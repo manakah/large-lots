@@ -108,7 +108,7 @@
             tableName: 'egp_parcels',
             mainWhere: " where status = 1",
             overlayName: "chicago_community_areas WHERE community = 'EAST GARFIELD PARK'",
-            fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status"
+            fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);
       });
