@@ -10,7 +10,7 @@
         line-width: 0.5;
         line-opacity: 1;
       }
-      #full_area_lots[status=1]{
+      #full_area_lots[status=3]{
         polygon-fill: #A1285D;
         line-color: #680D35;
       }
@@ -28,10 +28,12 @@
 
                 <p>The East Garfield Park Large Lot program has ended. Here's a timeline of what's happened:</p>
                 <ul>
-                  <li>Autust 4th, 2014 - the East Garfield Park program ended and 190 lots were successfully applied for.</li>
+                  <li>August 4th, 2014 - the East Garfield Park program ended and 190 lots were successfully applied for.</li>
+
+                  <li>August 4th, 2015 - 154 lots were officially sold to residents.</li>
                 </ul>
 
-                <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>applied for</strong>.</p>
+                <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>sold</strong> to residents.</p>
               </div>
             </div>
 
@@ -46,8 +48,8 @@
 
                     <label for='available'><span class="label label-available">Not applied for</span></label>
 
-                    <input id="applied" data-type='received' class="toggle-parcels checkbox" type="checkbox" checked=true />
-                    <label for='applied'><span class="label label-applied">Application received</span></label>
+                    <input id="applied" data-type='sold' class="toggle-parcels checkbox" type="checkbox" checked=true />
+                    <label for='applied'><span class="label label-applied">Sold</span></label>
                 </div>
               </form>
             </p>
@@ -88,7 +90,6 @@
     <script src="{% static 'js/jquery.address.js' %}"></script>
     <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
     <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
-    <script src="http://cdn.maptiks.com/maptiks-leaflet.min.js"></script>
 
     <script src="{% static 'js/largelots_status.js' %}"></script>
 
@@ -106,7 +107,7 @@
             },
             defaultZoom: 14,
             tableName: 'egp_parcels',
-            mainWhere: " where status = 1",
+            mainWhere: " where status = 3",
             overlayName: "chicago_community_areas WHERE community = 'EAST GARFIELD PARK'",
             fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
