@@ -23,6 +23,12 @@ a, a:hover {
     background-color: #ccc;
 }
 
+.footer { 
+    border-top: 1px solid #E6E6E6;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
 .navbar-header>.navbar-brand, .navbar-inverse .navbar-nav>li>a {color: #238b45; margin-top: 7px;}
 
 #logo img { margin: 5px 0 5px 0;}

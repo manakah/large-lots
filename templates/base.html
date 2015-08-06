@@ -48,7 +48,7 @@
           <ul class="nav navbar-nav pull-right">
             <li {% if request.path == '/' %}class='active' {% endif %}><a href="{% url 'home' %}">Home</a></li>
             <li {% if request.path == '/apply/' %}class='active' {% endif %}><a href="{% url 'apply' %}">Apply</a></li>
-            <li {% if request.path == '/lot-uses/' %}class='active' {% endif %}><a href="{% url 'lot_uses' %}">Lot uses</a></li>
+            <li {% if request.path == '/lot-uses/' %}class='active' {% endif %}><a href="{% url 'lot_uses' %}">Lot Uses</a></li>
             <li {% if request.path == '/faq/' %}class='active' {% endif %}><a href="{% url 'faq' %}">FAQ</a></li>
             <li {% if request.path == '/about/' %}class='active' {% endif %}><a href="{% url 'about' %}">About</a></li>
             {% if request.user.is_authenticated %}<li><a href="{% url 'logout' %}">Logout</a></li>{% endif %}
