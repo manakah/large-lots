@@ -313,6 +313,12 @@ def faq(request):
 def about(request):
     return render(request, 'about.html')
 
+def lot_uses(request):
+    return render(request, 'lot-uses/index.html')
+
+def lot_uses_1_community_agriculture(request):
+    return render(request, 'lot-uses/1-community-agriculture.html')
+
 def get_pin_from_address(request):
 
     address = request.GET.get('address', '')
