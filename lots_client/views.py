@@ -316,8 +316,15 @@ def about(request):
 def lot_uses(request):
     return render(request, 'lot-uses/index.html')
 
-def lot_uses_1_community_agriculture(request):
-    return render(request, 'lot-uses/1-community-agriculture.html')
+def lot_uses_page(request, use_id):
+
+    use_id = int(use_id)
+    if   use_id == 1: return render(request, 'lot-uses/1-community-agriculture.html')
+    elif use_id == 2: return render(request, 'lot-uses/2-public-plazas-hardscaping.html')
+    elif use_id == 3: return render(request, 'lot-uses/3-landscapes-athletics.html')
+    elif use_id == 4: return render(request, 'lot-uses/4-dog-friendly-areas.html')
+    elif use_id == 5: return render(request, 'lot-uses/5-public-playgrounds.html')
+    else: return HttpResponseRedirect('/lot-uses/')
 
 def get_pin_from_address(request):
 
