@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class='col-md-12'>
+      <p>
+        <a href="{% url 'lot_uses' %}">&laquo; back to Lot Uses</a> 
+      </p>
+
+      <h1>
+        {% block name %}{% endblock %} <small>{% block category %}{% endblock %}</small>
+      </h1>
+      <p>{% block description %}{% endblock %}</p>
+      <hr />
+  </div>
+
+  <div class='col-md-7'>
+
+    <h3><i class='fa fa-fw fa-comments'></i> What do I need to ask myself and decide?</h3>
+
+    {% block questions %}{% endblock %}
+
+    <h3><i class='fa fa-fw fa-file-text-o'></i> What steps is it going to involve?</h3>
+
+    {% block steps %}{% endblock %}
+
+    <h3><i class='fa fa-fw fa-mouse-pointer'></i> Where can I learn more about it?</h3>
+
+    {% block resources %}{% endblock %}
+    
+  </div>
+
+  <div class='col-md-5'>
+    <div class='well'>
+        <p>
+          {% block image %}{% endblock %}
+        </p>
+
+        {% block requirements %}{% endblock %}
+    </div>
+  </div>
+{% endblock %}
