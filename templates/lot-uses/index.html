@@ -1,36 +1,107 @@
 {% extends "base.html" %}
 {% block title %}Lot Uses{% endblock %}
 {% block content %}
-  <div class='col-md-8'>
-    <h2>Lot Uses</h2>
 
-    <h3>Public Projects</h3>
-    <p>Ranging from flexible seating to book and game kiosks to community gardens, public amenities provide a low-cost means to quickly inject new layers of comfort and activity in your neighborhood.</p>
-
-    <p><a href="/lot-uses/1/">Community Agriculture</a></p>
-    <p><a href="/lot-uses/2/">Public Plazas + Hardscaping</a></p>
-    <p><a href="/lot-uses/3/">Landscapes + Athletics</a></p>
-    <p><a href="/lot-uses/4/">Dog Friendly Areas</a></p>
-    <p><a href="/lot-uses/5/">Public Playgrounds</a></p>
-
-    <h3>Public or Private Projects</h3>
-    <p>Two lot owners may want to create the same type of amenity on their land, but their plans for who will ultimately use that amenity may require different paths to implementation. However, they can still connect and share knowledge with one another.</p>
-
-    <p><a href="/lot-uses/6/">Sustainable Strategies</a></p>
-    <p><a href="/lot-uses/7/">Furniture, Objects + Art</a></p>
-    <p><a href="/lot-uses/8/">Shelters + Sheds</a></p>
-    <p><a href="/lot-uses/9/">Greenhouse</a></p>
-    
-
-    <h3>Private Projects</h3>
-    <p>You can use your new lot for many private, residential purposes. Enhancing your existing home with new features, including unique outdoor spaces, can increase the value of your property as well as improve quality of life for your family members living at home.</p>
-
-    <p><a href="/lot-uses/10/">New Construction Building</a></p>
-    <p><a href="/lot-uses/11/">Building Addition</a></p>
-    <p><a href="/lot-uses/12/">Garage</a></p>
-    <p><a href="/lot-uses/13/">Pools, Ponds & Hot Tubs</a></p>
-    <p><a href="/lot-uses/14/">Porches + Decks</a></p>
-    <p><a href="/lot-uses/15/">Driveways + Patios</a></p>
-
+  <div class='row'>
+    <div class='col-md-12'>
+      <h2>Lot Uses</h2>
+    </div>
   </div>
+
+  <div class='row'>
+    <div class='col-md-8'>
+      <h3>Public Projects</h3>
+      <p>Ranging from flexible seating to book and game kiosks to community gardens, public amenities provide a low-cost means to quickly inject new layers of comfort and activity in your neighborhood.</p>
+
+      <table class='table table-condensed table-hover'>
+        <thead>
+          <tr>
+            <th>Public Project</th>
+            <th>Restrictions</th>
+          </tr>
+        </thead>
+        <tbody id='public-list'></tbody>
+      </table>
+    </div>
+    <div class='col-md-4'>
+      <h3>&nbsp;</h3>
+      <img src='/static/images/lot-uses/public-projects.jpg' alt='Public Projects' class='img-responsive img-thumbnail' />
+    </div>
+  </div>
+  <hr />
+  <div class='row'>
+    <div class='col-md-8'>
+      <h3>Public or Private Projects</h3>
+      <p>Two lot owners may want to create the same type of amenity on their land, but their plans for who will ultimately use that amenity may require different paths to implementation. </p>
+
+      <table class='table table-condensed table-hover'><tbody id='both-list'></tbody></table>
+    </div>
+    <div class='col-md-4'>
+      <h3>&nbsp;</h3>
+      <img src='/static/images/lot-uses/public-or-private-projects.jpg' alt='Public or Private Projects' class='img-responsive img-thumbnail' />
+    </div>
+  </div>
+  <hr />
+  <div class='row'>
+    <div class='col-md-8'>
+      <h3>Private Projects</h3>
+      <p>You can use your new lot for many private, residential purposes. Enhancing your existing home with new features, including unique outdoor spaces, can increase the value of your property as well as improve quality of life for your family members living at home.</p>
+
+      <table class='table table-condensed table-hover'><tbody id='private-list'></tbody></table>
+    </div>
+    <div class='col-md-4'>
+      <h3>&nbsp;</h3>
+      <img src='/static/images/lot-uses/private-projects.jpg' alt='Private Projects' class='img-responsive img-thumbnail' />
+    </div>
+  </div>
+{% endblock %}
+{% block extra_js %}
+  
+  <script>
+    var lot_uses = {
+      'public': [
+        {'id': '1', 'name': 'Community Agriculture', 'requirements' : ['Z'], 'description': 'Provides space for community members to grow plants for beautification, education, community distribution, or personal use.'},
+        {'id': '2', 'name': 'Public Plazas + Hardscaping', 'requirements' : ['Z', 'E']},
+        {'id': '3', 'name': 'Landscapes + Athletics', 'requirements' : ['Z']},
+        {'id': '4', 'name': 'Dog Friendly Areas', 'requirements' : ['Z']},
+        {'id': '5', 'name': 'Public Playgrounds', 'requirements' : ['Z', 'E']}
+      ],
+      'both': [
+        {'id': '6', 'name': 'Sustainable Strategies', 'requirements' : ['Z', 'E']},
+        {'id': '7', 'name': 'Furniture, Objects + Art', 'requirements' : ['Z', 'E']},
+        {'id': '8', 'name': 'Shelters + Sheds', 'requirements' : ['Z', 'E']},
+        {'id': '9', 'name': 'Greenhouse', 'requirements' : ['Z', 'E']}
+      ],
+      'private': [
+        {'id': '10', 'name': 'New Construction Building', 'requirements' : ['Z', 'S']},
+        {'id': '11', 'name': 'Building Addition', 'requirements' : ['Z', 'S']},
+        {'id': '12', 'name': 'Garage', 'requirements' : ['Z', 'S']},
+        {'id': '13', 'name': 'Pools, Ponds & Hot Tubs', 'requirements' : ['Z', 'E']},
+        {'id': '14', 'name': 'Porches + Decks', 'requirements' : ['Z', 'S']},
+        {'id': '15', 'name': 'Driveways + Patios', 'requirements' : ['Z', 'E']}
+      ]
+    }
+
+    $(function() {
+      populateList(lot_uses['public'], "#public-list");
+      populateList(lot_uses['both'], "#both-list");
+      populateList(lot_uses['private'], "#private-list");
+    });
+
+    function populateList(list, el) {
+      var html = ""
+      $(list).each( function (k, v) {
+        var req_labels = "";
+        $(v.requirements).each( function (k, v) { 
+          if (v == 'Z') req_labels += "<label class='label label-default'>Z</label> ";
+          if (v == 'S') req_labels += "<label class='label label-warning'>S</label> ";
+          if (v == 'E') req_labels += "<label class='label label-danger'>E</label> ";
+        });
+        html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a> <small>" + v.description + "</small></td><td><small>" + req_labels + "</small></td></tr>";
+      });
+
+      $(el).html(html);
+    }
+  </script>
+
 {% endblock %}
