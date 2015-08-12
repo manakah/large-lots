@@ -316,6 +316,9 @@ def about(request):
 def lot_uses(request):
     return render(request, 'lot-uses/index.html')
 
+def lot_uses_resources(request):
+    return render(request, 'lot-uses/key-resources.html')
+
 def lot_uses_page(request, use_id):
 
     use_id = int(use_id)
