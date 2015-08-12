@@ -5,19 +5,20 @@
   <div class='row'>
     <div class='col-md-12'>
       <h2>Lot Uses</h2>
+      <p><strong>Together, we create vibrant spaces to live, work, and play.</strong> Congratulations on acquiring a vacant lot in your neighborhood through the City of Chicago’s Large Lots Program! What’s next? This resource for new lot-owners can help jumpstart your design process today.</p>
     </div>
   </div>
 
   <div class='row'>
     <div class='col-md-8'>
       <h3>Public Projects</h3>
-      <p>Ranging from flexible seating to book and game kiosks to community gardens, public amenities provide a low-cost means to quickly inject new layers of comfort and activity in your neighborhood.</p>
+      <p><strong>Want to turn your lot into a new public amenity for your neighborhood?</strong> Ranging from flexible seating to book and game kiosks to community gardens, public amenities provide a low-cost means to quickly inject new layers of comfort and activity in your neighborhood.</p>
 
       <table class='table table-condensed table-hover'>
         <thead>
           <tr>
             <th>Public Project</th>
-            <th>Restrictions</th>
+            <th>Requirements</th>
           </tr>
         </thead>
         <tbody id='public-list'></tbody>
@@ -32,9 +33,17 @@
   <div class='row'>
     <div class='col-md-8'>
       <h3>Public or Private Projects</h3>
-      <p>Two lot owners may want to create the same type of amenity on their land, but their plans for who will ultimately use that amenity may require different paths to implementation. </p>
+      <p><strong>Certain projects can be created for either community use or private residential purposes.</strong> Two lot owners may want to create the same type of amenity on their land, but their plans for who will ultimately use that amenity may require different paths to implementation. </p>
 
-      <table class='table table-condensed table-hover'><tbody id='both-list'></tbody></table>
+      <table class='table table-condensed table-hover'>
+        <thead>
+          <tr>
+            <th>Public or Private Project</th>
+            <th>Requirements</th>
+          </tr>
+        </thead>
+        <tbody id='both-list'></tbody>
+      </table>
     </div>
     <div class='col-md-4'>
       <h3>&nbsp;</h3>
@@ -45,13 +54,34 @@
   <div class='row'>
     <div class='col-md-8'>
       <h3>Private Projects</h3>
-      <p>You can use your new lot for many private, residential purposes. Enhancing your existing home with new features, including unique outdoor spaces, can increase the value of your property as well as improve quality of life for your family members living at home.</p>
+      <p><strong>Enhance the value of your home, generate rental opportunities, and expand your property’s amenities.</strong> You can use your new lot for many private, residential purposes. Enhancing your existing home with new features, including unique outdoor spaces, can increase the value of your property as well as improve quality of life for your family members living at home.</p>
 
-      <table class='table table-condensed table-hover'><tbody id='private-list'></tbody></table>
+      <table class='table table-condensed table-hover'>
+        <thead>
+          <tr>
+            <th>Private Project</th>
+            <th>Requirements</th>
+          </tr>
+        </thead>
+        <tbody id='private-list'></tbody>
+      </table>
     </div>
     <div class='col-md-4'>
       <h3>&nbsp;</h3>
       <img src='/static/images/lot-uses/private-projects.jpg' alt='Private Projects' class='img-responsive img-thumbnail' />
+    </div>
+  </div>
+
+  <hr />
+  <div class='row'>
+    <div class='col-md-8'>
+      <h3>Chicago Large Lots Activation Guide</h3>
+      <p class='pull-left'>
+        <a href='/static/documents/LISC Large Lots Activation Guide.pdf'>
+          <img src='/static/images/lot-uses/activation-guide.png' alt='Large Lots Activation Guide' class='img-responsive img-thumbnail' style='width: 200px' />
+        </a>
+      </p>
+      <p>This information was curated by LISC Chicago and Latent Design for the Chicago Large Lots Activation Guide.</p><p>You can <a href='/static/documents/LISC Large Lots Activation Guide.pdf'>download the original guide here.</a></p>
     </div>
   </div>
 {% endblock %}
@@ -60,7 +90,7 @@
   <script>
     var lot_uses = {
       'public': [
-        {'id': '1', 'name': 'Community Agriculture', 'requirements' : ['Z'], 'description': 'Provides space for community members to grow plants for beautification, education, community distribution, or personal use.'},
+        {'id': '1', 'name': 'Community Agriculture', 'requirements' : ['Z']},
         {'id': '2', 'name': 'Public Plazas + Hardscaping', 'requirements' : ['Z', 'E']},
         {'id': '3', 'name': 'Landscapes + Athletics', 'requirements' : ['Z']},
         {'id': '4', 'name': 'Dog Friendly Areas', 'requirements' : ['Z']},
@@ -86,6 +116,8 @@
       populateList(lot_uses['public'], "#public-list");
       populateList(lot_uses['both'], "#both-list");
       populateList(lot_uses['private'], "#private-list");
+
+      $(".label").popover({trigger: "hover", placement: "top"});
     });
 
     function populateList(list, el) {
@@ -93,11 +125,11 @@
       $(list).each( function (k, v) {
         var req_labels = "";
         $(v.requirements).each( function (k, v) { 
-          if (v == 'Z') req_labels += "<label class='label label-default'>Z</label> ";
-          if (v == 'S') req_labels += "<label class='label label-warning'>S</label> ";
-          if (v == 'E') req_labels += "<label class='label label-danger'>E</label> ";
+          if (v == 'Z') req_labels += "<label class='label label-default' data-content='Department of Zoning Approval Required.'>Z</label> ";
+          if (v == 'S') req_labels += "<label class='label label-warning' data-content='Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor.'>S</label> ";
+          if (v == 'E') req_labels += "<label class='label label-danger' data-content='Easy Permit Required (Dept of Buildings). Hire a General Contractor.'>E</label> ";
         });
-        html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a> <small>" + v.description + "</small></td><td><small>" + req_labels + "</small></td></tr>";
+        html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a></td><td><small>" + req_labels + "</small></td></tr>";
       });
 
       $(el).html(html);
