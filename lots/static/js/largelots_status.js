@@ -29,7 +29,8 @@ var LargeLots = {
       L.Icon.Default.imagePath = '/images/'
 
       L.tileLayer('https://{s}.tiles.mapbox.com/v3/datamade.hn83a654/{z}/{x}/{y}.png', {
-          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
+          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>',
+          detectRetina: true
       }).addTo(LargeLots.map);
 
       LargeLots.info = L.control({position: 'bottomright'});
