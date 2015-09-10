@@ -211,7 +211,7 @@ var LargeLots = {
           status = 'Sold!';
           status_class = 'applied';
       }
-      var info = "<p>Selected lot: </p><img class='img-responsive img-thumbnail' src='http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?" + props.pin14 + "=' />\
+      var info = "<p>Selected lot: </p><img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin14 + ".jpg' />\
         <table class='table table-bordered table-condensed'><tbody>\
           <tr><td>Address</td><td>" + address + "</td></tr>\
           <tr><td>PIN</td><td>" + LargeLots.formatPin(props.pin14) + "</td></tr>\
