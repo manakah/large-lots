@@ -2,19 +2,19 @@ var LargeLots = LargeLots || {};
 var LargeLots = {
 
   map: null,
-  map_centroid: [41.89409955811395, -87.77157783508301],
+  map_centroid: [41.71200792706533, -87.6163101196289],
   defaultZoom: 13,
   lastClickedLayer: null,
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  maptiks_tracking_code: '91551db7-02a9-4f0f-834a-30f092e304fa',
   boundingBox: {
-    'bottom': 41.86099561435056,
-    'top': 41.92488743920406,
-    'right': -87.72239685058594,
-    'left': -87.82487869262695
+    'bottom': 41.6799636934724,
+    'top': 41.74403619430261,
+    'right': -87.55365371704102,
+    'left': -87.6789665222168
   },
+  cartodb_table: 'rp_lots',
 
   initialize: function() {
 
@@ -23,8 +23,7 @@ var LargeLots = {
           center: LargeLots.map_centroid,
           zoom: LargeLots.defaultZoom,
           scrollWheelZoom: false,
-          tapTolerance: 30,
-          track_id: LargeLots.maptiks_tracking_code
+          tapTolerance: 30
         });
       }
       // render a map!
@@ -74,13 +73,13 @@ var LargeLots = {
           cartodb_logo: false,
           sublayers: [
               {
-                  sql: "select * from austin_lots where city_owned='T' and residential='T' and alderman_hold != 'T'",
-                  cartocss: $('#austin-styles').html().trim(),
+                  sql: "select * from " + LargeLots.cartodb_table + " where city_owned='T' and residential='T' and alderman_hold != 'T'",
+                  cartocss: $('#map-styles').html().trim(),
                   interactivity: fields
               },
               {
-                  sql: "select * from chicago_community_areas where community = 'AUSTIN'",
-                  cartocss: "#austin_lots{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  sql: "select * from chicago_community_areas where community IN ('ROSELAND', 'PULLMAN')",
+                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
       }
@@ -106,8 +105,8 @@ var LargeLots = {
                 }
             }, 1000)
         }).error(function(e) {
-        //console.log('ERROR')
-        //console.log(e)
+        console.log('ERROR')
+        console.log(e)
       });
       $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
       LargeLots.addressSearch();
@@ -128,7 +127,7 @@ var LargeLots = {
               checks.push($(box).attr('id'))
           }
       });
-      var sql = 'select * from austin_lots';
+      var sql = 'select * from ' + LargeLots.cartodb_table;
       var clauses = []
       if(checks.indexOf('applied') >= 0){
           clauses.push('status = 1')
@@ -140,7 +139,7 @@ var LargeLots = {
           clauses = clauses.join(' or ');
           sql += clauses;
       } else {
-          sql = 'select * from austin_lots'
+          sql = 'select * from ' + LargeLots.cartodb_table;
       }
       LargeLots.lotsLayer.setSQL(sql);
   },
@@ -163,7 +162,7 @@ var LargeLots = {
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from austin_lots where display_pin = {{display_pin}}', {display_pin:display_pin})
+      sql.execute('select * from ' + LargeLots.cartodb_table + ' where display_pin = {{display_pin}}', {display_pin:display_pin})
         .done(function(data){
             var shape = data.features[0];
             LargeLots.lastClickedLayer = L.geoJson(shape);

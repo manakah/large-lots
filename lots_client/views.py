@@ -68,7 +68,7 @@ class ApplicationForm(forms.Form):
         carto = 'http://datamade.cartodb.com/api/v2/sql'
         params = {
             'api_key': settings.CARTODB_API_KEY,
-            'q':  "SELECT pin14 FROM austin_lots WHERE pin14 = '%s' AND city_owned='T' AND residential='T' AND alderman_hold != 'T'" % pin.replace('-', ''),
+            'q': "SELECT pin14 FROM %s WHERE pin14 = '%s' AND city_owned='T' AND residential='T' AND alderman_hold != 'T'" % (pin.replace('-', ''), settings.CURRENT_CARTODB),
         }
         r = requests.get(carto, params=params)
         if r.status_code == 200:
@@ -118,9 +118,9 @@ def home(request):
 # the application is active between July 1st 12:00am and August 4th 11:59pm
 def application_active(request):
     chicago_time = timezone.localtime(timezone.now())
-    start_date = timezone.make_aware(datetime(2014, 12, 1, 0, 0),
+    start_date = timezone.make_aware(datetime(2015, 9, 15, 0, 0),
         timezone.get_current_timezone())
-    end_date = timezone.make_aware(datetime(2015, 1, 31, 23, 59),
+    end_date = timezone.make_aware(datetime(2015, 10, 31, 23, 59),
         timezone.get_current_timezone())
     
     if settings.APPLICATION_DISPLAY: # override with configuration setting
@@ -136,8 +136,8 @@ def get_lon_lat(pin):
     carto = 'http://datamade.cartodb.com/api/v2/sql'
     params = {
         'api_key': settings.CARTODB_API_KEY,
-        'q':  "SELECT longitude, latitude FROM austin_lots WHERE pin14 = '%s'" % \
-            unicode(pin).replace('-', ''),
+        'q':  "SELECT longitude, latitude FROM %s WHERE pin14 = '%s'" % \
+            (unicode(pin).replace('-', ''), settings.CURRENT_CARTODB),
     }
     r = requests.get(carto, params=params)
     longitude, latitude = None, None

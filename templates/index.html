@@ -10,30 +10,44 @@
 
         {% if application_active %}
           <div class='col-md-8'>
-            <h3>Large Lots 3: Austin <small class='open'>Open</small></h3>
+            <h3>Large Lots 4: Roseland and Pullman <small class='open'>Open</small></h3>
 
-            <p>The third Large Lot program is open in Austin! <br />Applications will be accepted until <strong>January 31st, 2015</strong>. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
+            <p>The fourth Large Lot program is open in Roseland and Pullman! <br />Applications will be accepted until <strong>October 31st, 2015</strong>. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
 
             <p><a href='{% url "apply" %}' class="btn btn-success btn-lg">Apply for a lot</a></p>
 
           </div>
           <div class='col-md-4'>
-            <p><a href='{% url "apply" %}'><img src='{% static "images/phase-3-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Austin' /></a></p>
+            <p><a href='{% url "apply" %}'><img src='{% static "images/phase-4-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Roseland and Pullman' /></a></p>
           </div>
         {% else %}
           <div class='col-md-8'>
-            <h3>Large Lots 3: Austin <small class='closed'>Ended on January 31st, 2015</small></h3>
+            <h3>Large Lots 4: Roseland and Pullman <small class='closed'>Opens on September 15th, 2015</small></h3>
 
-            <p> The third Large Lot Program ended in Austin on <strong>January 31st at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.
-            </p>
-
-            <p><strong>Check back later for updates!</strong></p>
+            <p> The fourth Large Lot Program opens in Roseland and Pullman on <strong>September 15th at 12:00 a.m.</strong> and will be open through <strong>October 31st, 2015</strong>.
 
           </div>
           <div class='col-md-4'>
-            <p><img src='{% static "images/phase-3-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Austin' /></p>
+            <p><img src='{% static "images/phase-4-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Roseland and Pullman' /></p>
           </div>
         {% endif %}
+      </div>
+    </div>
+
+    <div class='well'>
+      <div class='row'>
+        <div class='col-md-8'>
+          <h3>Large Lots 3: Austin <small class='closed'>Ended on January 31st, 2015</small></h3>
+
+          <p> The third Large Lot Program ended in Austin on <strong>January 31st at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.
+          </p>
+
+          <p><strong>Check back later for updates!</strong></p>
+
+        </div>
+        <div class='col-md-4'>
+          <p><img src='{% static "images/phase-3-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Austin' /></p>
+        </div>
       </div>
     </div>
 
@@ -43,7 +57,6 @@
           <h3>Large Lots 2: East Garfield Park <small class='closed'>Ended on August 4th, 2014</small></h3>
 
           <p> The second Large Lot Program ended in East Garfield Park on <strong>August 4th at 11:59 p.m.</strong> and 154 lots were sold as of April 24th, 2015. <a href='{% url "status_pilot_2" %}'>See what lots were sold &raquo;</a></p>
-          </p>
 
           <p><a href='{% url "status_pilot_2" %}' class="btn btn-danger btn-lg">See what lots were sold</a></p>
 
@@ -73,7 +86,7 @@
     <div class='row'>
       <div class='col-md-8'>
         <h3>About</h3>
-        <p>The <strong>Large Lot Program</strong> is a housing land use approach that was developed as part of the <a href='http://www.cityofchicago.org/city/en/depts/dcd/supp_info/green-healthy-neighborhoods.html'>Green Healthy Neighborhoods</a> public planning process. This website was built to make the process of purchasing City-owned land through this program easier for residents. <a href='/about'>Read more &raquo;</a>
+        <p>The <strong>Large Lot Program</strong> is a housing land use approach that was developed as part of the <a href='http://www.cityofchicago.org/city/en/depts/dcd/supp_info/green-healthy-neighborhoods.html'>Green Healthy Neighborhoods</a> public planning process. This website was built to make the process of purchasing City-owned land through this program easier for residents. <a href='/about'>Read more &raquo;</a></p>
       </div>
     </div>
   </div>
