@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% block title %}Application status{% endblock %}
+{% block title %} | Application status {% endblock %}
 {% block extra_css %}
-    <style id="englewood-styles">
-      #full_area_lots {
+    <style id="egp-styles">
+      #egp_parcels {
         polygon-fill: #6ac682;
         polygon-opacity: 0.7;
         line-color: #389250;
         line-width: 0.5;
         line-opacity: 1;
       }
-      #full_area_lots[status=3]{
+      #full_area_lots[status=1]{
         polygon-fill: #A1285D;
         line-color: #680D35;
       }
@@ -21,17 +21,10 @@
 
         <div class='row'>
           <div class='col-md-12'>
-            <h1>Greater Englewood Area <small class='closed'>Closed</small></h1>
+            <h1>Austin <small class='closed'>Closed</small></h1>
             <div class='row'>
               <div class='col-md-9'>
-
-                <p>The Greater Englewood Area Large Lot program has ended. Here's a timeline of what's happened:</p>
-                <ul>
-                  <li>April 21, 2014 - the Englewood program ended and 414 applications for lots were received.</li>
-                  <li>August 21, 2014 - the <a href='http://www.cityofchicago.org/city/en/depts/dcd/supp_info/chicago_plan_commission.html'>Chicago Plan Commission</a> approved the sale of 322 properties.</li>
-                  <li>November 5, 2014 - <a href='http://www.cityofchicago.org/city/en/about/council.html'>Chicago City Council</a> passed an <a href='https://chicago.legistar.com/View.ashx?M=F&ID=3279643&GUID=AF8D3692-1A52-4931-871B-24419313126E'>ordinance</a> approving the final sale.</li>
-                  <li>January 30, 2015 - 276 lots were officially sold to residents.</li>
-                </ul>
+                <p> The second Large Lot Program ended in Austin on <strong>August 4th at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
 
                 <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>sold</strong> to residents.</p>
               </div>
@@ -88,7 +81,7 @@
     </div>
     </script>
     <script src="{% static 'js/jquery.address.js' %}"></script>
-    <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
     <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
 
     <script src="{% static 'js/largelots_status.js' %}"></script>
@@ -96,19 +89,19 @@
     <script>
       $(function() {
         var init_params = {
-            map_centroid: [41.77809673652204, -87.63673782348633],
-            defaultZoom: 13,
-            boundaryCartocss: '#large_lot_boundary{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}',
-            parcelsCartocss: $('#englewood-styles').html().trim(),
+            map_centroid: [41.8787248907554, -87.7055433591891],
+            boundaryCartocss: '#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}',
+            parcelsCartocss: $('#egp-styles').html().trim(),
             boundingBox: {
-                'bottom': 41.74378003152462,
-                'top': 41.807788914288814,
-                'right': -87.57219314575195,
-                'left': -87.69750595092773
+              'bottom': 41.868506217235485,
+              'top': 41.891607773180716,
+              'right': -87.68617630004883,
+              'left': -87.7223539352417
             },
-            tableName: 'lots_with_status',
-            mainWhere: " where status = 3",
-            overlayName: "chicago_community_areas WHERE community = 'PILOT 1 AREA'",
+            defaultZoom: 14,
+            tableName: 'egp_parcels',
+            mainWhere: " where status = 1",
+            overlayName: "chicago_community_areas WHERE community = 'AUSTIN'",
             fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);
