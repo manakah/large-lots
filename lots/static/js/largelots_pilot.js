@@ -72,6 +72,7 @@ var LargeLots = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
+          https: true,
           sublayers: [
               {
                   sql: "select * from " + LargeLots.cartodb_table + " where city_owned='T' and residential='T' and alderman_hold != 'T'",

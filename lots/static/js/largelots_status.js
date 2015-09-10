@@ -80,6 +80,7 @@ var LargeLots = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
+          https: true,
           sublayers: [{
                   sql: mainSQL,
                   cartocss: LargeLots.parcelsCartocss,
