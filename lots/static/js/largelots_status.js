@@ -80,7 +80,6 @@ var LargeLots = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
-          https: true,
           sublayers: [{
                   sql: mainSQL,
                   cartocss: LargeLots.parcelsCartocss,
@@ -91,7 +90,7 @@ var LargeLots = {
                   cartocss: LargeLots.boundaryCartocss
               }]
       }
-      cartodb.createLayer(LargeLots.map, layerOpts)
+      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
             LargeLots.lotsLayer = layer.getSubLayer(0)

@@ -72,7 +72,6 @@ var LargeLots = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
-          https: true,
           sublayers: [
               {
                   sql: "select * from " + LargeLots.cartodb_table + " where city_owned='T' and residential='T' and alderman_hold != 'T'",
@@ -85,7 +84,7 @@ var LargeLots = {
               }
           ]
       }
-      cartodb.createLayer(LargeLots.map, layerOpts)
+      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
             LargeLots.lotsLayer = layer.getSubLayer(0);
