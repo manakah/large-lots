@@ -108,7 +108,7 @@ class ApplicationForm(forms.Form):
     def clean_deed_image(self):
         image = self.cleaned_data['deed_image']._get_name()
         ftype = image.split('.')[-1]
-        if ftype not in ['pdf', 'png', 'jpg', 'jpeg']:
+        if ftype.lower() not in ['pdf', 'png', 'jpg', 'jpeg', 'gif']:
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
         return self.cleaned_data['deed_image']
 
