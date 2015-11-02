@@ -78,8 +78,19 @@
 
       <div class='clearfix'></div>
       <div class="footer">
-        <p class='pull-right'>&copy; <a href='http://www.lisc-chicago.org/'>LISC Chicago</a> and <a href='http://datamade.us'>DataMade</a><br />
-        <i class='fa fa-twitter'></i> Follow <a href='https://twitter.com/largelots'>@largelots</a> on Twitter</p>
+        <div class='row'>
+          <div class='col-md-1'>
+            <img src='{% static 'images/chicago-seal.png' %}' alt='City of Chicago' title='City of Chicago' />
+          </div>
+          <div class='col-md-8'>
+            <small>
+              Large Lots is a <a href='http://www.cityofchicago.org/city/en/depts/dcd/supp_info/large-lot-program.html'>City of Chicago</a> Program<br />
+              Website by <a href='http://www.lisc-chicago.org/'>LISC Chicago</a> and <a href='http://datamade.us'>DataMade</a><br />
+              <i class='fa fa-twitter'></i> Follow <a href='https://twitter.com/largelots'>@largelots</a> on Twitter for updates
+            </small>
+          </div>
+        </div>
+        
       </div>
     </div> <!-- /container -->
     {% block modals %}{% endblock %}
