@@ -103,7 +103,7 @@ def csv_dump(request, pilot):
                 getattr(lot.address, 'state', ''),
                 getattr(lot.address, 'zip_code', ''))
             pin = lot.pin
-            image_url = 'http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?%s=' % pin.replace('-', '')
+            image_url = 'https://pic.datamade.us/%s.jpg' % pin.replace('-', '')
             lot_use = lot.planned_use
             lots.extend([pin, addr, addr_full, image_url, lot_use])
         if len(lots) <= 5:

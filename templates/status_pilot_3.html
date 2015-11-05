@@ -10,7 +10,7 @@
         line-width: 0.5;
         line-opacity: 1;
       }
-      #full_area_lots[status=3]{
+      #full_area_lots[status=1]{
         polygon-fill: #A1285D;
         line-color: #680D35;
       }
@@ -21,17 +21,10 @@
 
         <div class='row'>
           <div class='col-md-12'>
-            <h1>East Garfield Park <small class='closed'>Closed</small></h1>
+            <h1>Austin <small class='closed'>Closed</small></h1>
             <div class='row'>
               <div class='col-md-9'>
-                <p> The second Large Lot Program ended in East Garfield Park on <strong>August 4th at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application sometime after the 1st week of October.</p>
-
-                <p>The East Garfield Park Large Lot program has ended. Here's a timeline of what's happened:</p>
-                <ul>
-                  <li>August 4th, 2014 - the East Garfield Park program ended and 190 lots were successfully applied for.</li>
-
-                  <li>April 24th, 2015 - 154 lots were officially sold to residents.</li>
-                </ul>
+                <p> The second Large Lot Program ended in Austin on <strong>August 4th at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
 
                 <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>sold</strong> to residents.</p>
               </div>
@@ -88,7 +81,7 @@
     </div>
     </script>
     <script src="{% static 'js/jquery.address.js' %}"></script>
-    <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
     <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
 
     <script src="{% static 'js/largelots_status.js' %}"></script>
@@ -107,8 +100,8 @@
             },
             defaultZoom: 14,
             tableName: 'egp_parcels',
-            mainWhere: " where status = 3",
-            overlayName: "chicago_community_areas WHERE community = 'EAST GARFIELD PARK'",
+            mainWhere: " where status = 1",
+            overlayName: "chicago_community_areas WHERE community = 'AUSTIN'",
             fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);

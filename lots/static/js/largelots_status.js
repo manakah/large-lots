@@ -5,8 +5,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'Chicago',
-  maptiks_tracking_code: '91551db7-02a9-4f0f-834a-30f092e304fa',
-
+  
   initialize: function(init_params) {
       LargeLots.defaultZoom = init_params.defaultZoom;
       LargeLots.map_centroid = init_params.map_centroid;
@@ -21,15 +20,15 @@ var LargeLots = {
         LargeLots.map = L.map('map', {
           center: LargeLots.map_centroid,
           zoom: LargeLots.defaultZoom,
-          scrollWheelZoom: false,
-          track_id: LargeLots.maptiks_tracking_code
+          scrollWheelZoom: false
         });
       }
       // render a map!
       L.Icon.Default.imagePath = '/images/'
 
       L.tileLayer('https://{s}.tiles.mapbox.com/v3/datamade.hn83a654/{z}/{x}/{y}.png', {
-          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
+          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>',
+          detectRetina: true
       }).addTo(LargeLots.map);
 
       LargeLots.info = L.control({position: 'bottomright'});
@@ -91,7 +90,7 @@ var LargeLots = {
                   cartocss: LargeLots.boundaryCartocss
               }]
       }
-      cartodb.createLayer(LargeLots.map, layerOpts)
+      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
             LargeLots.lotsLayer = layer.getSubLayer(0)
@@ -212,7 +211,7 @@ var LargeLots = {
           status = 'Sold!';
           status_class = 'applied';
       }
-      var info = "<p>Selected lot: </p><img class='img-responsive img-thumbnail' src='http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?" + props.pin14 + "=' />\
+      var info = "<p>Selected lot: </p><img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin14 + ".jpg' />\
         <table class='table table-bordered table-condensed'><tbody>\
           <tr><td>Address</td><td>" + address + "</td></tr>\
           <tr><td>PIN</td><td>" + LargeLots.formatPin(props.pin14) + "</td></tr>\

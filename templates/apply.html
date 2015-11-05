@@ -2,8 +2,8 @@
 {% load staticfiles %}
 {% block title %} | Apply {% endblock %}
 {% block extra_css %}
-    <style id="austin-styles">
-      #austin_lots {
+    <style id="map-styles">
+      #roseland {
         polygon-fill: #41ab5d;
         polygon-opacity: 0.7;
         line-color: #006d2c;
@@ -15,23 +15,22 @@
 {% block content %}
       <div class='col-md-12'>
 
-        <h1>Austin
+        <h1>Roseland and Pullman
             {% if form %}
             <small class='open'>Open</small>
             {% else %}
-            <small class='closed'>Ended on January 31st, 2015</small>
+            <small class='closed'>Closed on October 31st, 2015</small>
             {% endif %}
         </h1>
 
-        <p>If you own land in the Austin neighborhood, you can <strong>buy up two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
+        <p>If you own land in the Roseland and Pullman neighborhood, you can <strong>buy up two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
 
-        <p>Applications will be accepted between <strong>Dec 1st, 2014 at 12:00 a.m.</strong> and <strong>January 31st, 2015 11:59 p.m.</strong></p>
+        <p>Applications will be accepted between <strong>September 15th, 2015 at 12:00 a.m.</strong> and <strong>October 31st, 2015 11:59 p.m.</strong></p>
 
         <p>For more information, read the <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
         {% if form %}
             <div class='row'>
               <div class='col-md-12'>
-                <p>
                   <h2 id='browse'>1. Browse for and select up to two lots on your block</h2>
                   <form class='form-inline hidden-print' id='lot-form'>
                     <div class="form-group">
@@ -39,9 +38,10 @@
                       <input class='btn btn-primary btn-lg' id='search' type='button' value='Search' />
                     </div>
                   </form>
-                </p>
+                  <br />
               </div>
-
+            </div>
+            <div class='row'>
               <div class='col-md-4'>
                 <div class='well' id='lot-info'>
                   <p>To get started:</p>
@@ -180,7 +180,6 @@
                       </div>
                     </div>
                   </div>
-                </div>
 
                 <div id="application">
 
@@ -232,7 +231,7 @@
 
                           <h3>Upload your deed</h3>
 
-                          <p>To prove ownership of your Austin neighborhood property, you'll have to upload a copy or picture of your <strong>property deed</strong>.</p>
+                          <p>To prove ownership of your Roseland or Pullman neighborhood property, you'll have to upload a copy or picture of your <strong>property deed</strong>.</p>
 
                           <ol>
                             <li>If you <strong>do</strong> have a paper copy handy, scan it or take a picture of the first page.</li>
@@ -469,11 +468,13 @@
 
                 <p><button type="submit" class="btn btn-success btn-lg">Submit application &raquo;</button></p>
 
+                <br />
+                <br />
                 <p><strong>If you have any questions, please contact:</strong></p>
                 <p>
-                   Michael Berkshire, Department of Planning and Development<br />
+                   Jeanne Chandler, Department of Planning and Development<br />
                    Phone: (312) 744-0605<br />
-                   Email: <a href='mailto:Michael.Berkshire@cityofchicago.org'>Michael.Berkshire@cityofchicago.org</a>
+                   Email: <a href='mailto:Jeanne.Chandler@cityofchicago.org'>Jeanne.Chandler@cityofchicago.org</a>
                 </p>
               </form>
             </div>
@@ -486,10 +487,10 @@
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h4 class="modal-title" id="myModalLabel"><strong id='addr_search_modal'></strong> is not in the Austin neighborhood.</h4>
+              <h4 class="modal-title" id="myModalLabel"><strong id='addr_search_modal'></strong> is not in the Roseland or Pullman neighborhoods.</h4>
             </div>
             <div class="modal-body">
-              <p>Only residents of the Austin neighborhood can purchase lots for this pilot.</p>
+              <p>Only residents of the Roseland or Pullman neighborhoods can purchase lots for this pilot.</p>
 
               <p>If you think this is a mistake, try to include the street direction (N,S,E,W) or suffix (Ave, Dr, St, etc), or browse the map instead.</p>
             </div>
@@ -518,9 +519,9 @@
     </script>
     <script src="{% static 'js/jquery.address.js' %}"></script>
     <script src="{% static 'js/jquery.scrollto.js' %}"></script>
-    <script src="http://libs.cartocdn.com/cartodb.js/v3/cartodb.js"></script>
+    <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
     <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
-    
+
     <script src="{% static 'js/largelots_pilot.js' %}"></script>
 
     <script>
