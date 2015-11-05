@@ -19,7 +19,7 @@
         </div>
         {% for lot in lots %}
             <div class="col-sm-6">
-                <img class="img-responsive img-thumbnail" src="http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?{{lot.pin|remove_str:'-'}}=" />
+                <img class="img-responsive img-thumbnail" src="https://pic.datamade.us/{{lot.pin|remove_str:'-'}}.jpg" />
                 <table class="table table-bordered table-condensed">
                     <tbody>
                         <tr>
@@ -40,7 +40,7 @@
         </div>
         {% for lot in lots %}
         <div class="col-sm-12">
-            <img class="img-responsive img-thumbnail" src="http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?{{lot.pin|remove_str:'-'}}=" />
+            <img class="img-responsive img-thumbnail" src="https://pic.datamade.us/{{lot.pin|remove_str:'-'}}.jpg" />
             <table class="table table-bordered table-condensed">
                 <tbody>
                     <tr>

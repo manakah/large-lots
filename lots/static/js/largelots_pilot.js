@@ -193,7 +193,7 @@ var LargeLots = {
       }
       info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
       info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
-      <img class='img-responsive img-thumbnail' src='http://cookviewer1.cookcountyil.gov/Jsviewer/image_viewer/requestImg.aspx?" + props.display_pin + "=' /></div></div>";
+      <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.display_pin + ".jpg' /></div></div>";
       $.address.parameter('pin', props.display_pin)
       $('#lot-info').html(info);
       // console.log(info)

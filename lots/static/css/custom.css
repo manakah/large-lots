@@ -9,6 +9,19 @@ a, a:hover {
     color: #238b45;
 }
 
+.footer {
+    border-top: 1px solid #e6e6e6;
+    padding: 20px 10px;
+    margin-top: 70px;
+    background-color: #fefefe;
+}
+
+.footer img { 
+    padding-right: 30px;
+    margin-bottom: 20px;
+    height: 80px;
+}
+
 #received th {
     cursor: pointer;
 }
