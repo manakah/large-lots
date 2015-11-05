@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}New Construction Building - Lot Uses {% endblock %}
 {% block name %}New Construction Building{% endblock %}
 {% block category %}Private Project{% endblock %}
 {% block description %}A new detached building for single or multi-family residential or future mixed use programming, including community uses.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/10-new-construction-building.jpg' alt='New Construction Building' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-warning'>S</label> Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True"}}</p>
 {% endblock %}
 
 {% block questions %}

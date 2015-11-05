@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Building Addition - Lot Uses {% endblock %}
 {% block name %}Building Addition{% endblock %}
 {% block category %}Private Project{% endblock %}
 {% block description %}Building an addition indicates you will be adding enclosed, connected indoor square footage to an existing building.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/11-building-addition.jpg' alt='Building Addition' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-warning'>S</label> Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True"}}</p>
 {% endblock %}
 
 {% block questions %}

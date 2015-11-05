@@ -5,3 +5,33 @@ register = template.Library()
 @register.filter(name='remove_str')
 def remove_str(value, arg):
     return value.replace(arg, '')
+
+LINKS_TEXT = {
+    "Z": {
+        "link": "http://www.cityofchicago.org/city/en/depts/dcd/supp_info/plan_examination.html",
+        "text": "Department of Zoning Approval Required.",
+        "color": "default",
+    },
+    "S": {
+        "link": "http://www.cityofchicago.org/city/en/depts/bldgs/provdrs/stand_plan/svcs/applications.html",
+        "text": "Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor.",
+        "color": "warning",
+    },
+    "E": {
+        "link": "http://www.cityofchicago.org/city/en/depts/bldgs/provdrs/permit_proc.html",
+        "text": "Easy Permit Required (Dept of Buildings). Hire a General Contractor.",
+        "color": "danger",
+    },
+}
+
+@register.filter(name='lot_use_label', is_safe=True)
+def remove_str(label_type, extra_text):
+    label = "<a class='label-link' href='{link}' target='_blank'><label class='label label-{color}' data-content='{text}'>{label_type}</label></a>"
+    if extra_text == 'True':
+        label = "<a class='label-link' href='{link}' target='_blank'><label class='label label-{color}' data-content='{text}'>{label_type}</label> {text}</a>"
+
+    fmt_kwargs = LINKS_TEXT[label_type]
+    fmt_kwargs['label_type'] = label_type
+    
+    return label.format(**fmt_kwargs)
+

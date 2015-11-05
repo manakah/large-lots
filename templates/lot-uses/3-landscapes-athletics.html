@@ -1,11 +1,12 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Landscapes + Athletics - Lot Uses {% endblock %}
 {% block name %}Landscapes + Athletics{% endblock %}
 {% block category %}Public Project{% endblock %}
 {% block description %}Provides publicly accessible, community- managed open space for recreation, beautification, and sustainability.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/3-landscapes-athletics.jpg' alt='Landscapes + Athletics' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
 {% endblock %}
 
 {% block questions %}

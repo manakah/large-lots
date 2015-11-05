@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Driveways + Patios - Lot Uses {% endblock %}
 {% block name %}Driveways + Patios{% endblock %}
 {% block category %}Private Project{% endblock %}
 {% block description %}A concrete, asphalt, or other hardscape surface for parking or outdoor landscape use.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/15-driveways-patios.jpg' alt='Porches + Decks' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-danger'>E</label> Easy Permit Required (Dept of Buildings). Hire a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True" }}</p>
 {% endblock %}
 
 {% block questions %}
