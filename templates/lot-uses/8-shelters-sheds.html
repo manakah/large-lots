@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Shelters + Sheds - Lot Uses {% endblock %}
 {% block name %}Shelters + Sheds{% endblock %}
 {% block category %}Public or Private Project{% endblock %}
 {% block description %}An accessory building or structure that contributes to the comfort, convenience, or necessity of a principal building or use served.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/8-shelters-sheds.jpg' alt='Shelters + Sheds' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-danger'>E</label> Easy Permit Required (Dept of Buildings). Hire a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True"}}</p>
 {% endblock %}
 
 {% block questions %}

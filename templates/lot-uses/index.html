@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load lots_filters %}
 {% block title %}Lot Uses{% endblock %}
 {% block content %}
 
@@ -10,11 +11,25 @@
       <p>Before you dive in, browse our <a href="{% url 'lot_uses_resources' %}">Key Resources &raquo;</a></p>
 
       <h3>Requirements</h3>
+      <p>
+        All large lot owners are required to fence their lot (if the lot is not
+        adjacent to property they already own) with a
+        <a href="http://chicagocode.org/7-28-750/" target="_blank">
+            noncombustible screen fence
+        </a> while the lot remains vacant. Noncombustible materials
+        will not ignite at high temperatures and include metal, chain link, plastic,
+        stone, concrete, or brick. Fences must be constructed so that at least 50% of
+        the fence has openings that can be seen through, like in a lattice pattern.
+        Fences taller than 5ft require an
+        <a href="http://www.cityofchicago.org/city/en/depts/bldgs/provdrs/permit_proc.html" target="_blank">
+            easy permit.
+        </a>
+      </p>
       <p>All of the below projects will reqiure some kind of approval from the City of Chicago. We indicate what's required using these labels:</p>
       <small>
-        <label class='label label-default'>Z</label> Department of Zoning Approval Required.<br />
-        <label class='label label-warning'>S</label> Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor.<br />
-        <label class='label label-danger'>E</label> Easy Permit Required (Dept of Buildings). Hire a General Contractor.
+        {{ "Z"|lot_use_label:"True" }} <br />
+        {{ "S"|lot_use_label:"True" }} <br />
+        {{ "E"|lot_use_label:"True" }}
       </small>
     </div>
   </div>
@@ -43,7 +58,7 @@
   <div class='row'>
     <div class='col-md-8'>
       <h3>Private Projects</h3>
-      <p>Make your home more pleasant and valuable, or build new apartmetns for rent.</p>
+      <p>Make your home more pleasant and valuable, or build new apartments for rent.</p>
 
       <table class='table table-condensed table-hover'>
         <thead>
@@ -97,7 +112,7 @@
   </div>
 {% endblock %}
 {% block extra_js %}
-  
+
   <script>
     var lot_uses = {
       'public': [
@@ -135,10 +150,10 @@
       var html = ""
       $(list).each( function (k, v) {
         var req_labels = "";
-        $(v.requirements).each( function (k, v) { 
-          if (v == 'Z') req_labels += "<label class='label label-default' data-content='Department of Zoning Approval Required.'>Z</label> ";
-          if (v == 'S') req_labels += "<label class='label label-warning' data-content='Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor.'>S</label> ";
-          if (v == 'E') req_labels += "<label class='label label-danger' data-content='Easy Permit Required (Dept of Buildings). Hire a General Contractor.'>E</label> ";
+        $(v.requirements).each( function (k, v) {
+            if (v == 'Z') req_labels += "{{ "Z"|lot_use_label:"False" }} ";
+          if (v == 'S') req_labels += "{{ "S"|lot_use_label:"False" }} ";
+          if (v == 'E') req_labels += "{{ "E"|lot_use_label:"False" }} ";
         });
         html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a></td><td><small>" + req_labels + "</small></td></tr>";
       });

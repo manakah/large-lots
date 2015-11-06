@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Porches + Decks - Lot Uses {% endblock %}
 {% block name %}Porches + Decks{% endblock %}
 {% block category %}Private Project{% endblock %}
 {% block description %}An unheated portion of a building generally containing a stair, separated from the building by a fire-rated wall.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/14-porches-decks.jpg' alt='Porches + Decks' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-warning'>S</label> Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True" }}</p>
 {% endblock %}
 
 {% block questions %}

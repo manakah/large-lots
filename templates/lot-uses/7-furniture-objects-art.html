@@ -1,12 +1,13 @@
 {% extends "base_lot_uses.html" %}
+{% load lots_filters %}
 {% block title %}Furniture, Objects + Art - Lot Uses {% endblock %}
 {% block name %}Furniture, Objects + Art{% endblock %}
 {% block category %}Public or Private Project{% endblock %}
 {% block description %}Provides fixed items like benches, sculptures, and basketball hoops with secure foundations or surface bolts to prevent simple removal.{% endblock %}
 {% block image %}<img src='/static/images/lot-uses/7-furniture-objects-art.jpg' alt='Sustainable Strategies' class='img-responsive img-thumbnail' />{% endblock %}
 {% block requirements %}
-    <p><label class='label label-default'>Z</label> Department of Zoning Approval Required</p>
-    <p><label class='label label-danger'>E</label> Easy Permit Required (Dept of Buildings). Hire a General Contractor</p>
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True"}}</p>
 {% endblock %}
 
 {% block questions %}
