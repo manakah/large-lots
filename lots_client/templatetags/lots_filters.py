@@ -26,9 +26,9 @@ LINKS_TEXT = {
 
 @register.filter(name='lot_use_label', is_safe=True)
 def remove_str(label_type, extra_text):
-    label = "<a class='label-link' href='{link}' target='_blank'><label class='label label-{color}' data-content='{text}'>{label_type}</label></a>"
+    label = "<label class='label label-{color}' data-content='{text}'>{label_type}</label>"
     if extra_text == 'True':
-        label = "<a class='label-link' href='{link}' target='_blank'><label class='label label-{color}' data-content='{text}'>{label_type}</label> {text}</a>"
+        label = "<label class='label label-{color}'>{label_type}</label> <a class='label-link' href='{link}' target='_blank'>{text}</a>"
 
     fmt_kwargs = LINKS_TEXT[label_type]
     fmt_kwargs['label_type'] = label_type
