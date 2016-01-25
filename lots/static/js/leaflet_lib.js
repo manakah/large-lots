@@ -95,7 +95,7 @@ var LeafletLib = {
         }
         var s = document.createElement("script");
         s.type = "text/javascript";
-        s.src = "http://nominatim.openstreetmap.org/search/" + encodeURIComponent(address) + "?format=json&json_callback=LeafletLib.returnAddress";
+        s.src = "https://nominatim.openstreetmap.org/search/" + encodeURIComponent(address) + "?format=json&json_callback=LeafletLib.returnAddress";
         document.body.appendChild(s);
     },
 
