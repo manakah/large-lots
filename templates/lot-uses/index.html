@@ -8,7 +8,7 @@
       <h1>Lot Uses</h1>
       <p>What can you do with a vacant lot once you get it through the City of Chicago’s Large Lots Program? We've got a few ideas for you.</p>
 
-      <h3>Requirements</h3>
+      <h3>The Basics</h3>
       <p>
         All large lot owners are required to fence their lot (if the lot is not
         adjacent to property they already own) with a
@@ -22,48 +22,16 @@
             easy permit.
         </a>
       </p>
-      <p>All of the below projects will reqiure some kind of approval from the City of Chicago. We indicate what's required using these labels:</p>
-      <small>
-        {{ "Z"|lot_use_label:"True" }} <br />
-        {{ "S"|lot_use_label:"True" }} <br />
-        {{ "E"|lot_use_label:"True" }}
-      </small>
     </div>
   </div>
   <hr />
+  <h3>Bigger Ideas</h3>
   <div class='row'>
     <div class='col-md-8'>
-      <h3>Community Projects</h3>
-      <p>Turn your lot into a space your whole neighborhood can enjoy.</p>
-
-      <table class='table table-condensed table-hover'>
-        <thead>
-          <tr>
-            <th>Community Project</th>
-            <th>Requirements</th>
-          </tr>
-        </thead>
-        <tbody id='public-list'></tbody>
-      </table>
-    </div>
-    <div class='col-md-4'>
-      <h3>&nbsp;</h3>
-      <img src='/static/images/lot-uses/public-projects.jpg' alt='Public Projects' class='img-responsive img-thumbnail' />
-    </div>
-  </div>
-  <hr />
-  <div class='row'>
-    <div class='col-md-8'>
-      <h3>Private Projects</h3>
+      <h4>Private Projects</h4>
       <p>Make your home more pleasant and valuable, or build new apartments for rent.</p>
 
       <table class='table table-condensed table-hover'>
-        <thead>
-          <tr>
-            <th>Private Project</th>
-            <th>Requirements</th>
-          </tr>
-        </thead>
         <tbody id='private-list'></tbody>
       </table>
     </div>
@@ -75,16 +43,25 @@
   <hr />
   <div class='row'>
     <div class='col-md-8'>
-      <h3>Other Projects</h3>
+      <h4>Community Projects</h4>
+      <p>Turn your lot into a space your whole neighborhood can enjoy.</p>
+
+      <table class='table table-condensed table-hover'>
+        <tbody id='public-list'></tbody>
+      </table>
+    </div>
+    <div class='col-md-4'>
+      <h3>&nbsp;</h3>
+      <img src='/static/images/lot-uses/public-projects.jpg' alt='Public Projects' class='img-responsive img-thumbnail' />
+    </div>
+  </div>
+  <hr />
+  <div class='row'>
+    <div class='col-md-8'>
+      <h4>Other Projects</h4>
       <p>Projects that could be either private or for community use.</p>
 
       <table class='table table-condensed table-hover'>
-        <thead>
-          <tr>
-            <th>Project</th>
-            <th>Requirements</th>
-          </tr>
-        </thead>
         <tbody id='both-list'></tbody>
       </table>
     </div>
@@ -146,13 +123,7 @@
     function populateList(list, el) {
       var html = ""
       $(list).each( function (k, v) {
-        var req_labels = "";
-        $(v.requirements).each( function (k, v) {
-            if (v == 'Z') req_labels += "{{ "Z"|lot_use_label:"False" }} ";
-          if (v == 'S') req_labels += "{{ "S"|lot_use_label:"False" }} ";
-          if (v == 'E') req_labels += "{{ "E"|lot_use_label:"False" }} ";
-        });
-        html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a></td><td><small>" + req_labels + "</small></td></tr>";
+        html += "<tr><td><a href='/lot-uses/" + v.id + "/'>" + v.name + "</a></td></tr>";
       });
 
       $(el).html(html);
