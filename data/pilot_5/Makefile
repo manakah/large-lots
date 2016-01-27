@@ -88,14 +88,14 @@ city-owned-residential-lots.table: land-inventory.table cook-county-parcels.tabl
 		"CREATE INDEX city_owned_geom ON city_owned_residential_lots USING gist (geom)"
 	@touch build/$@
 
-RP_HEADER = "pin14,from_street_number,to_street_number,street_dir,street_name,street_type,address,ward,zoning_classification"
+HEADER = "pin14,from_street_number,to_street_number,street_dir,street_name,street_type,address,ward,zoning_classification"
 
 eligable_lots.csv: Auburn_Gresham_R_zoned.xlsx
 	in2csv $< | \
 		csvgrep -c CCRD -r '^((?!N).)*$$' | \
 		csvcut -c 1,3,4,5,6,7,8,12,13 | \
 		python processors/remove_dashes.py 0 | \
-		(echo $(RP_HEADER) ; tail -n +2) > build/$@
+		(echo $(HEADER) ; tail -n +2) > build/$@
 
 eligable_lots.table: eligable_lots.csv
 	psql -h $(PG_HOST) -U $(PG_USER) -p $(PG_PORT) -d $(PG_DB) -c "DROP TABLE IF EXISTS eligable_lots;"
