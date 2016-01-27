@@ -92,6 +92,7 @@ RP_HEADER = "pin14,from_street_number,to_street_number,street_dir,street_name,st
 
 eligable_lots.csv: Auburn_Gresham_R_zoned.xlsx
 	in2csv $< | \
+		csvgrep -c CCRD -r '^((?!N).)*$$' | \
 		csvcut -c 1,3,4,5,6,7,8,12,13 | \
 		python processors/remove_dashes.py 0 | \
 		(echo $(RP_HEADER) ; tail -n +2) > build/$@
