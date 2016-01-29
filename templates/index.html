@@ -10,17 +10,34 @@
 
         {% if application_active %}
           <div class='col-md-8'>
-            <h3>Large Lots 4: Roseland and Pullman <small class='open'>Open</small></h3>
+            <h3>Large Lots 5: Auburn Gresham <small class='open'>Open</small></h3>
 
-            <p>The fourth Large Lot program is open in Roseland and Pullman! <br />Applications will be accepted until <strong>October 31st, 2015</strong>. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
+            <p>The fifth Large Lot program is open in Auburn Gresham! <br />Applications will be accepted until <strong>October 31st, 2015</strong>. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
 
             <p><a href='{% url "apply" %}' class="btn btn-success btn-lg">Apply for a lot</a></p>
 
           </div>
           <div class='col-md-4'>
-            <p><a href='{% url "apply" %}'><img src='{% static "images/phase-4-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Roseland and Pullman' /></a></p>
+            <p><a href='{% url "apply" %}'><img src='{% static "images/phase-5-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Auburn Gresham' /></a></p>
           </div>
         {% else %}
+          <div class='col-md-8'>
+            <h3>Large Lots 4: Auburn Gresham <small class='closed'>Ended on October 31, 2015</small></h3>
+
+            <p> The fourth Large Lot Program ended in Auburn Gresham on <strong>October 31st at 11:59 p.m.</strong></p>
+
+            <p>Check back soon for updates!</p>
+
+          </div>
+          <div class='col-md-4'>
+            <p><img src='{% static "images/phase-5-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Auburn Gresham' /></p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class='well'>
+      <div class='row'>
           <div class='col-md-8'>
             <h3>Large Lots 4: Roseland and Pullman <small class='closed'>Ended on October 31, 2015</small></h3>
 
@@ -32,7 +49,6 @@
           <div class='col-md-4'>
             <p><img src='{% static "images/phase-4-screenshot-1.png" %}' class='img-responsive img-thumbnail' alt='Roseland and Pullman' /></p>
           </div>
-        {% endif %}
       </div>
     </div>
 
