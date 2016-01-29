@@ -2,19 +2,19 @@ var LargeLots = LargeLots || {};
 var LargeLots = {
 
   map: null,
-  map_centroid: [41.71200792706533, -87.6163101196289],
-  defaultZoom: 13,
+  map_centroid: [41.7442054377053, -87.6563067873806],
+  defaultZoom: 14,
   lastClickedLayer: null,
   geojson: null,
   marker: null,
   locationScope: 'chicago',
   boundingBox: {
-    'bottom': 41.6799636934724,
-    'top': 41.74403619430261,
-    'right': -87.55365371704102,
-    'left': -87.6789665222168
+    'bottom': 41.728634825134,
+    'top': 41.7581437537799,
+    'right': -87.6337338351415,
+    'left': -87.6785879838136
   },
-  cartodb_table: 'rp_lots',
+  cartodb_table: 'ag_lots',
 
   initialize: function() {
 
@@ -79,7 +79,7 @@ var LargeLots = {
                   interactivity: fields
               },
               {
-                  sql: "select * from chicago_community_areas where community IN ('ROSELAND', 'PULLMAN')",
+                  sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
@@ -163,7 +163,7 @@ var LargeLots = {
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from ' + LargeLots.cartodb_table + ' where display_pin = {{display_pin}}', {display_pin:display_pin})
+      sql.execute('select * from ' + LargeLots.cartodb_table + ' where display_pin = {{display_pin}}::VARCHAR', {display_pin:display_pin})
         .done(function(data){
             var shape = data.features[0];
             LargeLots.lastClickedLayer = L.geoJson(shape);
@@ -188,7 +188,7 @@ var LargeLots = {
           info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zoning_classification + "' target='_blank'>" + props.zoning_classification + "</a>)</td></tr>";
       }
       if (props.sq_ft){
-          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(props.sq_ft) + "</td></tr>";
+          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.sq_ft)) + "</td></tr>";
 
       }
       info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
