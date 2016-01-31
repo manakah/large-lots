@@ -21,10 +21,10 @@
 
         <div class='row'>
           <div class='col-md-12'>
-            <h1>Austin <small class='closed'>Closed</small></h1>
+            <h1>Roseland/Pullman <small class='closed'>Closed</small></h1>
             <div class='row'>
               <div class='col-md-9'>
-                <p> The third Large Lot Program ended in Austin on <strong>August 4th at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
+                <p> The fouth Large Lot Program ended in Roseland/Pullman on <strong>October 31st at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
 
                 <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>sold</strong> to residents.</p>
               </div>
@@ -99,9 +99,9 @@
               'left': -87.7223539352417
             },
             defaultZoom: 14,
-            tableName: 'egp_parcels',
+            tableName: 'rp_parcels',
             mainWhere: " where status = 1",
-            overlayName: "chicago_community_areas WHERE community = 'AUSTIN'",
+            overlayName: "chicago_community_areas where community IN ('ROSELAND', 'PULLMAN')",
             fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);

@@ -307,6 +307,12 @@ def status_pilot_1(request):
 def status_pilot_2(request):
     return render(request, 'status_pilot_2.html')
 
+def status_pilot_3(request):
+    return render(request, 'status_pilot_3.html')
+
+def status_pilot_4(request):
+    return render(request, 'status_pilot_4.html')
+
 def faq(request):
     return render(request, 'faq.html')
 
