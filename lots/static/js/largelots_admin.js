@@ -84,7 +84,7 @@ var LargeLotsAdmin = {
               },
               {
                   sql: 'select * from east_garfield_park',
-                  cartocss: "#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  cartocss: "#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.4;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
       }

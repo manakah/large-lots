@@ -115,12 +115,11 @@ class ApplicationForm(forms.Form):
 def home(request):
     return render(request, 'index.html', {'application_active': application_active(request)})
 
-# the application is active between July 1st 12:00am and August 4th 11:59pm
 def application_active(request):
     chicago_time = timezone.localtime(timezone.now())
-    start_date = timezone.make_aware(datetime(2015, 9, 15, 0, 0),
+    start_date = timezone.make_aware(datetime(2016, 2, 1, 0, 0),
         timezone.get_current_timezone())
-    end_date = timezone.make_aware(datetime(2015, 10, 31, 23, 59),
+    end_date = timezone.make_aware(datetime(2016, 3, 20, 23, 59),
         timezone.get_current_timezone())
     
     if settings.APPLICATION_DISPLAY: # override with configuration setting
@@ -306,6 +305,12 @@ def status_pilot_1(request):
 
 def status_pilot_2(request):
     return render(request, 'status_pilot_2.html')
+
+def status_pilot_3(request):
+    return render(request, 'status_pilot_3.html')
+
+def status_pilot_4(request):
+    return render(request, 'status_pilot_4.html')
 
 def faq(request):
     return render(request, 'faq.html')
