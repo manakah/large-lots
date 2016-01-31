@@ -66,7 +66,7 @@
             <!-- <li><a href="http://largelots.tumblr.com">Blog</a></li> -->
             <li {% if request.path == '/faq/' %}class='active' {% endif %}><a href="{% url 'faq' %}"><i class='fa fa-question-circle'></i> FAQ</a></li>
             <li {% if request.path == '/about/' %}class='active' {% endif %}><a href="{% url 'about' %}"><i class='fa fa-info-circle'></i> About</a></li>
-            {% if request.user.is_authenticated %}<li><a href="{% url 'logout' %}">Logout</a></li>{% endif %}
+            {% if request.user.is_authenticated %}<li><a href="{% url 'logout' %}"><i class='fa fa-sign-out'></i> Logout</a></li>{% endif %}
           </ul>
         </div><!--/.nav-collapse -->
         {% endblock %}
