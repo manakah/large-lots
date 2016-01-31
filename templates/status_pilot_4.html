@@ -24,7 +24,11 @@
             <h1>Roseland/Pullman <small class='closed'>Closed</small></h1>
             <div class='row'>
               <div class='col-md-9'>
+<<<<<<< HEAD
                 <p> The fouth Large Lot Program ended in Roseland/Pullman on <strong>October 31st at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
+=======
+                <p> The fourth Large Lot Program ended in Roseland/Pullman on <strong>October 31st at 11:59 p.m.</strong> Applicants will be contacted via a letter regarding the status of their application.</p>
+>>>>>>> d5b092059d36e26cc00033f0d8f06522172727ed
 
                 <p>Browse the map or enter your address below to see what lots have been <strong class='closed'>sold</strong> to residents.</p>
               </div>
@@ -90,7 +94,7 @@
       $(function() {
         var init_params = {
             map_centroid: [41.8787248907554, -87.7055433591891],
-            boundaryCartocss: '#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}',
+            boundaryCartocss: '#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.4;line-color: #FFF;line-width: 3;line-opacity: 1;}',
             parcelsCartocss: $('#egp-styles').html().trim(),
             boundingBox: {
               'bottom': 41.868506217235485,
@@ -101,7 +105,7 @@
             defaultZoom: 14,
             tableName: 'rp_parcels',
             mainWhere: " where status = 1",
-            overlayName: "chicago_community_areas where community IN ('ROSELAND', 'PULLMAN')",
+            overlayName: "chicago_community_areas WHERE community IN ('ROSELAND', 'PULLMAN')",
             fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);
