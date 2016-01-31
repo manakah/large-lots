@@ -80,7 +80,7 @@ var LargeLots = {
               },
               {
                   sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
-                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.2;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.4;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
       }
