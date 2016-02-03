@@ -9,17 +9,17 @@ def remove_str(value, arg):
 LINKS_TEXT = {
     "Z": {
         "link": "http://www.cityofchicago.org/city/en/depts/dcd/supp_info/plan_examination.html",
-        "text": "Department of Zoning Approval Required.",
+        "text": "Zoning Approval from Department of Planning and Development Required",
         "color": "default",
     },
     "S": {
         "link": "http://www.cityofchicago.org/city/en/depts/bldgs/provdrs/stand_plan/svcs/applications.html",
-        "text": "Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor.",
+        "text": "Standard Permit Required (Dept of Buildings). Hire an Architect and a General Contractor",
         "color": "warning",
     },
     "E": {
         "link": "http://www.cityofchicago.org/city/en/depts/bldgs/provdrs/permit_proc.html",
-        "text": "Easy Permit Required (Dept of Buildings). Hire a General Contractor.",
+        "text": "Easy Permit Required (Dept of Buildings). Hire a General Contractor",
         "color": "danger",
     },
 }
