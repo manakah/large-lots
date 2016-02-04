@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class='col-md-12'>
+      <p>
+        <a href="{% url 'lot_uses' %}">&laquo; back to Lot Uses</a>
+      </p>
+
+      <h1>
+        {% block name %}{% endblock %} <small>{% block category %}{% endblock %}</small>
+      </h1>
+      <p>{% block description %}{% endblock %}</p>
+    {% block requirements %}{% endblock %}
+      <hr />
+  </div>
+
+  <div class='col-md-7'>
+
+    <h3><img src='/static/images/lot-uses/steps-blue.png' alt='What do I need to ask myself and decide?' style='width: 50px;' /> What steps is it going to involve?</h3>
+
+    {% block steps %}{% endblock %}
+
+    <h3><img src='/static/images/lot-uses/resources-blue.png' alt='What do I need to ask myself and decide?' style='width: 50px;' /> Where can I learn more about it?</h3>
+
+    {% block resources %}{% endblock %}
+
+  </div>
+
+  <div class='col-md-5'>
+    <p>
+      {% block image %}{% endblock %}
+    </p>
+
+  </div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Shelters + Sheds - Lot Uses {% endblock %}
+{% block name %}Shelters + Sheds{% endblock %}
+{% block description %}An accessory building or structure that contributes to the comfort, convenience, or necessity of a principal building or use served.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/8-shelters-sheds.jpg' alt='Shelters + Sheds' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True"}}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Private or public?</li>
+        <li>Is this for a community garden? (Special zoning applies.)</li>
+        <li>Single story?</li>
+        <li>Will you personally maintain the structure?</li>
+        <li>Related to commercial activity at all?</li>
+        <li>Security plan?</li>
+        <li>Planning to host large events?</li>
+        <li>Fixed furniture like benches or tables?</li>
+        <li>Electricity?</li>
+        <li>Need help designing or building it?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Get professional advice to determine the Chicago Municipal Code’s requirements on height, size, and property line setbacks.</p></li>
+        <li><p>If you plan to have the public onto your privately-owned land, talk to your homeowner’s insurance company about changes to policy to protect yourself from liability.</p></li>
+        <li><p>If you are an owner-occupant able to design and/or build it yourself to be code-compliant, you may be eligible to move forward without a registered architect/contractor through the Homeowner Assistance Permit.</p></li>
+        <li><p>Talk to your design professional about whether your structure qualifies for the Easy Permit program, which requires a general contractor. You may need a Standard Plan Review Permit from the Department of Buildings, which requires both an architect and a general contractor.</p></li>
+        <li><p>Structures within community gardens have special rules. Refer to the <a href="http://www.cityofchicago.org/city/en/depts/dcd/supp_info/urban_agriculturefaq.html" target="_blank">City’s Urban Agriculture FAQ’s</a>.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>City of Chicago Zoning for Public Open Space: See the City’s Open Space resources and read <a href='http://tinyurl.com/ChiOpenSpace'>CitySpace Chicago</a></p></li>
+        <li><p>City of Chicago Urban Agriculture Zoning contact: See the City’s Urban Agriculture <a href='http://tinyurl.com/ChiUrbanAgriculture'>FAQ on garden sheds</a></p></li>
+        <li><p>To learn more about a Homeowner Permit: See the <a href='http://tinyurl.com/homeownerpermit'>Homeowner Assistance Plan Review submittal process</a></p></li>
+    </ul>
+{% endblock %}

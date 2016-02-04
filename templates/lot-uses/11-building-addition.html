@@ -1,0 +1,41 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Building Addition - Lot Uses {% endblock %}
+{% block name %}Building Addition{% endblock %}
+{% block category %}Private Project{% endblock %}
+{% block description %}Building an addition indicates you will be adding enclosed, connected indoor square footage to an existing building.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/11-building-addition.jpg' alt='Building Addition' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True"}}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Residential use only?</li>
+        <li>Planning on renting out the new space?</li>
+        <li>Have the plans of your existing building?</li>
+        <li>Planning to refinance your home?</li>
+        <li>Rooftop solar or wind turbines?</li>
+        <li>Have a homeowners association?</li>
+        <li>Consulted your home insurance company?</li>
+        <li>Considered pre-fabricated additions?</li>
+        <li>Can you live on site during construction?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>You will need to hire a licensed architect and licensed general contractor to obtain the permits. Work with your architect to determine the Chicago Municipal Code’s requirements on height, size, construction materials, and property line setbacks.</p></li>
+        <li><p>You will need approval from the Department of Zoning as well as a Standard Review Building Permit from the Department of Buildings.</p></li>
+        <li><p>If you’re interested in using sustainable technologies, you will also need a Green Permit. This can expedite your other permit processes.</p></li>
+        <li><p>If you will be renting out the new space to tenants, ensure your units are in accordance with the City of Chicago Residential Landlord and Tenant Ordinance</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>To learn more about becoming a Landlord: See the <a href='http://tinyurl.com/ChiLandlords'>City of Chicago’s Residential Landlord and Tenant Ordinance</a></p></li>
+        <li><p>To get some design ideas: One way to prepare for a meeting with your architect is to gather images of interiors you like from sites such as: <a href='http://Houzz.com'>Houzz.com</a>, <a href='http://Pinterest.com'>Pinterest.com</a>, <a href='http://ApartmentTherapy.com'>ApartmentTherapy.com</a>, <a href='http://DesignSponge.com'>DesignSponge.com</a>, <a href='http://design-milk.com'>design-milk.com</a>, <a href='http://witanddelight.com'>witanddelight.com</a>, and <a href='http://dwell.com'>dwell.com</a></p></li>
+    </ul>
+{% endblock %}
