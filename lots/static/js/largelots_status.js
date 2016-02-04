@@ -1,3 +1,5 @@
+var geocoder = new google.maps.Geocoder();
+
 var LargeLots = LargeLots || {};
 var LargeLots = {
   map: null,
@@ -11,7 +13,6 @@ var LargeLots = {
       LargeLots.map_centroid = init_params.map_centroid;
       LargeLots.boundaryCartocss = init_params.boundaryCartocss;
       LargeLots.parcelsCartocss = init_params.parcelsCartocss;
-      LargeLots.boundingBox = init_params.boundingBox;
       LargeLots.tableName = init_params.tableName;
       LargeLots.overlayName = init_params.overlayName;
       LargeLots.mainWhere = init_params.mainWhere;
@@ -24,12 +25,19 @@ var LargeLots = {
         });
       }
       // render a map!
-      L.Icon.Default.imagePath = '/images/'
+      L.Icon.Default.imagePath = '/static/images/'
 
-      L.tileLayer('https://{s}.tiles.mapbox.com/v3/datamade.hn83a654/{z}/{x}/{y}.png', {
-          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>',
-          detectRetina: true
-      }).addTo(LargeLots.map);
+      var google_map_styles = [
+        {
+          stylers: [
+            { saturation: -100 },
+            { lightness: 40 }
+          ]
+        }
+      ];
+
+      var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
+      LargeLots.map.addLayer(layer);
 
       LargeLots.info = L.control({position: 'bottomright'});
 
@@ -241,53 +249,48 @@ var LargeLots = {
 
   addressSearch: function (e) {
     if (e) e.preventDefault();
-    var searchRadius = $("#search_address").val();
-    if (searchRadius != '') {
+    var searchAddress = $("#search_address").val();
+    if (searchAddress != '') {
 
-      var raw_address = $("#search_address").val().toLowerCase();
-      raw_address = raw_address.replace(" n ", " north ");
-      raw_address = raw_address.replace(" s ", " south ");
-      raw_address = raw_address.replace(" e ", " east ");
-      raw_address = raw_address.replace(" w ", " west ");
+      $("#id_owned_address").val(searchAddress.replace((", " + LargeLots.locationScope), ""));
 
       if(LargeLots.locationScope && LargeLots.locationScope.length){
-        var checkaddress = raw_address.toLowerCase();
+        var checkaddress = searchAddress.toLowerCase();
         var checkcity = LargeLots.locationScope.split(",")[0].toLowerCase();
         if(checkaddress.indexOf(checkcity) == -1){
-          raw_address += ", " + LargeLots.locationScope;
+          searchAddress += ", " + LargeLots.locationScope;
         }
       }
 
-      $.address.parameter('address', encodeURIComponent(raw_address));
+      $.address.parameter('address', encodeURIComponent(searchAddress));
 
-      var s = document.createElement("script");
-      s.type = "text/javascript";
-      s.src = "https://nominatim.openstreetmap.org/search/" + encodeURIComponent(raw_address) + "?format=json&bounded=1&viewbox=" + LargeLots.boundingBox['left'] + "," + LargeLots.boundingBox['top'] + "," + LargeLots.boundingBox['right'] + "," + LargeLots.boundingBox['bottom'] + "&json_callback=LargeLots.returnAddress";
-      document.body.appendChild(s);
-      //&bounded=1&viewbox=" + LargeLots.boundingBox['left'] + "," + LargeLots.boundingBox['top'] + "," + LargeLots.boundingBox['right'] + "," + LargeLots.boundingBox['bottom'] + "
-    }
-  },
+      geocoder.geocode( { 'address': searchAddress}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+          currentPinpoint = [results[0].geometry.location.lat(), results[0].geometry.location.lng()];
 
-  returnAddress: function (response){
+          // check if the point is in neighborhood area
+          var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+          sql.execute("select cartodb_id, the_geom FROM " + LargeLots.overlayName + " AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          .done(function(data){
+            if (data.features.length == 0) {
+              alert("Your address is outside the program area. Please try again.");
+            }
+            else {
+              LargeLots.map.setView(currentPinpoint, 17);
 
-    if(!response.length){
-      $('#modalGeocode').modal('show');
-      return;
-    }
+              if (LargeLots.marker)
+                LargeLots.map.removeLayer( LargeLots.marker );
 
-    var first = response[0];
+              LargeLots.marker = L.marker(currentPinpoint).addTo(LargeLots.map);
+            }
 
-    LargeLots.map.setView([first.lat, first.lon], 17);
-
-    if (LargeLots.marker)
-      LargeLots.map.removeLayer( LargeLots.marker );
-
-    var defaultIcon = L.icon({
-        iconUrl: 'images/marker-icon.png',
-        shadowUrl: 'images/marker-shadow.png',
-        shadowAnchor: [0, 0]
+          }).error(function(e){console.log(e)});
+        }
+        else {
+          alert("We could not find your address: " + status);
+        }
       });
-    LargeLots.marker = L.marker([first.lat, first.lon]).addTo(LargeLots.map);
+    }
   },
 
   formatPin: function(pin) {

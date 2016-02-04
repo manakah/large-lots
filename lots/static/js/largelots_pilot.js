@@ -26,13 +26,13 @@ var LargeLots = {
       L.Icon.Default.imagePath = '/static/images/'
 
       var google_map_styles = [
-          {
-            stylers: [
-              { saturation: -100 },
-              { lightness: 40 }
-            ]
-          }
-        ];
+        {
+          stylers: [
+            { saturation: -100 },
+            { lightness: 40 }
+          ]
+        }
+      ];
 
       var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
       LargeLots.map.addLayer(layer);
@@ -83,7 +83,7 @@ var LargeLots = {
               },
               {
                   sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
-                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.3;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
       }
@@ -239,7 +239,7 @@ var LargeLots = {
 
           // check if the point is in neighborhood area
           var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-          sql.execute('select cartodb_id, the_geom from ' + LargeLots.cartodb_table + ' where ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))', {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'AUBURN GRESHAM' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
           .done(function(data){
             // console.log(data);
             if (data.features.length == 0) {

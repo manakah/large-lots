@@ -5,7 +5,7 @@
     <style id="map-styles">
       #roseland {
         polygon-fill: #41ab5d;
-        polygon-opacity: 0.9;
+        polygon-opacity: 0.7;
         line-color: #006d2c;
         line-width: 0.5;
         line-opacity: 1;
@@ -530,6 +530,8 @@
       $(function() {
         LargeLots.initialize();
       });
+
+      var autocomplete = new google.maps.places.Autocomplete(document.getElementById('search_address'));
 
       $("#search").on("click", LargeLots.addressSearch);
       $("#apply_another").on("click", function(){ $("#map").ScrollTo({offsetTop: "70px"}); });
