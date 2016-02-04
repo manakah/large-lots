@@ -10,12 +10,6 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  boundingBox: {
-    'bottom': 41.728634825134,
-    'top': 41.7581437537799,
-    'right': -87.6337338351415,
-    'left': -87.6785879838136
-  },
   cartodb_table: 'ag_lots',
 
   initialize: function() {
@@ -31,7 +25,16 @@ var LargeLots = {
       // render a map!
       L.Icon.Default.imagePath = '/static/images/'
 
-      var layer = new L.Google('ROADMAP', {animate: false});
+      var google_map_styles = [
+          {
+            stylers: [
+              { saturation: -100 },
+              { lightness: 40 }
+            ]
+          }
+        ];
+
+      var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
       LargeLots.map.addLayer(layer);
 
       LargeLots.info = L.control({position: 'bottomright'});
@@ -234,13 +237,25 @@ var LargeLots = {
         if (status == google.maps.GeocoderStatus.OK) {
           currentPinpoint = [results[0].geometry.location.lat(), results[0].geometry.location.lng()];
 
-          console.log(currentPinpoint);
-          LargeLots.map.setView(currentPinpoint, 17);
+          // check if the point is in neighborhood area
+          var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+          sql.execute('select cartodb_id, the_geom from ' + LargeLots.cartodb_table + ' where ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))', {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          .done(function(data){
+            // console.log(data);
+            if (data.features.length == 0) {
+              $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
+              $('#modalGeocode').modal('show');
+            }
+            else {
+              LargeLots.map.setView(currentPinpoint, 17);
 
-          if (LargeLots.marker)
-            LargeLots.map.removeLayer( LargeLots.marker );
+              if (LargeLots.marker)
+                LargeLots.map.removeLayer( LargeLots.marker );
 
-          LargeLots.marker = L.marker(currentPinpoint).addTo(LargeLots.map);
+              LargeLots.marker = L.marker(currentPinpoint).addTo(LargeLots.map);
+            }
+
+          }).error(function(e){console.log(e)});
         }
         else {
           alert("We could not find your address: " + status);
