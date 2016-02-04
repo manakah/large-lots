@@ -71,16 +71,11 @@ def csv_dump(request, pilot):
         'Phone',
         'Email',
         'Received assistance',
-        'Lot 1 PIN',
-        'Lot 1 Address',
-        'Lot 1 Full Address',
-        'Lot 1 Image URL',
-        'Lot 1 Planned Use',
-        'Lot 2 PIN',
-        'Lot 2 Address',
-        'Lot 2 Full Address',
-        'Lot 2 Image URL',
-        'Lot 2 Planned Use',
+        'Lot PIN',
+        'Lot Address',
+        'Lot Full Address',
+        'Lot Image URL',
+        'Lot Planned Use',
     ]
     rows = []
     for application in applications:
@@ -94,7 +89,6 @@ def csv_dump(request, pilot):
             getattr(application.contact_address, 'city', ''),
             getattr(application.contact_address, 'state', ''),
             getattr(application.contact_address, 'zip_code', ''))
-        lots = []
         for lot in application.lot_set.all():
             addr = getattr(lot.address, 'street', '').upper()
             addr_full = '%s %s %s %s' % \
@@ -105,36 +99,28 @@ def csv_dump(request, pilot):
             pin = lot.pin
             image_url = 'https://pic.datamade.us/%s.jpg' % pin.replace('-', '')
             lot_use = lot.planned_use
-            lots.extend([pin, addr, addr_full, image_url, lot_use])
-        if len(lots) <= 5:
-            lots.extend(['', '', '', '', ''])
-        lot_1_pin, lot_1_addr, lot_1_addr_full, lot_1_image, lot_1_use, \
-                lot_2_pin, lot_2_addr, lot_2_addr_full, lot_2_image, lot_2_use = lots
-        rows.append([
-            application.id,
-            application.received_date.strftime('%Y-%m-%d %H:%m %p'),
-            application.first_name,
-            application.last_name,
-            application.organization,
-            getattr(application.owned_address, 'street', '').upper(),
-            owned_address,
-            application.owned_pin,
-            application.deed_image.url,
-            contact_address,
-            application.phone,
-            application.email,
-            application.how_heard,
-            lot_1_pin,
-            lot_1_addr,
-            lot_1_addr_full,
-            lot_1_image,
-            lot_1_use,
-            lot_2_pin,
-            lot_2_addr,
-            lot_2_addr_full,
-            lot_2_image,
-            lot_2_use,
-        ])
+            
+            
+            rows.append([
+                application.id,
+                application.received_date.strftime('%Y-%m-%d %H:%m %p'),
+                application.first_name,
+                application.last_name,
+                application.organization,
+                getattr(application.owned_address, 'street', '').upper(),
+                owned_address,
+                application.owned_pin,
+                application.deed_image.url,
+                contact_address,
+                application.phone,
+                application.email,
+                application.how_heard,
+                pin,
+                addr,
+                addr_full,
+                image_url,
+                lot_use,
+            ])
     writer = csv.writer(response)
     writer.writerow(header)
     writer.writerows(rows)
