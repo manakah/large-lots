@@ -1,0 +1,39 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Driveways + Patios - Lot Uses {% endblock %}
+{% block name %}Driveways + Patios{% endblock %}
+{% block category %}Private Project{% endblock %}
+{% block description %}A concrete, asphalt, or other hardscape surface for parking or outdoor landscape use.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/15-driveways-patios.jpg' alt='Porches + Decks' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True" }}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Private parking pad?</li>
+        <li>Asphalt?</li>
+        <li>Concrete?</li>
+        <li>Publicly accessible?</li>
+        <li>Any existing/remnant paving?</li>
+        <li>Considered drainage issues?</li>
+        <li>Considered benefits of permeable paving?</li>
+        <li>Ramp elements?</li>
+        <li>Do you have a survey of utility lines that may be beneath grade?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Permeable paving refers to a range of sustainable materials (including pervious concrete, porous asphalt, or brick-like paving stones) which have the advantage of allowing stormwater to pass through the paving and return to the soil below, rather than becoming runoff for the city’s sewers. It can look the same as non-porous paving but helps filter pollutants and improves our water quality.</p></li>
+        <li><p>If you are an owner-occupant able to design and/or build it yourself to be fully code-compliant, you may be eligible to move forward without a registered contractor via the Homeowner Assistance Permit process. Otherwise, you will at least require a general contractor.</p></li>
+        <li><p>Talk to your design professional about whether your paving qualifies for the Easy Permit program, which requires a licensed general contractor.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>To learn more about a Homeowner Permit: See the <a href='http://tinyurl.com/homeownerpermit'>Homeowner Assistance Plan Review submittal process</a></p></li>
+    </ul>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Playgrounds - Lot Uses {% endblock %}
+{% block name %}Playgrounds{% endblock %}
+{% block category %}Community Project{% endblock %}
+{% block description %}Provides publicly accessible, community- managed playground for youth of all ages in your neighborhood.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/5-public-playgrounds.jpg' alt='Public Playgrounds' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True" }}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Have a committed volunteer community?</li>
+        <li>Understand liability considerations?</li>
+        <li>Will you have a storage shed?</li>
+        <li>Will you personally maintain the lot?</li>
+        <li>Security?</li>
+        <li>Fencing?</li>
+        <li>Planning to host large events?</li>
+        <li>Fixed furniture like benches or tables?</li>
+        <li>Shade structures like gazebos?</li>
+        <li>On-site parking lot?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>You will need to negotiate additional insurance for the public playground you wish to create, both as it pertains to inviting the public on private land as well as relating to injuries on the equipment. By establishing a community organization for playground users, you may be able to reduce your liability if members of the organization sign a waiver and/or contribute a membership fee to offset higher insurance costs. Talk to your insurer. Homeowners Associations have accomplished this in the past.</p></li>
+        <li><p>Talk to your design professional about whether you will need an architect as well as a general contractor for the playground, hardscape areas and foundations. </p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>City of Chicago Open Space Zoning contact: See the City’s Open Space resources and read <a href='http://tinyurl.com/ChiOpenSpace'>CitySpace Chicago</a></p></li>
+    </ul>
+{% endblock %}

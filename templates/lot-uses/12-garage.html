@@ -1,0 +1,41 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Garage - Lot Uses {% endblock %}
+{% block name %}Garage{% endblock %}
+{% block category %}Private Project{% endblock %}
+{% block description %}A garage is a building or part of a building designed for the display, shelter, storage, or servicing of all types of motor vehicles containing flammable fuel.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/12-garage.jpg' alt='Garage' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True"}}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Frame construction?</li>
+        <li>Masonry construction?</li>
+        <li>Will it be insulated?</li>
+        <li>Existing building or foundation? • Roof deck?</li>
+        <li>Pergola/trellis on roof deck?</li>
+        <li>Rooftop solar panels?</li>
+        <li>Rooftop wind turbines?</li>
+        <li>Enclosed stairs?</li>
+        <li>Exterior stairs?</li>
+        <li>Building it all yourself?</li>
+        <li>Need help building it?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Get professional advice to determine the Chicago Municipal Code’s requirements on height, size, and setbacks. Consult an architect to design and draft the permit plan. Hire a licensed general contractor for the project. Get approval from the Department of Zoning. If you are an owner-occupant able to design and/ or build it yourself to be fully code- compliant, you may be eligible to move forward without a registered architect/contractor through the Homeowner Assistance Permit process.</p></li>
+        <li><p>You will most likely need a Standard Plan Review Permit from the Department of Buildings. Talk to your design professional about whether your garage qualifies for the Easy Permit program.</p></li>
+        <li><p>Depending on the scope of construction and the finishes and cladding you require, anticipate construction costs between $80-$120 per square foot of the garage.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>To learn more about a Homeowner Permit: See the <a href='http://tinyurl.com/homeownerpermit'>Homeowner Assistance Plan Review submittal process</a></p></li>
+    </ul>
+{% endblock %}

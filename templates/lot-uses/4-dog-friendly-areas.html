@@ -1,0 +1,38 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Dog Friendly Areas - Lot Uses {% endblock %}
+{% block name %}Dog Friendly Areas{% endblock %}
+{% block category %}Community Project{% endblock %}
+{% block description %}Designated sections where dogs are allowed to run, socialize, and play off-leash legally and securely.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/4-dog-friendly-areas.jpg' alt='Dog Friendly Areas' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Got a dog owner’s community organization?</li>
+        <li>Budget includes animal-related insurance?</li>
+        <li>Water hookups for cleaning?</li>
+        <li>Will you personally maintain the space?</li>
+        <li>Relationships with local pet-related shops?</li>
+        <li>Security plan?</li>
+        <li>Planning to host large events?</li>
+        <li>Fixed furniture like benches or tables?</li>
+        <li>Need help designing or building it?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Review the Chicago Park District’s “Dog Friendly Areas Manual for Development.” Although you will not need to go through the same formal process that applies to Park District owned land, many general considerations and proposed rules for dog areas are pertinent.</p></li>
+        <li><p>You will need to negotiate additional insurance for your dog friendly area, both as it pertains to inviting the public on private land as well as relating to potential animal attacks. By establishing a community organization for dog owners, you may be able to reduce your liability if members of the organization sign a waiver and/or contribute a membership fee to offset higher insurance costs. Talk to your insurer. </p></li>
+        <li><p>Talk to your design professional about whether you will need a landscape architect as well as a general contractor for hardscape areas and foundations for fixed furniture.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>City of Chicago Open Space Zoning contact: See the City’s Open Space resources and read <a href='http://tinyurl.com/ChiOpenSpace'>CitySpace Chicago</a></p></li>
+    </ul>
+{% endblock %}

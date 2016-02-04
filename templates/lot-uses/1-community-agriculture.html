@@ -1,0 +1,41 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Community Agriculture - Lot Uses {% endblock %}
+{% block name %}Community Agriculture{% endblock %}
+{% block category %}Community Project{% endblock %}
+{% block description %}Provides space for community members to grow plants for beautification, education, community distribution, or personal use.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/1-community-agriculture.jpg' alt='Community Agriculture' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True"}} </p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Have a committed volunteer community?</li>
+        <li>Horticultural knowledge?</li>
+        <li>Will you have a storage shed?</li>
+        <li>Will you have a hoop house/greenhouse?</li>
+        <li>Compost?</li>
+        <li>Fencing?</li>
+        <li>Planning to sell produce?</li>
+        <li>Raised beds?</li>
+        <li>Rainwater collection?</li>
+        <li>On-site parking lot?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Get professional advice and see the City of Chicago’s Urban Agriculture FAQ to determine how to get zoning approval for community agriculture.</p></li>
+        <li><p>The City of Chicago defines Community Gardens differently from how it defines Urban Farms. Community Gardens are typically operated by non-profit volunteers, and cannot exceed 25,000 SF in area. Urban Farms are commercial operations with a business license.</p></li>
+        <li><p>Certain “accessory buildings,” such as sheds, hoop houses, and greenhouses, require approval from Zoning, and possibly a permit. The size and materials used will determine what approval process you’ll need. You may need to hire an architect and/or general contractor for a permit. Get professional advice.</p></li>
+        <li><p>Research and connect with nearby community gardens in your area to foster a strong volunteer team.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li>City of Chicago Urban Agriculture Zoning contact: <a href='http://tinyurl.com/ChiUrbanAgriculture'>See the City’s Urban Agriculture FAQ</a>.</li>
+        <li>City contact person for community agriculture zoning inquiries: Brad Roback, 312.744.8563 <a href='mailto:bradley.roback@cityofchicago.org'>bradley.roback@cityofchicago.org</a></li>
+    </ul>
+{% endblock %}

@@ -318,6 +318,29 @@ def faq(request):
 def about(request):
     return render(request, 'about.html')
 
+def lot_uses(request):
+    return render(request, 'lot-uses/index.html')
+
+def lot_uses_page(request, use_id):
+
+    use_id = int(use_id)
+    if   use_id ==  1: return render(request, 'lot-uses/1-community-agriculture.html')
+    elif use_id ==  2: return render(request, 'lot-uses/2-public-plazas-hardscaping.html')
+    elif use_id ==  3: return render(request, 'lot-uses/3-landscapes-athletics.html')
+    elif use_id ==  4: return render(request, 'lot-uses/4-dog-friendly-areas.html')
+    elif use_id ==  5: return render(request, 'lot-uses/5-public-playgrounds.html')
+    elif use_id ==  6: return render(request, 'lot-uses/6-sustainable-strategies.html')
+    elif use_id ==  7: return render(request, 'lot-uses/7-furniture-objects-art.html')
+    elif use_id ==  8: return render(request, 'lot-uses/8-shelters-sheds.html')
+    elif use_id ==  9: return render(request, 'lot-uses/9-greenhouse.html')
+    elif use_id == 10: return render(request, 'lot-uses/10-new-construction-building.html')
+    elif use_id == 11: return render(request, 'lot-uses/11-building-addition.html')
+    elif use_id == 12: return render(request, 'lot-uses/12-garage.html')
+    elif use_id == 13: return render(request, 'lot-uses/13-pools-ponds-hot-tubs.html')
+    elif use_id == 14: return render(request, 'lot-uses/14-porches-decks.html')
+    elif use_id == 15: return render(request, 'lot-uses/15-driveways-patios.html')
+    else: return HttpResponseRedirect('/lot-uses/')
+
 def get_pin_from_address(request):
 
     address = request.GET.get('address', '')

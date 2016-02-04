@@ -1,0 +1,39 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Sustainable Strategies - Lot Uses {% endblock %}
+{% block name %}Sustainable Strategies{% endblock %}
+{% block description %}Green roofs, solar panels, wind turbines, rainwater harvesting & other green technology for private or public use.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/6-sustainable-strategies.jpg' alt='Sustainable Strategies' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "E"|lot_use_label:"True" }}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li><p>Green roof?</p></li>
+        <li><p>Eligible for geothermal?</p></li>
+        <li><p>Photovoltaic solar? (Electricity)</p></li>
+        <li><p>Solar thermal panels? (Heat)</p></li>
+        <li><p>Wind turbines or small wind capturing coils?</p></li>
+        <li><p>Want to lower your energy bills?</p></li>
+        <li><p>Interested in subsidies for energy efficiency?</p></li>
+        <li><p>Researched passive strategies?</p></li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Get a free energy assessment from your current energy utility or a non-profit to find out where green upgrades would make the biggest impact.</p></li>
+        <li><p>Pursuing green strategies can expedite your permit process through the Green Permit program.</p></li>
+        <li><p>See if you’re eligible for rebates or installations through the city’s <a href="http://www.cityofchicago.org/city/en/progs/env/retrofit_chicago.html" target="_blank">Retrofit Chicago</a> program. Free efficiency items can include smart water meters, and rain barrels.</p></li>
+        <li><p>Owners of buildings with 1-4 residential units may be eligible for Energy Efficiency Loan Options offered by the Chicago Community Loan Fund.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p><a href='http://tinyurl.com/ChiGreenPermitsContact'>Green Permits Info</a>, <a href='mailto:sophie.martinez@cityofchicago.org'>sophie.martinez@cityofchicago.org</a>, 312.744.7862</p></li>
+        <li><p>City of Chicago’s <a href='http://tinyurl.com/retrofitchicago'>Retrofit Chicago</a></p></li>
+    </ul>
+{% endblock %}

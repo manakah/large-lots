@@ -1,0 +1,42 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}New Construction Building - Lot Uses {% endblock %}
+{% block name %}New Construction Building{% endblock %}
+{% block category %}Private Project{% endblock %}
+{% block description %}A new detached building for single or multi-family residential or future mixed use programming, including community uses.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/10-new-construction-building.jpg' alt='New Construction Building' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+    <p>{{ "S"|lot_use_label:"True"}}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Residential use?</li>
+        <li>Planning on renting out the new space?</li>
+        <li>Have the survey of your existing site?</li>
+        <li>Planning to refinance or seek loans?</li>
+        <li>Rooftop solar panels?</li>
+        <li>Rooftop wind turbines?</li>
+        <li>Have a homeowners association?</li>
+        <li>Consulted your insurance company?</li>
+        <li>Considered pre-fabricated buildings?</li>
+        <li>Compliant with Large Lots usage constraints?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>You will need to hire a licensed architect and licensed general contractor to obtain the permits. Work with your architect to determine the Chicago Municipal Code’s requirements on height, size, materials and property line setbacks.</p></li>
+        <li><p>You will need approval from the Department of Zoning as well as a Standard Review Building Permit from the Department of Buildings. If the building will have a use other than residential, you may need to apply for a change in zoning.</p></li>
+        <li><p>If you’re interested in sustainable tech, you may need a Green Permit. This can expedite permitting.</p></li>
+        <li><p>If you will be renting out the new space, comply with the City of Chicago Residential Landlord and Tenant Ordinance.</p></li>
+        <li><p>Depending on the scope of construction and the quality of the finishes, anticipate construction costs starting at $200 per square foot of the building.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>To learn more about becoming a Landlord: See the <a href='http://tinyurl.com/ChiLandlords'>City of Chicago’s Residential Landlord and Tenant Ordinance</a></p></li>
+    </ul>
+{% endblock %}

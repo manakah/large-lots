@@ -36,6 +36,12 @@ a, a:hover {
     background-color: #ccc;
 }
 
+.footer {
+    border-top: 1px solid #E6E6E6;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
 .navbar-header>.navbar-brand, .navbar-inverse .navbar-nav>li>a {color: #238b45; margin-top: 7px;}
 
 #logo img { margin: 5px 0 5px 0;}
@@ -48,7 +54,7 @@ a, a:hover {
 
 #lot-form input[type=checkbox] { margin-left: 20px; }
 
-.nav-pills > li.active > a, .nav-pills > li.active, 
+.nav-pills > li.active > a, .nav-pills > li.active,
 .nav-pills > li.active:hover > a, .nav-pills > li.active:hover {
     background-color: #238B45;
 }
@@ -134,6 +140,14 @@ a, a:hover {
 
 .label-danger { background-color: #BE4630; }
 .label-success { background-color: #389250; }
+
+.label-link label {
+    color: #fff;
+}
+
+.label-link {
+    text-decoration: none !important;
+}
 
 /* Form Styling */
 

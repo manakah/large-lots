@@ -1,0 +1,38 @@
+{% extends "base_lot_uses.html" %}
+{% load lots_filters %}
+{% block title %}Landscapes + Athletics - Lot Uses {% endblock %}
+{% block name %}Landscapes + Athletics{% endblock %}
+{% block category %}Community Project{% endblock %}
+{% block description %}Provides accessible, community- managed open space for recreation, beautification, and sustainability.{% endblock %}
+{% block image %}<img src='/static/images/lot-uses/3-landscapes-athletics.jpg' alt='Landscapes + Athletics' class='img-responsive img-thumbnail' />{% endblock %}
+{% block requirements %}
+    <p>{{ "Z"|lot_use_label:"True" }}</p>
+{% endblock %}
+
+{% block questions %}
+    <ul>
+        <li>Have a committed volunteer community?</li>
+        <li>Horticultural knowledge?</li>
+        <li>Will you have a storage shed?</li>
+        <li>Will you personally maintain the lot?</li>
+        <li>Sports organizations? Fencing?</li>
+        <li>Planning to sell produce?</li>
+        <li>Raised beds?</li>
+        <li>Rainwater collection?</li>
+        <li>On-site parking lot?</li>
+    </ul>
+{% endblock %}
+
+{% block steps %}
+    <ol>
+        <li><p>Reach out to your homeowner’s insurance to determine how your privately owned lot can become a community-managed open space for use by the general public. You may need to make changes to your policy to protect yourself from liability.</p></li>
+        <li><p>Certain “accessory buildings,” such as storage sheds, gazebos, and pergolas, require approval from Zoning, and possibly a permit from the Department of Buildings. The size and materials used to construct the structure will determine what approval process you’ll need. Get professional advice to find out. You may need to hire an architect and/or general contractor for a permit.</p></li>
+        <li><p>Consider utility needs for light posts and waste receptacles. Make a plan to ensure a safe level of security 24/7 in the space. Renewable energy sources may help with providing site lighting and other amenities.</p></li>
+    </ol>
+{% endblock %}
+
+{% block resources %}
+    <ul>
+        <li><p>To learn more about a Homeowner Permit: See the <a href='http://tinyurl.com/homeownerpermit'>Homeowner Assistance Plan Review submittal process</a></p></li>
+    </ul>
+{% endblock %}
