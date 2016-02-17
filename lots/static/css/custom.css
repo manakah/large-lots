@@ -99,9 +99,9 @@ a, a:hover {
 
 #print-page { color: #555; }
 
-.alert-success {
-    background-color: #238B45;
-    border-color: #238B45;
+.well-success {
+    background-color: #DFF5E6;
+    border-color: #DFF5E6;
 }
 
 .alert-success a:hover {
