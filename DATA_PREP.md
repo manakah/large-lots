@@ -22,7 +22,7 @@ $ shp2pgsql -I -s 4326 cook_county_parcels.shp parcels | psql -U <db_user> -d <d
 $ shp2pgsql -I -s 4326 chicago_addresses.shp chicago_addresses | psql -U postgres -d wopr
 ```
 
-**Load Land Inventory using ``csvsql`` (from [csvkit](http://csvkit.readthedocs.org/))**
+**Load Land Inventory using ``csvsql`` (from [csvkit](https://csvkit.readthedocs.io/))**
 
 ```bash
 $ cat land_inventory.csv | \
