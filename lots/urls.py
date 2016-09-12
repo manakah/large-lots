@@ -1,30 +1,33 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
+from lots_client.views import home, status_pilot_1, status_pilot_2, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, get_pin_from_address
+
+from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout
 
 from django.contrib import admin
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
     # Examples:
-    url(r'^$', 'lots_client.views.home', name='home'),
+    url(r'^$', home, name='home'),
     url(r'^status/$', RedirectView.as_view(url='/status/pilot_1', permanent=False), name='status'),
-    url(r'^status/pilot_2$', 'lots_client.views.status_pilot_2', name='status_pilot_2'),
-    url(r'^status/pilot_1$', 'lots_client.views.status_pilot_1', name='status_pilot_1'),
-    url(r'^apply/$', 'lots_client.views.apply', name='apply'),
-    url(r'^apply-confirm/(?P<tracking_id>\S+)/$', 'lots_client.views.apply_confirm', name='apply_confirm'),
-    url(r'^faq/$', 'lots_client.views.faq', name='faq'),
-    url(r'^about/$', 'lots_client.views.about', name='about'),
-    url(r'^lot-uses/(?P<use_id>\d+)/$', 'lots_client.views.lot_uses_page', name='lot_uses_page'),
-    url(r'^lot-uses/$', 'lots_client.views.lot_uses', name='lot_uses'),
-    url(r'^lots-admin/(?P<pilot>\S+)/$', 'lots_admin.views.pilot_admin', name='pilot_admin'),
-    url(r'^lots-admin/$', 'lots_admin.views.lots_admin', name='lots_admin'),
-    url(r'^lots-admin-map/$', 'lots_admin.views.lots_admin_map', name='lots_admin_map'),
-    url(r'^csv-dump/(?P<pilot>\S+)/$', 'lots_admin.views.csv_dump', name='csv_dump'),
-    url(r'^lots-login/$', 'lots_admin.views.lots_login', name='lots_login'),
-    url(r'^logout/$', 'lots_admin.views.lots_logout', name='logout'),
+    url(r'^status/pilot_2$', status_pilot_2, name='status_pilot_2'),
+    url(r'^status/pilot_1$', status_pilot_1, name='status_pilot_1'),
+    url(r'^apply/$', apply, name='apply'),
+    url(r'^apply-confirm/(?P<tracking_id>\S+)/$', apply_confirm, name='apply_confirm'),
+    url(r'^faq/$', faq, name='faq'),
+    url(r'^about/$', about, name='about'),
+    url(r'^lot-uses/(?P<use_id>\d+)/$', lot_uses_page, name='lot_uses_page'),
+    url(r'^lot-uses/$', lot_uses, name='lot_uses'),
+    url(r'^lots-admin/(?P<pilot>\S+)/$', pilot_admin, name='pilot_admin'),
+    url(r'^lots-admin/$', lots_admin, name='lots_admin'),
+    url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
+    url(r'^csv-dump/(?P<pilot>\S+)/$', csv_dump, name='csv_dump'),
+    url(r'^lots-login/$', lots_login, name='lots_login'),
+    url(r'^logout/$', lots_logout, name='logout'),
 
     # api endpoints
-    url(r'^api/get-pin$', 'lots_client.views.get_pin_from_address', name='get_pin_from_address'),
+    url(r'^api/get-pin$', get_pin_from_address, name='get_pin_from_address'),
 
     url(r'^django-admin/', include(admin.site.urls)),
-)
+]
