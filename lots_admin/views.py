@@ -125,3 +125,14 @@ def csv_dump(request, pilot):
     writer.writerow(header)
     writer.writerows(rows)
     return response
+
+@login_required(login_url='/lots-login/')
+def deed_check(request, application_id):
+    application = Application.objects.get(id=application_id)
+    return render(request, 'deed_check.html', {
+        'application': application
+        })
+
+@login_required(login_url='/lots-login/')
+def pdfviewer(request):
+    return render(request, 'pdfviewer.html')

@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*
 
 import re
+import json
+from uuid import uuid4
+from collections import OrderedDict
+from datetime import datetime
+
+import requests
+
+import usaddress
+
+from dateutil import parser
+
 from django.shortcuts import render
 from django.conf import settings
 from django import forms
@@ -8,16 +19,10 @@ from django.utils import timezone
 from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
-from lots_admin.models import Lot, Application, Address
-import requests
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
-import json
-from uuid import uuid4
-from collections import OrderedDict
-from datetime import datetime
-from dateutil import parser
-import usaddress
+
+from lots_admin.models import Lot, Application, Address, ApplicationStatus
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -220,6 +225,9 @@ def apply(request):
             c_address, created = Address.objects.get_or_create(**c_address_info)
             owned_address = get_lot_address(form.cleaned_data['owned_address'],
                                             form.cleaned_data['owned_pin'])
+
+            application_status = ApplicationStatus.objects.get(step=2)
+
             app_info = {
                 'first_name': form.cleaned_data['first_name'],
                 'last_name': form.cleaned_data['last_name'],
@@ -233,6 +241,7 @@ def apply(request):
                 'how_heard': form.cleaned_data.get('how_heard'),
                 'tracking_id': str(uuid4()),
                 'pilot': settings.CURRENT_PILOT,
+                'status': application_status
             }
             app = Application(**app_info)
             app.save()

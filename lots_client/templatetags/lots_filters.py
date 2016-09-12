@@ -32,6 +32,9 @@ def remove_str(label_type, extra_text):
 
     fmt_kwargs = LINKS_TEXT[label_type]
     fmt_kwargs['label_type'] = label_type
-    
+
     return label.format(**fmt_kwargs)
 
+@register.filter
+def check_for_pdf(image_path):
+    return image_path.endswith('pdf')

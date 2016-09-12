@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, get_pin_from_address
 
-from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout
+from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout, deed_check, pdfviewer
 
 from django.contrib import admin
 admin.autodiscover()
@@ -30,4 +30,8 @@ urlpatterns = [
     url(r'^api/get-pin$', get_pin_from_address, name='get_pin_from_address'),
 
     url(r'^django-admin/', include(admin.site.urls)),
+
+    # review steps
+    url(r'^pdfviewer/$', pdfviewer, name='pdfviewer'),
+    url(r'^application-review/step-2/(?P<application_id>\d+)/$', deed_check, name='deed_check'),
 ]

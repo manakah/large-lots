@@ -1,6 +1,7 @@
 from django.db import models
 import time
 from django.conf import settings
+from django.contrib.auth.models import User
 
 class Address(models.Model):
     street = models.CharField(max_length=255)
@@ -14,7 +15,7 @@ class Address(models.Model):
     state = models.CharField(max_length=20, default='IL')
     zip_code = models.CharField(max_length=10, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s %s, %s %s' % \
             (self.street, self.city, self.state, self.zip_code)
 
@@ -22,9 +23,9 @@ def upload_name(instance, filename):
     now = int(time.time())
     return '{pilot}/deeds/{first_name}-{last_name}-{now}_{filename}'\
         .format(pilot=settings.CURRENT_PILOT,
-                first_name=instance.first_name, 
-                last_name=instance.last_name, 
-                now=now, 
+                first_name=instance.first_name,
+                last_name=instance.last_name,
+                now=now,
                 filename=filename)
 
 class Application(models.Model):
@@ -39,16 +40,15 @@ class Application(models.Model):
     email = models.CharField(max_length=255, null=True)
     how_heard = models.CharField(max_length=255, null=True)
     tracking_id = models.CharField(max_length=40)
-    status = models.CharField(max_length=50, null=True)
+    status = models.ForeignKey('ReviewStatus')
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.first_name and self.last_name:
             return '%s %s' % (self.first_name, self.last_name)
         elif self.organization:
             return self.organization
-
 
 class Lot(models.Model):
     pin = models.CharField(max_length=14, primary_key=True)
@@ -56,5 +56,27 @@ class Lot(models.Model):
     application = models.ManyToManyField(Application)
     planned_use = models.CharField(max_length=20, default=None, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.pin
+
+class ApplicationStatus(models.Model):
+    description = models.CharField(max_length=255)
+    public_status = models.CharField(max_length=255)
+    step = models.IntegerField()
+
+    def __str__(self):
+        return self.description
+
+class DenialReason(models.Model):
+    value = models.TextField()
+    step = models.IntegerField()
+
+class ReviewStatus(models.Model):
+    reviewer = models.ForeignKey(User)
+    denied = models.BooleanField(default=False)
+    denial_reason = models.ForeignKey('DenialReason', null=True)
+    email_sent = models.BooleanField()
+    application_status = models.ForeignKey('ApplicationStatus')
+
+    def __str__(self):
+        return self.application_status
