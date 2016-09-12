@@ -63,14 +63,17 @@ class ApplicationForm(forms.Form):
     terms = forms.BooleanField(
         error_messages={'required': 'Verify that you have read and agree to the terms'},
         label="Application terms")
-    
+
     def _check_pin(self, pin):
         carto = 'http://datamade.cartodb.com/api/v2/sql'
+        pin = pin.replace('-', '')
         params = {
             'api_key': settings.CARTODB_API_KEY,
-            'q': "SELECT pin14 FROM %s WHERE pin14 = '%s' AND city_owned='T' AND residential='T' AND alderman_hold != 'T'" % (pin.replace('-', ''), settings.CURRENT_CARTODB),
+            'q': "SELECT pin14 FROM %s WHERE pin14 = '%s' AND city_owned='T' AND residential='T' AND alderman_hold != 'T'" % (settings.CURRENT_CARTODB, pin),
         }
         r = requests.get(carto, params=params)
+        print(params)
+        print(r.json())
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
                 return pin
@@ -96,9 +99,10 @@ class ApplicationForm(forms.Form):
         if self.cleaned_data['lot_2_pin']:
             return self._clean_pin('lot_2_pin')
         return self.cleaned_data['lot_2_pin']
-    
+
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
+        pin = pin.replace("-", "")
         pattern = re.compile('[^0-9]')
         if len(pattern.sub('', pin)) != 14:
             raise forms.ValidationError('Please provide a valid PIN')
@@ -121,7 +125,7 @@ def application_active(request):
         timezone.get_current_timezone())
     end_date = timezone.make_aware(datetime(2016, 5, 15, 23, 59),
         timezone.get_current_timezone())
-    
+
     if settings.APPLICATION_DISPLAY: # override with configuration setting
         return True
     elif request.user.is_authenticated(): # or if you're logged in
@@ -136,7 +140,7 @@ def get_lon_lat(pin):
     params = {
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT longitude, latitude FROM %s WHERE pin14 = '%s'" % \
-            (unicode(pin).replace('-', ''), settings.CURRENT_CARTODB),
+            (pin.replace('-', ''), settings.CURRENT_CARTODB),
     }
     r = requests.get(carto, params=params)
     longitude, latitude = None, None
@@ -181,7 +185,7 @@ def apply(request):
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
         if form.is_valid():
-            l1_address = get_lot_address(form.cleaned_data['lot_1_address'], 
+            l1_address = get_lot_address(form.cleaned_data['lot_1_address'],
                                          form.cleaned_data['lot_1_pin'])
             lot1_info = {
                 'pin': form.cleaned_data['lot_1_pin'],
@@ -227,7 +231,7 @@ def apply(request):
                 'phone': form.cleaned_data['phone'],
                 'email': form.cleaned_data.get('email'),
                 'how_heard': form.cleaned_data.get('how_heard'),
-                'tracking_id': unicode(uuid4()),
+                'tracking_id': str(uuid4()),
                 'pilot': settings.CURRENT_PILOT,
             }
             app = Application(**app_info)
@@ -236,7 +240,7 @@ def apply(request):
             if lot2:
                 app.lot_set.add(lot2)
             app.save()
-            
+
             html_template = get_template('apply_html_email.html')
             text_template = get_template('apply_text_email.txt')
             lots = [l for l in app.lot_set.all()]
@@ -244,7 +248,7 @@ def apply(request):
             html_content = html_template.render(context)
             text_content = text_template.render(context)
             subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
-            
+
             from_email = settings.EMAIL_HOST_USER
             to_email = [from_email]
 
@@ -349,8 +353,8 @@ def get_pin_from_address(request):
     if address != '':
         (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
         response['address_components'] = {
-            'street_number': street_number, 
-            'street_direction': street_dir, 
+            'street_number': street_number,
+            'street_direction': street_dir,
             'street_name': street_name,
             'unit_number': unit_number
         }
@@ -360,10 +364,10 @@ def get_pin_from_address(request):
         # http://cookcountypropertyinfo.com/Pages/Address-Results.aspx?hnum=444&sname=Wabash&city=Chicago&zip=&unit=&dir=N
         property_page = requests.get(response['source_url'])
         if property_page.status_code is 200:
-            found_pins = list(set(re.findall('\d{2}-\d{2}-\d{3}-\d{3}-\d{4}', property_page.content)))
+            found_pins = list(set(re.findall('\d{2}-\d{2}-\d{3}-\d{3}-\d{4}', property_page.content.decode('utf-8'))))
             if found_pins:
                 response['found_pins'] = found_pins
             else:
                 response['found_pins'] = 'Not found'
 
-    return HttpResponse(json.dumps(response), mimetype="application/json") 
+    return HttpResponse(json.dumps(response), mimetype="application/json")

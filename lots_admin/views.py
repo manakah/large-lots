@@ -17,7 +17,7 @@ def lots_login(request):
             user = form.get_user()
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('lots_admin.views.lots_admin'))
+                return HttpResponseRedirect(reverse('lots_admin'))
     else:
         form = AuthenticationForm()
     return render(request, 'lots_login.html', {'form': form})
@@ -39,16 +39,16 @@ def lots_admin_map(request):
 def lots_admin(request):
     applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
     return render(request, 'admin.html', {
-        'applications': applications, 
-        'selected_pilot': settings.CURRENT_PILOT, 
+        'applications': applications,
+        'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO})
 
 @login_required(login_url='/lots-login/')
 def pilot_admin(request, pilot):
     applications = Application.objects.filter(pilot=pilot)
     return render(request, 'admin.html', {
-        'applications': applications, 
-        'selected_pilot': pilot, 
+        'applications': applications,
+        'selected_pilot': pilot,
         'pilot_info': settings.PILOT_INFO})
 
 @login_required(login_url='/lots-login/')
@@ -99,8 +99,8 @@ def csv_dump(request, pilot):
             pin = lot.pin
             image_url = 'https://pic.datamade.us/%s.jpg' % pin.replace('-', '')
             lot_use = lot.planned_use
-            
-            
+
+
             rows.append([
                 application.id,
                 application.received_date.strftime('%Y-%m-%d %H:%m %p'),

@@ -7,14 +7,14 @@
         <ul class="nav nav-pills">
             {% for k,v in pilot_info.items %}
                 <li {% if k == selected_pilot %}class='active'{% endif %}>
-                    <a href="{% url 'lots_admin.views.pilot_admin' k %}">{{v.human_name}}</a>
+                    <a href="{% url 'pilot_admin' k %}">{{v.human_name}}</a>
                 </li>
             {% endfor %}
         </ul>
     </div>
 </div>
 <h2>
-    {% if applications %} 
+    {% if applications %}
         {{ applications|length }}
     {% else %}
         0
