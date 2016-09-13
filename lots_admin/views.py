@@ -139,10 +139,6 @@ def deed_check(request, application_id):
 def pdfviewer(request):
     return render(request, 'pdfviewer.html')
 
-# class DeedCheckForm(forms.Form):
-#     address = forms.BooleanField(label="Applicant address")
-#     name = forms.BooleanField(label="Applicant name")
-
 @login_required(login_url='/lots-login/')
 def deed_check_submit(request, application_id):
     if request.method == 'POST':
