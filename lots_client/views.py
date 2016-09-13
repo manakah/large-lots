@@ -22,7 +22,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 
-from lots_admin.models import Lot, Application, Address, ApplicationStatus
+from lots_admin.models import Lot, Application, Address, ApplicationStatus, ReviewStatus
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -380,3 +380,4 @@ def get_pin_from_address(request):
                 response['found_pins'] = 'Not found'
 
     return HttpResponse(json.dumps(response), mimetype="application/json")
+

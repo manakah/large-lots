@@ -4,6 +4,30 @@
 {% block title %}Deed check{% endblock %}
 {% block content %}
 
+<div class="row">
+  <div class="col-md-12">
+    <h2>Review Process: Deed Check</h2>
+    <p>Does the name and address on the deed match those of the applicant?</p>
+    <form role="form" id="deed-check" method="POST" action="{% url 'deed_check_submit' application.id %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <div class="checkbox">
+          <label>
+            <input id="applicant-name" name="name" type="checkbox"/>
+            {{ application.first_name }} {{ application.last_name }}
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input id="address-name" name="address" type="checkbox"/>
+            {{ application.owned_address }}
+          </label>
+        </div>
+      </div>
+      <p><button type="submit" class="btn btn-success btn-lg">Submit</button></p>
+    </form>
+  </div>
+</div>
 
 {% if application.deed_image.url|check_for_pdf %}
     <iframe

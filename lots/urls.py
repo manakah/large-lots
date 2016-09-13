@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, get_pin_from_address
 
-from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout, deed_check, pdfviewer
+from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout, deed_check, pdfviewer, deed_check_submit, location_check
 
 from django.contrib import admin
 admin.autodiscover()
@@ -34,4 +34,7 @@ urlpatterns = [
     # review steps
     url(r'^pdfviewer/$', pdfviewer, name='pdfviewer'),
     url(r'^application-review/step-2/(?P<application_id>\d+)/$', deed_check, name='deed_check'),
+    url(r'^application-review/step-3/(?P<application_id>\d+)/$', location_check, name='location_check'),
+
+    url(r'^deed_check_submit/(?P<application_id>\d+)$', deed_check_submit, name='deed_check_submit'),
 ]

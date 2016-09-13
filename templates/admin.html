@@ -61,7 +61,9 @@
                 {{application.owned_pin}}<br />
                 <a href="{{application.deed_image.url}}" target="_blank">Download deed</a>
             </td>
-            <td><a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a></td>
+            <td>
+                <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+            </td>
             <td><a href="{% url 'apply_confirm' application.tracking_id %}" target="_blank">Detail page</a></td>
         </tr>
     {% endfor %}

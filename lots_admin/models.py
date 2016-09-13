@@ -40,7 +40,8 @@ class Application(models.Model):
     email = models.CharField(max_length=255, null=True)
     how_heard = models.CharField(max_length=255, null=True)
     tracking_id = models.CharField(max_length=40)
-    status = models.ForeignKey('ReviewStatus')
+    review_status = models.ForeignKey('ReviewStatus', blank=True, null=True)
+    status = models.ForeignKey('ApplicationStatus')
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
 
@@ -76,7 +77,3 @@ class ReviewStatus(models.Model):
     denied = models.BooleanField(default=False)
     denial_reason = models.ForeignKey('DenialReason', null=True)
     email_sent = models.BooleanField()
-    application_status = models.ForeignKey('ApplicationStatus')
-
-    def __str__(self):
-        return self.application_status

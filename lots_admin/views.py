@@ -5,10 +5,12 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from lots_admin.models import Application, Lot
+from django.contrib.auth.models import User
+from lots_admin.models import Application, Lot, ApplicationStatus
 from datetime import datetime
 import csv
 import json
+from django import forms
 
 def lots_login(request):
     if request.method == 'POST':
@@ -136,3 +138,35 @@ def deed_check(request, application_id):
 @login_required(login_url='/lots-login/')
 def pdfviewer(request):
     return render(request, 'pdfviewer.html')
+
+# class DeedCheckForm(forms.Form):
+#     address = forms.BooleanField(label="Applicant address")
+#     name = forms.BooleanField(label="Applicant name")
+
+@login_required(login_url='/lots-login/')
+def deed_check_submit(request, application_id):
+    if request.method == 'POST':
+        name = request.POST.get('name', 'off')
+        address = request.POST.get('address', 'off')
+        if (name == 'on' and address == 'on'):
+            application = Application.objects.get(id=application_id)
+            application_status = ApplicationStatus.objects.get(description='Location and zoning check', public_status='approved', step=3)
+            print
+            application.status = application_status
+            application.save()
+
+
+
+    # Should redirect to Step 3 or Denied page...
+    applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
+    return render(request, 'admin.html', {
+        'applications': applications,
+        'selected_pilot': settings.CURRENT_PILOT,
+        'pilot_info': settings.PILOT_INFO})
+
+@login_required(login_url='/lots-login/')
+def location_check(request, application_id):
+    application = Application.objects.get(id=application_id)
+    return render(request, 'location_check.html', {
+        'application': application
+        })

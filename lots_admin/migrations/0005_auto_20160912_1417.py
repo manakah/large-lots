@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='application',
             name='status',
-            field=models.ForeignKey(default=2, on_delete=django.db.models.deletion.CASCADE, to='lots_admin.ApplicationStatus'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lots_admin.ApplicationStatus'),
             preserve_default=False,
         ),
         migrations.AlterField(
