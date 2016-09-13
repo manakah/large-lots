@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from lots_admin.models import Application, Lot, ApplicationStatus
+from lots_admin.models import Application, Lot, ApplicationStatus, ReviewStatus, DenialReason
 from datetime import datetime
 import csv
 import json
@@ -146,27 +146,44 @@ def pdfviewer(request):
 @login_required(login_url='/lots-login/')
 def deed_check_submit(request, application_id):
     if request.method == 'POST':
+        application = Application.objects.get(id=application_id)
+        user = request.user
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
+        # Move to step 3 of review process.
         if (name == 'on' and address == 'on'):
-            application = Application.objects.get(id=application_id)
-            application_status = ApplicationStatus.objects.get(description='Location and zoning check', public_status='approved', step=3)
-            print
+            application_status, created = ApplicationStatus.objects.get_or_create(description='Location and zoning check', public_status='approved', step=3)
             application.status = application_status
+            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
+            application.review_status = rev_status
             application.save()
 
+            return HttpResponseRedirect('/application-review/step-3/%s/' % application.id)
+        # Deny application.
+        else:
+            if (name == 'off' and address == 'on'):
+                reason, created = DenialReason.objects.get_or_create(value='Applicant name does not match deed', step=2)
+            elif (name == 'on' and address == 'off'):
+                reason, created = DenialReason.objects.get_or_create(value='Applicant address does not match deed', step=2)
+            else:
+                reason, created = DenialReason.objects.get_or_create(value='Applicant name and address do not match deed', step=2)
+            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
+            application.review_status = rev_status
+            application.status = None
+            application.save()
 
-
-    # Should redirect to Step 3 or Denied page...
-    applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
-    return render(request, 'admin.html', {
-        'applications': applications,
-        'selected_pilot': settings.CURRENT_PILOT,
-        'pilot_info': settings.PILOT_INFO})
+            return HttpResponseRedirect('/deny-application/%s/' % application.id)
 
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
     application = Application.objects.get(id=application_id)
     return render(request, 'location_check.html', {
+        'application': application
+        })
+
+@login_required(login_url='/lots-login/')
+def deny_application(request, application_id):
+    application = Application.objects.get(id=application_id)
+    return render(request, 'deny_application.html', {
         'application': application
         })

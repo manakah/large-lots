@@ -32,6 +32,7 @@
         <th>Applied lots</th>
         <th>Contact info</th>
         <th>Owned property</th>
+        <th class="no-wrap">Next review step</th>
         <th>Status</th>
         <th></th>
     </thead>
@@ -62,7 +63,18 @@
                 <a href="{{application.deed_image.url}}" target="_blank">Download deed</a>
             </td>
             <td>
-                <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                {% if application.status %}
+                    <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                {% else %}
+                    None
+                {% endif %}
+            </td>
+            <td>
+                {% if application.review_status.denied %}
+                    denied
+                {% else %}
+                    {{ application.status.public_status }}
+                {% endif %}
             </td>
             <td><a href="{% url 'apply_confirm' application.tracking_id %}" target="_blank">Detail page</a></td>
         </tr>

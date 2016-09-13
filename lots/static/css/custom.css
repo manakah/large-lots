@@ -16,7 +16,7 @@ a, a:hover {
     background-color: #fefefe;
 }
 
-.footer img { 
+.footer img {
     padding-right: 30px;
     margin-bottom: 20px;
     height: 80px;
@@ -181,4 +181,8 @@ a, a:hover {
     background: white;
     cursor: inherit;
     display: block;
+}
+
+.no-wrap {
+    white-space: nowrap;
 }
