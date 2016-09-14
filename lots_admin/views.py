@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Q
 from lots_admin.models import Application, Lot, ApplicationStatus, ReviewStatus, DenialReason
 from datetime import datetime
 import csv
@@ -173,13 +174,26 @@ def deed_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
     application = Application.objects.get(id=application_id)
+
+    # Location of the applicant's property.
     owned_pin = application.owned_pin
+
+    # Location(s) of properties the applicant applied for.
     applied_pins = [l.pin for l in application.lot_set.all()]
+
+    # Find if other people have applied to the applicants' lots
+    applicants_list = Application.objects.filter(lot__pin__in=applied_pins).filter(Q(review_status__denied=False) | Q(review_status=None))
+
+    # Location(s) of properties of other applicants who applied for the same property.
+    other_owned_pins = [app.owned_pin for app in applicants_list ]
+    other_owned_pins.remove(owned_pin)
 
     return render(request, 'location_check.html', {
         'application': application,
         'owned_pin': owned_pin,
-        'applied_pins': applied_pins
+        'applied_pins': applied_pins,
+        'applicants_list': applicants_list,
+        'other_owned_pins': other_owned_pins
         })
 
 @login_required(login_url='/lots-login/')
@@ -188,3 +202,26 @@ def deny_application(request, application_id):
     return render(request, 'deny_application.html', {
         'application': application
         })
+
+@login_required(login_url='/lots-login/')
+def location_check_submit(request, application_id):
+    if request.method == 'POST':
+        application = Application.objects.get(id=application_id)
+        block = request.POST.get('block', 'off')
+        adjacent = request.POST.get('adjacent', 'off')
+        lottery = request.POST.get('lottery', 'off')
+        if (block == 'on'):
+            if (adjacent == 'on'):
+                print("adjacent...wins")
+                # Write logic to update the application status, etc.
+                return HttpResponseRedirect(reverse('lots_admin'))
+            if (lottery == 'on'):
+                print("lottery!")
+                # Write logic to update the application status to "mulitple possible applicants"
+                return HttpResponseRedirect(reverse('lots_admin'))
+            # Write logic to update the application status, etc.
+            return HttpResponseRedirect(reverse('lots_admin'))
+        else:
+            # TODO: make generic DENY page.
+            return HttpResponseRedirect('/deny-application/%s/' % application.id)
+

@@ -49,7 +49,7 @@ initialize: function() {
         var date_formatted = '';
         if (props) {
           var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-          info += "<h5>Property owned by applicant</h5>"
+          info += "<h5>Property owned by the applicant</h5>"
           info += "<p>PIN: " + LargeLots.formatPin(props.display_pin) + "<br />";
           info += "Zoned: " + props.zoning_classification + "<br />";
           info += "Sq Ft: " + props.sq_ft + "<p/>";
@@ -58,6 +58,31 @@ initialize: function() {
       };
 
       LargeLots.infoOwned.addTo(LargeLots.map);
+
+
+      // info div for other applicants' properties
+      LargeLots.infoOtherApplicants = L.control({position: 'bottomright'});
+
+      LargeLots.infoOtherApplicants.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'infoOtherApplicants');
+          this.update();
+          return this._div;
+      };
+
+      LargeLots.infoOtherApplicants.update = function (props) {
+        var date_formatted = '';
+        if (props) {
+          var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
+          info += "<h5>Property owned by another applicant</h5>"
+          info += "<p>PIN: " + LargeLots.formatPin(props.display_pin) + "<br />";
+          info += "Zoned: " + props.zoning_classification + "<br />";
+          info += "Sq Ft: " + props.sq_ft + "<p/>";
+          this._div.innerHTML  = info;
+        }
+      };
+
+      LargeLots.infoOtherApplicants.addTo(LargeLots.map);
+
 
       // info div for application property
       LargeLots.infoApplied = L.control({position: 'bottomright'});
@@ -71,9 +96,16 @@ initialize: function() {
       LargeLots.infoApplied.update = function (props) {
         var date_formatted = '';
         if (props) {
+          if (props.residential == "T"){
+            residential = "True"
+          }
+          else {
+            residential = "False"
+          }
           var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-          info += "<h5>Property for sale</h5>"
+          info += "<h5>Lot for sale</h5>"
           info += "<p>PIN: " + LargeLots.formatPin(props.display_pin) + "<br />";
+          info += "Residential: " + residential + "<br />";
           info += "Zoned: " + props.zoning_classification + "<br />";
           info += "Sq Ft: " + props.sq_ft + "<br />";
           if (props.status == 1){
@@ -94,16 +126,23 @@ initialize: function() {
         }
       };
 
+      LargeLots.infoApplied.addTo(LargeLots.map);
+
       LargeLots.clear = function(infoDiv) {
         infoDiv._div.innerHTML = '';
       }
 
-      LargeLots.infoApplied.addTo(LargeLots.map);
-
+      // Make SQL queries.
       var sqlOwned = "select * from " + LargeLots.cartodb_table + " where pin14='" + ownedPin + "'";
+
       var sqlApplied = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
       $.each(appliedPins, function(i, pin) {
         sqlApplied += " or pin14='" + pin + "'"
+      })
+
+      var sqlOtherApplicants = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
+      $.each(otherOwnedPins, function(i, pin) {
+        sqlOtherApplicants += " or pin14='" + pin + "'"
       })
 
       var fields = "display_pin,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
@@ -121,12 +160,18 @@ initialize: function() {
                   sql: sqlApplied,
                   cartocss: $('#applied-styles').html().trim(),
                   interactivity: fields
-              }
+              },
+              {
+                  sql: sqlOtherApplicants,
+                  cartocss: $('#other-applied-styles').html().trim(),
+                  interactivity: fields
+              },
           ]
       }
       cartodb.createLayer(LargeLots.map, layerOpts)
         .addTo(LargeLots.map)
         .done(function(layer) {
+            // Make a sublayer for the applicant's owned property
             var ownedProperty = layer.getSubLayer(0);
             ownedProperty.setInteraction(true);
             ownedProperty.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
@@ -138,6 +183,7 @@ initialize: function() {
               LargeLots.clear(LargeLots.infoOwned);
             });
 
+            // Make a sublayer for the property applied for.
             var appliedProperty = layer.getSubLayer(1);
             appliedProperty.setInteraction(true);
             appliedProperty.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
@@ -148,6 +194,20 @@ initialize: function() {
               $('#locationcheck-map div').css('cursor','inherit');
               LargeLots.clear(LargeLots.infoApplied);
             });
+
+
+            // Make a sublayer for other applicants on the same property.
+            var otherApplicantProperties = layer.getSubLayer(2);
+            otherApplicantProperties.setInteraction(true);
+            otherApplicantProperties.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
+              $('#locationcheck-map div').css('cursor','pointer');
+              LargeLots.infoOtherApplicants.update(data);
+            });
+            otherApplicantProperties.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
+              $('#locationcheck-map div').css('cursor','inherit');
+              LargeLots.clear(LargeLots.infoOtherApplicants);
+            });
+
 
             $.each(appliedPins, function(i, pin) {
               sqlOwned += " or pin14='" + pin + "'"
