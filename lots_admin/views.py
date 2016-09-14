@@ -1,3 +1,9 @@
+from datetime import datetime
+import csv
+import json
+
+from esridump.dumper import EsriDumper
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -7,9 +13,6 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from lots_admin.models import Application, Lot, ApplicationStatus, ReviewStatus, DenialReason
-from datetime import datetime
-import csv
-import json
 from django import forms
 
 def lots_login(request):
@@ -183,3 +186,14 @@ def deny_application(request, application_id):
     return render(request, 'deny_application.html', {
         'application': application
         })
+
+# @login_required(login_url='/lots-login/')
+def get_parcel_geometry(request):
+    pin = request.GET.get('pin')
+    query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
+    dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44', 
+                        extra_query_args=query_args)
+
+    geometry = next(dumper.iter())
+
+    return HttpResponse(json.dumps(geometry), content_type='application/json')
