@@ -173,8 +173,13 @@ def deed_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
     application = Application.objects.get(id=application_id)
+    owned_pin = application.owned_pin
+    applied_pins = [l.pin for l in application.lot_set.all()]
+
     return render(request, 'location_check.html', {
-        'application': application
+        'application': application,
+        'owned_pin': owned_pin,
+        'applied_pins': applied_pins
         })
 
 @login_required(login_url='/lots-login/')
