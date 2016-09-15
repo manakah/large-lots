@@ -7,7 +7,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'Chicago',
-  
+
   initialize: function(init_params) {
       LargeLots.defaultZoom = init_params.defaultZoom;
       LargeLots.map_centroid = init_params.map_centroid;
@@ -113,8 +113,7 @@ var LargeLots = {
             });
             LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
                 LargeLots.getOneParcel(data['pin14']);
-            });
-            window.setTimeout(function(){
+                        window.setTimeout(function(){
                 if($.address.parameter('pin')){
                     LargeLots.getOneParcel($.address.parameter('pin'))
                 }
