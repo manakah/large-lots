@@ -9,9 +9,10 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
+  // cartodb_table: 'large_lots_citywide_test',
   cartodb_table: 'ag_lots',
 
-initialize: function() {
+  initialize: function() {
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('locationcheck-map', {
@@ -133,6 +134,7 @@ initialize: function() {
       }
 
       // Make SQL queries.
+      // For large_lots_citywide_test: change pin14 to pin_nbr
       var sqlOwned = "select * from " + LargeLots.cartodb_table + " where pin14='" + ownedPin + "'";
 
       var sqlApplied = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
@@ -146,6 +148,7 @@ initialize: function() {
       })
 
       var fields = "display_pin,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
+      // var fields = "pin, pin_nbr, street_name, street_direction, street_type, city_owned_ind, residential"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -210,11 +213,11 @@ initialize: function() {
 
 
             $.each(appliedPins, function(i, pin) {
-              sqlOwned += " or pin14='" + pin + "'"
+              sqlOtherApplicants += " or pin14='" + pin + "'"
             });
 
             var sqlBounds = new cartodb.SQL({ user: 'datamade' });
-            sqlBounds.getBounds(sqlOwned).done(function(bounds){
+            sqlBounds.getBounds(sqlOtherApplicants).done(function(bounds){
               LargeLots.map.fitBounds(bounds);
             });
         }).error(function(e) {

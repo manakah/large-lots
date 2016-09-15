@@ -7,6 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
+from operator import __or__ as OR
+from functools import reduce
 from lots_admin.models import Application, Lot, ApplicationStatus, ReviewStatus, DenialReason
 from datetime import datetime
 import csv
@@ -182,7 +184,8 @@ def location_check(request, application_id):
     applied_pins = [l.pin for l in application.lot_set.all()]
 
     # Find if other people have applied to the applicants' lots
-    applicants_list = Application.objects.filter(lot__pin__in=applied_pins).filter(Q(review_status__denied=False) | Q(review_status=None))
+    q_list = [Q(review_status__denied=False) | Q(review_status=None) | Q(status__step=4)]
+    applicants_list = Application.objects.filter(lot__pin__in=applied_pins).filter(reduce(OR, q_list))
 
     # Location(s) of properties of other applicants who applied for the same property.
     other_owned_pins = [app.owned_pin for app in applicants_list ]
@@ -207,19 +210,36 @@ def deny_application(request, application_id):
 def location_check_submit(request, application_id):
     if request.method == 'POST':
         application = Application.objects.get(id=application_id)
+        user = request.user
         block = request.POST.get('block', 'off')
         adjacent = request.POST.get('adjacent', 'off')
+        not_adjacent = request.POST.get('not-adjacent', 'off')
         lottery = request.POST.get('lottery', 'off')
+
+        print(block)
+        print(adjacent)
+        print(lottery)
         if (block == 'on'):
-            if (adjacent == 'on'):
-                print("adjacent...wins")
-                # Write logic to update the application status, etc.
+            if (not_adjacent == 'on'):
+                reason, created = DenialReason.objects.get_or_create(value='Another applicant is adjacent to lot', step=3)
+                rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
+                application.review_status = rev_status
+                application.status = None
+                application.save()
                 return HttpResponseRedirect(reverse('lots_admin'))
             if (lottery == 'on'):
-                print("lottery!")
-                # Write logic to update the application status to "mulitple possible applicants"
+                application_status, created = ApplicationStatus.objects.get_or_create(description='Multiple applicant check', public_status='approved', step=4)
+                application.status = application_status
+                rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
+                application.review_status = rev_status
+                application.save()
                 return HttpResponseRedirect(reverse('lots_admin'))
-            # Write logic to update the application status, etc.
+
+            application_status, created = ApplicationStatus.objects.get_or_create(description='Alderman letter of support', public_status='approved', step=5)
+            application.status = application_status
+            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
+            application.review_status = rev_status
+            application.save()
             return HttpResponseRedirect(reverse('lots_admin'))
         else:
             # TODO: make generic DENY page.
