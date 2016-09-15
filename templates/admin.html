@@ -29,9 +29,6 @@
         <th>ID</th>
         <th>Date received</th>
         <th>Name/Organization</th>
-        <th>Applied lots</th>
-        <th>Contact info</th>
-        <th>Owned property</th>
         <th class="no-wrap">Next review step</th>
         <th>Status</th>
         <th></th>
@@ -49,22 +46,12 @@
                 {% endif %}
             </td>
             <td>
-                {% for lot in application.lot_set.all %}
-                    <p>
-                        {{lot.address.street}}<br />
-                        {{lot.pin}}
-                    </p>
-                {% endfor %}
-            </td>
-            <td>{{application.contact_address.street}} <br /> {{application.phone}} <br /> {{application.email}}</td>
-            <td>
-                {{application.owned_address.street}}<br />
-                {{application.owned_pin}}<br />
-                <a href="{{application.deed_image.url}}" target="_blank">Download deed</a>
-            </td>
-            <td>
                 {% if application.status %}
-                    <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                    {% if application.status.step == 5 %}
+                        {{ application.status }}
+                    {% else %}
+                        <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                    {% endif %}
                 {% else %}
                     None
                 {% endif %}

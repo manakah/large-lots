@@ -149,8 +149,9 @@ def deed_check_submit(request, application_id):
         user = request.user
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
+        church = request.POST.get('church')
         # Move to step 3 of review process.
-        if (name == 'on' and address == 'on'):
+        if (name == 'on' and address == 'on' and church == '2'):
             application_status, created = ApplicationStatus.objects.get_or_create(description='Location and zoning check', public_status='approved', step=3)
             application.status = application_status
             rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
@@ -160,7 +161,9 @@ def deed_check_submit(request, application_id):
             return HttpResponseRedirect('/application-review/step-3/%s/' % application.id)
         # Deny application.
         else:
-            if (name == 'off' and address == 'on'):
+            if (church == '1'):
+                reason, created = DenialReason.objects.get_or_create(value="Applicant's owned property is a church", step=2)
+            elif (name == 'off' and address == 'on'):
                 reason, created = DenialReason.objects.get_or_create(value='Applicant name does not match deed', step=2)
             elif (name == 'on' and address == 'off'):
                 reason, created = DenialReason.objects.get_or_create(value='Applicant address does not match deed', step=2)
