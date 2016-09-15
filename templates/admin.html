@@ -47,7 +47,11 @@
             </td>
             <td>
                 {% if application.status %}
-                    <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                    {% if application.status.step == 5 %}
+                        {{ application.status }}
+                    {% else %}
+                        <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                    {% endif %}
                 {% else %}
                     None
                 {% endif %}
