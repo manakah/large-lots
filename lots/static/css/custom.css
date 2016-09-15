@@ -183,8 +183,8 @@ a, a:hover {
     display: block;
 }
 
-.no-wrap {
-    white-space: nowrap;
-}
+.no-wrap { white-space: nowrap; }
 
-#locationcheck-map { height: 600px;}
+#locationcheck-map { height: 600px; }
+
+.block { display: inline-block; }

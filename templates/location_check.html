@@ -42,28 +42,28 @@
         <div class="checkbox">
           <label>
             <input id="block" name="block" type="checkbox"/>
-            Is the lot for sale on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the applicant's poperty?
+            Is the applicant's property on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the lot for sale?
           </label>
         </div>
 
         {% if other_owned_pins %}
           <h4>Multiple people want to buy this lot. (Click only one option.)</h4>
-          <div class="checkbox">
+          <div class="radio">
             <label>
-              <input id="adjacent" name="adjacent" type="checkbox"/>
-              Is the applicant-under-review adjacent to the lot?
+              <input id="adjacent" name="adjacent" type="radio" value="1"/>
+              Is the applicant adjacent to the lot?
             </label>
           </div>
-          <div class="checkbox">
+          <div class="radio">
             <label>
-              <input id="not-adjacent" name="not-adjacent" type="checkbox"/>
+              <input id="not-adjacent" name="adjacent" type="radio" value="2"/>
               Is another applicant adjacent to the lot?
             </label>
           </div>
-          <div class="checkbox">
+          <div class="radio">
             <label>
-              <input id="lottery" name="lottery" type="checkbox"/>
-              Or, are multiple applicants adjacent or on the same block?
+              <input id="lottery" name="adjacent" type="radio" value="3"/>
+              Is the applicant and another applicant adjacent to the lot, OR on the same block?
             </label>
           </div>
         {% endif %}

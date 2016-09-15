@@ -168,7 +168,6 @@ def deed_check_submit(request, application_id):
                 reason, created = DenialReason.objects.get_or_create(value='Applicant name and address do not match deed', step=2)
             rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
             application.review_status = rev_status
-            application.status = None
             application.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application.id)
@@ -176,6 +175,11 @@ def deed_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
     application = Application.objects.get(id=application_id)
+
+    # The following three lines reset ReviewStatus, in the event that the reviewer clicks "No, go back."
+    rev_status, created = ReviewStatus.objects.get_or_create(reviewer=request.user, denied=False, email_sent=False)
+    application.review_status = rev_status
+    application.save()
 
     # Location of the applicant's property.
     owned_pin = application.owned_pin
@@ -207,27 +211,30 @@ def deny_application(request, application_id):
         })
 
 @login_required(login_url='/lots-login/')
+def deny_submit(request, application_id):
+    application = Application.objects.get(id=application_id)
+    application.status = None
+    application.save()
+    return HttpResponseRedirect(reverse('lots_admin'))
+
+@login_required(login_url='/lots-login/')
 def location_check_submit(request, application_id):
     if request.method == 'POST':
         application = Application.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block', 'off')
-        adjacent = request.POST.get('adjacent', 'off')
-        not_adjacent = request.POST.get('not-adjacent', 'off')
-        lottery = request.POST.get('lottery', 'off')
+        adjacent = request.POST.get('adjacent')
 
-        print(block)
-        print(adjacent)
-        print(lottery)
         if (block == 'on'):
-            if (not_adjacent == 'on'):
+            if (adjacent == '2'):
+                # Deny application, since another applicant is adjacent to the property.
                 reason, created = DenialReason.objects.get_or_create(value='Another applicant is adjacent to lot', step=3)
                 rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
                 application.review_status = rev_status
-                application.status = None
                 application.save()
-                return HttpResponseRedirect(reverse('lots_admin'))
-            if (lottery == 'on'):
+                return HttpResponseRedirect('/deny-application/%s/' % application.id)
+            if (adjacent == '3'):
+                # Application goes to a lottery.
                 application_status, created = ApplicationStatus.objects.get_or_create(description='Multiple applicant check', public_status='approved', step=4)
                 application.status = application_status
                 rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
@@ -235,13 +242,36 @@ def location_check_submit(request, application_id):
                 application.save()
                 return HttpResponseRedirect(reverse('lots_admin'))
 
+            # Move application to Step 5.
             application_status, created = ApplicationStatus.objects.get_or_create(description='Alderman letter of support', public_status='approved', step=5)
             application.status = application_status
             rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False)
             application.review_status = rev_status
             application.save()
+
+            # Deny other applicants.
+            # Location(s) of properties the applicant applied for.
+            applied_pins = [l.pin for l in application.lot_set.all()]
+            q_list = [Q(review_status__denied=False) | Q(review_status=None) | Q(status__step=4)]
+            #  Get list of other applicants.
+            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(reduce(OR, q_list))
+            applicants_list = list(applicants)
+            applicants_list.remove(application)
+
+            for a in applicants_list:
+                print(a)
+                reason, created = DenialReason.objects.get_or_create(value='Another applicant is adjacent to lot', step=3)
+                rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
+                a.review_status = rev_status
+                a.status = None
+                a.save()
+
             return HttpResponseRedirect(reverse('lots_admin'))
         else:
-            # TODO: make generic DENY page.
+            # Deny application, since applicant does not live on same block as lot.
+            reason, created = DenialReason.objects.get_or_create(value='Applicant is not on same block as lot', step=3)
+            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason)
+            application.review_status = rev_status
+            application.save()
             return HttpResponseRedirect('/deny-application/%s/' % application.id)
 

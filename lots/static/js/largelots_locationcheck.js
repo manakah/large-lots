@@ -211,14 +211,10 @@ var LargeLots = {
               LargeLots.clear(LargeLots.infoOtherApplicants);
             });
 
-
-            $.each(appliedPins, function(i, pin) {
-              sqlOtherApplicants += " or pin14='" + pin + "'"
-            });
-
             var sqlBounds = new cartodb.SQL({ user: 'datamade' });
-            sqlBounds.getBounds(sqlOtherApplicants).done(function(bounds){
+            sqlBounds.getBounds(sqlApplied).done(function(bounds){
               LargeLots.map.fitBounds(bounds);
+              LargeLots.map.setZoom(18);
             });
         }).error(function(e) {
         console.log('ERROR')

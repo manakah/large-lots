@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load lots_filters %}
 {% block title %}Deny application{% endblock %}
 {% block content %}
 
@@ -9,8 +10,14 @@
     <p>You are about to deny this application for the following reason:</p>
     <p><strong>{{ application.review_status.denial_reason }}</strong></p>
     <p>Are you sure?</p>
-    <a href="{% url 'deed_check' application.id %}" class="btn btn-danger">No, go back.</a>
-    <a href="{% url 'lots_admin' %}" class="btn btn-success">Yes, I'm sure.</a>
+    {{ application.review_status.step }}
+    <div class='block'><a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger">No, go back.</a></div>
+    <div class='block'>
+      <form role="form" id="deed-check" method="POST" action="{% url 'deny_submit' application.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Yes, I'm sure.</button>
+      </form>
+    </div>
   </div>
 </div>
 
