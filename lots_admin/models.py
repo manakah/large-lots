@@ -80,6 +80,7 @@ class ReviewStatus(models.Model):
     denied = models.BooleanField(default=False)
     denial_reason = models.ForeignKey('DenialReason', null=True)
     email_sent = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.reviewer)
