@@ -9,6 +9,22 @@ a, a:hover {
     color: #238b45;
 }
 
+/*Continue here*/
+a.dropdown-toggle:visited {
+    color: #333333;
+    text-decoration: none;
+}
+
+a.dropdown-toggle:hover {
+    color: #333333;
+    text-decoration: none;
+}
+
+a:active {
+    color: #333333;
+    text-decoration: none;
+}
+
 .footer {
     border-top: 1px solid #e6e6e6;
     padding: 20px 10px;
@@ -42,7 +58,12 @@ a, a:hover {
     padding-top: 10px;
 }
 
-.navbar-header>.navbar-brand, .navbar-inverse .navbar-nav>li>a {color: #238b45; margin-top: 7px;}
+.navbar-header>.navbar-brand, .navbar-inverse .navbar-nav>li>a, .navbar-inverse .navbar-nav>li>div {
+    color: #238b45;
+    margin-top: 7px;
+    line-height: 20px;
+    padding: 15px;
+}
 
 #logo img { margin: 5px 0 5px 0;}
 
