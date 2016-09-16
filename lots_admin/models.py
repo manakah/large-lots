@@ -2,6 +2,7 @@ from django.db import models
 import time
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Address(models.Model):
     street = models.CharField(max_length=255)
