@@ -47,18 +47,19 @@
             </td>
             <td>
                 {% if application.status %}
-                    {% if application.status.step == 5 %}
-                        {{ application.status }}
-                    {% else %}
+                    {% if application.status.step == 2 or application.status.step == 3 or application.status.step == 4 %}
                         <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                    {% else %}
+                        {{ application.status }}
                     {% endif %}
                 {% else %}
-                    None
+                    none
                 {% endif %}
             </td>
             <td>
                 {% if application.review_status.denied %}
                     denied
+                    {{application.review_status.denial_reason}}
                 {% else %}
                     {{ application.status.public_status }}
                 {% endif %}

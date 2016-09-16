@@ -21,23 +21,41 @@
         line-opacity: 1;
       }
     </style>
-    <!-- Do not break largelots_locationcheck.js -->
     <style id="other-applied-styles">
-      #full_area_lots {}
+      #full_area_lots {
+        polygon-fill: #A1285D;
+        polygon-opacity: 0.2;
+        line-color: #680D35;
+        line-width: 0.5;
+        line-opacity: 1;
+      }
     </style>
 {% endblock %}
 {% block content %}
 
 <div class="row">
   <div class="col-md-4">
-    <h2>Review Process: Location and zoning check</h2>
-    <form role="form" id="deed-check" method="POST" action="{% url 'location_check_submit' application.id %}">
+    <h2>Review Process: Multiple location check</h2>
+    <form role="form" id="deed-check" method="POST" action="{% url 'multiple_location_check_submit' application.id %}">
       {% csrf_token %}
       <div class="form-group">
-        <div class="checkbox">
+        <h4>Multiple people want to buy this lot.</h4>
+        <div class="radio">
           <label>
-            <input id="block" name="block" type="checkbox"/>
-            Is the applicant's property on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the lot for sale?
+            <input id="adjacent" name="adjacent" type="radio" value="1"/>
+            Is the applicant adjacent to the lot?
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input id="not-adjacent" name="adjacent" type="radio" value="2"/>
+            Is another applicant adjacent to the lot?
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input id="lottery" name="adjacent" type="radio" value="3"/>
+            Is the applicant and another applicant adjacent to the lot, or on the same block? (Applicant goes to lottery.)
           </label>
         </div>
       </div>
@@ -60,8 +78,7 @@
   <script>
     var ownedPin = '{{ application.owned_pin }}';
     var appliedPins = {{ applied_pins|safe }};
-    // Do not break largelots_locationcheck.js
-    var otherOwnedPins = ['0'];
+    var otherOwnedPins = {{ other_owned_pins|safe }};
 
     $(function() {
       LargeLots.initialize();

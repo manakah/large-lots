@@ -2,6 +2,7 @@ from django.db import models
 import time
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Address(models.Model):
     street = models.CharField(max_length=255)
@@ -80,6 +81,7 @@ class ReviewStatus(models.Model):
     denied = models.BooleanField(default=False)
     denial_reason = models.ForeignKey('DenialReason', null=True)
     email_sent = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.reviewer)
