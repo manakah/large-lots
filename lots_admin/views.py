@@ -215,7 +215,6 @@ def location_check(request, application_id):
         'applied_pins': applied_pins
         })
 
-
 @login_required(login_url='/lots-login/')
 def location_check_submit(request, application_id):
     if request.method == 'POST':
@@ -225,21 +224,17 @@ def location_check_submit(request, application_id):
 
         if (block == 'on'):
             # Update ReviewStatus.
-            rev_status = ReviewStatus(reviewer=user, denied=False, email_sent=False, application=application)
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=3)
             rev_status.save()
 
             # Are there other applicants on this property?
             applied_pins = [l.pin for l in application.lot_set.all()]
-            reviews = ReviewStatus.objects.filter(application=application, denied=True)
-            reviews_list = list(reviews)
-            print(reviews_list)
-            applicants = Application.objects.filter(lot__pin__in=applied_pins)
+            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
             applicants_list = list(applicants)
 
-
-            if (len(applicants_list) > 1 and len(reviews_list) == 0):
-                # Other applicants: move application to Step 4.
-                application_status, created = ApplicationStatus.objects(description=APPLICATION_STATUS['multi'], public_status='approved', step=4)
+            if (len(applicants_list) > 1):
+                # If there are other applicants: move application to Step 4.
+                application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['multi'], public_status='approved', step=4)
                 application.status = application_status
                 application.save()
 
@@ -253,9 +248,10 @@ def location_check_submit(request, application_id):
                 return HttpResponseRedirect(reverse('lots_admin'))
         else:
             # Deny application, since applicant does not live on same block as lot.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'], step=3)
-            rev_status = ReviewStatus(reviewer=user, denied=True, email_sent=True, denial_reason=reason, application=application)
-            application.review_status = rev_status
+            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
+            rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=application, step_completed=3)
+            rev_status.save()
+            application.denied = True
             application.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application.id)
@@ -264,9 +260,9 @@ def location_check_submit(request, application_id):
 def multiple_applicant_check(request, application_id):
     application = Application.objects.get(id=application_id)
 
-    # The following three lines reset ReviewStatus, in the event that the reviewer clicks "No, go back."
-    rev_status, created = ReviewStatus.objects.get_or_create(reviewer=request.user, denied=False, email_sent=False, application=application)
-    application.review_status = rev_status
+     # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
+    ReviewStatus.objects.filter(application=application, step_completed=4).delete()
+    application.denied = False
     application.save()
 
     # Location of the applicant's property.
@@ -275,9 +271,10 @@ def multiple_applicant_check(request, application_id):
     # Location(s) of properties the applicant applied for.
     applied_pins = [l.pin for l in application.lot_set.all()]
 
-    # Find if other people have applied to the applicants' lots
-    q_list = [Q(review_status__denied=False) | Q(review_status=None) | Q(status__step=4)]
-    applicants_list = Application.objects.filter(lot__pin__in=applied_pins).filter(reduce(OR, q_list))
+    # Are there other applicants on this property?
+    applied_pins = [l.pin for l in application.lot_set.all()]
+    applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
+    applicants_list = list(applicants)
 
     # Location(s) of properties of other applicants who applied for the same property.
     other_owned_pins = [app.owned_pin for app in applicants_list ]
@@ -300,43 +297,44 @@ def multiple_location_check_submit(request, application_id):
 
         if (adjacent == '2'):
             # Deny application, since another applicant is adjacent to the property.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'], step=4)
-            rev_status = ReviewStatus(reviewer=user, denied=True, email_sent=True, denial_reason=reason, application=application)
-            application.review_status = rev_status
+            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
+            rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=application, step_completed=4)
+            rev_status.save()
+            application.denied = True
             application.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application.id)
 
         elif (adjacent == '3'):
-            # Application goes to a lottery.
+            # Application goes to Step 5: lottery.
             application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
             application.status = application_status
-            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False, application=application)
-            application.review_status = rev_status
             application.save()
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=4)
+            rev_status.save()
 
             return HttpResponseRedirect(reverse('lots_admin'))
         else:
             # Move application to Step 6.
             application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
             application.status = application_status
-            rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=False, email_sent=False, application=application)
-            application.review_status = rev_status
             application.save()
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=4)
+            rev_status.save()
 
             # Deny other applicants.
             # Location(s) of properties the applicant applied for.
             applied_pins = [l.pin for l in application.lot_set.all()]
-            q_list = [Q(review_status__denied=False) | Q(review_status=None) | Q(status__step=4)]
-            #  Get list of other applicants.
-            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(reduce(OR, q_list))
+            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
             applicants_list = list(applicants)
             applicants_list.remove(application)
 
             for a in applicants_list:
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'], step=4)
-                rev_status, created = ReviewStatus.objects.get_or_create(reviewer=user, denied=True, email_sent=True, denial_reason=reason, application=a)
-                a.review_status = rev_status
+                ReviewStatus.objects.filter(application=a, step_completed=4).delete()
+                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
+                rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
+                rev_status.save()
+                a.denied = True
                 a.status = None
                 a.save()
 
