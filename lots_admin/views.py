@@ -344,7 +344,9 @@ def multiple_location_check_submit(request, application_id):
 def review_status_log(request, application_id):
     application = Application.objects.get(id=application_id)
     reviews = ReviewStatus.objects.filter(application=application)
+    status = ApplicationStatus.objects.all()
     return render(request, 'review_status_log.html', {
         'application': application,
-        'reviews': reviews
+        'reviews': reviews,
+        'status': status
         })

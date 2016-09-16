@@ -188,3 +188,5 @@ a, a:hover {
 #locationcheck-map { height: 600px; }
 
 .block { display: inline-block; }
+
+table a, .table a { text-decoration: none; }

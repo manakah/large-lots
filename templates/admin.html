@@ -29,9 +29,8 @@
         <th>ID</th>
         <th>Date received</th>
         <th>Name/Organization</th>
+        <th>Details</th>
         <th class="no-wrap">Next review step</th>
-        <th>Status</th>
-        <th></th>
     </thead>
     <tbody>
     {% for application in applications %}
@@ -46,26 +45,29 @@
                 {% endif %}
             </td>
             <td>
+                {% if application.denied %}
+                    Status: denied
+                {% else %}
+                    Status: {{ application.status.public_status }}
+                {% endif %}
+                </br>
+                <a href="/review-status-log/{{ application.id }}">
+                    Review history
+                </a></br>
+                <a href="{% url 'apply_confirm' application.tracking_id %}" target="_blank">Confirmation page</a>
+            </td>
+            <td>
                 {% if application.status %}
                     {% if application.status.step == 2 or application.status.step == 3 or application.status.step == 4 %}
-                        <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/">{{ application.status }}</a>
+                        <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a>
                     {% else %}
-                        {{ application.status }}
+                        {{ application.status }}</br>
+                        Waiting for decision
                     {% endif %}
                 {% else %}
                     none
                 {% endif %}
             </td>
-            <td>
-                <a href="/review-status-log/{{ application.id }}">
-                    {% if application.denied %}
-                        denied
-                    {% else %}
-                        {{ application.status.public_status }}
-                    {% endif %}
-                </a>
-            </td>
-            <td><a href="{% url 'apply_confirm' application.tracking_id %}" target="_blank">Detail page</a></td>
         </tr>
     {% endfor %}
     </tbody>
