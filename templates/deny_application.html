@@ -8,9 +8,8 @@
   <div class="col-md-12">
     <h2>Deny application?</h2>
     <p>You are about to deny this application for the following reason:</p>
-    <p><strong>{{ application.review_status.denial_reason }}</strong></p>
+    <p><strong>{{ review.denial_reason }}</strong></p>
     <p>Are you sure?</p>
-    {{ application.review_status.step }}
     <div class='block'><a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger">No, go back.</a></div>
     <div class='block'>
       <form role="form" id="deed-check" method="POST" action="{% url 'deny_submit' application.id %}">
