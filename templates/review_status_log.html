@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Application list{% endblock %}
+{% block content %}
+
+<table class="table table-striped">
+    <thead>
+      <th>Date</th>
+      <th>Reviewer</th>
+      <th>Decision</th>
+      <th>Reason</th>
+    </thead>
+    <tbody>
+    {% for r in reviews %}
+      <tr>
+        <td>{{r.created_at}}</td>
+        <td>{{r.reviewer}}</td>
+        {% if r.denial_reason %}
+          <td>deny application</td>
+          <td>{{ r.denial_reason }}</td>
+        {% else %}
+          <td>complete step {{ r.step_completed }}</td>
+          <td>N/A</td>
+        {% endif %}
+
+      </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

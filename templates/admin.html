@@ -57,12 +57,13 @@
                 {% endif %}
             </td>
             <td>
-                {% if application.review_status.denied %}
-                    denied
-                    {{application.review_status.denial_reason}}
-                {% else %}
-                    {{ application.status.public_status }}
-                {% endif %}
+                <a href="/review-status-log/{{ application.id }}">
+                    {% if application.denied %}
+                        denied
+                    {% else %}
+                        {{ application.status.public_status }}
+                    {% endif %}
+                </a>
             </td>
             <td><a href="{% url 'apply_confirm' application.tracking_id %}" target="_blank">Detail page</a></td>
         </tr>
