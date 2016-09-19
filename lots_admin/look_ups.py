@@ -11,5 +11,6 @@ APPLICATION_STATUS = {
   'location': 'Location check',
   'multi': 'Multiple applicant check',
   'letter': 'Alderman letter of support',
-  'lottery': 'Lottery'
+  'lottery': 'Lottery',
+  'EDS': 'Submit EDS and principal profile'
 }

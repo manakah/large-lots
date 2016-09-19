@@ -16,7 +16,7 @@
         </ul>
     </div>
 </div>
-<h2>
+<h3>
     {% if applications %}
         {{ applications|length }}
     {% else %}
@@ -26,10 +26,16 @@
     <small>
         <!-- <a href="/lots-admin-map/"><i class='fa fa-map-marker'></i> Map view</a> &nbsp;&nbsp;&nbsp;  -->
         <a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
-</h2>
-<h2>
-    Applications to review before Step 4
-</h2>
+</h3>
+<h3>
+    {% if applications_before_four %}
+        {{ applications_before_four|length }} Applications to review before "Multiple applicant check"
+    {% else %}
+        {{ applications_at_four|length }} Applications on "Multiple applicant check" to complete
+    {% endif %}
+</h3>
+<!-- Form for bulk submit. -->
+<form role="form" method="POST" action="{% url 'alderman_advance_submit' %}">
 <table id="received" class="table table-striped tablesorter">
     <thead>
         <th>ID</th>
@@ -37,6 +43,7 @@
         <th>Name/Organization</th>
         <th>Details</th>
         <th class="no-wrap">Next review step</th>
+        <th>Bulk review</th>
     </thead>
     <tbody>
     {% for application in applications %}
@@ -52,7 +59,7 @@
                   {{application.organization}}
                 {% endif %}
             </td>
-            <td>
+            <td class="no-wrap">
                 {% if application.denied %}
                     Status: denied
                 {% else %}
@@ -66,20 +73,53 @@
             </td>
             <td>
                 {% if application.status %}
-                    {% if application.status.step == 2 or application.status.step == 3 or application.status.step == 4 %}
+                    {% if application.status.step == 2 or application.status.step == 3 %}
                         <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a>
+                    {% elif application.status.step == 4 %}
+                        {% if applications_before_four %}
+                            {{ application.status }}</br>
+                            Waiting for other applications
+                        {% else %}
+                            <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a>
+                        {% endif %}
                     {% else %}
                         {{ application.status }}</br>
                         Waiting for decision
                     {% endif %}
                 {% else %}
-                    none
+                    None
+                {% endif %}
+            </td>
+            <td>
+                <!-- Table cell with form data. -->
+                {% if application.status.step == 6 %}
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <div class="checkbox">
+                      <label>
+                        <input name="advance" value="{{application.id}}" type="checkbox"/>
+                      </label>
+                    </div>
+                  </div>
                 {% endif %}
             </td>
         </tr>
     {% endfor %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+            Move select applications to next step?</br>
+            <button type="submit" class="btn btn-success">Submit</button>
+            </td>
+        </tr>
     </tbody>
 </table>
+</form>
+
 {% endblock %}
 {% block extra_js %}
     <script src="{% static 'js/jquery-1.12.3.js' %}" type="text/javascript"></script>
@@ -87,7 +127,15 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $('#received').DataTable({
-                "order": [[ 1, "desc" ]]
+                "order": [[ 1, "desc" ]],
+                "paging": false,
+                "info": false,
+                columnDefs: [
+                    {
+                        targets: 5,
+                        orderable: false
+                    },
+                ]
             });
         })
     </script>

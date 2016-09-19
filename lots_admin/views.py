@@ -44,10 +44,16 @@ def lots_admin_map(request):
 @login_required(login_url='/lots-login/')
 def lots_admin(request):
     applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
+    applications_before_four = Application.objects.filter(Q(status__step=2) | Q(status__step=3))
+    applications_at_four = Application.objects.filter(status__step=4)
+
     return render(request, 'admin.html', {
         'applications': applications,
         'selected_pilot': settings.CURRENT_PILOT,
-        'pilot_info': settings.PILOT_INFO})
+        'pilot_info': settings.PILOT_INFO,
+        'applications_before_four': applications_before_four,
+        'applications_at_four': applications_at_four
+        })
 
 @login_required(login_url='/lots-login/')
 def pilot_admin(request, pilot):
@@ -238,7 +244,8 @@ def location_check_submit(request, application_id):
                 application.status = application_status
                 application.save()
 
-                return HttpResponseRedirect('/application-review/step-4/%s/' % application.id)
+                # return HttpResponseRedirect('/application-review/step-4/%s/' % application.id)
+                return HttpResponseRedirect(reverse('lots_admin'))
             else:
                 # No other applicants: move application to Step 5.
                 application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
@@ -350,3 +357,23 @@ def review_status_log(request, application_id):
         'reviews': reviews,
         'status': status
         })
+
+@login_required(login_url='/lots-login/')
+def alderman_advance_submit(request):
+    if request.method == 'POST':
+        advance = request.POST.getlist('advance')
+        advanced_applications_id = [int(a) for a in advance]
+        applications = Application.objects.filter(id__in=advanced_applications_id)
+        applications_list = list(applications)
+
+        for a in applications:
+            # Move each application to Step 7
+            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['EDS'], public_status='approved', step=7)
+            a.status = application_status
+            a.save()
+
+            # Create a review status.
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=6)
+            rev_status.save()
+
+        return HttpResponseRedirect(reverse('lots_admin'))

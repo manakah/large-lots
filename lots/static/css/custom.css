@@ -23,7 +23,7 @@ a.dropdown-toggle:hover {
 .footer {
     border-top: 1px solid #e6e6e6;
     padding: 20px 10px;
-    margin-top: 70px;
+    margin-top: 10px;
     background-color: #fefefe;
 }
 
@@ -31,30 +31,6 @@ a.dropdown-toggle:hover {
     padding-right: 30px;
     margin-bottom: 20px;
     height: 80px;
-}
-
-#received th {
-    cursor: pointer;
-}
-
-/*#received th.sortDown {
-    background-image: url('../images/desc.gif');
-    background-color: #ccc;
-}
-
-#received th.sortUp {
-    background-image: url('../images/asc.gif');
-    background-color: #ccc;
-}*/
-
-table.dataTable thead .sorting_asc {
-    background-image: url('../images/asc.gif');
-}
-
-.footer {
-    border-top: 1px solid #E6E6E6;
-    margin-top: 10px;
-    padding-top: 10px;
 }
 
 .navbar-header>.navbar-brand, .navbar-inverse .navbar-nav>li>a, .navbar-inverse .navbar-nav>li>div {
@@ -130,6 +106,13 @@ table.dataTable thead .sorting_asc {
     color: #fff;
 }
 
+#received th {
+    cursor: pointer;
+}
+
+table a, .table a { text-decoration: none; }
+
+.dataTables_wrapper { margin-top: 1.5em; }
 
 /* leaflet legend styles */
 .leaflet-google-layer{
@@ -187,7 +170,6 @@ table.dataTable thead .sorting_asc {
 .open { color: #389250;}
 .closed { color: #A1285D;}
 
-
 .btn-file {
     position: relative;
     overflow: hidden;
@@ -214,4 +196,10 @@ table.dataTable thead .sorting_asc {
 
 .block { display: inline-block; }
 
-table a, .table a { text-decoration: none; }
+.fl-r { float: right; }
+
+td input[type="checkbox"] {
+    float: left;
+    margin: 0 auto;
+    width: 100%;
+}

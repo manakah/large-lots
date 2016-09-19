@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, get_pin_from_address
 
-from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, multiple_applicant_check, multiple_location_check_submit, deny_application, deny_submit, review_status_log
+from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, multiple_applicant_check, multiple_location_check_submit, deny_application, deny_submit, review_status_log, alderman_advance_submit
 
 from django.contrib import admin
 admin.autodiscover()
@@ -42,4 +42,5 @@ urlpatterns = [
     url(r'^deny-application/(?P<application_id>\d+)/$', deny_application, name='deny_application'),
     url(r'^deny-submit/(?P<application_id>\d+)/$', deny_submit, name='deny_submit'),
     url(r'^review-status-log/(?P<application_id>\d+)$', review_status_log, name='review_status_log'),
+    url(r'^alderman_advance_submit/$', alderman_advance_submit, name='alderman_advance_submit'),
 ]
