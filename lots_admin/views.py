@@ -279,7 +279,6 @@ def multiple_applicant_check(request, application_id):
     applied_pins = [l.pin for l in application.lot_set.all()]
 
     # Are there other applicants on this property?
-    applied_pins = [l.pin for l in application.lot_set.all()]
     applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
     applicants_list = list(applicants)
 
@@ -348,6 +347,55 @@ def multiple_location_check_submit(request, application_id):
             return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
+def lottery(request):
+    applications = Application.objects.filter(status__step=5)
+
+    # All applications in a lottery.
+    applications_list = list(applications)
+
+    # All lots in a lottery; all applicants associated with those lots.
+    applied_pins = []
+    application_obj = {}
+    for a in applications_list:
+        applied_pins += [l.pin for l in a.lot_set.all()]
+        for l in a.lot_set.all():
+            application_obj[a] = l.pin
+
+    print(application_obj)
+    lot_pins = list(set(applied_pins))
+    lots = Lot.objects.filter(pin__in=lot_pins)
+    lots_list = list(lots)
+
+    return render(request, 'lottery.html', {
+        'application_obj': application_obj,
+        'lots_list': lots_list
+        })
+
+@login_required(login_url='/lots-login/')
+def lottery_submit(request):
+    if request.method == 'POST':
+        user = request.user
+        winners = request.POST.getlist('winner')
+        winners_id = [int(a) for a in winners]
+
+        winning_apps = Application.objects.filter(id__in=winners_id)
+        winning_apps_list = list(winning_apps)
+
+        # Move lottery winners to Step 6.
+        for a in winning_apps:
+            # Move each application to Step 6.
+            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+            a.status = application_status
+            a.save()
+
+            # Create a review status.
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=a, step_completed=5)
+            rev_status.save()
+
+        return HttpResponseRedirect(reverse('lots_admin'))
+
+
+@login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
     application = Application.objects.get(id=application_id)
     reviews = ReviewStatus.objects.filter(application=application)
@@ -361,19 +409,20 @@ def review_status_log(request, application_id):
 @login_required(login_url='/lots-login/')
 def alderman_advance_submit(request):
     if request.method == 'POST':
+        user = request.user
         advance = request.POST.getlist('advance')
         advanced_applications_id = [int(a) for a in advance]
         applications = Application.objects.filter(id__in=advanced_applications_id)
         applications_list = list(applications)
 
         for a in applications:
-            # Move each application to Step 7
+            # Move each application to Step 7.
             application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['EDS'], public_status='approved', step=7)
             a.status = application_status
             a.save()
 
             # Create a review status.
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=6)
+            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=a, step_completed=6)
             rev_status.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))

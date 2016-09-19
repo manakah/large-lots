@@ -73,7 +73,7 @@
             </td>
             <td>
                 {% if application.status %}
-                    {% if application.status.step == 2 or application.status.step == 3 %}
+                    {% if application.status.step == 2 or application.status.step == 3 or application.status.step == 7 %}
                         <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a>
                     {% elif application.status.step == 4 %}
                         {% if applications_before_four %}
@@ -82,6 +82,8 @@
                         {% else %}
                             <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a>
                         {% endif %}
+                    {% elif application.status.step == 5 %}
+                        <a href="/lottery/">Lottery</a>
                     {% else %}
                         {{ application.status }}</br>
                         Waiting for decision
@@ -101,6 +103,8 @@
                       </label>
                     </div>
                   </div>
+                {% else %}
+                    Not an option
                 {% endif %}
             </td>
         </tr>
@@ -112,8 +116,8 @@
             <td></td>
             <td></td>
             <td>
-            Move select applications to next step?</br>
-            <button type="submit" class="btn btn-success">Submit</button>
+            Received letter of support?</br>
+            <button type="submit" class="btn btn-success">Yes, submit.</button>
             </td>
         </tr>
     </tbody>

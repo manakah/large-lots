@@ -203,3 +203,7 @@ td input[type="checkbox"] {
     margin: 0 auto;
     width: 100%;
 }
+
+table#received thead th, table#received {
+  border-bottom: 0;
+}

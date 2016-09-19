@@ -44,7 +44,6 @@ class Application(models.Model):
     status = models.ForeignKey('ApplicationStatus', blank=True, null=True)
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
-    denied = models.BooleanField(default=False)
 
     def __str__(self):
         if self.first_name and self.last_name:
@@ -85,3 +84,8 @@ class ReviewStatus(models.Model):
 
     def __str__(self):
         return str(self.reviewer)
+
+class DenialStatus(models.Model):
+    denied = models.BooleanField(default=False)
+    application = models.ForeignKey('Application', blank=True, null=True)
+    lot = models.ForeignKey('Lot', blank=True, null=True)

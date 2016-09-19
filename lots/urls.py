@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, get_pin_from_address
 
-from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, multiple_applicant_check, multiple_location_check_submit, deny_application, deny_submit, review_status_log, alderman_advance_submit
+from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, multiple_applicant_check, multiple_location_check_submit, lottery, lottery_submit, deny_application, deny_submit, review_status_log, alderman_advance_submit
 
 from django.contrib import admin
 admin.autodiscover()
@@ -39,6 +39,8 @@ urlpatterns = [
     url(r'^location_check_submit/(?P<application_id>\d+)$', location_check_submit, name='location_check_submit'),
     url(r'^application-review/step-4/(?P<application_id>\d+)/$', multiple_applicant_check, name='multiple_applicant_check'),
     url(r'^multiple_location_check_submit/(?P<application_id>\d+)$', multiple_location_check_submit, name='multiple_location_check_submit'),
+    url(r'^lottery/$', lottery, name='lottery'),
+    url(r'^lottery-submit/$', lottery_submit, name='lottery_submit'),
     url(r'^deny-application/(?P<application_id>\d+)/$', deny_application, name='deny_application'),
     url(r'^deny-submit/(?P<application_id>\d+)/$', deny_submit, name='deny_submit'),
     url(r'^review-status-log/(?P<application_id>\d+)$', review_status_log, name='review_status_log'),

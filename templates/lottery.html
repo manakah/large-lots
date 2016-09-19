@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Lottery{% endblock %}
+{% block content %}
+
+<form role="form" method="POST" action="{% url 'lottery_submit' %}">
+<h2>Large Lots Lottery</h2>
+{% for lot in lots_list %}
+<h3>{{ lot.address }}</h3>
+<table class="table table-striped">
+    <thead>
+      <th>Applicant</th>
+      <th>Winner</th>
+    </thead>
+    <tbody>
+      {% for app, pin in application_obj.items %}
+        {% csrf_token %}
+        {% if pin == lot.pin %}
+        <tr>
+          <td>{{ app }}</td>
+          <td>
+            <div class="form-group">
+              <div class="checkbox">
+                <label>
+                  <input name="winner" value="{{app.id}}" type="checkbox"/>
+                </label>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+<button type="submit" class="btn btn-success">Submit winners!</button>
+</form>
+
+{% endblock %}
