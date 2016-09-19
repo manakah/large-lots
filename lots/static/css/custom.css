@@ -37,7 +37,7 @@ a.dropdown-toggle:hover {
     cursor: pointer;
 }
 
-#received th.sortDown {
+/*#received th.sortDown {
     background-image: url('../images/desc.gif');
     background-color: #ccc;
 }
@@ -45,6 +45,10 @@ a.dropdown-toggle:hover {
 #received th.sortUp {
     background-image: url('../images/asc.gif');
     background-color: #ccc;
+}*/
+
+table.dataTable thead .sorting_asc {
+    background-image: url('../images/asc.gif');
 }
 
 .footer {
