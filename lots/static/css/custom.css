@@ -20,11 +20,6 @@ a.dropdown-toggle:hover {
     text-decoration: none;
 }
 
-a:active {
-    color: #333333;
-    text-decoration: none;
-}
-
 .footer {
     border-top: 1px solid #e6e6e6;
     padding: 20px 10px;
@@ -64,6 +59,8 @@ a:active {
     line-height: 20px;
     padding: 15px;
 }
+
+.dropdown-menu { font-size: 18px; }
 
 #logo img { margin: 5px 0 5px 0;}
 
@@ -134,6 +131,7 @@ a:active {
 .leaflet-google-layer{
     z-index: 0 !important;
 }
+
 .leaflet-map-pane{
     z-index: 100;
 }
@@ -146,6 +144,7 @@ a:active {
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
 }
+
 .infoOwned h4, .infoApplied h4, .infoOtherApplicants h4 {
     margin: 0 0 5px;
     color: #777;
@@ -155,6 +154,7 @@ a:active {
     line-height: 18px;
     color: #555;
 }
+
 .legend i {
     width: 18px;
     height: 18px;
