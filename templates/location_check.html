@@ -21,7 +21,7 @@
         line-opacity: 1;
       }
     </style>
-    <!-- Do not break largelots_locationcheck.js -->
+    <!-- Deleting this will break largelots_locationcheck.js -->
     <style id="other-applied-styles">
       #full_area_lots {}
     </style>
@@ -31,7 +31,7 @@
 <div class="row">
   <div class="col-md-4">
     <h2>Review Process: Location and zoning check</h2>
-    <form role="form" id="deed-check" method="POST" action="{% url 'location_check_submit' application.id %}">
+    <form role="form" id="deed-check" method="POST" action="{% url 'location_check_submit' application_status.id %}">
       {% csrf_token %}
       <div class="form-group">
         <div class="checkbox">
@@ -58,8 +58,8 @@
   <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
   <script src="{% static 'js/largelots_locationcheck.js' %}"></script>
   <script>
-    var ownedPin = '{{ application.owned_pin }}';
-    var appliedPins = {{ applied_pins|safe }};
+    var ownedPin = '{{ owned_pin }}';
+    var lotPin = '{{ lot_pin }}';
     // Do not break largelots_locationcheck.js
     var otherOwnedPins = ['0'];
 

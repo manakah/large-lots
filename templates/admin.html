@@ -68,7 +68,7 @@
                     Status: {{ applicant.current_step.public_status }}
                 {% endif %}
                 </br>
-                <a href="/review-status-log/{{ applicant.application.id }}">
+                <a href="/review-status-log/{{ applicant.id }}">
                     Review history
                 </a></br>
                 <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a>
@@ -76,7 +76,7 @@
             <td>
                 {% if applicant.current_step %}
                     {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                     {% elif applicant.current_step.step == 4 %}
                         <!-- {% if applications_before_four %}
                             {{ application.application_step }}</br>
@@ -101,7 +101,7 @@
                   <div class="form-group">
                     <div class="checkbox">
                       <label>
-                        <input name="advance" value="{{applicant.application.id}}" type="checkbox"/>
+                        <input name="advance" value="{{applicant.id}}" type="checkbox"/>
                       </label>
                     </div>
                   </div>

@@ -137,10 +137,11 @@ var LargeLots = {
       // For large_lots_citywide_test: change pin14 to pin_nbr
       var sqlOwned = "select * from " + LargeLots.cartodb_table + " where pin14='" + ownedPin + "'";
 
-      var sqlApplied = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
-      $.each(appliedPins, function(i, pin) {
-        sqlApplied += " or pin14='" + pin + "'"
-      })
+      var sqlApplied = "select * from " + LargeLots.cartodb_table + " where pin14='" + lotPin + "'";
+      // var sqlApplied = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
+      // $.each(appliedPins, function(i, pin) {
+      //   sqlApplied += " or pin14='" + pin + "'"
+      // })
 
       var sqlOtherApplicants = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
       $.each(otherOwnedPins, function(i, pin) {

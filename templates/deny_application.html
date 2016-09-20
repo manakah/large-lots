@@ -10,9 +10,9 @@
     <p>You are about to deny this application for the following reason:</p>
     <p><strong>{{ review.denial_reason }}</strong></p>
     <p>Are you sure?</p>
-    <div class='block'><a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger">No, go back.</a></div>
+    <div class='block'><a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/" class="btn btn-danger">No, go back.</a></div>
     <div class='block'>
-      <form role="form" id="deed-check" method="POST" action="{% url 'deny_submit' application.id %}">
+      <form role="form" id="deed-check" method="POST" action="{% url 'deny_submit' application_status.id %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-success">Yes, I'm sure.</button>
       </form>

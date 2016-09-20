@@ -146,48 +146,50 @@ def pdfviewer(request):
 
 @login_required(login_url='/lots-login/')
 def deny_application(request, application_id):
-    application = Application.objects.get(id=application_id)
-    review = ReviewStatus.objects.filter(application=application).latest('id')
+    application_status = ApplicationStatus.objects.get(id=application_id)
+    review = Review.objects.filter(application=application_status).latest('id')
     return render(request, 'deny_application.html', {
-        'application': application,
+        'application_status': application_status,
         'review': review
         })
 
 @login_required(login_url='/lots-login/')
 def deny_submit(request, application_id):
-    application = Application.objects.get(id=application_id)
-    application.status = None
-    application.save()
+    application_status = ApplicationStatus.objects.get(id=application_id)
+    application_status.current_step = None
+    application_status.save()
     return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
-    application = Application.objects.get(id=application_id)
-    # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    ReviewStatus.objects.filter(application=application, step_completed=2).delete()
-    application.denied = False
-    application.save()
+    application_status = ApplicationStatus.objects.get(id=application_id)
+
+    # Delete last Review, if someone hits "no, go back" on deny page.
+    Review.objects.filter(application=application_status, step_completed=2).delete()
+    application_status.denied = False
+    application_status.save()
     return render(request, 'deed_check.html', {
-        'application': application
+        'application_status': application_status
         })
 
 @login_required(login_url='/lots-login/')
 def deed_check_submit(request, application_id):
     if request.method == 'POST':
-        application = Application.objects.get(id=application_id)
+        application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
         # Move to step 3 of review process.
         if (name == 'on' and address == 'on' and church == '2'):
-            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='approved', step=3)
-            application.status = application_status
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=2)
-            rev_status.save()
-            application.save()
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='approved', step=3)
+            application_status.current_step = step
+            application_status.save()
 
-            return HttpResponseRedirect('/application-review/step-3/%s/' % application.id)
+            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=2)
+            review.save()
+
+            return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
         # Deny application.
         else:
             if (church == '1'):
@@ -198,72 +200,73 @@ def deed_check_submit(request, application_id):
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['address'])
             else:
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name-address'])
-            rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=application, step_completed=2)
-            rev_status.save()
-            application.denied = True
-            application.save()
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+            review.save()
 
-            return HttpResponseRedirect('/deny-application/%s/' % application.id)
+            application_status.denied = True
+            application_status.save()
+
+            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
-    application = Application.objects.get(id=application_id)
+    application_status = ApplicationStatus.objects.get(id=application_id)
     # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    ReviewStatus.objects.filter(application=application, step_completed=3).delete()
-    application.denied = False
-    application.save()
+    Review.objects.filter(application=application_status, step_completed=3).delete()
+    application_status.denied = False
+    application_status.save()
     # Location of the applicant's property.
-    owned_pin = application.owned_pin
-    # Location(s) of properties the applicant applied for.
-    applied_pins = [l.pin for l in application.lot_set.all()]
+    owned_pin = application_status.application.owned_pin
+
+    # Location of the lot.
+    lot_pin = application_status.lot.pin
 
     return render(request, 'location_check.html', {
-        'application': application,
+        'application_status': application_status,
         'owned_pin': owned_pin,
-        'applied_pins': applied_pins
+        'lot_pin': lot_pin
         })
 
 @login_required(login_url='/lots-login/')
 def location_check_submit(request, application_id):
     if request.method == 'POST':
-        application = Application.objects.get(id=application_id)
+        application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block', 'off')
 
         if (block == 'on'):
-            # Update ReviewStatus.
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=3)
-            rev_status.save()
+            # Create a new review for completing this step.
+            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=3)
+            review.save()
 
             # Are there other applicants on this property?
-            applied_pins = [l.pin for l in application.lot_set.all()]
-            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
-            applicants_list = list(applicants)
+            lot_pin = application_status.lot.pin
+            other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
+            applicants_list = list(other_applicants)
 
             if (len(applicants_list) > 1):
                 # If there are other applicants: move application to Step 4.
-                application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['multi'], public_status='approved', step=4)
-                application.status = application_status
-                application.save()
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['multi'], public_status='approved', step=4)
+                application_status.current_step = step
+                application_status.save()
 
-                # return HttpResponseRedirect('/application-review/step-4/%s/' % application.id)
                 return HttpResponseRedirect(reverse('lots_admin'))
             else:
-                # No other applicants: move application to Step 5.
-                application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
-                application.status = application_status
-                application.save()
+                # No other applicants: move application to Step 6.
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+                application_status.current_step = step
+                application_status.save()
 
                 return HttpResponseRedirect(reverse('lots_admin'))
         else:
             # Deny application, since applicant does not live on same block as lot.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
-            rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=application, step_completed=3)
+            rev_status = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=3)
             rev_status.save()
-            application.denied = True
-            application.save()
+            application_status.denied = True
+            application_status.save()
 
-            return HttpResponseRedirect('/deny-application/%s/' % application.id)
+            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
 @login_required(login_url='/lots-login/')
 def multiple_applicant_check(request, application_id):
@@ -399,9 +402,9 @@ def lottery_submit(request):
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
-    application = Application.objects.get(id=application_id)
-    reviews = ReviewStatus.objects.filter(application=application)
-    status = ApplicationStatus.objects.all()
+    application = ApplicationStatus.objects.get(id=application_id)
+    reviews = Review.objects.filter(application=application)
+    status = ApplicationStep.objects.all()
     return render(request, 'review_status_log.html', {
         'application': application,
         'reviews': reviews,
