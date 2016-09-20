@@ -8,6 +8,7 @@ DENIAL_REASONS = {
 }
 
 APPLICATION_STATUS = {
+  'deed': 'Deed check',
   'location': 'Location check',
   'multi': 'Multiple applicant check',
   'letter': 'Alderman letter of support',

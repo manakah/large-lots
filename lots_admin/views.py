@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from operator import __or__ as OR
 from functools import reduce
-from lots_admin.models import Application, Lot, ApplicationStatus, ReviewStatus, DenialReason
+from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from datetime import datetime
 import csv
@@ -43,16 +43,18 @@ def lots_admin_map(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request):
-    applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
-    applications_before_four = Application.objects.filter(Q(status__step=2) | Q(status__step=3))
-    applications_at_four = Application.objects.filter(status__step=4)
+    # applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
+    # applications_before_four = Application.objects.filter(Q(status__step=2) | Q(status__step=3))
+    # applications_at_four = Application.objects.filter(status__step=4)
+
+    application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT)
 
     return render(request, 'admin.html', {
-        'applications': applications,
+        'application_status_list': application_status_list,
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
-        'applications_before_four': applications_before_four,
-        'applications_at_four': applications_at_four
+        # 'applications_before_four': applications_before_four,
+        # 'applications_at_four': applications_at_four
         })
 
 @login_required(login_url='/lots-login/')
