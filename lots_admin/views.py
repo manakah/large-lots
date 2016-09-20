@@ -43,18 +43,16 @@ def lots_admin_map(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request):
-    # applications = Application.objects.filter(pilot=settings.CURRENT_PILOT)
-    # applications_before_four = Application.objects.filter(Q(status__step=2) | Q(status__step=3))
-    # applications_at_four = Application.objects.filter(status__step=4)
-
     application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT)
+    before_step4 = ApplicationStatus.objects.filter(Q(current_step__step=2) | Q(current_step__step=3))
+    on_step4 = ApplicationStatus.objects.filter(current_step__step=4)
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
-        # 'applications_before_four': applications_before_four,
-        # 'applications_at_four': applications_at_four
+        'before_step4': before_step4,
+        'on_step4': on_step4
         })
 
 @login_required(login_url='/lots-login/')
@@ -270,31 +268,32 @@ def location_check_submit(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def multiple_applicant_check(request, application_id):
-    application = Application.objects.get(id=application_id)
+    application_status = ApplicationStatus.objects.get(id=application_id)
 
      # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    ReviewStatus.objects.filter(application=application, step_completed=4).delete()
-    application.denied = False
-    application.save()
+    Review.objects.filter(application=application_status, step_completed=4).delete()
+    application_status.denied = False
+    application_status.save()
 
     # Location of the applicant's property.
-    owned_pin = application.owned_pin
+    owned_pin = application_status.application.owned_pin
+    print(owned_pin)
 
-    # Location(s) of properties the applicant applied for.
-    applied_pins = [l.pin for l in application.lot_set.all()]
+    # Location of the lot.
+    lot_pin = application_status.lot.pin
 
     # Are there other applicants on this property?
-    applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
-    applicants_list = list(applicants)
+    other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
+    applicants_list = list(other_applicants)
 
     # Location(s) of properties of other applicants who applied for the same property.
-    other_owned_pins = [app.owned_pin for app in applicants_list ]
+    other_owned_pins = [s.application.owned_pin for s in applicants_list ]
     other_owned_pins.remove(owned_pin)
 
     return render(request, 'multiple_applicant_check.html', {
-        'application': application,
+        'application_status': application_status,
         'owned_pin': owned_pin,
-        'applied_pins': applied_pins,
+        'lot_pin': lot_pin,
         'applicants_list': applicants_list,
         'other_owned_pins': other_owned_pins
         })

@@ -78,12 +78,12 @@
                     {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
                         <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                     {% elif applicant.current_step.step == 4 %}
-                        <!-- {% if applications_before_four %}
-                            {{ application.application_step }}</br>
+                        {% if before_step4 %}
+                            {{ applicant.current_step }}</br>
                             Waiting for other applications
-                        {% else %} -->
-                            <!-- <a href="/application-review/step-{{ application.status.step }}/{{ application.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ application.status }}</a> -->
-                        <!-- {% endif %} -->
+                        {% else %}
+                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                        {% endif %}
                     {% elif applicant.current_step.step == 5 %}
                         <a href="/lottery/">Lottery</a>
                     {% else %}
