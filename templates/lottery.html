@@ -13,16 +13,16 @@
       <th>Winner</th>
     </thead>
     <tbody>
-      {% for app, pin in application_obj.items %}
+      {% for applicant in applications %}
         {% csrf_token %}
-        {% if pin == lot.pin %}
+        {% if applicant.lot == lot %}
         <tr>
-          <td>{{ app }}</td>
+          <td>{{ applicant.application.first_name }} {{ applicant.application.last_name }}</td>
           <td>
             <div class="form-group">
               <div class="checkbox">
                 <label>
-                  <input name="winner" value="{{app.id}}" type="checkbox"/>
+                  <input name="winner" value="{{applicant.id}}" type="checkbox"/>
                 </label>
               </div>
             </div>

@@ -163,9 +163,15 @@ def deed_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
 
     # Delete last Review, if someone hits "no, go back" on deny page.
-    Review.objects.filter(application=application_status, step_completed=2).delete()
-    application_status.denied = False
-    application_status.save()
+    denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
+    # Reset ApplicationStatus.
+    for a in denied_apps:
+        Review.objects.filter(application=a, step_completed=2).delete()
+        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='approved', step=2)
+        a.current_step = step
+        a.denied = False
+        a.save()
+
     return render(request, 'deed_check.html', {
         'application_status': application_status
         })
@@ -204,6 +210,19 @@ def deed_check_submit(request, application_id):
             application_status.denied = True
             application_status.save()
 
+            # If applicant applied for another lot, then also deny that ApplicationStatus.
+            other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
+
+            if other_app:
+                app = other_app[0]
+
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
+            review.save()
+
+            app.denied = True
+            app.current_step = None
+            app.save()
+
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
 @login_required(login_url='/lots-login/')
@@ -237,7 +256,7 @@ def location_check_submit(request, application_id):
             review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=3)
             review.save()
 
-            # Are there other applicants on this property?
+            # Are there other applicants who applied to this property?
             lot_pin = application_status.lot.pin
             other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
             applicants_list = list(other_applicants)
@@ -301,77 +320,70 @@ def multiple_applicant_check(request, application_id):
 @login_required(login_url='/lots-login/')
 def multiple_location_check_submit(request, application_id):
     if request.method == 'POST':
-        application = Application.objects.get(id=application_id)
+        application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         adjacent = request.POST.get('adjacent')
 
         if (adjacent == '2'):
             # Deny application, since another applicant is adjacent to the property.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-            rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=application, step_completed=4)
-            rev_status.save()
-            application.denied = True
-            application.save()
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=4)
+            review.save()
+            application_status.denied = True
+            application_status.save()
 
-            return HttpResponseRedirect('/deny-application/%s/' % application.id)
+            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
         elif (adjacent == '3'):
-            # Application goes to Step 5: lottery.
-            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
-            application.status = application_status
-            application.save()
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=4)
-            rev_status.save()
+            # Application goes to Step 5: lottery. Do not send other applicants to lottery, in the event that two properties are adjacent, and one property is not.
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
+            application_status.current_step = step
+            application_status.save()
+            review = Review(reviewer=user, email_sent=True, application=application_status, step_completed=4)
+            review.save()
 
             return HttpResponseRedirect(reverse('lots_admin'))
         else:
             # Move application to Step 6.
-            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
-            application.status = application_status
-            application.save()
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=application, step_completed=4)
-            rev_status.save()
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+            application_status.current_step = step
+            application_status.save()
+            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=4)
+            review.save()
 
             # Deny other applicants.
             # Location(s) of properties the applicant applied for.
-            applied_pins = [l.pin for l in application.lot_set.all()]
-            applicants = Application.objects.filter(lot__pin__in=applied_pins).filter(denied=False)
-            applicants_list = list(applicants)
-            applicants_list.remove(application)
+
+            lot_pin = application_status.lot.pin
+            other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
+            applicants_list = list(other_applicants)
+            applicants_list.remove(application_status)
 
             for a in applicants_list:
-                ReviewStatus.objects.filter(application=a, step_completed=4).delete()
+                # Review.objects.filter(application=a, step_completed=4).delete()
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-                rev_status = ReviewStatus(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
-                rev_status.save()
+                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
+                review.save()
                 a.denied = True
-                a.status = None
+                a.current_step = None
                 a.save()
 
             return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
 def lottery(request):
-    applications = Application.objects.filter(status__step=5)
-
-    # All applications in a lottery.
+    # Get all applications that will go to lottery.
+    applications = ApplicationStatus.objects.filter(current_step__step=5)
     applications_list = list(applications)
-
-    # All lots in a lottery; all applicants associated with those lots.
-    applied_pins = []
-    application_obj = {}
+    # Get all lots.
+    lots = []
     for a in applications_list:
-        applied_pins += [l.pin for l in a.lot_set.all()]
-        for l in a.lot_set.all():
-            application_obj[a] = l.pin
-
-    print(application_obj)
-    lot_pins = list(set(applied_pins))
-    lots = Lot.objects.filter(pin__in=lot_pins)
-    lots_list = list(lots)
+        lots.append(a.lot)
+    # Deduplicate applied_pins array.
+    lots_list = list(set(lots))
 
     return render(request, 'lottery.html', {
-        'application_obj': application_obj,
+        'applications': applications,
         'lots_list': lots_list
         })
 
@@ -381,23 +393,31 @@ def lottery_submit(request):
         user = request.user
         winners = request.POST.getlist('winner')
         winners_id = [int(a) for a in winners]
-
-        winning_apps = Application.objects.filter(id__in=winners_id)
-        winning_apps_list = list(winning_apps)
+        winning_apps = ApplicationStatus.objects.filter(id__in=winners_id)
 
         # Move lottery winners to Step 6.
         for a in winning_apps:
             # Move each application to Step 6.
-            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
-            a.status = application_status
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+            a.current_step = step
             a.save()
 
-            # Create a review status.
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=a, step_completed=5)
-            rev_status.save()
+            # Create a review.
+            review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
+            review.save()
+
+        # Deny lottery losers: find all applications on Step 5.
+        losing_apps = ApplicationStatus.objects.filter(current_step__step=5)
+        for a in losing_apps:
+            # Deny each application.
+            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['lottery'])
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=5)
+            review.save()
+            a.denied = True
+            a.current_step = None
+            a.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))
-
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
@@ -414,19 +434,20 @@ def review_status_log(request, application_id):
 def alderman_advance_submit(request):
     if request.method == 'POST':
         user = request.user
-        advance = request.POST.getlist('advance')
-        advanced_applications_id = [int(a) for a in advance]
-        applications = Application.objects.filter(id__in=advanced_applications_id)
-        applications_list = list(applications)
+        supported_app_ids = request.POST.getlist('letter-received')
+        supported_app_ids = [int(i) for i in supported_app_ids]
+
+        applications = ApplicationStatus.objects.filter(id__in=supported_app_ids)
+        print(applications)
 
         for a in applications:
             # Move each application to Step 7.
-            application_status, created = ApplicationStatus.objects.get_or_create(description=APPLICATION_STATUS['EDS'], public_status='approved', step=7)
-            a.status = application_status
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS'], public_status='approved', step=7)
+            a.current_step = step
             a.save()
 
-            # Create a review status.
-            rev_status = ReviewStatus(reviewer=user, email_sent=False, application=a, step_completed=6)
-            rev_status.save()
+            # Create a review.
+            review = Review(reviewer=user, email_sent=False, application=a, step_completed=6)
+            review.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))
