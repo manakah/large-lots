@@ -29,11 +29,12 @@
         <a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
 </h3>
 <h3>
-<!--     {% if applications_before_four %}
-        {{ applications_before_four|length }} Applications to review before "Multiple applicant check"
+    <!-- Check for applications that have not advanced through Steps 2 and 3. -->
+    {% if before_step4 %}
+        {{ before_step4|length }} Applications to review before "Multiple applicant check"
     {% else %}
-        {{ applications_at_four|length }} Applications on "Multiple applicant check" to complete
-    {% endif %} -->
+        {{ on_step4|length }} Applications on "Multiple applicant check" to complete
+    {% endif %}
 </h3>
 
 <!-- Form for bulk submit. -->
@@ -45,7 +46,7 @@
         <th>Name/Organization</th>
         <th>Details</th>
         <th class="no-wrap">Next review step</th>
-        <th>Bulk review</th>
+        <th class="bulk">Bulk review</th>
     </thead>
     <tbody>
     {% for applicant in application_status_list %}
@@ -94,7 +95,7 @@
                     None
                 {% endif %}
             </td>
-            <td>
+            <td class="bulk">
                 <!-- Table cell with form data -->
                 {% if applicant.current_step.step == 6 %}
                   {% csrf_token %}
@@ -111,18 +112,20 @@
             </td>
         </tr>
     {% endfor %}
+    </tbody>
+    <tfoot>
         <tr>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
             <td></td>
-            <td>
+            <td class="bulk">
             Received letter of support?</br>
             <button type="submit" class="btn btn-success">Yes, submit.</button>
             </td>
         </tr>
-    </tbody>
+    </tfoot>
 </table>
 </form>
 

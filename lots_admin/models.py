@@ -89,3 +89,6 @@ class ApplicationStatus(models.Model):
     application = models.ForeignKey('Application', blank=True, null=True)
     lot = models.ForeignKey('Lot', blank=True, null=True)
     current_step = models.ForeignKey('ApplicationStep', blank=True, null=True)
+
+    def __str__(self):
+        return str(self.application) + " " + str(self.lot)

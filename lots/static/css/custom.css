@@ -207,3 +207,14 @@ td input[type="checkbox"] {
 table#received thead th, table#received {
   border-bottom: 0;
 }
+
+table#received tfoot td {
+  border-top: 2px solid #f9f9f9;
+}
+
+td.bulk, th.bulk { text-align: center; }
+
+.winner {
+    width: 60%;
+    text-align: center;
+}

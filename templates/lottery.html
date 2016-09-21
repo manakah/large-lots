@@ -7,10 +7,11 @@
 <h2>Large Lots Lottery</h2>
 {% for lot in lots_list %}
 <h3>{{ lot.address }}</h3>
+<h3>Lot #{{ lot.pin }}</h3>
 <table class="table table-striped">
     <thead>
       <th>Applicant</th>
-      <th>Winner</th>
+      <th class="winner">Winner</th>
     </thead>
     <tbody>
       {% for applicant in applications %}

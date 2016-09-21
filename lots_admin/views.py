@@ -162,9 +162,9 @@ def deny_submit(request, application_id):
 def deed_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
 
-    # Delete last Review, if someone hits "no, go back" on deny page.
+    # Delete last Review(s), if someone hits "no, go back" on deny page.
     denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
-    # Reset ApplicationStatus.
+    # Reset ApplicationStatus, if some hits "no, go back" on deny page.
     for a in denied_apps:
         Review.objects.filter(application=a, step_completed=2).delete()
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='approved', step=2)
@@ -186,12 +186,16 @@ def deed_check_submit(request, application_id):
         church = request.POST.get('church')
         # Move to step 3 of review process.
         if (name == 'on' and address == 'on' and church == '2'):
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='approved', step=3)
-            application_status.current_step = step
-            application_status.save()
+            # If applicant applied for another lot, then also move that ApplicationStatus to Step 3.
+            apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
 
-            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=2)
-            review.save()
+            for app in apps:
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='approved', step=3)
+                app.current_step = step
+                app.save()
+
+                review = Review(reviewer=user, email_sent=False, application=app, step_completed=2)
+                review.save()
 
             return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
         # Deny application.
@@ -216,12 +220,12 @@ def deed_check_submit(request, application_id):
             if other_app:
                 app = other_app[0]
 
-            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
-            review.save()
+                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
+                review.save()
 
-            app.denied = True
-            app.current_step = None
-            app.save()
+                app.denied = True
+                app.current_step = None
+                app.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -421,11 +425,11 @@ def lottery_submit(request):
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
-    application = ApplicationStatus.objects.get(id=application_id)
-    reviews = Review.objects.filter(application=application)
+    application_status = ApplicationStatus.objects.get(id=application_id)
+    reviews = Review.objects.filter(application=application_status)
     status = ApplicationStep.objects.all()
     return render(request, 'review_status_log.html', {
-        'application': application,
+        'application_status': application_status,
         'reviews': reviews,
         'status': status
         })
