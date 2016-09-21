@@ -36,7 +36,7 @@
 <div class="row">
   <div class="col-md-4">
     <h2>Review Process: Multiple location check</h2>
-    <form role="form" id="deed-check" method="POST" action="{% url 'multiple_location_check_submit' application.id %}">
+    <form role="form" id="deed-check" method="POST" action="{% url 'multiple_location_check_submit' application_status.id %}">
       {% csrf_token %}
       <div class="form-group">
         <h4>Multiple people want to buy this lot.</h4>
@@ -76,8 +76,8 @@
   <script src="{% static 'js/leaflet.label.js' %}" type="text/javascript"></script>
   <script src="{% static 'js/largelots_locationcheck.js' %}"></script>
   <script>
-    var ownedPin = '{{ application.owned_pin }}';
-    var appliedPins = {{ applied_pins|safe }};
+    var ownedPin = '{{ owned_pin }}';
+    var lotPin = '{{ lot_pin }}';
     var otherOwnedPins = {{ other_owned_pins|safe }};
 
     $(function() {

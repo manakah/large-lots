@@ -22,7 +22,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.cache import cache
 from django.http import HttpResponse, HttpResponseRedirect
 
-from lots_admin.models import Lot, Application, Address, ApplicationStatus, ReviewStatus
+from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
+from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -226,8 +227,6 @@ def apply(request):
             owned_address = get_lot_address(form.cleaned_data['owned_address'],
                                             form.cleaned_data['owned_pin'])
 
-            application_status = ApplicationStatus.objects.get(step=2)
-
             app_info = {
                 'first_name': form.cleaned_data['first_name'],
                 'last_name': form.cleaned_data['last_name'],
@@ -240,8 +239,7 @@ def apply(request):
                 'email': form.cleaned_data.get('email'),
                 'how_heard': form.cleaned_data.get('how_heard'),
                 'tracking_id': str(uuid4()),
-                'pilot': settings.CURRENT_PILOT,
-                'status': application_status
+                'pilot': settings.CURRENT_PILOT
             }
             app = Application(**app_info)
             app.save()
@@ -249,6 +247,15 @@ def apply(request):
             if lot2:
                 app.lot_set.add(lot2)
             app.save()
+
+            # Create ApplicationStep and ApplicationStatus objects.
+            app_step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='approved', step=2)
+
+            app_status1 = ApplicationStatus(application=app, lot=lot1, current_step=app_step)
+            app_status1.save()
+            if lot2:
+                app_status2 = ApplicationStatus(application=app, lot=lot2, current_step=app_step)
+                app_status2.save()
 
             html_template = get_template('apply_html_email.html')
             text_template = get_template('apply_text_email.txt')

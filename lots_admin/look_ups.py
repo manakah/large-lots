@@ -4,12 +4,15 @@ DENIAL_REASONS = {
     'address': 'Applicant address does not match deed',
     'name-address': 'Applicant name and address do not match deed',
     'block': 'Applicant is not on same block as lot',
-    'adjacent': 'Another applicant is adjacent to lot'
+    'adjacent': 'Another applicant is adjacent to lot',
+    'lottery': 'Another applicant won the lottery'
 }
 
 APPLICATION_STATUS = {
+  'deed': 'Deed check',
   'location': 'Location check',
   'multi': 'Multiple applicant check',
   'letter': 'Alderman letter of support',
-  'lottery': 'Lottery'
+  'lottery': 'Lottery',
+  'EDS': 'Submit EDS and principal profile'
 }

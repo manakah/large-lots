@@ -3,6 +3,9 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
+<h2>Review history</h2>
+<p>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s application for <strong>{{ application_status.lot.address }}</strong></p>
+{% if reviews %}
 <table class="table table-striped">
     <thead>
       <th>Date</th>
@@ -11,27 +14,33 @@
       <th>Reason</th>
     </thead>
     <tbody>
-    {% for r in reviews %}
-      <tr>
-        <td>{{r.created_at}}</td>
-        <td>{{r.reviewer}}</td>
-        {% if r.denial_reason %}
-          <td>deny application</td>
-          <td>{{ r.denial_reason }}</td>
-        {% else %}
-          <td>
-            {% for s in status %}
-              {% if s.step == r.step_completed %}
-                Complete step {{ r.step_completed }}: {{ s.description }}
-              {% endif %}
-            {% endfor %}
-          </td>
-          <td>N/A</td>
-        {% endif %}
+      {% for r in reviews %}
+        <tr>
+          <td>{{r.created_at}}</td>
+          <td>{{r.reviewer}}</td>
+          {% if r.denial_reason %}
+            <td>Deny application</td>
+            <td>{{ r.denial_reason }}</td>
+          {% else %}
+            <td>
+              {% for s in status %}
+                {% if s.step == r.step_completed %}
+                  Complete step {{ r.step_completed }}: {{ s.description }}
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>N/A</td>
+          {% endif %}
 
-      </tr>
-    {% endfor %}
+        </tr>
+      {% endfor %}
     </tbody>
 </table>
+
+{% else %}
+  <p>This application has not been reviewed.</p>
+{% endif %}
+
+<div><a href="{% url 'lots_admin' %}" class="btn btn-danger">Go back</a></div>
 
 {% endblock %}
