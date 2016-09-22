@@ -4,9 +4,11 @@
 {% block title %}Deed check{% endblock %}
 {% block content %}
 
+{% include "review-header.html" with app=application_status %}
+
 <div class="row">
   <div class="col-md-6">
-    <h2>Review Process: Deed Check</h2>
+    <h3>Deed Check</h3>
     <p>Does the name and address on the deed match those of the applicant?</p>
     <form role="form" id="deed-check" method="POST" action="{% url 'deed_check_submit' application_status.id %}">
       {% csrf_token %}

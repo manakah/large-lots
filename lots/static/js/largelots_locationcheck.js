@@ -133,15 +133,32 @@ var LargeLots = {
         infoDiv._div.innerHTML = '';
       }
 
+      // Add legend.
+      LargeLots.locationsLegend = L.control({position: 'bottomleft'});
+
+      LargeLots.locationsLegend.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'locationsLegend');
+          this._div.innerHTML = '<ul class="location-legend">' +
+          '<li><div id="sale-lot" class="legend-block"></div><div class="legend-block text">Lot for sale</div></li>' +
+          '<li><div id="owned-prop" class="legend-block"></div><div class="legend-block text">Owned by applicant<div></li>' +
+          '<li><div id="other-prop" class="legend-block"></div><div class="legend-block text">Owned by other applicants</div></li></ul>'
+          return this._div;
+      };
+      LargeLots.locationsLegend.addTo(LargeLots.map);
+
       // Make SQL queries.
       // For large_lots_citywide_test: change pin14 to pin_nbr
       var sqlOwned = "select * from " + LargeLots.cartodb_table + " where pin14='" + ownedPin + "'";
 
+      // Check that applicant entered a valid pin.
+      var sql = new cartodb.SQL({ user: 'datamade' });
+      sql.execute(sqlOwned).done(function(data) {
+        if(data.rows.length == 0) {
+          alert("We cannot locate the applicant's property on the map, likely because the applicant did not enter a valid pin. You can deny this application by selecting 'No' or contact the applicant for clarification.")
+        }
+      });
+
       var sqlApplied = "select * from " + LargeLots.cartodb_table + " where pin14='" + lotPin + "'";
-      // var sqlApplied = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
-      // $.each(appliedPins, function(i, pin) {
-      //   sqlApplied += " or pin14='" + pin + "'"
-      // })
 
       var sqlOtherApplicants = " select * from " + LargeLots.cartodb_table + " where pin14='0000000000'"
       $.each(otherOwnedPins, function(i, pin) {

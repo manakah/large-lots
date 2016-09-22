@@ -28,22 +28,42 @@
 {% endblock %}
 {% block content %}
 
+{% include "review-header.html" with app=application_status %}
+
 <div class="row">
   <div class="col-md-4">
-    <h2>Review Process: Location and zoning check</h2>
-    <form role="form" id="deed-check" method="POST" action="{% url 'location_check_submit' application_status.id %}">
+    <h3>Location check</h3>
+    <p>Is the applicant's property on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the lot for sale?</p>
+    <form role="form" method="POST" action="{% url 'location_check_submit' application_status.id %}">
       {% csrf_token %}
-      <div class="form-group">
-        <div class="checkbox">
+      <div class="form-group" id="location">
+        <div class="radio">
           <label>
-            <input id="block" name="block" type="checkbox"/>
-            Is the applicant's property on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the lot for sale?
+            <input value="yes" name="block" type="radio"/>
+            Yes
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input value="no" name="block" type="radio"/>
+            No
           </label>
         </div>
       </div>
       <p><button type="submit" class="btn btn-success">Submit</button></p>
     </form>
+
+    <h3>Definition of a Block</h3>
+    <p><img class='img-responsive img-thumbnail' src='/static/images/same-block.png' /></p>
+    <p>Property owners can purchase a city-owned lot:</p>
+    <ul>
+      <li>On their side of the street</li>
+      <li>Across the street</li>
+      <li>Across the alley behind their property</li>
+    </ul>
+
   </div>
+
   <div class="col-md-8" id="locationcheck-map"></div>
 </div>
 

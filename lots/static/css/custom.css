@@ -46,11 +46,9 @@ a.dropdown-toggle:hover {
 
 .pull-left img { margin-right: 20px; }
 
-#search_address {
-    width: 400px;
-}
-
 #lot-form input[type=checkbox] { margin-left: 20px; }
+
+#search_address { width: 400px; }
 
 .nav-pills > li.active > a, .nav-pills > li.active,
 .nav-pills > li.active:hover > a, .nav-pills > li.active:hover {
@@ -123,13 +121,17 @@ table a, .table a { text-decoration: none; }
     z-index: 100;
 }
 
-.infoOwned, .infoApplied, .infoOtherApplicants {
+.infoOwned, .infoApplied, .infoOtherApplicants, .locationsLegend {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: white;
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
+}
+
+.locationsLegend {
+    padding-top: 1em;
 }
 
 .infoOwned h4, .infoApplied h4, .infoOtherApplicants h4 {
@@ -165,7 +167,6 @@ table a, .table a { text-decoration: none; }
 }
 
 /* Form Styling */
-
 .red { color: red; }
 .open { color: #389250;}
 .closed { color: #A1285D;}
@@ -192,18 +193,17 @@ table a, .table a { text-decoration: none; }
 
 .no-wrap { white-space: nowrap; }
 
-#locationcheck-map { height: 600px; }
-
 .block { display: inline-block; }
 
 .fl-r { float: right; }
 
-td input[type="checkbox"] {
+td input[type="radio"] {
     float: left;
     margin: 0 auto;
     width: 100%;
 }
 
+/*Styles for admin.html and DataTable */
 table#received thead th, table#received {
   border-bottom: 0;
 }
@@ -212,9 +212,104 @@ table#received tfoot td {
   border-top: 2px solid #f9f9f9;
 }
 
+#received_filter {
+    float: left;
+}
+
+#received_length {
+    float: right;
+}
+
+.wait {
+    font-style: italic;
+    color: #9D9C9C;
+}
+
 td.bulk, th.bulk { text-align: center; }
 
+button.bulk { float: right; }
+
+div.empty { padding-top: 18%; }
+
+#letter-checkbox { padding-left: 0; }
+
+/* Style for review_status_log.html */
+.review-header { color: #9D9C9C; }
+
+/* Styles for deed-check.html*/
+#pdf-embed { margin-top: 20px; }
+
+/* Styles for location-check.html*/
+div#location .radio+.radio { margin-top: 0px; }
+
+div#location .radio {
+    display: inline-block;
+    padding-right: 20px;
+}
+
+#locationcheck-map {
+    height: 680px;
+    margin-top: 20px;
+}
+
+/* Styles for multiple locations map legend */
+
+ul.location-legend {
+    list-style: none;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+    -webkit-padding-start: 0;
+}
+
+.location-legend li {
+    margin-bottom: 1em;
+}
+
+div#sale-lot {
+    background-color: #41ab5d;
+    border-radius: 5px;
+    opacity: 0.7;
+    height: 22px;
+    width: 22px;
+}
+
+div#owned-prop {
+    background-color: #A1285D;
+    border-radius: 5px;
+    opacity: 0.7;
+    height: 22px;
+    width: 22px;
+}
+
+div#other-prop {
+    background-color: #A1285D;
+    border-radius: 5px;
+    border: 1.5px solid #680D35;
+    opacity: 0.2;
+    height: 22px;
+    width: 22px;
+}
+
+div.legend-block {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 10px;
+}
+
+div.text { padding-top: 1%; }
+
+/* Styles for lottery.html */
 .winner {
     width: 60%;
     text-align: center;
+}
+
+button.winners {
+    float: right;
+}
+
+thead#table-stripe {
+    background-color: #f9f9f9;
 }

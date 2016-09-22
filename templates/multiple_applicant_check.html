@@ -33,13 +33,15 @@
 {% endblock %}
 {% block content %}
 
+{% include "review-header.html" with app=application_status %}
+
 <div class="row">
   <div class="col-md-4">
-    <h2>Review Process: Multiple location check</h2>
-    <form role="form" id="deed-check" method="POST" action="{% url 'multiple_location_check_submit' application_status.id %}">
+    <h3>Multiple applicant check</h3>
+    <form role="form" method="POST" action="{% url 'multiple_location_check_submit' application_status.id %}">
       {% csrf_token %}
       <div class="form-group">
-        <h4>Multiple people want to buy this lot.</h4>
+        <p><strong>Multiple people want to buy this lot.</strong></p>
         <div class="radio">
           <label>
             <input id="adjacent" name="adjacent" type="radio" value="1"/>
@@ -61,6 +63,13 @@
       </div>
       <p><button type="submit" class="btn btn-success">Submit</button></p>
     </form>
+    <!-- <hr> -->
+<!--     <ul class="location-legend">
+      <li><div id="sale-lot" class="legend-block"></div><div class="legend-block text">Lot for sale</div></li>
+      <li><div id="owned-prop" class="legend-block"></div><div class="legend-block text">Owned by applicant<div></li>
+      <li><div id="other-prop" class="legend-block"></div><div class="legend-block text">Owned by other applicants</div></li>
+    </ul> -->
+
   </div>
   <div class="col-md-8" id="locationcheck-map"></div>
 </div>

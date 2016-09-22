@@ -17,116 +17,108 @@
         </ul>
     </div>
 </div>
-<h3>
-    {% if application_status_list %}
-        {{ application_status_list|length }}
-    {% else %}
-        0
-    {% endif %}
-    Applications received
-    <small>
-        <!-- <a href="/lots-admin-map/"><i class='fa fa-map-marker'></i> Map view</a> &nbsp;&nbsp;&nbsp;  -->
-        <a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
-</h3>
-<h3>
-    <!-- Check for applications that have not advanced through Steps 2 and 3. -->
-    {% if before_step4 %}
-        {{ before_step4|length }} Applications to review before "Multiple applicant check"
-    {% else %}
-        {{ on_step4|length }} Applications on "Multiple applicant check" to complete
-    {% endif %}
-</h3>
 
 <!-- Form for bulk submit. -->
 <form role="form" method="POST" action="{% url 'alderman_advance_submit' %}">
-<table id="received" class="table table-striped tablesorter">
-    <thead>
-        <th>ID</th>
-        <th>Date received</th>
-        <th>Name/Organization</th>
-        <th>Details</th>
-        <th class="no-wrap">Next review step</th>
-        <th class="bulk">Bulk review</th>
-    </thead>
-    <tbody>
-    {% for applicant in application_status_list %}
-        <tr>
-            <td>
-                {{applicant.id}}
-            </td>
-            <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
-            <td>
-                {{applicant.application.first_name}} {{applicant.application.last_name}}
-                {% if applicant.application.organization %}
-                <br />
-                  {{applicant.application.organization}}
-                {% endif %}
-            </td>
-            <td class="no-wrap">
-                {% if applicant.denied %}
-                    Status: denied
+    <div class="row">
+        <div class='col-md-8'>
+            <h3>
+                {% if application_status_list %}
+                    {{ application_status_list|length }}
                 {% else %}
-                    Status: {{ applicant.current_step.public_status }}
+                    0
                 {% endif %}
-                </br>
-                <a href="/review-status-log/{{ applicant.id }}">
-                    Review history
-                </a></br>
-                <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a>
-            </td>
-            <td>
+                Applications received
+                <small><a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
+            </h3>
+            <h3>
+                <!-- Check for applications that have not advanced through Steps 2 and 3. -->
+                {% if before_step4 %}
+                    {{ before_step4|length }} Applications to review before "Multiple applicant check"
+                {% else %}
+                    {{ on_step4|length }} Applications on "Multiple applicant check" to complete
+                {% endif %}
+            </h3>
+        </div>
+
+        <div class="col-md-4">
+            <div class="empty"></div>
+            <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Alderman letter: Bulk submit</button>
+        </div>
+    </div>
+
+    <table id="received" class="table table-striped tablesorter">
+        <thead>
+            <th>ID</th>
+            <th>Date received</th>
+            <th>Name/Organization</th>
+            <th>Details</th>
+            <th class="no-wrap">Next review step</th>
+    <!--         <th class="bulk">Bulk review</th> -->
+        </thead>
+        <tbody>
+        {% for applicant in application_status_list %}
+            <tr>
+                <td>
+                    {{applicant.application.id}}
+                </td>
+                <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
+                <td>
+                    {{applicant.application.first_name}} {{applicant.application.last_name}}
+                    {% if applicant.application.organization %}
+                    <br />
+                      {{applicant.application.organization}}
+                    {% endif %}
+                </td>
+                <td class="no-wrap">
+                    {% if applicant.denied %}
+                        Status: denied
+                    {% else %}
+                        Status: {{ applicant.current_step.public_status }}
+                    {% endif %}
+                    </br>
+                    <a href="/review-status-log/{{ applicant.id }}">
+                        Review history
+                    </a></br>
+                    <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a>
+                </td>
+                <!-- Add data-order attribute to sort by step. -->
                 {% if applicant.current_step %}
+                <td data-order='{{ applicant.current_step.step }}'>
                     {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                     {% elif applicant.current_step.step == 4 %}
                         {% if before_step4 %}
-                            {{ applicant.current_step }}</br>
-                            Waiting for other applications
+                           {{ applicant.current_step }}</br>
+                            <span class='wait'>Waiting for other applications</span>
                         {% else %}
-                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-share" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                         {% endif %}
                     {% elif applicant.current_step.step == 5 %}
-                        <a href="/lottery/">Lottery</a>
+                       <a href="/lottery/">Lottery</a>
+                    {% elif applicant.current_step.step == 6 %}
+                        <div class='col-sm-10' id="letter-checkbox">
+                            {{ applicant.current_step }}</br>
+                            <span class='wait'>Waiting for decision</span>
+                        </div>
+                        {% csrf_token %}
+                        <div class="form-group col-sm-2">
+                            <div class="checkbox">
+                              <label>
+                                <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
+                              </label>
+                            </div>
+                        </div>
                     {% else %}
-                        {{ applicant.current_step }}</br>
-                        Waiting for decision
                     {% endif %}
+                </td>
                 {% else %}
-                    None
+                <td data-order="99">None</td>
                 {% endif %}
-            </td>
-            <td class="bulk">
-                <!-- Table cell with form data -->
-                {% if applicant.current_step.step == 6 %}
-                  {% csrf_token %}
-                  <div class="form-group">
-                    <div class="checkbox">
-                      <label>
-                        <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
-                      </label>
-                    </div>
-                  </div>
-                {% else %}
-                    Not an option
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="bulk">
-            Received letter of support?</br>
-            <button type="submit" class="btn btn-success">Yes, submit.</button>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 </form>
 
 {% endblock %}
@@ -136,15 +128,9 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $('#received').DataTable({
-                "order": [[ 1, "desc" ]],
-                "paging": false,
+                "order": [[4, 'asc']],
                 "info": false,
-                columnDefs: [
-                    {
-                        targets: 5,
-                        orderable: false
-                    },
-                ]
+                "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
             });
         })
     </script>
