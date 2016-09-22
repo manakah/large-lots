@@ -223,3 +223,16 @@ td.bulk, th.bulk { text-align: center; }
     font-style: italic;
     color: #9D9C9C;
 }
+
+#received_filter {
+    float: left;
+}
+
+#received_length {
+    float: right;
+}
+
+button.bulk {
+    margin-top: 70%;
+    float: right;
+}
