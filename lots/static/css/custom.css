@@ -218,3 +218,8 @@ td.bulk, th.bulk { text-align: center; }
     width: 60%;
     text-align: center;
 }
+
+.wait {
+    font-style: italic;
+    color: #9D9C9C;
+}
