@@ -28,11 +28,13 @@
 {% endblock %}
 {% block content %}
 
+{% include "review-header.html" with app=application_status %}
+
 <div class="row">
   <div class="col-md-4">
-    <h2>Review Process: Location and zoning check</h2>
+    <h3>Location check</h3>
     <p>Is the applicant's property on the <a href='/faq/#faq-block' target='_blank'>same block</a> as the lot for sale?</p>
-    <form role="form" id="deed-check" method="POST" action="{% url 'location_check_submit' application_status.id %}">
+    <form role="form" method="POST" action="{% url 'location_check_submit' application_status.id %}">
       {% csrf_token %}
       <div class="form-group" id="location">
         <div class="radio">
@@ -49,7 +51,7 @@
         </div>
       </div>
       <p><button type="submit" class="btn btn-success">Submit</button></p>
-      <hr>
+      <!-- <hr> -->
       <h3>Definition of a Block</h3>
       <p><img class='img-responsive img-thumbnail' src='/static/images/same-block.png' /></p>
       <p>Property owners can purchase a city-owned lot:</p>

@@ -3,8 +3,9 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
-<h2>Review history</h2>
-<p>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s application for <strong>{{ application_status.lot.address }}</strong></p>
+{% include "review-header.html" with app=application_status %}
+
+<h3>Review history</h3>
 {% if reviews %}
 <table class="table table-striped">
     <thead>

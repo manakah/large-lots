@@ -39,7 +39,6 @@
                     {{ on_step4|length }} Applications on "Multiple applicant check" to complete
                 {% endif %}
             </h3>
-            <h3>Total applications left to review</h3>
         </div>
 
         <div class="col-md-4">
@@ -61,7 +60,7 @@
         {% for applicant in application_status_list %}
             <tr>
                 <td>
-                    {{applicant.id}}
+                    {{applicant.application.id}}
                 </td>
                 <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
                 <td>

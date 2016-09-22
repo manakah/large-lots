@@ -395,7 +395,8 @@ def lottery(request):
 def lottery_submit(request):
     if request.method == 'POST':
         user = request.user
-        winners = request.POST.getlist('winner')
+        winners = [value for name, value in request.POST.items()
+                if name.startswith('winner')]
         winners_id = [int(a) for a in winners]
         winning_apps = ApplicationStatus.objects.filter(id__in=winners_id)
 
@@ -422,6 +423,14 @@ def lottery_submit(request):
             a.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))
+
+@login_required(login_url='/lots-login/')
+def review_EDS(request, application_id):
+    application_status = ApplicationStatus.objects.get(id=application_id)
+    return render(request, 'review_EDS.html', {
+        'application_status': application_status
+        })
+
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):

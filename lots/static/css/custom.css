@@ -46,11 +46,9 @@ a.dropdown-toggle:hover {
 
 .pull-left img { margin-right: 20px; }
 
-#search_address {
-    width: 400px;
-}
-
 #lot-form input[type=checkbox] { margin-left: 20px; }
+
+#search_address { width: 400px; }
 
 .nav-pills > li.active > a, .nav-pills > li.active,
 .nav-pills > li.active:hover > a, .nav-pills > li.active:hover {
@@ -165,7 +163,6 @@ table a, .table a { text-decoration: none; }
 }
 
 /* Form Styling */
-
 .red { color: red; }
 .open { color: #389250;}
 .closed { color: #A1285D;}
@@ -192,36 +189,23 @@ table a, .table a { text-decoration: none; }
 
 .no-wrap { white-space: nowrap; }
 
-#locationcheck-map { height: 600px; }
-
 .block { display: inline-block; }
 
 .fl-r { float: right; }
 
-/*td input[type="checkbox"] {
+td input[type="radio"] {
     float: left;
     margin: 0 auto;
     width: 100%;
-}*/
+}
 
+/*Styles for admin.html and DataTable */
 table#received thead th, table#received {
   border-bottom: 0;
 }
 
 table#received tfoot td {
   border-top: 2px solid #f9f9f9;
-}
-
-td.bulk, th.bulk { text-align: center; }
-
-.winner {
-    width: 60%;
-    text-align: center;
-}
-
-.wait {
-    font-style: italic;
-    color: #9D9C9C;
 }
 
 #received_filter {
@@ -232,14 +216,26 @@ td.bulk, th.bulk { text-align: center; }
     float: right;
 }
 
-button.bulk {
-    float: right;
+.wait {
+    font-style: italic;
+    color: #9D9C9C;
 }
 
-div.empty { padding-top: 30%; }
+td.bulk, th.bulk { text-align: center; }
+
+button.bulk { float: right; }
+
+div.empty { padding-top: 18%; }
 
 #letter-checkbox { padding-left: 0; }
 
+/* Style for review_status_log.html */
+.review-header { color: #9D9C9C; }
+
+/* Styles for deed-check.html*/
+#pdf-embed { margin-top: 20px; }
+
+/* Styles for location-check.html*/
 div#location .radio+.radio { margin-top: 0px; }
 
 div#location .radio {
@@ -247,8 +243,13 @@ div#location .radio {
     padding-right: 20px;
 }
 
-/* Multiple locations map legend */
-ul.legend {
+#locationcheck-map {
+    height: 600px;
+    margin-top: 20px;
+}
+
+/* Styles for multiple locations map legend */
+ul.location-legend {
     list-style: none;
     -webkit-margin-before: 0;
     -webkit-margin-after: 0;
@@ -257,7 +258,7 @@ ul.legend {
     -webkit-padding-start: 0;
 }
 
-.legend li {
+.location-legend li {
     margin-bottom: 1em;
 }
 
@@ -293,3 +294,17 @@ div.legend-block {
 }
 
 div.text { padding-top: 1%; }
+
+/* Styles for lottery.html */
+.winner {
+    width: 60%;
+    text-align: center;
+}
+
+button.winners {
+    float: right;
+}
+
+thead#table-stripe {
+    background-color: #f9f9f9;
+}
