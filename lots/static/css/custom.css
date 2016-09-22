@@ -121,13 +121,17 @@ table a, .table a { text-decoration: none; }
     z-index: 100;
 }
 
-.infoOwned, .infoApplied, .infoOtherApplicants {
+.infoOwned, .infoApplied, .infoOtherApplicants, .locationsLegend {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: white;
     background: rgba(255,255,255,0.8);
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
+}
+
+.locationsLegend {
+    padding-top: 1em;
 }
 
 .infoOwned h4, .infoApplied h4, .infoOtherApplicants h4 {
@@ -244,11 +248,12 @@ div#location .radio {
 }
 
 #locationcheck-map {
-    height: 600px;
+    height: 680px;
     margin-top: 20px;
 }
 
 /* Styles for multiple locations map legend */
+
 ul.location-legend {
     list-style: none;
     -webkit-margin-before: 0;
