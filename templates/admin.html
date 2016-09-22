@@ -74,27 +74,29 @@
                 </a></br>
                 <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a>
             </td>
-            <td>
-                {% if applicant.current_step %}
-                    {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
-                    {% elif applicant.current_step.step == 4 %}
-                        {% if before_step4 %}
-                            {{ applicant.current_step }}</br>
-                            <span class='wait'>Waiting for other applications</span>
-                        {% else %}
-                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
-                        {% endif %}
-                    {% elif applicant.current_step.step == 5 %}
-                        <a href="/lottery/">Lottery</a>
+            <!-- Add data-order attribute to allow for asc sorting by step. -->
+            {% if applicant.current_step %}
+            <td data-order='{{ applicant.current_step.step }}'>
+                {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
+                    <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"<i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                {% elif applicant.current_step.step == 4 %}
+                    {% if before_step4 %}
+                       {{ applicant.current_step }}</br>
+                        <span class='wait'>Waiting for other applications</span>
                     {% else %}
-                        {{ applicant.current_step }}</br>
-                        <span class='wait'>Waiting for decision</span>
+                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                     {% endif %}
+                {% elif applicant.current_step.step == 5 %}
+                   <a href="/lottery/">Lottery</a>
                 {% else %}
-                    None
+                   {{ applicant.current_step }}</br>
+                    <span class='wait'>Waiting for decision</span>
                 {% endif %}
             </td>
+            {% else %}
+            <td data-order="12">None</td>
+            {% endif %}
+
             <td class="bulk">
                 <!-- Table cell with form data -->
                 {% if applicant.current_step.step == 6 %}
@@ -136,7 +138,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
             $('#received').DataTable({
-                "order": [[ 1, "desc" ]],
+                "order": [[4, 'asc']],
                 "paging": false,
                 "info": false,
                 columnDefs: [
