@@ -21,7 +21,7 @@
 <!-- Form for bulk submit. -->
 <form role="form" method="POST" action="{% url 'alderman_advance_submit' %}">
     <div class="row">
-        <div class='col-md-10'>
+        <div class='col-md-8'>
             <h3>
                 {% if application_status_list %}
                     {{ application_status_list|length }}
@@ -42,8 +42,8 @@
             <h3>Total applications left to review</h3>
         </div>
 
-        <div class="col-md-2">
-            <!-- <p>Move applicants that received alderman support to next step.</p> -->
+        <div class="col-md-4">
+            <div class="empty"></div>
             <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Alderman letter: Bulk submit</button>
         </div>
     </div>
@@ -98,11 +98,12 @@
                     {% elif applicant.current_step.step == 5 %}
                        <a href="/lottery/">Lottery</a>
                     {% elif applicant.current_step.step == 6 %}
-                       {{ applicant.current_step }}</br>
-                        <span class='wait'>Waiting for decision</span>
-
+                        <div class='col-sm-10' id="letter-checkbox">
+                            {{ applicant.current_step }}</br>
+                            <span class='wait'>Waiting for decision</span>
+                        </div>
                         {% csrf_token %}
-                        <div class="form-group">
+                        <div class="form-group col-sm-2">
                             <div class="checkbox">
                               <label>
                                 <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>

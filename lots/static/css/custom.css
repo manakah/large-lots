@@ -198,11 +198,11 @@ table a, .table a { text-decoration: none; }
 
 .fl-r { float: right; }
 
-td input[type="checkbox"] {
+/*td input[type="checkbox"] {
     float: left;
     margin: 0 auto;
     width: 100%;
-}
+}*/
 
 table#received thead th, table#received {
   border-bottom: 0;
@@ -233,6 +233,63 @@ td.bulk, th.bulk { text-align: center; }
 }
 
 button.bulk {
-    margin-top: 70%;
     float: right;
 }
+
+div.empty { padding-top: 30%; }
+
+#letter-checkbox { padding-left: 0; }
+
+div#location .radio+.radio { margin-top: 0px; }
+
+div#location .radio {
+    display: inline-block;
+    padding-right: 20px;
+}
+
+/* Multiple locations map legend */
+ul.legend {
+    list-style: none;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
+    -webkit-margin-start: 0;
+    -webkit-margin-end: 0;
+    -webkit-padding-start: 0;
+}
+
+.legend li {
+    margin-bottom: 1em;
+}
+
+div#sale-lot {
+    background-color: #41ab5d;
+    border-radius: 5px;
+    opacity: 0.7;
+    height: 22px;
+    width: 22px;
+}
+
+div#owned-prop {
+    background-color: #A1285D;
+    border-radius: 5px;
+    opacity: 0.7;
+    height: 22px;
+    width: 22px;
+}
+
+div#other-prop {
+    background-color: #A1285D;
+    border-radius: 5px;
+    border: 1.5px solid #680D35;
+    opacity: 0.2;
+    height: 22px;
+    width: 22px;
+}
+
+div.legend-block {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 10px;
+}
+
+div.text { padding-top: 1%; }

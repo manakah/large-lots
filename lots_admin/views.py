@@ -253,9 +253,9 @@ def location_check_submit(request, application_id):
     if request.method == 'POST':
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
-        block = request.POST.get('block', 'off')
+        block = request.POST.get('block')
 
-        if (block == 'on'):
+        if (block == 'yes'):
             # Create a new review for completing this step.
             review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=3)
             review.save()
