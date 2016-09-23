@@ -4,9 +4,11 @@
 {% block title %}Deny application{% endblock %}
 {% block content %}
 
+{% include "review-header.html" with app=application_status %}
+
 <div class="row">
   <div class="col-md-12">
-    <h2>Deny application?</h2>
+    <h3>Deny application?</h3>
     <p>You are about to deny this application for the following reason:</p>
     <p><strong>{{ review.denial_reason }}</strong></p>
     <p>Are you sure?</p>

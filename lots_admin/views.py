@@ -1,3 +1,10 @@
+import csv
+import json
+from operator import __or__ as OR
+from functools import reduce
+from datetime import datetime
+from django import forms
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -6,15 +13,13 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.template import Context
+from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from operator import __or__ as OR
-from functools import reduce
-from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
+
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from datetime import datetime
-import csv
-import json
-from django import forms
+from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
 
 def lots_login(request):
     if request.method == 'POST':
@@ -156,7 +161,11 @@ def deny_submit(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     application_status.current_step = None
     application_status.save()
+
+    send_email(request, application_status, "deny")
+
     return HttpResponseRedirect(reverse('lots_admin'))
+
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
@@ -226,6 +235,8 @@ def deed_check_submit(request, application_id):
                 app.denied = True
                 app.current_step = None
                 app.save()
+
+                send_email(request, app, "deny")
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -300,7 +311,6 @@ def multiple_applicant_check(request, application_id):
 
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin
-    print(owned_pin)
 
     # Location of the lot.
     lot_pin = application_status.lot.pin
@@ -324,55 +334,50 @@ def multiple_applicant_check(request, application_id):
 @login_required(login_url='/lots-login/')
 def multiple_location_check_submit(request, application_id):
     if request.method == 'POST':
-        application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
-        adjacent = request.POST.get('adjacent')
+        applications = request.POST.getlist('multi-check')
+        application_ids = [int(i) for i in applications]
 
-        if (adjacent == '2'):
-            # Deny application, since another applicant is adjacent to the property.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=4)
-            review.save()
-            application_status.denied = True
-            application_status.save()
+        applications = ApplicationStatus.objects.filter(id__in=application_ids)
 
-            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
-
-        elif (adjacent == '3'):
-            # Application goes to Step 5: lottery. Do not send other applicants to lottery, in the event that two properties are adjacent, and one property is not.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
-            application_status.current_step = step
-            application_status.save()
-            review = Review(reviewer=user, email_sent=True, application=application_status, step_completed=4)
-            review.save()
-
-            return HttpResponseRedirect(reverse('lots_admin'))
-        else:
-            # Move application to Step 6.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
-            application_status.current_step = step
-            application_status.save()
-            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=4)
-            review.save()
-
-            # Deny other applicants.
-            # Location(s) of properties the applicant applied for.
-
-            lot_pin = application_status.lot.pin
-            other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
-            applicants_list = list(other_applicants)
-            applicants_list.remove(application_status)
-
-            for a in applicants_list:
-                # Review.objects.filter(application=a, step_completed=4).delete()
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
-                review.save()
-                a.denied = True
-                a.current_step = None
+        if(len(applications) > 1):
+            # Move applicants to lottery.
+            for a in applications:
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
+                a.current_step = step
                 a.save()
+                review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
+                review.save()
 
-            return HttpResponseRedirect(reverse('lots_admin'))
+                # Send lottery applicants an email notification.
+                send_email(request, a, "lottery")
+
+        else:
+            # Move winning application to Step 6.
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+            a = ApplicationStatus.objects.get(id=application_ids[0])
+            a.current_step = step
+            a.save()
+            review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
+            review.save()
+
+        # Deny unchecked applications.
+        application_status = ApplicationStatus.objects.get(id=application_id)
+        lot_pin = application_status.lot.pin
+        applicants_to_deny = ApplicationStatus.objects.filter(lot=lot_pin, denied=False).exclude(id__in=application_ids)
+
+        for a in applicants_to_deny:
+            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
+            review.save()
+            a.denied = True
+            a.current_step = None
+            a.save()
+
+            send_email(request, a, "deny")
+
+        return HttpResponseRedirect(reverse('lots_admin'))
+
 
 @login_required(login_url='/lots-login/')
 def lottery(request):
@@ -422,6 +427,8 @@ def lottery_submit(request):
             a.current_step = None
             a.save()
 
+            send_email(request, a, "deny")
+
         return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
@@ -451,7 +458,6 @@ def alderman_advance_submit(request):
         supported_app_ids = [int(i) for i in supported_app_ids]
 
         applications = ApplicationStatus.objects.filter(id__in=supported_app_ids)
-        print(applications)
 
         for a in applications:
             # Move each application to Step 7.
@@ -464,3 +470,30 @@ def alderman_advance_submit(request):
             review.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))
+
+def send_email(request, application_status, email_type):
+    app = application_status.application
+    lot = application_status.lot
+    review = Review.objects.filter(application=application_status).latest('id')
+
+    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
+    html = email_type + "_html_email.html"
+    txt = email_type + "_text_email.txt"
+    html_template = get_template(html)
+    text_template = get_template(txt)
+    html_content = html_template.render(context)
+    text_content = text_template.render(context)
+    subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
+
+    from_email = settings.EMAIL_HOST_USER
+    to_email = [from_email]
+
+    # if provided, send confirmation email to applicant
+    if app.email:
+        to_email.append(app.email)
+
+    # send email confirmation to info@largelots.org
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
+
