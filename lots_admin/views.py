@@ -162,31 +162,10 @@ def deny_submit(request, application_id):
     application_status.current_step = None
     application_status.save()
 
-    app = application_status.application
-    lot = application_status.lot
-    review = Review.objects.filter(application=application_status).latest('id')
-
-    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
-    html_template = get_template('deny_html_email.html')
-    text_template = get_template('deny_text_email.txt')
-    html_content = html_template.render(context)
-    text_content = text_template.render(context)
-    subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
-
-    from_email = settings.EMAIL_HOST_USER
-    print(from_email)
-    to_email = [from_email]
-
-    # if provided, send confirmation email to applicant
-    if app.email:
-        to_email.append(app.email)
-
-    # send email confirmation to info@largelots.org
-    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
-    msg.attach_alternative(html_content, 'text/html')
-    msg.send()
+    send_denial_email(request, application_status)
 
     return HttpResponseRedirect(reverse('lots_admin'))
+
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
@@ -256,6 +235,8 @@ def deed_check_submit(request, application_id):
                 app.denied = True
                 app.current_step = None
                 app.save()
+
+                send_denial_email(request, app)
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -369,7 +350,7 @@ def multiple_location_check_submit(request, application_id):
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
         elif (adjacent == '3'):
-            # Application goes to Step 5: lottery. Do not send other applicants to lottery, in the event that two properties are adjacent, and one property is not.
+            # Application goes to Step 5: lottery. Do not send other applicants to lottery YET, in the event that two properties are adjacent and one property is not.
             step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
             application_status.current_step = step
             application_status.save()
@@ -401,6 +382,8 @@ def multiple_location_check_submit(request, application_id):
                 a.denied = True
                 a.current_step = None
                 a.save()
+
+                send_denial_email(request, a)
 
             return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -452,6 +435,8 @@ def lottery_submit(request):
             a.current_step = None
             a.save()
 
+            send_denial_email(request, a)
+
         return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
@@ -494,3 +479,28 @@ def alderman_advance_submit(request):
             review.save()
 
         return HttpResponseRedirect(reverse('lots_admin'))
+
+def send_denial_email(request, application_status):
+    app = application_status.application
+    lot = application_status.lot
+    review = Review.objects.filter(application=application_status).latest('id')
+
+    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
+    html_template = get_template('deny_html_email.html')
+    text_template = get_template('deny_text_email.txt')
+    html_content = html_template.render(context)
+    text_content = text_template.render(context)
+    subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
+
+    from_email = settings.EMAIL_HOST_USER
+    print(from_email)
+    to_email = [from_email]
+
+    # if provided, send confirmation email to applicant
+    if app.email:
+        to_email.append(app.email)
+
+    # send email confirmation to info@largelots.org
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
