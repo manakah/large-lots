@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lots_filters %}
+{% block title %}Deed check{% endblock %}
+{% block content %}
+
+{% include "review-header.html" with app=application_status %}
+
+<h3>Submit EDS and principal profile</h3>
+
+{% endblock %}

@@ -15,17 +15,17 @@
 {% block content %}
       <div class='col-md-12'>
 
-        <h1>Auburn Gresham
+        <h1>Citywide
             {% if form %}
             <small class='open'>Open</small>
             {% else %}
-            <small class='closed'>Closed on May 15th, 2015</small>
+            <small class='closed'>Opens on Oct 3rd, 2016</small>
             {% endif %}
         </h1>
 
-        <p>If you own land in the Auburn Gresham neighborhood, you can <strong>buy up two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
+        <p>If you own land on the South or West sides of Chicago, you can <strong>buy up two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
 
-        <p>Applications will be accepted between <strong>February 1st, 2016 at 12:00 a.m.</strong> and <strong>May 15th, 2016 11:59 p.m.</strong></p>
+        <p>Applications will be accepted between <strong>October 3rd, 2016 at 12:00 a.m.</strong> and <strong>XXX, 2016 11:59 p.m.</strong></p>
 
         <p>For more information, read the <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
         {% if form %}
@@ -231,7 +231,7 @@
 
                           <h3>Upload your deed</h3>
 
-                          <p>To prove ownership of your Auburn Gresham neighborhood property, you'll have to upload a copy or picture of your <strong>property deed</strong>.</p>
+                          <p>To prove ownership of your property, you'll have to upload a copy or picture of your <strong>property deed</strong>.</p>
 
                           <ol>
                             <li>If you <strong>do</strong> have a paper copy handy, scan it or take a picture of the first page.</li>
@@ -487,10 +487,10 @@
           <div class="modal-content">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h4 class="modal-title" id="myModalLabel"><strong id='addr_search_modal'></strong> is not in the Auburn Gresham neighborhood.</h4>
+              <h4 class="modal-title" id="myModalLabel"><strong id='addr_search_modal'></strong> is not in the Large Lots program area.</h4>
             </div>
             <div class="modal-body">
-              <p>Only residents of the Auburn Gresham neighborhood can purchase lots for this pilot.</p>
+              <p>Only property owners in the Large Lots program area can purchase lots for this pilot.</p>
 
               <p>If you think this is a mistake, try to include the street direction (N,S,E,W) or suffix (Ave, Dr, St, etc), or browse the map instead.</p>
             </div>
@@ -517,7 +517,7 @@
       <div class="cartodb-popup-tip-container"></div>
     </div>
     </script>
-    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places&v=3.17"></script>
+    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places&v=3.17&key=AIzaSyCSg3bQurfz0U61uKn_8CYgPHzcl_Y2JE8"></script>
     <script src="{% static 'js/jquery.address.js' %}"></script>
     <script src="{% static 'js/jquery.scrollto.js' %}"></script>
     <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>

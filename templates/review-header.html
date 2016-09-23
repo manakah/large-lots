@@ -1,0 +1,13 @@
+<p class="review-header">{{ app.application.first_name }} {{ app.application.last_name }}'s application for <strong>{{ app.lot.address}}</strong></p>
+<ul class='nav nav-wizard'>
+  <li>Step 1</li>
+  <li class="{% if app.current_step.step == 2 %} active {% endif %}">Step 2{% if app.current_step.step == 2 %}: Deed check {% endif %}</li>
+  <li class="{% if app.current_step.step == 3 %} active {% endif %}">Step 3{% if app.current_step.step == 3 %}: Location check {% endif %}</li>
+  <li class="{% if app.current_step.step == 4 %} active {% endif %}">Step 4{% if app.current_step.step == 4 %}: Multiple applicant check{% endif %}</li>
+  <li class="{% if app.current_step.step == 5 %} active {% endif %}">Step 5{% if app.current_step.step == 5 %}: Lottery{% endif %}</li>
+  <li class="{% if app.current_step.step == 6 %} active {% endif %}">Step 6{% if app.current_step.step == 6 %}: Alderman letter of support{% endif %}</li>
+  <li class="{% if app.current_step.step == 7 %} active {% endif %}">Step 7{% if app.current_step.step == 7 %}: Submit EDS and principal profile {% endif %}</li>
+  {% if app.denied == True %}
+    <li class="active">Denied</li>
+  {% endif %}
+</ul>

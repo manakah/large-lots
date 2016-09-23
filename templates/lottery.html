@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Lottery{% endblock %}
+{% block content %}
+<form role="form" method="POST" action="{% url 'lottery_submit' %}">
+<h2>Large Lots Lottery</h2>
+{% for lot in lots_list %}
+<h3>{{ lot.address }}</h3>
+<h3>Lot #{{ lot.pin }}</h3>
+<table class="table">
+    <thead id="table-stripe">
+      <th>Application ID</th>
+      <th>Name/Organization</th>
+      <th class="winner">Winner</th>
+    </thead>
+    <tbody>
+      {% for applicant in applications %}
+        {% csrf_token %}
+        {% if applicant.lot == lot %}
+        <tr>
+          <td>{{ applicant.application.id }}</td>
+          <td>
+            {{ applicant.application.first_name }} {{ applicant.application.last_name }}
+            {% if applicant.application.organization %}
+              <br />
+              {{applicant.application.organization}}
+            {% endif %}
+          </td>
+          <td>
+            <div class="form-group">
+              <div class="radio">
+                <label>
+                  <input name="winner{{lot}}" value="{{applicant.id}}" type="radio"/>
+                </label>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+<button type="submit" class="btn btn-success winners"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Submit winners</button>
+</form>
+
+{% endblock %}

@@ -4,13 +4,13 @@ var LargeLots = LargeLots || {};
 var LargeLots = {
 
   map: null,
-  map_centroid: [41.7442054377053, -87.6563067873806],
-  defaultZoom: 14,
+  map_centroid: [41.7872, -87.6345],
+  defaultZoom: 11,
   lastClickedLayer: null,
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'ag_lots',
+  cartodb_table: 'large_lots_citywide_expansion_data',
 
   initialize: function() {
 
@@ -52,14 +52,14 @@ var LargeLots = {
           var info = '';
           if(props.street_number){
               info += "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-              info += "<p>PIN: " + props.display_pin + "<br />";
+              info += "<p>PIN: " + props.pin_nbr + "<br />";
           }
-          if (props.zoning_classification){
-              info += "Zoned: " + props.zoning_classification + "<br />";
-          }
-          if (props.sq_ft){
-              info += "Sq Ft: " + props.sq_ft + "<br />";
-          }
+          // if (props.zoning_classification){
+          //     info += "Zoned: " + props.zoning_classification + "<br />";
+          // }
+          // if (props.sq_ft){
+          //     info += "Sq Ft: " + props.sq_ft + "<br />";
+          // }
           this._div.innerHTML  = info;
         }
       };
@@ -70,21 +70,22 @@ var LargeLots = {
 
       LargeLots.info.addTo(LargeLots.map);
 
-      var fields = "display_pin,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, city_owned_ind, residential"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
           sublayers: [
               {
-                  sql: "select * from " + LargeLots.cartodb_table + " where city_owned='T' and residential='T' and alderman_hold != 'T'",
+                  sql: "select * from " + LargeLots.cartodb_table,
                   cartocss: $('#map-styles').html().trim(),
                   interactivity: fields
-              },
-              {
-                  sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
-                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
+              // },
+              // {
+              //     sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
+              //     cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+              // }
           ]
       }
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
@@ -101,7 +102,7 @@ var LargeLots = {
               LargeLots.info.clear();
             });
             LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
-                LargeLots.getOneParcel(data['display_pin']);
+                LargeLots.getOneParcel(data['pin_nbr']);
             });
             window.setTimeout(function(){
                 if($.address.parameter('pin')){
@@ -150,23 +151,23 @@ var LargeLots = {
 
   formatAddress: function (prop) {
     if (prop.street_type == null) prop.street_type = "";
-    if (prop.street_number == null) prop.street_number = "";
-    if (prop.street_dir == null) prop.street_dir = "";
+    if (prop.low_address == null) prop.low_address = "";
+    if (prop.street_direction == null) prop.street_direction = "";
     if (prop.street_name == null) prop.street_name = "";
 
-    var ret = prop.street_number + " " + prop.street_dir + " " + prop.street_name + " " + prop.street_type;
+    var ret = prop.low_address + " " + prop.street_direction + " " + prop.street_name + " " + prop.street_type;
     if (ret.trim() == "")
       return "Unknown";
     else
       return ret;
   },
 
-  getOneParcel: function(display_pin){
+  getOneParcel: function(pin_nbr){
       if (LargeLots.lastClickedLayer){
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from ' + LargeLots.cartodb_table + ' where display_pin = {{display_pin}}::VARCHAR', {display_pin:display_pin})
+      sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr = {{pin_nbr}}::VARCHAR', {pin_nbr:pin_nbr})
         .done(function(data){
             var shape = data.features[0];
             LargeLots.lastClickedLayer = L.geoJson(shape);
@@ -181,12 +182,12 @@ var LargeLots = {
   selectParcel: function (props){
       // console.log(props)
       var address = LargeLots.formatAddress(props);
-      var pin_formatted = LargeLots.formatPin(props.display_pin);
+      var pin_formatted = LargeLots.formatPin(props.pin_nbr);
 
       var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
         <table class='table table-bordered table-condensed'><tbody>\
           <tr><td>Address</td><td>" + address + "</td></tr>\
-          <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://cookcountypropertyinfo.com/Pages/PIN-Results.aspx?PIN=" + props.display_pin + "'>info</a>)</td></tr>";
+          <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
       if (props.zoning_classification){
           info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zoning_classification + "' target='_blank'>" + props.zoning_classification + "</a>)</td></tr>";
       }
@@ -196,8 +197,8 @@ var LargeLots = {
       }
       info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
       info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
-      <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.display_pin + ".jpg' /></div></div>";
-      $.address.parameter('pin', props.display_pin)
+      <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin_nbr + ".jpg' /></div></div>";
+      $.address.parameter('pin', props.pin_nbr)
       $('#lot-info').html(info);
       // console.log(info)
 
@@ -237,25 +238,25 @@ var LargeLots = {
         if (status == google.maps.GeocoderStatus.OK) {
           currentPinpoint = [results[0].geometry.location.lat(), results[0].geometry.location.lng()];
 
-          // check if the point is in neighborhood area
-          var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-          sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'AUBURN GRESHAM' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
-          .done(function(data){
-            // console.log(data);
-            if (data.features.length == 0) {
-              $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
-              $('#modalGeocode').modal('show');
-            }
-            else {
+          // // check if the point is in neighborhood area
+          // var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+          // sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'AUBURN GRESHAM' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          // .done(function(data){
+          //   // console.log(data);
+          //   if (data.features.length == 0) {
+          //     $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
+          //     $('#modalGeocode').modal('show');
+          //   }
+          //   else {
               LargeLots.map.setView(currentPinpoint, 17);
 
               if (LargeLots.marker)
                 LargeLots.map.removeLayer( LargeLots.marker );
 
               LargeLots.marker = L.marker(currentPinpoint).addTo(LargeLots.map);
-            }
+          //   }
 
-          }).error(function(e){console.log(e)});
+          // }).error(function(e){console.log(e)});
         }
         else {
           alert("We could not find your address: " + status);

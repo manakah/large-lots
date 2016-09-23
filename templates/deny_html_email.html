@@ -1,0 +1,27 @@
+{% load lots_filters %}
+<div class="row">
+    <div class="col-md-12">
+        <a id='logo' href="http://largelots.org">
+        <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>Hi {{ app.first_name }}.</p>
+        <p>Thanks, again, for your application to the Large Lots program in Chicago. We have reviewed your application for Lot #{{ lot.pin }} on {{ lot.address.street }}. Your application was denied because:
+        </p>
+        <p><strong>{{ review.denial_reason }}</strong></p>
+        <p>You can learn more about our evaluation process by visiting our <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p><strong>If you have any questions, please contact:</strong></p>
+        <p>
+           Jeanne Chandler, Department of Planning and Development<br />
+           Phone: (312) 744-0605<br />
+           Email: Jeanne.Chandler@cityofchicago.org
+        </p>
+    </div>
+</div>

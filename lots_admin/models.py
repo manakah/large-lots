@@ -2,6 +2,7 @@ from django.db import models
 import time
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class Address(models.Model):
     street = models.CharField(max_length=255)
@@ -40,8 +41,6 @@ class Application(models.Model):
     email = models.CharField(max_length=255, null=True)
     how_heard = models.CharField(max_length=255, null=True)
     tracking_id = models.CharField(max_length=40)
-    review_status = models.ForeignKey('ReviewStatus', blank=True, null=True)
-    status = models.ForeignKey('ApplicationStatus', blank=True, null=True)
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
 
@@ -60,7 +59,7 @@ class Lot(models.Model):
     def __str__(self):
         return self.pin
 
-class ApplicationStatus(models.Model):
+class ApplicationStep(models.Model):
     description = models.CharField(max_length=255)
     public_status = models.CharField(max_length=255)
     step = models.IntegerField()
@@ -68,18 +67,28 @@ class ApplicationStatus(models.Model):
     def __str__(self):
         return self.description
 
+class Review(models.Model):
+    reviewer = models.ForeignKey(User)
+    step_completed = models.IntegerField()
+    denial_reason = models.ForeignKey('DenialReason', null=True)
+    email_sent = models.BooleanField()
+    application = models.ForeignKey('ApplicationStatus', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.reviewer)
+
 class DenialReason(models.Model):
     value = models.TextField()
-    step = models.IntegerField()
 
     def __str__(self):
         return self.value
 
-class ReviewStatus(models.Model):
-    reviewer = models.ForeignKey(User)
+class ApplicationStatus(models.Model):
     denied = models.BooleanField(default=False)
-    denial_reason = models.ForeignKey('DenialReason', null=True)
-    email_sent = models.BooleanField()
+    application = models.ForeignKey('Application', blank=True, null=True)
+    lot = models.ForeignKey('Lot', blank=True, null=True)
+    current_step = models.ForeignKey('ApplicationStep', blank=True, null=True)
 
     def __str__(self):
-        return str(self.reviewer)
+        return str(self.application) + " " + str(self.lot)
