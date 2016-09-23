@@ -35,4 +35,17 @@ PILOT_INFO = {
         'human_name': 'Pilot 3: Austin'
     }
 }
+
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.postgresql',
+       'NAME': 'largelots',
+       'USER': '',
+       'PASSWORD': '',
+       'HOST': 'localhost',
+       'PORT': '5432',
+   }
+}
+
 CURRENT_PILOT = "pilot_3"
+CURRENT_CARTODB = "my_cartodb_table"
