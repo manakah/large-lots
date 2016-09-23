@@ -1,9 +1,12 @@
+from datetime import datetime
 import csv
 import json
 from operator import __or__ as OR
 from functools import reduce
 from datetime import datetime
 from django import forms
+
+from esridump.dumper import EsriDumper
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -13,6 +16,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django import forms
 from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
@@ -262,6 +266,24 @@ def location_check(request, application_id):
         })
 
 @login_required(login_url='/lots-login/')
+def deny_application(request, application_id):
+    application = Application.objects.get(id=application_id)
+    return render(request, 'deny_application.html', {
+        'application': application
+        })
+
+# @login_required(login_url='/lots-login/')
+def get_parcel_geometry(request):
+    pin = request.GET.get('pin')
+    query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
+    dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44', 
+                        extra_query_args=query_args)
+
+    geometry = next(dumper.iter())
+
+    return HttpResponse(json.dumps(geometry), content_type='application/json')
+
+@login_required(login_url='/lots-login/')
 def location_check_submit(request, application_id):
     if request.method == 'POST':
         application_status = ApplicationStatus.objects.get(id=application_id)
@@ -498,4 +520,3 @@ def send_email(request, application_status, email_type):
     msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
-
