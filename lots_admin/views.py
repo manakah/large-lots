@@ -311,7 +311,6 @@ def multiple_applicant_check(request, application_id):
 
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin
-    print(owned_pin)
 
     # Location of the lot.
     lot_pin = application_status.lot.pin
@@ -335,57 +334,47 @@ def multiple_applicant_check(request, application_id):
 @login_required(login_url='/lots-login/')
 def multiple_location_check_submit(request, application_id):
     if request.method == 'POST':
-        application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
-        adjacent = request.POST.get('adjacent')
+        applications = request.POST.getlist('multi-check')
+        application_ids = [int(i) for i in applications]
 
-        if (adjacent == '2'):
-            # Deny application, since another applicant is adjacent to the property.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=4)
-            review.save()
-            application_status.denied = True
-            application_status.save()
+        applications = ApplicationStatus.objects.filter(id__in=application_ids)
 
-            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
-
-        elif (adjacent == '3'):
-            # Application goes to Step 5: lottery. Do not send other applicants to lottery YET, in the event that two properties are adjacent and one property is not.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
-            application_status.current_step = step
-            application_status.save()
-            review = Review(reviewer=user, email_sent=True, application=application_status, step_completed=4)
-            review.save()
-
-            return HttpResponseRedirect(reverse('lots_admin'))
-        else:
-            # Move application to Step 6.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
-            application_status.current_step = step
-            application_status.save()
-            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=4)
-            review.save()
-
-            # Deny other applicants.
-            # Location(s) of properties the applicant applied for.
-
-            lot_pin = application_status.lot.pin
-            other_applicants = ApplicationStatus.objects.filter(lot=lot_pin, denied=False)
-            applicants_list = list(other_applicants)
-            applicants_list.remove(application_status)
-
-            for a in applicants_list:
-                # Review.objects.filter(application=a, step_completed=4).delete()
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
-                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
-                review.save()
-                a.denied = True
-                a.current_step = None
+        if(len(applications) > 1):
+            # Move applicants to lottery.
+            for a in applications:
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['lottery'], public_status='approved', step=5)
+                a.current_step = step
                 a.save()
+                review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
+                review.save()
 
-                send_denial_email(request, a)
+        else:
+            # Move winning application to Step 6.
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
+            a = ApplicationStatus.objects.get(id=application_ids[0])
+            a.current_step = step
+            a.save()
+            review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
+            review.save()
 
-            return HttpResponseRedirect(reverse('lots_admin'))
+        # Deny unchecked applications.
+        application_status = ApplicationStatus.objects.get(id=application_id)
+        lot_pin = application_status.lot.pin
+        applicants_to_deny = ApplicationStatus.objects.filter(lot=lot_pin, denied=False).exclude(id__in=application_ids)
+
+        for a in applicants_to_deny:
+            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
+            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
+            review.save()
+            a.denied = True
+            a.current_step = None
+            a.save()
+
+            send_denial_email(request, a)
+
+        return HttpResponseRedirect(reverse('lots_admin'))
+
 
 @login_required(login_url='/lots-login/')
 def lottery(request):
@@ -466,7 +455,6 @@ def alderman_advance_submit(request):
         supported_app_ids = [int(i) for i in supported_app_ids]
 
         applications = ApplicationStatus.objects.filter(id__in=supported_app_ids)
-        print(applications)
 
         for a in applications:
             # Move each application to Step 7.

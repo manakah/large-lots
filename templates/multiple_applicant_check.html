@@ -38,37 +38,27 @@
 <div class="row">
   <div class="col-md-4">
     <h3>Multiple applicant check</h3>
+    <p><strong>Multiple people want to buy this lot.</strong></p>
+    <p>Select the winning applicant. In the event of a tie, select more than one applicant: they enter a lottery. <em>Applicants not selected here will be denied.</em></p>
+
     <form role="form" method="POST" action="{% url 'multiple_location_check_submit' application_status.id %}">
       {% csrf_token %}
+      {% for app in applicants_list %}
       <div class="form-group">
-        <p><strong>Multiple people want to buy this lot.</strong></p>
-        <div class="radio">
+        <div class="checkbox">
           <label>
-            <input id="adjacent" name="adjacent" type="radio" value="1"/>
-            Is the applicant adjacent to the lot?
-          </label>
-        </div>
-        <div class="radio">
-          <label>
-            <input id="not-adjacent" name="adjacent" type="radio" value="2"/>
-            Is another applicant adjacent to the lot?
-          </label>
-        </div>
-        <div class="radio">
-          <label>
-            <input id="lottery" name="adjacent" type="radio" value="3"/>
-            Is the applicant and another applicant adjacent to the lot, or on the same block? (Applicant goes to lottery.)
+            <input name="multi-check" type="checkbox" value="{{ app.id }}"/>
+            <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong></br>
+            {{ app.application.owned_address }}</br>
+            Property pin: {{ app.application.owned_pin }}
           </label>
         </div>
       </div>
+      {% endfor %}
       <p><button type="submit" class="btn btn-success">Submit</button></p>
     </form>
-    <!-- <hr> -->
-<!--     <ul class="location-legend">
-      <li><div id="sale-lot" class="legend-block"></div><div class="legend-block text">Lot for sale</div></li>
-      <li><div id="owned-prop" class="legend-block"></div><div class="legend-block text">Owned by applicant<div></li>
-      <li><div id="other-prop" class="legend-block"></div><div class="legend-block text">Owned by other applicants</div></li>
-    </ul> -->
+
+    <div class="well"><p>The winning application owns a property adjacent to the lot.</p><p> For a lottery, two or more applicants are adjacent to the lot, or two or more applicants are on the same block.</p></div>
 
   </div>
   <div class="col-md-8" id="locationcheck-map"></div>
