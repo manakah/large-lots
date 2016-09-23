@@ -173,6 +173,27 @@ var LargeLots = {
         console.log('ERROR')
         console.log(e)
       });
+
+
+      //fetch the applicant's lot geometry based on their pin
+      $.when($.get('/get-parcel-geometry/?pin=' + ownedPin)).then(
+        function(ownedParcel){
+          L.geoJson(ownedParcel, {
+              style: {"fillColor": "#A1285D", "fillOpacity": 0.7, "color": "#A1285D", 'opacity': 1, 'weight': 1}
+          }).addTo(LargeLots.map);
+      });
+
+      //for everyone else who applied to the lot, fetch their property geometry based on their pin
+      $.each(otherOwnedPins, function(i, pin){
+        $.when($.get('/get-parcel-geometry/?pin=' + pin)).then(
+          function(otherOwnedParcel){
+            L.geoJson(otherOwnedParcel, {
+                style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1}
+            }).addTo(LargeLots.map);
+        });
+      });
+
+      
   },
 
   formatPin: function(pin) {
