@@ -51,13 +51,15 @@ def lots_admin(request):
     application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT)
     before_step4 = ApplicationStatus.objects.filter(Q(current_step__step=2) | Q(current_step__step=3))
     on_step4 = ApplicationStatus.objects.filter(current_step__step=4)
+    alderman_letter = ApplicationStatus.objects.filter(current_step__step=6)
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
-        'on_step4': on_step4
+        'on_step4': on_step4,
+        'alderman_letter': alderman_letter
         })
 
 @login_required(login_url='/lots-login/')

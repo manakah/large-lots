@@ -6,7 +6,7 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-md-12">
         <ul class="nav nav-pills">
             {% for k,v in pilot_info.items %}
@@ -16,7 +16,7 @@
             {% endfor %}
         </ul>
     </div>
-</div>
+</div> -->
 
 <!-- Form for bulk submit. -->
 <form role="form" method="POST" action="{% url 'alderman_advance_submit' %}">
@@ -43,7 +43,9 @@
 
         <div class="col-md-4">
             <div class="empty"></div>
-            <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Alderman letter: Bulk submit</button>
+            {% if alderman_letter %}
+                <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Alderman letter: Bulk submit</button>
+            {% endif %}
         </div>
     </div>
 
