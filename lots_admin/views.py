@@ -162,7 +162,7 @@ def deny_submit(request, application_id):
     application_status.current_step = None
     application_status.save()
 
-    send_denial_email(request, application_status)
+    send_email(request, application_status, "deny")
 
     return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -236,7 +236,7 @@ def deed_check_submit(request, application_id):
                 app.current_step = None
                 app.save()
 
-                send_denial_email(request, app)
+                send_email(request, app, "deny")
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -349,6 +349,9 @@ def multiple_location_check_submit(request, application_id):
                 review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
                 review.save()
 
+                # Send lottery applicants an email notification.
+                send_email(request, a, "lottery")
+
         else:
             # Move winning application to Step 6.
             step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='approved', step=6)
@@ -371,7 +374,7 @@ def multiple_location_check_submit(request, application_id):
             a.current_step = None
             a.save()
 
-            send_denial_email(request, a)
+            send_email(request, a, "deny")
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -424,7 +427,7 @@ def lottery_submit(request):
             a.current_step = None
             a.save()
 
-            send_denial_email(request, a)
+            send_email(request, a, "deny")
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -468,20 +471,21 @@ def alderman_advance_submit(request):
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
-def send_denial_email(request, application_status):
+def send_email(request, application_status, email_type):
     app = application_status.application
     lot = application_status.lot
     review = Review.objects.filter(application=application_status).latest('id')
 
     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
-    html_template = get_template('deny_html_email.html')
-    text_template = get_template('deny_text_email.txt')
+    html = email_type + "_html_email.html"
+    txt = email_type + "_text_email.txt"
+    html_template = get_template(html)
+    text_template = get_template(txt)
     html_content = html_template.render(context)
     text_content = text_template.render(context)
     subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
 
     from_email = settings.EMAIL_HOST_USER
-    print(from_email)
     to_email = [from_email]
 
     # if provided, send confirmation email to applicant
@@ -492,3 +496,4 @@ def send_denial_email(request, application_status):
     msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
+
