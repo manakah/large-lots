@@ -1,3 +1,10 @@
+import csv
+import json
+from operator import __or__ as OR
+from functools import reduce
+from datetime import datetime
+from django import forms
+
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
@@ -6,15 +13,13 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.template import Context
+from django.template.loader import get_template
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-from operator import __or__ as OR
-from functools import reduce
-from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
+
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from datetime import datetime
-import csv
-import json
-from django import forms
+from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
 
 def lots_login(request):
     if request.method == 'POST':
@@ -156,6 +161,31 @@ def deny_submit(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     application_status.current_step = None
     application_status.save()
+
+    app = application_status.application
+    lot = application_status.lot
+    review = Review.objects.filter(application=application_status).latest('id')
+
+    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
+    html_template = get_template('deny_html_email.html')
+    text_template = get_template('deny_text_email.txt')
+    html_content = html_template.render(context)
+    text_content = text_template.render(context)
+    subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
+
+    from_email = settings.EMAIL_HOST_USER
+    print(from_email)
+    to_email = [from_email]
+
+    # if provided, send confirmation email to applicant
+    if app.email:
+        to_email.append(app.email)
+
+    # send email confirmation to info@largelots.org
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
+
     return HttpResponseRedirect(reverse('lots_admin'))
 
 @login_required(login_url='/lots-login/')
