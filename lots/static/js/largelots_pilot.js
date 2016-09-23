@@ -80,12 +80,11 @@ var LargeLots = {
                   sql: "select * from " + LargeLots.cartodb_table,
                   cartocss: $('#map-styles').html().trim(),
                   interactivity: fields
+              },
+              {
+                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
+                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
-              // },
-              // {
-              //     sql: "select * from chicago_community_areas where community = 'AUBURN GRESHAM'",
-              //     cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
-              // }
           ]
       }
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
@@ -238,25 +237,25 @@ var LargeLots = {
         if (status == google.maps.GeocoderStatus.OK) {
           currentPinpoint = [results[0].geometry.location.lat(), results[0].geometry.location.lng()];
 
-          // // check if the point is in neighborhood area
-          // var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-          // sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'AUBURN GRESHAM' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
-          // .done(function(data){
-          //   // console.log(data);
-          //   if (data.features.length == 0) {
-          //     $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
-          //     $('#modalGeocode').modal('show');
-          //   }
-          //   else {
+          // check if the point is in neighborhood area
+          var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+          sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          .done(function(data){
+            // console.log(data);
+            if (data.features.length == 0) {
+              $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
+              $('#modalGeocode').modal('show');
+            }
+            else {
               LargeLots.map.setView(currentPinpoint, 17);
 
               if (LargeLots.marker)
                 LargeLots.map.removeLayer( LargeLots.marker );
 
               LargeLots.marker = L.marker(currentPinpoint).addTo(LargeLots.map);
-          //   }
+            }
 
-          // }).error(function(e){console.log(e)});
+          }).error(function(e){console.log(e)});
         }
         else {
           alert("We could not find your address: " + status);
