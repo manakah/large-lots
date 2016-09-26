@@ -225,7 +225,7 @@ table#received tfoot td {
     color: #9D9C9C;
 }
 
-td.bulk, th.bulk { text-align: center; }
+td.bulk, th.bulk, td.ball, th.ball { text-align: center; }
 
 button.bulk { float: right; }
 

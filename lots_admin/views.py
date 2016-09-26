@@ -265,18 +265,11 @@ def location_check(request, application_id):
         'lot_pin': lot_pin
         })
 
-@login_required(login_url='/lots-login/')
-def deny_application(request, application_id):
-    application = Application.objects.get(id=application_id)
-    return render(request, 'deny_application.html', {
-        'application': application
-        })
-
 # @login_required(login_url='/lots-login/')
 def get_parcel_geometry(request):
     pin = request.GET.get('pin')
     query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
-    dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44', 
+    dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44',
                         extra_query_args=query_args)
 
     geometry = next(dumper.iter())
@@ -406,7 +399,8 @@ def multiple_location_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def lottery(request):
     # Get all applications that will go to lottery.
-    applications = ApplicationStatus.objects.filter(current_step__step=5)
+    applications = ApplicationStatus.objects.filter(current_step__step=5).order_by('application__last_name')
+    print(applications)
     applications_list = list(applications)
     # Get all lots.
     lots = []

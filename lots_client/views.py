@@ -58,7 +58,9 @@ class ApplicationForm(forms.Form):
     phone = forms.CharField(
         error_messages={'required': 'Provide a contact phone number'},
         label="Your phone number")
-    email = forms.CharField(required=False)
+    email = forms.CharField(
+        error_messages={'required': 'Provide an email address'},
+        label="Your email address")
     contact_street = forms.CharField(
         error_messages={'required': 'Provide a complete address'},
         label="Your contact address")
@@ -123,20 +125,26 @@ class ApplicationForm(forms.Form):
         return self.cleaned_data['deed_image']
 
 def home(request):
-    return render(request, 'index.html', {'application_active': application_active(request)})
+    applications = Application.objects.all()
+    return render(request, 'index.html', {
+        'application_active': application_active(request),
+        'applications': applications
+        })
 
 def application_active(request):
+    apps = Application.objects.all()
     chicago_time = timezone.localtime(timezone.now())
-    start_date = timezone.make_aware(datetime(2016, 2, 1, 0, 0),
+    start_date = timezone.make_aware(datetime(2016, 10, 1, 0, 0),
         timezone.get_current_timezone())
-    end_date = timezone.make_aware(datetime(2016, 5, 15, 23, 59),
-        timezone.get_current_timezone())
+    # end_date = timezone.make_aware(datetime(2016, 5, 15, 23, 59),
+        # timezone.get_current_timezone())
 
     if settings.APPLICATION_DISPLAY: # override with configuration setting
         return True
     elif request.user.is_authenticated(): # or if you're logged in
         return True
-    elif start_date < chicago_time < end_date: # otherwise, check the dates
+    # elif (start_date < chicago_time < end_date): # otherwise, check the dates
+    elif (start_date < chicago_time) or (len(apps) <= 1500): # otherwise, check the dates
         return True
     else:
         return False
@@ -186,6 +194,8 @@ def get_lot_address(address, pin):
     return add_obj
 
 def apply(request):
+    applications = Application.objects.all()
+
     if request.method == 'POST':
         form = ApplicationForm(request.POST, request.FILES)
         context = {}
@@ -302,6 +312,7 @@ def apply(request):
             context['form'] = form
             fields = [f for f in form.fields]
             context['error_messages'] = OrderedDict()
+            context['applications'] = applications
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
@@ -313,7 +324,10 @@ def apply(request):
             form = ApplicationForm()
         else:
             form = None
-    return render(request, 'apply.html', {'form': form})
+    return render(request, 'apply.html', {
+        'form': form,
+        'applications': applications
+    })
 
 def apply_confirm(request, tracking_id):
     app = Application.objects.get(tracking_id=tracking_id)

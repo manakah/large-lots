@@ -20,7 +20,10 @@
           <td>{{r.created_at}}</td>
           <td>{{r.reviewer}}</td>
           {% if r.denial_reason %}
-            <td>Deny application</td>
+            <td>
+              Deny application<br>
+              <em>Email notification sent</em>
+            </td>
             <td>{{ r.denial_reason }}</td>
           {% else %}
             <td>
