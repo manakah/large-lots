@@ -123,7 +123,11 @@ class ApplicationForm(forms.Form):
         return self.cleaned_data['deed_image']
 
 def home(request):
-    return render(request, 'index.html', {'application_active': application_active(request)})
+    applications = Application.objects.all()
+    return render(request, 'index.html', {
+        'application_active': application_active(request),
+        'applications': applications
+        })
 
 def application_active(request):
     chicago_time = timezone.localtime(timezone.now())
@@ -186,6 +190,8 @@ def get_lot_address(address, pin):
     return add_obj
 
 def apply(request):
+    applications = Application.objects.all()
+
     if request.method == 'POST':
         form = ApplicationForm(request.POST, request.FILES)
         context = {}
@@ -302,6 +308,7 @@ def apply(request):
             context['form'] = form
             fields = [f for f in form.fields]
             context['error_messages'] = OrderedDict()
+            context['applications'] = applications
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
@@ -313,7 +320,10 @@ def apply(request):
             form = ApplicationForm()
         else:
             form = None
-    return render(request, 'apply.html', {'form': form})
+    return render(request, 'apply.html', {
+        'form': form,
+        'applications': applications
+    })
 
 def apply_confirm(request, tracking_id):
     app = Application.objects.get(tracking_id=tracking_id)
