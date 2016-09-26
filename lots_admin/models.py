@@ -38,7 +38,7 @@ class Application(models.Model):
     deed_image = models.FileField(upload_to=upload_name)
     contact_address = models.ForeignKey(Address, related_name='contact_address')
     phone = models.CharField(max_length=15)
-    email = models.CharField(max_length=255, null=True)
+    email = models.CharField(max_length=255)
     how_heard = models.CharField(max_length=255, null=True)
     tracking_id = models.CharField(max_length=40)
     received_date = models.DateTimeField(auto_now_add=True)

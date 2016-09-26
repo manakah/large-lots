@@ -189,7 +189,8 @@
                         <h2>2. Proof of ownership on the block</h2>
                         <p><span class="red">*</span>Required</p>
 
-                          <p>You'll need to <strong>upload a copy of your deed</strong> prove that you own property on the same block as the lot(s) you are applying to buy.</p>
+                          <p>You'll need to <strong>upload a copy of your deed</strong> to prove that you own property on the same block as the lot(s) you are applying to buy. You do not need to be a resident of the deeded property, but you must be its owner.</p>
+                          <p>The name on your application and the address entered here must exactly match the name and address on your deed.</p>
 
                           <div class="row">
                             <div class="col-sm-7">
@@ -231,7 +232,7 @@
 
                           <h3>Upload your deed</h3>
 
-                          <p>To prove ownership of your property, you'll have to upload a copy or picture of your <strong>property deed</strong>.</p>
+                          <p>Upload a copy or picture of your <strong>property deed</strong>.</p>
 
                           <ol>
                             <li>If you <strong>do</strong> have a paper copy handy, scan it or take a picture of the first page.</li>
@@ -359,12 +360,12 @@
                             {% else %}
                             <div class="form-group">
                             {% endif %}
-                            <label for="id_email"><i class="fa fa-envelope"></i> Email</label>
+                            <label for="id_email"><i class="fa fa-envelope"></i> Email</label><span class="red">*</span>
                             <input type="email" value="{{email}}" class="form-control" id="id_email" name="email" placeholder="name@email.com">
                             {% for error in form.email.errors %}
                                 <span class="help-block">{{ error }}</span>
                             {% endfor %}
-                            <p class="help-block">If provided, we'll send you a confirmation email and updates on your application status.</p>
+                    <!--         <p class="help-block">If provided, we'll send you a confirmation email and updates on your application status.</p> -->
                           </div>
                             {% if form.contact_street.errors or form.contact_city.errors or form.contact_state.errors or form.contact_zip_code.errors %}
                             <div class="form-group has-error">
@@ -432,7 +433,7 @@
 
                         <ul>
                           <li>You will have to pay property taxes based on the assessed value of your lot. <a href='/faq/#faq-estimated-taxes'>See the FAQ for details</a></li>
-                          <li>You must own the lot for at least 5 years before selling it</li>
+                          <li>You must own the lot for at least 5 years before selling it, but you can develop it at anytime</li>
                           <li>You can't use the lot for commercial purposes</li>
                         </ul>
 
