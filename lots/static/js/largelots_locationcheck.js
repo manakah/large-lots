@@ -37,6 +37,37 @@ var LargeLots = {
       var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
       LargeLots.map.addLayer(layer);
 
+      // info div for application property
+      LargeLots.infoApplied = L.control({position: 'bottomright'});
+
+      LargeLots.infoApplied.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'infoApplied');
+          this.update();
+          return this._div;
+      };
+
+      LargeLots.infoApplied.update = function (props) {
+        var date_formatted = '';
+        if (props) {
+          var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
+          info += "<h5>Lot for sale</h5>"
+          info += "<p>PIN: " + LargeLots.formatPin(props.pin_nbr) + "<br />";
+          info += "Ward: " + props.ward + "<br />";
+          info += "Zoned: " + props.zone_class + "<br />";
+          info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";
+          info += "</p>"
+
+          this._div.innerHTML  = info;
+        }
+      };
+
+      LargeLots.infoApplied.addTo(LargeLots.map);
+
+      LargeLots.clear = function(infoDiv) {
+        infoDiv._div.innerHTML = '';
+      }
+
+
       // info div for owned property
       LargeLots.infoOwned = L.control({position: 'bottomright'});
 
@@ -49,11 +80,10 @@ var LargeLots = {
       LargeLots.infoOwned.update = function (props) {
         var date_formatted = '';
         if (props) {
-          var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
+          var info = "<h4>" + props.Address + "</h4>";
           info += "<h5>Property owned by the applicant</h5>"
-          info += "<p>PIN: " + LargeLots.formatPin(props.pin_nbr) + "<br />";
-          info += "Zoned: " + props.zoning_classification + "<br />";
-          info += "Sq Ft: " + props.sq_ft + "<p/>";
+          info += "<p>PIN: " + LargeLots.formatPin(props.PIN14) + "<br />";
+          info += "Sq Ft: " + props.LandSqft + "<p/>";
           this._div.innerHTML  = info;
         }
       };
@@ -73,53 +103,16 @@ var LargeLots = {
       LargeLots.infoOtherApplicants.update = function (props) {
         var date_formatted = '';
         if (props) {
-          var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
+          var info = "<h4>" + props.Address + "</h4>";
           info += "<h5>Property owned by another applicant</h5>"
-          info += "<p>PIN: " + LargeLots.formatPin(props.pin_nbr) + "<br />";
-          info += "Zoned: " + props.zoning_classification + "<br />";
-          info += "Sq Ft: " + props.sq_ft + "<p/>";
+          info += "<p>PIN: " + LargeLots.formatPin(props.PIN14) + "<br />";
+          info += "Sq Ft: " + props.LandSqft + "<p/>";
           this._div.innerHTML  = info;
         }
       };
 
       LargeLots.infoOtherApplicants.addTo(LargeLots.map);
 
-
-      // info div for application property
-      LargeLots.infoApplied = L.control({position: 'bottomright'});
-
-      LargeLots.infoApplied.onAdd = function (map) {
-          this._div = L.DomUtil.create('div', 'infoApplied');
-          this.update();
-          return this._div;
-      };
-
-      LargeLots.infoApplied.update = function (props) {
-        var date_formatted = '';
-        if (props) {
-          if (props.residential == "T"){
-            residential = "True"
-          }
-          else {
-            residential = "False"
-          }
-          var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-          info += "<h5>Lot for sale</h5>"
-          info += "<p>PIN: " + LargeLots.formatPin(props.pin_nbr) + "<br />";
-          info += "Residential: " + residential + "<br />";
-          info += "Zoned: " + props.zoning_classification + "<br />";
-          info += "Sq Ft: " + props.sq_ft + "<br />";
-          info += "</p>"
-
-          this._div.innerHTML  = info;
-        }
-      };
-
-      LargeLots.infoApplied.addTo(LargeLots.map);
-
-      LargeLots.clear = function(infoDiv) {
-        infoDiv._div.innerHTML = '';
-      }
 
       // Add legend.
       LargeLots.locationsLegend = L.control({position: 'bottomleft'});
@@ -136,7 +129,7 @@ var LargeLots = {
 
       var sqlApplied = "select * from " + LargeLots.cartodb_table + " where pin_nbr='" + lotPin + "'";
 
-      var fields = "pin, pin_nbr, street_name, street_direction, street_type, city_owned_ind, residential"
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -153,15 +146,15 @@ var LargeLots = {
         .addTo(LargeLots.map)
         .done(function(layer) {
             // Make a sublayer for the applicant's owned property
-            var ownedProperty = layer.getSubLayer(0);
-            ownedProperty.setInteraction(true);
-            ownedProperty.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
+            var appliedProperty = layer.getSubLayer(0);
+            appliedProperty.setInteraction(true);
+            appliedProperty.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
               $('#locationcheck-map div').css('cursor','pointer');
-              LargeLots.infoOwned.update(data);
+              LargeLots.infoApplied.update(data);
             });
-            ownedProperty.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
+            appliedProperty.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
               $('#locationcheck-map div').css('cursor','inherit');
-              LargeLots.clear(LargeLots.infoOwned);
+              LargeLots.clear(LargeLots.infoApplied);
             });
 
             var sqlBounds = new cartodb.SQL({ user: 'datamade' });
@@ -179,7 +172,16 @@ var LargeLots = {
       $.when($.get('/get-parcel-geometry/?pin=' + ownedPin)).then(
         function(ownedParcel){
           L.geoJson(ownedParcel, {
-              style: {"fillColor": "#A1285D", "fillOpacity": 0.7, "color": "#A1285D", 'opacity': 1, 'weight': 1}
+              style: {"fillColor": "#A1285D", "fillOpacity": 0.7, "color": "#A1285D", 'opacity': 1, 'weight': 1},
+              onEachFeature: function(feature, layer) {
+                console.log(feature.properties);
+                layer.on('mouseover', function() {
+                  LargeLots.infoOwned.update(feature.properties);
+                });
+                layer.on('mouseout', function() {
+                  LargeLots.clear(LargeLots.infoOwned);
+                });
+              }
           }).addTo(LargeLots.map);
       });
 
@@ -188,12 +190,19 @@ var LargeLots = {
         $.when($.get('/get-parcel-geometry/?pin=' + pin)).then(
           function(otherOwnedParcel){
             L.geoJson(otherOwnedParcel, {
-                style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1}
+                style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1},
+                onEachFeature: function(feature, layer) {
+                  layer.on('mouseover', function() {
+                    LargeLots.infoOtherApplicants.update(feature.properties);
+                  });
+                  layer.on('mouseout', function() {
+                    LargeLots.clear(LargeLots.infoOtherApplicants);
+                  });
+                }
             }).addTo(LargeLots.map);
         });
       });
 
-      
   },
 
   formatPin: function(pin) {

@@ -58,7 +58,9 @@ class ApplicationForm(forms.Form):
     phone = forms.CharField(
         error_messages={'required': 'Provide a contact phone number'},
         label="Your phone number")
-    email = forms.CharField(required=False)
+    email = forms.CharField(
+        error_messages={'required': 'Provide an email address'},
+        label="Your email address")
     contact_street = forms.CharField(
         error_messages={'required': 'Provide a complete address'},
         label="Your contact address")
