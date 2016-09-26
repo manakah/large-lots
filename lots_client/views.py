@@ -144,7 +144,7 @@ def application_active(request):
     elif request.user.is_authenticated(): # or if you're logged in
         return True
     # elif (start_date < chicago_time < end_date): # otherwise, check the dates
-    elif (start_date < chicago_time) or (len(apps) <= 3): # otherwise, check the dates
+    elif (start_date < chicago_time) or (len(apps) <= 1500): # otherwise, check the dates
         return True
     else:
         return False

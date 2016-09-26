@@ -399,7 +399,8 @@ def multiple_location_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def lottery(request):
     # Get all applications that will go to lottery.
-    applications = ApplicationStatus.objects.filter(current_step__step=5)
+    applications = ApplicationStatus.objects.filter(current_step__step=5).order_by('application__last_name')
+    print(applications)
     applications_list = list(applications)
     # Get all lots.
     lots = []

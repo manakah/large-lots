@@ -12,7 +12,7 @@
       <th class="no-wrap">Application ID</th>
       <th>Name/Organization</th>
       <th>Email</th>
-      <th class="no-wrap">Ball number</th>
+      <th class="no-wrap ball">Ball number</th>
       <th class="winner">Winner</th>
     </thead>
     <tbody>
@@ -29,7 +29,7 @@
             {% endif %}
           </td>
           <td>{{ applicant.application.email}}</td>
-          <td></td>
+          <td class="ball">{{ forloop.counter }}</td>
           <td>
             <div class="form-group">
               <div class="radio">
