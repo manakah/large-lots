@@ -9,8 +9,10 @@
 <h3>Lot #{{ lot.pin }}</h3>
 <table class="table">
     <thead id="table-stripe">
-      <th>Application ID</th>
+      <th class="no-wrap">Application ID</th>
       <th>Name/Organization</th>
+      <th>Email</th>
+      <th class="no-wrap">Ball number</th>
       <th class="winner">Winner</th>
     </thead>
     <tbody>
@@ -26,6 +28,8 @@
               {{applicant.application.organization}}
             {% endif %}
           </td>
+          <td>{{ applicant.application.email}}</td>
+          <td></td>
           <td>
             <div class="form-group">
               <div class="radio">
@@ -41,7 +45,14 @@
     </tbody>
 </table>
 {% endfor %}
-<button type="submit" class="btn btn-success winners"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Submit winners</button>
-</form>
+<div class="row">
+  <div class="col-md-6">
+    <a href="{% url 'lots_admin' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a>
+  </div>
+  <div class="col-md-6">
+    <button type="submit" class="btn btn-success winners"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Submit winners</button>
+  </div>
+  </form>
+</div>
 
 {% endblock %}
