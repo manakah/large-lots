@@ -49,8 +49,8 @@ urlpatterns = [
     url(r'^lottery-submit/$', lottery_submit, name='lottery_submit'),
     url(r'^application-review/step-7/(?P<application_id>\d+)/$', review_EDS, name='review_EDS'),
     url(r'^deny-application/(?P<application_id>\d+)/$', deny_application, name='deny_application'),
-    url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
     url(r'^deny-submit/(?P<application_id>\d+)/$', deny_submit, name='deny_submit'),
     url(r'^review-status-log/(?P<application_id>\d+)$', review_status_log, name='review_status_log'),
     url(r'^alderman_advance_submit/$', alderman_advance_submit, name='alderman_advance_submit'),
+    url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
 ]
