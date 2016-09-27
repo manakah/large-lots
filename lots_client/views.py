@@ -77,7 +77,7 @@ class ApplicationForm(forms.Form):
         pin = pin.replace('-', '')
         params = {
             'api_key': settings.CARTODB_API_KEY,
-            'q': "SELECT pin14 FROM %s WHERE pin14 = '%s' AND city_owned='T' AND residential='T' AND alderman_hold != 'T'" % (settings.CURRENT_CARTODB, pin),
+            'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
         }
         r = requests.get(carto, params=params)
         print(params)
@@ -149,24 +149,24 @@ def application_active(request):
     else:
         return False
 
-def get_lon_lat(pin):
+def get_ward(pin):
     carto = 'http://datamade.cartodb.com/api/v2/sql'
     params = {
         'api_key': settings.CARTODB_API_KEY,
-        'q':  "SELECT longitude, latitude FROM %s WHERE pin14 = '%s'" % \
-            (pin.replace('-', ''), settings.CURRENT_CARTODB),
+        'q':  "SELECT ward FROM %s WHERE pin_nbr = '%s'" % \
+            (settings.CURRENT_CARTODB, pin),
     }
+    ward_nbr = None
     r = requests.get(carto, params=params)
-    longitude, latitude = None, None
     if r.status_code is 200:
-        resp = r.json()['rows']
-        if resp:
-            longitude, latitude = resp[0]['longitude'], resp[0]['latitude']
-    return longitude, latitude
+        resp = json.loads(r.text)
+        if resp['rows']:
+            ward = resp['rows']
+            ward_nbr = ward[0]['ward']
+    return ward_nbr
 
 def parse_address(address):
     parsed = usaddress.parse(address)
-
     street_number = ' '.join([p[0] for p in parsed if p[1] == 'AddressNumber'])
     street_dir = ' '.join([p[0] for p in parsed if p[1] == 'StreetNamePreDirectional'])
     street_name = ' '.join([p[0] for p in parsed if p[1] == 'StreetName'])
@@ -177,18 +177,17 @@ def parse_address(address):
 
 def get_lot_address(address, pin):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
-    longitude, latitude = get_lon_lat(pin)
+    ward = get_ward(pin)
     add_info = {
         'street': address,
         'street_number': street_number,
         'street_dir': street_dir,
         'street_name': street_name,
         'street_type': street_type,
-        'longitude': longitude,
-        'latitude': latitude,
         'city': 'Chicago',
         'state': 'IL',
         'zip_code': '',
+        'ward': ward
     }
     add_obj, created = Address.objects.get_or_create(**add_info)
     return add_obj
@@ -201,6 +200,7 @@ def apply(request):
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
         if form.is_valid():
+            print(form.cleaned_data['lot_1_pin'])
             l1_address = get_lot_address(form.cleaned_data['lot_1_address'],
                                          form.cleaned_data['lot_1_pin'])
             lot1_info = {
@@ -215,6 +215,7 @@ def apply(request):
                 lot1.save()
             lot2 = None
             if form.cleaned_data.get('lot_2_pin'):
+                print(form.cleaned_data['lot_2_pin'])
                 l2_address = get_lot_address(form.cleaned_data['lot_2_address'],
                                              form.cleaned_data['lot_2_pin'])
                 lot2_info = {
@@ -234,6 +235,7 @@ def apply(request):
                 'zip_code': form.cleaned_data['contact_zip_code']
             }
             c_address, created = Address.objects.get_or_create(**c_address_info)
+            print(form.cleaned_data['owned_pin'])
             owned_address = get_lot_address(form.cleaned_data['owned_address'],
                                             form.cleaned_data['owned_pin'])
 

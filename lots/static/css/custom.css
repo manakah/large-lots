@@ -225,11 +225,15 @@ table#received tfoot td {
     color: #9D9C9C;
 }
 
-td.bulk, th.bulk, td.ball, th.ball { text-align: center; }
+td.bulk, th.bulk, td.ball, th.ball, td.ward { text-align: center; }
 
 button.bulk { float: right; }
 
-div.empty { padding-top: 18%; }
+select.bulk {
+    width: 100%;
+    margin-bottom: 1em;
+    margin-top: 20px;
+}
 
 #letter-checkbox { padding-left: 0; }
 
