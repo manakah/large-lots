@@ -10,11 +10,10 @@ class Address(models.Model):
     street_dir = models.CharField(max_length=2, null=True)
     street_name = models.CharField(max_length=50, null=True)
     street_type = models.CharField(max_length=10, null=True)
-    longitude = models.FloatField(null=True)
-    latitude = models.FloatField(null=True)
     city = models.CharField(max_length=20, default='Chicago')
     state = models.CharField(max_length=20, default='IL')
     zip_code = models.CharField(max_length=10, null=True)
+    ward = models.CharField(max_length=10, null=True)
 
     def __str__(self):
         return '%s %s, %s %s' % \
