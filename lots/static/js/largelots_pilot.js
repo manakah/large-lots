@@ -37,6 +37,7 @@ var LargeLots = {
       var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
       LargeLots.map.addLayer(layer);
 
+      // code for info box bubble
       LargeLots.info = L.control({position: 'bottomright'});
 
       LargeLots.info.onAdd = function (map) {
@@ -50,17 +51,16 @@ var LargeLots = {
         var date_formatted = '';
         if (props) {
           var info = '';
-          if(props.street_number){
+          if(props.street_name){
               info += "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-              info += "<p>PIN: " + props.pin_nbr + "<br />";
+              info += "Community: " + props.community + "<br />";
+              info += "Ward: " + props.ward + "<br />";
+              info += "PIN: " + props.pin + "<br />";
           }
-          // if (props.zoning_classification){
-          //     info += "Zoned: " + props.zoning_classification + "<br />";
-          // }
-          // if (props.sq_ft){
-          //     info += "Sq Ft: " + props.sq_ft + "<br />";
-          // }
-          this._div.innerHTML  = info;
+          if (props.square_feet){
+              info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";
+          }
+          this._div.innerHTML = info;
         }
       };
 
@@ -70,7 +70,7 @@ var LargeLots = {
 
       LargeLots.info.addTo(LargeLots.map);
 
-      var fields = "pin, pin_nbr, street_name, street_direction, street_type, city_owned_ind, residential"
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, square_feet, ward, community"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -179,7 +179,6 @@ var LargeLots = {
   },
 
   selectParcel: function (props){
-      // console.log(props)
       var address = LargeLots.formatAddress(props);
       var pin_formatted = LargeLots.formatPin(props.pin_nbr);
 

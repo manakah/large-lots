@@ -121,7 +121,7 @@ table a, .table a { text-decoration: none; }
     z-index: 100;
 }
 
-.infoOwned, .infoApplied, .infoOtherApplicants, .locationsLegend {
+.info, .infoOwned, .infoApplied, .infoOtherApplicants, .locationsLegend {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
     background: white;
