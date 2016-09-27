@@ -68,7 +68,7 @@ class ApplicationStep(models.Model):
 
 class Review(models.Model):
     reviewer = models.ForeignKey(User)
-    step_completed = models.IntegerField()
+    step_completed = models.IntegerField(null=True)
     denial_reason = models.ForeignKey('DenialReason', null=True)
     email_sent = models.BooleanField()
     application = models.ForeignKey('ApplicationStatus', blank=True, null=True)

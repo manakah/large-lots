@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% load staticfiles %}
+{% load lots_filters %}
+{% block title %}Deny applications{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-md-12">
+    <h3>Deny application?</h3>
+    <p>You are about to deny these applications.</p>
+    <p>If you want to continue, add a denial reason (optional). If not, then remove the application from the list.</p>
+
+    <form role="form" method="POST" action="{% url 'bulk_deny_submit' %}">
+      {% for a in applications %}
+        <ul>
+          <li>
+            {{ a.application.first_name }} {{ a.application.last_name }}</br>
+            Application for Lot #{{ a.lot.pin }}</br>
+            {% csrf_token %}
+            <input type="hidden" name="application" value='{{ a.id }}'>
+            <select name='denial-reason' class="bulk">
+                <option value="none">None</option>
+                <option value="letter">Alderman did not provide letter of support</option>
+                <option value="EDS">Incomplete information on EDS and principal profile</option>
+                <option value="debts">Applicant did not pay city debts</option>
+                <option value="commission">Plan Commission did not approve application</option>
+                <option value="city-council">City Council did not approve application</option>
+            </select>
+            <div class="checkbox">
+              <label>
+                <input name="remove" value="{{ a.id }}" type="checkbox"/>
+                Do not deny: remove from list
+              </label>
+            </div>
+          </li>
+        </ul>
+      {% endfor %}
+      <button type="submit" class="btn btn-success bulk"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Deny applications</button>
+      <p>In clicking this button, all applicants on this list will receive an email notification.</p>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

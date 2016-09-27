@@ -19,7 +19,7 @@
 </div> -->
 
 <!-- Form for bulk submit. -->
-<form role="form" method="POST" action="{% url 'alderman_advance_submit' %}">
+<form role="form" method="POST" action="{% url 'bulk_submit' %}">
     <div class="row">
         <div class='col-md-8'>
             <h3>
@@ -31,20 +31,22 @@
                 Applications received
                 <small><a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
             </h3>
-            <h3>
-                <!-- Check for applications that have not advanced through Steps 2 and 3. -->
-                {% if before_step4 %}
-                    {{ before_step4|length }} Applications to review before "Multiple applicant check"
-                {% else %}
-                    {{ on_step4|length }} Applications on "Multiple applicant check" to complete
-                {% endif %}
-            </h3>
         </div>
 
         <div class="col-md-4">
-            <div class="empty"></div>
-            {% if alderman_letter %}
-                <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Alderman letter: Bulk submit</button>
+            {% if dropdown %}
+                <p class="bulk wait">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
+            {% else %}
+                {% csrf_token %}
+                <select name='step' class="bulk">
+                    <option value="step6">Complete step 6: Alderman letter of support</option>
+                    <option value="step7">Complete step 7: Submit EDS and principal profile</option>
+                    <option value="step8">Complete step 8: Certify as free and clear of debts</option>
+                    <option value="step9">Complete step 9: Approval by Plan Commission</option>
+                    <option value="step10">Complete step 10: Approval by City Council</option>
+                    <option value="deny">Deny application</option>
+                </select>
+                <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Update selected</button>
             {% endif %}
         </div>
     </div>
@@ -55,6 +57,7 @@
             <th>Date received</th>
             <th>Name/Organization</th>
             <th>Details</th>
+            <th class="no-wrap">Lot ward</th>
             <th class="no-wrap">Next review step</th>
     <!--         <th class="bulk">Bulk review</th> -->
         </thead>
@@ -82,12 +85,13 @@
                     <a href="/review-status-log/{{ applicant.id }}">
                         Review history
                     </a></br>
-                    <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a>
+                    <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
                 </td>
-                <!-- Add data-order attribute to sort by step. -->
+                <td class="ward">{{ applicant.lot.address.ward }}</td>
+                <!-- Add data-order attribute to sort by step. Show next step in table-->
                 {% if applicant.current_step %}
                 <td data-order='{{ applicant.current_step.step }}'>
-                    {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 or applicant.current_step.step == 7 %}
+                    {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 %}
                         <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
                     {% elif applicant.current_step.step == 4 %}
                         {% if before_step4 %}
@@ -98,20 +102,24 @@
                         {% endif %}
                     {% elif applicant.current_step.step == 5 %}
                        <a href="/lottery/">Lottery</a>
-                    {% elif applicant.current_step.step == 6 %}
+                    {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
                         <div class='col-sm-10' id="letter-checkbox">
                             {{ applicant.current_step }}</br>
-                            <span class='wait'>Waiting for decision</span>
+                            <span class='wait'>Ready for bulk submit</span>
                         </div>
-                        {% csrf_token %}
-                        <div class="form-group col-sm-2">
-                            <div class="checkbox">
-                              <label>
-                                <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
-                              </label>
+                        {% if dropdown|length == 0 %}
+                            {% csrf_token %}
+                            <div class="form-group col-sm-2">
+                                <div class="checkbox">
+                                  <label>
+                                    <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
+                                  </label>
+                                </div>
                             </div>
-                        </div>
+                        {% endif %}
                     {% else %}
+                        Sold</br>
+                        <span class="wait">Official closing event to be held</span>
                     {% endif %}
                 </td>
                 {% else %}
