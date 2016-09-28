@@ -21,7 +21,7 @@
 <!-- Form for bulk submit. -->
 <form role="form" method="POST" action="{% url 'bulk_submit' %}">
     <div class="row">
-        <div class='col-md-8'>
+        <div class='col-md-7'>
             <h3>
                 {% if application_status_list %}
                     {{ application_status_list|length }}
@@ -33,12 +33,14 @@
             </h3>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
             {% if on_steps2345 %}
                 <p class="bulk wait">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
             {% else %}
                 {% csrf_token %}
-                <select name='step' class="bulk">
+
+                <select name='step' class="form-control update">
+                    <option>-----------------</option>
                     <option value="step6">Complete step 6: Alderman letter of support</option>
                     <option value="step7">Complete step 7: Submit EDS and principal profile</option>
                     <option value="step8">Complete step 8: Certify as free and clear of debts</option>
@@ -46,8 +48,8 @@
                     <option value="step10">Complete step 10: Approval by City Council</option>
                     <option value="deny">Deny application</option>
                 </select>
-                <!-- Make this button an add-on -->
-                <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Update selected</button>
+                <button type="submit" class="btn btn-success update"><i class="fa fa-check" aria-hidden="true"></i> Update</button>
+
             {% endif %}
         </div>
     </div>

@@ -227,12 +227,15 @@ table#received tfoot td {
 
 td.bulk, th.bulk, td.ball, th.ball, td.ward { text-align: center; }
 
-button.bulk { float: right; }
+button.update {
+    display: inline-block;
+    height: 36px;
+}
 
-select.bulk {
-    width: 100%;
-    margin-bottom: 1em;
+select.update {
+    width: 70%;
     margin-top: 20px;
+    display: inline-block;
 }
 
 #letter-checkbox { padding-left: 0; }
