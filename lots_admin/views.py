@@ -57,18 +57,20 @@ def lots_admin(request):
     step3 = Q(current_step__step=3)
     step4 = Q(current_step__step=4)
     step5 = Q(current_step__step=5)
-    application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT)
+    application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT).exclude(denied=True)
+    denied_application_list = ApplicationStatus.objects.filter(denied=True)
     before_step4 = ApplicationStatus.objects.filter(step2 | step3)
-    on_step4 = ApplicationStatus.objects.filter(current_step__step=4)
-    dropdown = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
+    on_steps2345 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
+    app_count = len(application_status_list) + len(denied_application_list)
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
+        'denied_application_list': denied_application_list,
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
-        'on_step4': on_step4,
-        'dropdown': dropdown
+        'on_steps2345': on_steps2345,
+        'app_count': app_count
         })
 
 @login_required(login_url='/lots-login/')
@@ -173,7 +175,7 @@ def deny_submit(request, application_id):
     application_status.current_step = None
     application_status.save()
 
-    send_email(request, application_status, "deny")
+    send_email(request, application_status)
 
     return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -247,7 +249,7 @@ def deed_check_submit(request, application_id):
                 app.current_step = None
                 app.save()
 
-                send_email(request, app, "deny")
+                send_email(request, app)
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -371,9 +373,6 @@ def multiple_location_check_submit(request, application_id):
                 review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
                 review.save()
 
-                # Send lottery applicants an email notification.
-                send_email(request, a, "lottery")
-
         else:
             # Move winning application to Step 6.
             step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
@@ -396,7 +395,7 @@ def multiple_location_check_submit(request, application_id):
             a.current_step = None
             a.save()
 
-            send_email(request, a, "deny")
+            send_email(request, a)
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -449,7 +448,7 @@ def lottery_submit(request):
             a.current_step = None
             a.save()
 
-            send_email(request, a, "deny")
+            send_email(request, a)
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -544,16 +543,13 @@ def bulk_deny(request):
 def bulk_deny_submit(request):
     user = request.user
     denial_reasons = request.POST.getlist('denial-reason')
+    no_deny_ids = request.POST.getlist('remove')
     apps = request.POST.getlist('application')
     app_ids = [int(i) for i in apps]
-    no_deny_ids = request.POST.getlist('remove')
-    print(app_ids)
-    print(denial_reasons)
-    print(no_deny_ids)
-    apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
-    print(apps_to_deny)
+
     dictionary = dict(zip(app_ids, denial_reasons))
-    print(dictionary)
+    apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
+
     for a in apps_to_deny:
         dict_reason = dictionary[a.id]
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS[dict_reason])
@@ -564,24 +560,53 @@ def bulk_deny_submit(request):
         a.current_step = None
         a.save()
 
-        send_email(request, a, "deny")
+        send_email(request, a)
 
     return HttpResponseRedirect(reverse('lots_admin'))
 
+@login_required(login_url='/lots-login/')
+def status_tally(request):
+    total = ApplicationStatus.objects.all()
+    step2 = ApplicationStatus.objects.filter(current_step__step=2)
+    step3 = ApplicationStatus.objects.filter(current_step__step=3)
+    step4 = ApplicationStatus.objects.filter(current_step__step=4)
+    step5 = ApplicationStatus.objects.filter(current_step__step=5)
+    step6 = ApplicationStatus.objects.filter(current_step__step=6)
+    step7 = ApplicationStatus.objects.filter(current_step__step=7)
+    step8 = ApplicationStatus.objects.filter(current_step__step=8)
+    step9 = ApplicationStatus.objects.filter(current_step__step=9)
+    step10 = ApplicationStatus.objects.filter(current_step__step=10)
+    sold = ApplicationStatus.objects.filter(current_step__step=11)
+    denied = ApplicationStatus.objects.filter(denied=True)
+
+    return render(request, 'status-tally.html', {
+        'total': total,
+        'step2': step2,
+        'step3': step3,
+        'step4': step4,
+        'step5': step5,
+        'step6': step6,
+        'step7': step7,
+        'step8': step8,
+        'step9': step9,
+        'step10': step10,
+        'sold': sold,
+        'denied': denied
+        })
 
 def next_step(description_key, status, step_int, application):
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
         application.current_step = step
         application.save()
 
-def send_email(request, application_status, email_type):
+def send_email(request, application_status):
     app = application_status.application
     lot = application_status.lot
     review = Review.objects.filter(application=application_status).latest('id')
 
     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
-    html = email_type + "_html_email.html"
-    txt = email_type + "_text_email.txt"
+    html = "deny_html_email.html"
+    txt = "deny_text_email.txt"
     html_template = get_template(html)
     text_template = get_template(txt)
     html_content = html_template.render(context)

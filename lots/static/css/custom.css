@@ -204,19 +204,15 @@ td input[type="radio"] {
 }
 
 /*Styles for admin.html and DataTable */
-table#received thead th, table#received {
+table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, table#deniedTable {
   border-bottom: 0;
 }
 
-table#received tfoot td {
-  border-top: 2px solid #f9f9f9;
-}
-
-#received_filter {
+#receivedTable_filter, #deniedTable_filter {
     float: left;
 }
 
-#received_length {
+#receivedTable_length, #deniedTable_length {
     float: right;
 }
 
@@ -225,20 +221,42 @@ table#received tfoot td {
     color: #9D9C9C;
 }
 
+.info-text {
+    font-style: italic;
+    color: #9D9C9C;
+    padding-top: 12px;
+}
+
 td.bulk, th.bulk, td.ball, th.ball, td.ward { text-align: center; }
 
-button.bulk { float: right; }
+button.update {
+    display: inline-block;
+    height: 36px;
+}
 
-select.bulk {
-    width: 100%;
-    margin-bottom: 1em;
+select.update {
+    width: 70%;
     margin-top: 20px;
+    display: inline-block;
 }
 
 #letter-checkbox { padding-left: 0; }
 
+.right-nav {
+    float: right;
+    font-size: 16px;
+}
+
+.table-info {
+    background-color: rgba(161,40,93,0.1)
+}
+
 /* Style for review_status_log.html */
 .review-header { color: #9D9C9C; }
+
+ul.nav-wizard li {
+    padding: 0 10px 0 22px;
+}
 
 /* Styles for deed-check.html*/
 #pdf-embed { margin-top: 20px; }
@@ -316,4 +334,20 @@ button.winners {
 
 thead#table-stripe {
     background-color: #f9f9f9;
+}
+
+/* Styles for bulk_deny.html */
+ul.bulk-deny {
+    list-style: none;
+    padding: 0;
+}
+
+.bulk-deny li:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.bulk-deny li { padding: 1em; }
+
+select.bulk-deny {
+    width: 60%;
 }
