@@ -174,7 +174,7 @@ def deny_submit(request, application_id):
     application_status.current_step = None
     application_status.save()
 
-    send_email(request, application_status, "deny")
+    send_email(request, application_status)
 
     return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -248,7 +248,7 @@ def deed_check_submit(request, application_id):
                 app.current_step = None
                 app.save()
 
-                send_email(request, app, "deny")
+                send_email(request, app)
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -372,9 +372,6 @@ def multiple_location_check_submit(request, application_id):
                 review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
                 review.save()
 
-                # Send lottery applicants an email notification.
-                send_email(request, a, "lottery")
-
         else:
             # Move winning application to Step 6.
             step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
@@ -397,7 +394,7 @@ def multiple_location_check_submit(request, application_id):
             a.current_step = None
             a.save()
 
-            send_email(request, a, "deny")
+            send_email(request, a)
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -450,7 +447,7 @@ def lottery_submit(request):
             a.current_step = None
             a.save()
 
-            send_email(request, a, "deny")
+            send_email(request, a)
 
         return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -545,16 +542,13 @@ def bulk_deny(request):
 def bulk_deny_submit(request):
     user = request.user
     denial_reasons = request.POST.getlist('denial-reason')
+    no_deny_ids = request.POST.getlist('remove')
     apps = request.POST.getlist('application')
     app_ids = [int(i) for i in apps]
-    no_deny_ids = request.POST.getlist('remove')
-    print(app_ids)
-    print(denial_reasons)
-    print(no_deny_ids)
-    apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
-    print(apps_to_deny)
+
     dictionary = dict(zip(app_ids, denial_reasons))
-    print(dictionary)
+    apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
+
     for a in apps_to_deny:
         dict_reason = dictionary[a.id]
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS[dict_reason])
@@ -565,7 +559,7 @@ def bulk_deny_submit(request):
         a.current_step = None
         a.save()
 
-        send_email(request, a, "deny")
+        send_email(request, a)
 
     return HttpResponseRedirect(reverse('lots_admin'))
 
@@ -575,14 +569,14 @@ def next_step(description_key, status, step_int, application):
         application.current_step = step
         application.save()
 
-def send_email(request, application_status, email_type):
+def send_email(request, application_status):
     app = application_status.application
     lot = application_status.lot
     review = Review.objects.filter(application=application_status).latest('id')
 
     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
-    html = email_type + "_html_email.html"
-    txt = email_type + "_text_email.txt"
+    html = "deny_html_email.html"
+    txt = "deny_text_email.txt"
     html_template = get_template(html)
     text_template = get_template(txt)
     html_content = html_template.render(context)

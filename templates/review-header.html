@@ -5,8 +5,14 @@
   <li class="{% if app.current_step.step == 3 %} active {% endif %}">Step 3{% if app.current_step.step == 3 %}: Location check {% endif %}</li>
   <li class="{% if app.current_step.step == 4 %} active {% endif %}">Step 4{% if app.current_step.step == 4 %}: Multiple applicant check{% endif %}</li>
   <li class="{% if app.current_step.step == 5 %} active {% endif %}">Step 5{% if app.current_step.step == 5 %}: Lottery{% endif %}</li>
-  <li class="{% if app.current_step.step == 6 %} active {% endif %}">Step 6{% if app.current_step.step == 6 %}: Alderman letter of support{% endif %}</li>
-  <li class="{% if app.current_step.step == 7 %} active {% endif %}">Step 7{% if app.current_step.step == 7 %}: Submit EDS and principal profile {% endif %}</li>
+  <li class="{% if app.current_step.step == 6 %} active {% endif %}">Step 6{% if app.current_step.step == 6 %}: Alderman letter{% endif %}</li>
+  <li class="{% if app.current_step.step == 7 %} active {% endif %}">Step 7{% if app.current_step.step == 7 %}: Submit EDS {% endif %}</li>
+  <li class="{% if app.current_step.step == 8 %} active {% endif %}">Step 8{% if app.current_step.step == 8 %}: Certify as debt free{% endif %}</li>
+  <li class="{% if app.current_step.step == 9 %} active {% endif %}">Step 9{% if app.current_step.step == 9 %}: Approval by Plan Commission {% endif %}</li>
+  <li class="{% if app.current_step.step == 10 %} active {% endif %}">Step 10{% if app.current_step.step == 10 %}: Approval by City Council {% endif %}</li>
+  {% if app.current_step.step == 11 %}
+    <li class="active">Sold</li>
+  {% endif %}
   {% if app.denied == True %}
     <li class="active">Denied</li>
   {% endif %}

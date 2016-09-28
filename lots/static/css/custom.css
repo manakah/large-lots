@@ -240,8 +240,13 @@ select.update {
 
 #letter-checkbox { padding-left: 0; }
 
+
 /* Style for review_status_log.html */
 .review-header { color: #9D9C9C; }
+
+ul.nav-wizard li {
+    padding: 0 10px 0 22px;
+}
 
 /* Styles for deed-check.html*/
 #pdf-embed { margin-top: 20px; }
@@ -319,4 +324,20 @@ button.winners {
 
 thead#table-stripe {
     background-color: #f9f9f9;
+}
+
+/* Styles for bulk_deny.html */
+ul.bulk-deny {
+    list-style: none;
+    padding: 0;
+}
+
+.bulk-deny li:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.bulk-deny li { padding: 1em; }
+
+select.bulk-deny {
+    width: 60%;
 }
