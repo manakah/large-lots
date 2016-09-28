@@ -19,19 +19,19 @@
             {% if form %}
             <small class='open'>Open</small>
             {% else %}
-              {% if applications|length >= 1500 %}
-                <small class='closed'>Closed</small>
-              {% else %}
-                <small class='closed'>Opens on Oct 1st, 2016</small>
-              {% endif %}
+            <small class='closed'>Opens on Oct 1st, 2016</small>
             {% endif %}
         </h1>
 
         <p>If you own land on the South or West sides of Chicago, you can <strong>buy up to two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
 
-        <p>Applications will be accepted beginning <strong>October 1, 2016</strong>. The application period will end after <strong>1,500 applications</strong> are received. To date, the City has received <strong>{{ applications|length }} applications</strong>.</p>
+        <p>Applications will be accepted beginning <strong>Oct 1, 2016</strong>. The application period will end on <strong>Oct 31, 2016 at midnight</strong>.</p>
 
         <p>For more information, read the <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
+
+        <!-- TODO: Make the application counter fancier. -->
+        <p>The City has received <strong>{{ applications|length }} applications</strong>.</p>
+
         {% if form %}
             <div class='row'>
               <div class='col-md-12'>

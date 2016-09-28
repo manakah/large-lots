@@ -17,8 +17,9 @@
             <div class='col-md-8'>
               <h3>Large Lots 6: Citywide Expansion <small class='open'>Open</small></h3>
 
-              <p>The sixth Large Lot Program is open throughout the South and West sides of Chicago. Applications will be accepted beginning <strong>October 1st, 2016</strong>. The application period will end after <strong>1,500 applications</strong> are received. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
-              <p><strong>{{ applications|length }} of 1,500 applications received</strong></p>
+              <p>The sixth Large Lot Program is open throughout the South and West sides of Chicago. Applications will be accepted beginning <strong>Oct 1st, 2016</strong>. The application period will end on <strong>Oct 31st, 2016 at midnight</strong>. <a href='{% url "apply" %}'>Apply for a lot today!</a></p>
+              <!-- TODO: Make application counter fancier. -->
+              <p>The City has received <strong>{{ applications|length }} applications</strong>.</p>
               <p><a href='{% url "apply" %}' class="btn btn-success btn-lg">Apply for a lot</a></p>
 
             </div>
@@ -26,19 +27,12 @@
               <p><a href='{% url "apply" %}'><img src='{% static "images/phase-6-screenshot-1.jpg" %}' class='img-responsive img-thumbnail' alt='Citywide' /></a></p>
             </div>
         {% else %}
-          {% if applications|length >= 1500 %}
-          <div class='col-md-8'>
-            <h3>Large Lots 6: Citywide Expansion <small class='closed'>Closed</small></h3>
-            <p>The sixth Large Lot Program has ended. The City reached its <strong>application limit of 1,500</strong>.</p>
-            <p>Check back soon for updates!</p>
-          </div>
-          {% else %}
           <div class='col-md-8'>
             <h3>Large Lots 6: Citywide <small class='closed'>Opens on Oct 1st, 2016</small></h3>
-            <p> The sixth Large Lot Program opens Citywide on <strong>Oct 1st, 2016 at 12:00 a.m.</strong></p>
+            <p> The sixth Large Lot Program opens Citywide on <strong>Oct 1st, 2016 at 12:00 a.m.</strong> and closes on <strong>Oct 31st, 2016 at midnight</strong>.</p>
             <p>Check back soon for updates!</p>
           </div>
-          {% endif %}
+
           <div class='col-md-4'>
             <p><img src='{% static "images/phase-6-screenshot-1.jpg" %}' class='img-responsive img-thumbnail' alt='Citywide' /></p>
           </div>
