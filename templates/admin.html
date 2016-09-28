@@ -34,7 +34,7 @@
         </div>
 
         <div class="col-md-4">
-            {% if dropdown %}
+            {% if on_steps2345 %}
                 <p class="bulk wait">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
             {% else %}
                 {% csrf_token %}
@@ -46,6 +46,7 @@
                     <option value="step10">Complete step 10: Approval by City Council</option>
                     <option value="deny">Deny application</option>
                 </select>
+                <!-- Make this button an add-on -->
                 <button type="submit" class="btn btn-success bulk"><i class="fa fa-check" aria-hidden="true"></i> Update selected</button>
             {% endif %}
         </div>
@@ -57,9 +58,8 @@
             <th>Date received</th>
             <th>Name/Organization</th>
             <th>Details</th>
-            <th class="no-wrap">Lot ward</th>
+            <th>Ward</th>
             <th class="no-wrap">Next review step</th>
-    <!--         <th class="bulk">Bulk review</th> -->
         </thead>
         <tbody>
         {% for applicant in application_status_list %}
@@ -88,26 +88,31 @@
                     <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
                 </td>
                 <td class="ward">{{ applicant.lot.address.ward }}</td>
-                <!-- Add data-order attribute to sort by step. Show next step in table-->
+
                 {% if applicant.current_step %}
                 <td data-order='{{ applicant.current_step.step }}'>
+                    <!-- Steps 2 and 3 -->
                     {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
+                    <!-- Step 4 -->
                     {% elif applicant.current_step.step == 4 %}
-                        {% if before_step4 %}
-                           {{ applicant.current_step }}</br>
+                        {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
+                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
                             <span class='wait'>Waiting for other applications</span>
                         {% else %}
-                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> {{ applicant.current_step }}</a>
+                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
                         {% endif %}
+                    <!-- Step 5 -->
                     {% elif applicant.current_step.step == 5 %}
-                       <a href="/lottery/">Lottery</a>
+                        <a href="/lottery/">Step {{ applicant.current_step.step }}: Lottery</a>
+                    <!-- Steps 6-10 -->
                     {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
                         <div class='col-sm-10' id="letter-checkbox">
-                            {{ applicant.current_step }}</br>
-                            <span class='wait'>Ready for bulk submit</span>
+                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
+                            {% if on_steps2345|length == 0 %}<span class='wait'>Ready for bulk submit</span>{% endif %}
                         </div>
-                        {% if dropdown|length == 0 %}
+                        </div>
+                        {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
                             {% csrf_token %}
                             <div class="form-group col-sm-2">
                                 <div class="checkbox">
@@ -117,6 +122,7 @@
                                 </div>
                             </div>
                         {% endif %}
+                    <!-- Step 11: Sold -->
                     {% else %}
                         Sold</br>
                         <span class="wait">Official closing event to be held</span>
@@ -125,6 +131,7 @@
                 {% else %}
                 <td data-order="99">None</td>
                 {% endif %}
+                <!-- End Next Step -->
             </tr>
         {% endfor %}
         </tbody>
