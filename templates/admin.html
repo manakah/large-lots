@@ -6,36 +6,28 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
-<!-- <div class="row">
+<div class="row">
     <div class="col-md-12">
-        <ul class="nav nav-pills">
-            {% for k,v in pilot_info.items %}
-                <li {% if k == selected_pilot %}class='active'{% endif %}>
-                    <a href="{% url 'pilot_admin' k %}">{{v.human_name}}</a>
-                </li>
-            {% endfor %}
-        </ul>
+        <div class="right-nav">
+            <a href="#" id="viewMode"><i class="fa fa-table" aria-hidden="true"></i> Denied applications</a> |
+            <a href="/status-tally/"><i class="fa fa-list-ul" aria-hidden="true"></i> Status tally</a>
+        </div>
     </div>
-</div> -->
+</div>
 
 <!-- Form for bulk submit. -->
 <form role="form" method="POST" action="{% url 'bulk_submit' %}">
     <div class="row">
         <div class='col-md-7'>
             <h3>
-                {% if application_status_list %}
-                    {{ application_status_list|length }}
-                {% else %}
-                    0
-                {% endif %}
-                Applications received
+                Large Lots received {{app_count}} applications
                 <small><a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
             </h3>
         </div>
 
-        <div class="col-md-5">
+        <div class="col-md-5" id="bulkDiv">
             {% if on_steps2345 %}
-                <p class="bulk wait">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
+                <p class="info-text">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
             {% else %}
                 {% csrf_token %}
 
@@ -54,17 +46,105 @@
         </div>
     </div>
 
-    <table id="received" class="table table-striped tablesorter">
+    <div id="receivedDiv">
+        <table id="receivedTable" class="table table-striped tablesorter">
+            <thead>
+                <th>ID</th>
+                <th>Date received</th>
+                <th>Name/Organization</th>
+                <th>Details</th>
+                <th>Ward</th>
+                <th class="no-wrap">Next review step</th>
+            </thead>
+            <tbody>
+            {% for applicant in application_status_list %}
+                <tr>
+                    <td>
+                        {{applicant.application.id}}
+                    </td>
+                    <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
+                    <td>
+                        {{applicant.application.first_name}} {{applicant.application.last_name}}
+                        {% if applicant.application.organization %}
+                        <br />
+                          {{applicant.application.organization}}
+                        {% endif %}
+                    </td>
+                    <td class="no-wrap">
+                        {% if applicant.denied %}
+                            Status: denied
+                        {% else %}
+                            Status: {{ applicant.current_step.public_status }}
+                        {% endif %}
+                        </br>
+                        <a href="/review-status-log/{{ applicant.id }}">
+                            Review history
+                        </a></br>
+                        <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
+                    </td>
+                    <td class="ward">{{ applicant.lot.address.ward }}</td>
+
+                    {% if applicant.current_step %}
+                    <td data-order='{{ applicant.current_step.step }}'>
+                        <!-- Steps 2 and 3 -->
+                        {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 %}
+                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
+                        <!-- Step 4 -->
+                        {% elif applicant.current_step.step == 4 %}
+                            {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
+                                Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
+                                <span class='wait'>Waiting for other applications</span>
+                            {% else %}
+                                <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
+                            {% endif %}
+                        <!-- Step 5 -->
+                        {% elif applicant.current_step.step == 5 %}
+                            <a href="/lottery/">Step {{ applicant.current_step.step }}: Lottery</a>
+                        <!-- Steps 6-10 -->
+                        {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
+                            <div class='col-sm-10' id="letter-checkbox">
+                                Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
+                                {% if on_steps2345|length == 0 %}<span class='wait'>Ready for bulk submit</span>{% endif %}
+                            </div>
+                            </div>
+                            {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
+                                {% csrf_token %}
+                                <div class="form-group col-sm-2">
+                                    <div class="checkbox">
+                                      <label>
+                                        <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
+                                      </label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        <!-- Step 11: Sold -->
+                        {% else %}
+                            Sold</br>
+                            <span class="wait">Official closing event to be held</span>
+                        {% endif %}
+                    </td>
+                    {% else %}
+                    <td data-order="99">None</td>
+                    {% endif %}
+                    <!-- End Next Step -->
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<div id="deniedDiv" style="display: none">
+    <table id="deniedTable" class="table table-striped tablesorter">
         <thead>
             <th>ID</th>
             <th>Date received</th>
             <th>Name/Organization</th>
             <th>Details</th>
             <th>Ward</th>
-            <th class="no-wrap">Next review step</th>
         </thead>
         <tbody>
-        {% for applicant in application_status_list %}
+        {% for applicant in denied_application_list %}
             <tr>
                 <td>
                     {{applicant.application.id}}
@@ -78,11 +158,7 @@
                     {% endif %}
                 </td>
                 <td class="no-wrap">
-                    {% if applicant.denied %}
                         Status: denied
-                    {% else %}
-                        Status: {{ applicant.current_step.public_status }}
-                    {% endif %}
                     </br>
                     <a href="/review-status-log/{{ applicant.id }}">
                         Review history
@@ -90,55 +166,11 @@
                     <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
                 </td>
                 <td class="ward">{{ applicant.lot.address.ward }}</td>
-
-                {% if applicant.current_step %}
-                <td data-order='{{ applicant.current_step.step }}'>
-                    <!-- Steps 2 and 3 -->
-                    {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
-                    <!-- Step 4 -->
-                    {% elif applicant.current_step.step == 4 %}
-                        {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
-                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
-                            <span class='wait'>Waiting for other applications</span>
-                        {% else %}
-                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
-                        {% endif %}
-                    <!-- Step 5 -->
-                    {% elif applicant.current_step.step == 5 %}
-                        <a href="/lottery/">Step {{ applicant.current_step.step }}: Lottery</a>
-                    <!-- Steps 6-10 -->
-                    {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
-                        <div class='col-sm-10' id="letter-checkbox">
-                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
-                            {% if on_steps2345|length == 0 %}<span class='wait'>Ready for bulk submit</span>{% endif %}
-                        </div>
-                        </div>
-                        {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
-                            {% csrf_token %}
-                            <div class="form-group col-sm-2">
-                                <div class="checkbox">
-                                  <label>
-                                    <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
-                                  </label>
-                                </div>
-                            </div>
-                        {% endif %}
-                    <!-- Step 11: Sold -->
-                    {% else %}
-                        Sold</br>
-                        <span class="wait">Official closing event to be held</span>
-                    {% endif %}
-                </td>
-                {% else %}
-                <td data-order="99">None</td>
-                {% endif %}
-                <!-- End Next Step -->
             </tr>
         {% endfor %}
         </tbody>
     </table>
-</form>
+</div>
 
 {% endblock %}
 {% block extra_js %}
@@ -146,10 +178,31 @@
     <script src="{% static 'js/jquery.dataTables.min.js' %}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#received').DataTable({
+            $('#receivedTable').DataTable({
                 "order": [[4, 'asc']],
                 "info": false,
                 "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
+            });
+
+            $('#deniedTable').DataTable({
+                "order": [[0, 'asc']],
+                "info": false,
+                "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
+            });
+
+            $('#viewMode').click(function(){
+                if ($('#receivedDiv').is(":visible")){
+                  $('#viewMode').html('<i class="fa fa-table" aria-hidden="true"></i> Applications to review');
+                  $('#receivedDiv').hide();
+                  $('#deniedDiv').show();
+                  $('#bulkDiv').hide();
+                }
+                else {
+                  $('#viewMode').html('<i class="fa fa-table" aria-hidden="true"></i> Denied applications');
+                  $('#receivedDiv').show();
+                  $('#deniedDiv').hide();
+                  $('#bulkDiv').show();
+                }
             });
         })
     </script>

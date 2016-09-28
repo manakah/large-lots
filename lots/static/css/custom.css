@@ -204,25 +204,27 @@ td input[type="radio"] {
 }
 
 /*Styles for admin.html and DataTable */
-table#received thead th, table#received {
+table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, table#deniedTable {
   border-bottom: 0;
 }
 
-table#received tfoot td {
-  border-top: 2px solid #f9f9f9;
-}
-
-#received_filter {
+#receivedTable_filter, #deniedTable_filter {
     float: left;
 }
 
-#received_length {
+#receivedTable_length, #deniedTable_length {
     float: right;
 }
 
 .wait {
     font-style: italic;
     color: #9D9C9C;
+}
+
+.info-text {
+    font-style: italic;
+    color: #9D9C9C;
+    padding-top: 12px;
 }
 
 td.bulk, th.bulk, td.ball, th.ball, td.ward { text-align: center; }
@@ -240,6 +242,14 @@ select.update {
 
 #letter-checkbox { padding-left: 0; }
 
+.right-nav {
+    float: right;
+    font-size: 16px;
+}
+
+.table-info {
+    background-color: rgba(161,40,93,0.1)
+}
 
 /* Style for review_status_log.html */
 .review-header { color: #9D9C9C; }
