@@ -1,6 +1,7 @@
 from datetime import datetime
 import csv
 import json
+import re
 
 from operator import __or__ as OR
 from functools import reduce
@@ -33,7 +34,7 @@ def lots_login(request):
             user = form.get_user()
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('lots_admin'))
+                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
     else:
         form = AuthenticationForm()
     return render(request, 'lots_login.html', {'form': form})
@@ -52,34 +53,35 @@ def lots_admin_map(request):
     return render(request, 'admin-map.html', {'applied_pins': pins_str})
 
 @login_required(login_url='/lots-login/')
-def lots_admin(request):
+def lots_admin(request, step):
+    # Variables: list of step specific, denied, and all.
+    if step.isdigit():
+        step = int(step)
+        application_status_list = ApplicationStatus.objects.filter(current_step__step=step)
+    elif step == "denied":
+        application_status_list = ApplicationStatus.objects.filter(denied=True)
+    elif step == "all":
+        application_status_list = ApplicationStatus.objects.all()
     step2 = Q(current_step__step=2)
     step3 = Q(current_step__step=3)
     step4 = Q(current_step__step=4)
     step5 = Q(current_step__step=5)
-    application_status_list = ApplicationStatus.objects.filter(application__pilot=settings.CURRENT_PILOT).exclude(denied=True)
-    denied_application_list = ApplicationStatus.objects.filter(denied=True)
     before_step4 = ApplicationStatus.objects.filter(step2 | step3)
     on_steps2345 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
-    app_count = len(application_status_list) + len(denied_application_list)
+    app_count = len(ApplicationStatus.objects.all())
+
+    counter_range = range(2, 11)
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
-        'denied_application_list': denied_application_list,
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
         'on_steps2345': on_steps2345,
-        'app_count': app_count
+        'app_count': app_count,
+        'step': step,
+        'counter_range': counter_range
         })
-
-@login_required(login_url='/lots-login/')
-def pilot_admin(request, pilot):
-    applications = Application.objects.filter(pilot=pilot)
-    return render(request, 'admin.html', {
-        'applications': applications,
-        'selected_pilot': pilot,
-        'pilot_info': settings.PILOT_INFO})
 
 @login_required(login_url='/lots-login/')
 def csv_dump(request, pilot):
@@ -172,12 +174,13 @@ def deny_application(request, application_id):
 @login_required(login_url='/lots-login/')
 def deny_submit(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
+    # step_arg = str(application_status.current_step.step)
     application_status.current_step = None
     application_status.save()
 
     send_email(request, application_status)
 
-    return HttpResponseRedirect(reverse('lots_admin'))
+    return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
 
 
 @login_required(login_url='/lots-login/')
@@ -309,14 +312,14 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect(reverse('lots_admin'))
+                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
             else:
                 # No other applicants: move application to Step 6.
                 step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect(reverse('lots_admin'))
+                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
         else:
             # Deny application, since applicant does not live on same block as lot.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
@@ -403,7 +406,7 @@ def multiple_location_check_submit(request, application_id):
 
             send_email(request, a)
 
-        return HttpResponseRedirect(reverse('lots_admin'))
+        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
 
 @login_required(login_url='/lots-login/')
@@ -456,7 +459,7 @@ def lottery_submit(request):
 
             send_email(request, a)
 
-        return HttpResponseRedirect(reverse('lots_admin'))
+        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def review_EDS(request, application_id):
@@ -471,6 +474,7 @@ def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
     status = ApplicationStep.objects.all()
+    print(status)
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
@@ -482,6 +486,7 @@ def bulk_submit(request):
     if request.method == 'POST':
         user = request.user
         selected_step = request.POST.getlist('step')[0]
+        step_arg = re.sub('step', '', selected_step)
         selected_apps = request.POST.getlist('letter-received')
         selected_app_ids = [int(i) for i in selected_apps]
         applications = ApplicationStatus.objects.filter(id__in=selected_app_ids)
@@ -532,9 +537,9 @@ def bulk_submit(request):
                 request.session['application_ids'] = selected_app_ids
                 return HttpResponseRedirect('/bulk-deny')
             else:
-                return HttpResponseRedirect(reverse('lots_admin'))
+                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
-        return HttpResponseRedirect(reverse('lots_admin'))
+        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def bulk_deny(request):
@@ -568,7 +573,7 @@ def bulk_deny_submit(request):
 
         send_email(request, a)
 
-    return HttpResponseRedirect(reverse('lots_admin'))
+    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):

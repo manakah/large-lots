@@ -4,7 +4,7 @@ from lots_client.views import home, status_pilot_1, status_pilot_2, \
     apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
     get_pin_from_address
 
-from lots_admin.views import pilot_admin, lots_admin, lots_admin_map, csv_dump, lots_login, \
+from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, \
     multiple_applicant_check, multiple_location_check_submit, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
@@ -25,8 +25,9 @@ urlpatterns = [
     url(r'^about/$', about, name='about'),
     url(r'^lot-uses/(?P<use_id>\d+)/$', lot_uses_page, name='lot_uses_page'),
     url(r'^lot-uses/$', lot_uses, name='lot_uses'),
-    url(r'^lots-admin/(?P<pilot>\S+)/$', pilot_admin, name='pilot_admin'),
-    url(r'^lots-admin/$', lots_admin, name='lots_admin'),
+    # url(r'^lots-admin/$', lots_admin, name='lots_admin'),
+    url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
+
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
     url(r'^csv-dump/(?P<pilot>\S+)/$', csv_dump, name='csv_dump'),
     url(r'^lots-login/$', lots_login, name='lots_login'),
