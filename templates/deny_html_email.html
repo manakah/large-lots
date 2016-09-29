@@ -1,27 +1,70 @@
 {% load lots_filters %}
-<div class="row">
-    <div class="col-md-12">
-        <a id='logo' href="http://largelots.org">
-        <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
-        </a>
+
+<div style="font-family: Calibri, Arial, sans-serif; font-size: 14px;">
+    <div class="row">
+        <div class="col-md-12">
+            <a id='logo' href="http://largelots.org">
+            <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+            </a>
+            <p>{{ today|date:'F j, Y' }}</p>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <p>Hi {{ app.first_name }}.</p>
-        <p>Thanks, again, for your application to the Large Lots program in Chicago. We have reviewed your application for Lot #{{ lot.pin }} on {{ lot.address.street }}. Your application was denied because:
-        </p>
-        <p><strong>{{ review.denial_reason }}</strong></p>
-        <p>You can learn more about our evaluation process by visiting our <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
+    <div class="row">
+        <div class="col-md-12">
+            {{ app.first_name}} {{ app.last_name }}<br />
+            {{ app.owned_address }}
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <p><strong>If you have any questions, please contact:</strong></p>
-        <p>
-           Jeanne Chandler, Department of Planning and Development<br />
-           Phone: (312) 744-0605<br />
-           Email: Jeanne.Chandler@cityofchicago.org
-        </p>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Dear {{ app.first_name }},</p>
+            <p>Thank you for your application to the Large Lots program in Chicago. The City has reviewed your application for the following property:</p>
+            <p>
+                <strong>{{ lot.address.street }}</strong><br />
+                <strong>Pin #: {{ lot.pin }}</strong>
+            </p>
+            <p>Unfortunately, we have to deny your application, because
+            <strong>
+            <!-- Denial reasons for emails. Can be customized by Jeanne, if you wants. -->
+            {% if review.denial_reason|slugify == DENIAL_REASONS.document|slugify %}
+                you did not include a deed for the property that you own.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.church|slugify %}
+                the property that you own is a church.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.name|slugify %}
+                the name on your application does not match the name on your deed.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.address|slugify %}
+                the address given on your application does not match the address on your deed.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.nameaddress|slugify %}
+                the name and address on your application do not match the name and address on your deed.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.block|slugify %}
+                you own property on a different block than the lot you requested.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.adjacent|slugify %}
+                other individuals also submitted applications for the lot that you requested, and another applicant owns property adjacent to this lot.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.lottery|slugify %}
+                other individuals also submitted applications for the lot that you requested, and you were not selected to purchase the property in the lottery.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.letter|slugify %}
+                the Alderman in your ward did not provide a letter of support.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.EDS|slugify %}
+                you did not have complete information on your Economic Disclosure Statement and Affidavit (“EDS”) for the City of Chicago.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.debts|slugify %}
+                you owe the City money. We allowed six weeks for you to pay dues, and you failed to do so.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.commission|slugify %}
+                the Chicago Plan Commission did not approve your application.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.citycouncil|slugify %}
+                the Chicago City Council did not approve your application.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.none|slugify %}
+                your application was not complete.
+            {% endif %}
+            </strong>
+            You can learn more about our evaluation process by visiting our <a target='_blank' href='https://www.largelots.org/faq/'>frequently asked questions (FAQ) page</a>.</p>
+            <p>Again, thank you for your application. We look forward to working with you in the future. You may stay informed on the Large Lots program through <a target='_blank' href='https://www.largelots.org/'>largelots.org</a> or <a target='_blank' href="https://www.cityofchicago.org/city/en/depts/dcd.html">cityofchicago.org/DPD</a>.</p>
+            <p>Feel free to contact me if you have any questions by email at <a href="mailto:Jeanne.chandler@cityofchicago.org">Jeanne.chandler@cityofchicago.org</a> or by phone at (312)744-0605.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Sincerely,</p>
+            <p>Jeanne Chandler</p>
+        </div>
     </div>
 </div>

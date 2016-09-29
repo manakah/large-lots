@@ -204,7 +204,6 @@ def deed_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         document = request.POST.get('document')
-        print(document)
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
@@ -233,7 +232,7 @@ def deed_check_submit(request, application_id):
             elif (name == 'on' and address == 'off'):
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['address'])
             else:
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name-address'])
+                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['nameaddress'])
             review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
             review.save()
 
@@ -364,6 +363,7 @@ def multiple_location_check_submit(request, application_id):
     if request.method == 'POST':
         user = request.user
         applications = request.POST.getlist('multi-check')
+        print(applications)
         application_ids = [int(i) for i in applications]
 
         applications = ApplicationStatus.objects.filter(id__in=application_ids)
@@ -379,16 +379,18 @@ def multiple_location_check_submit(request, application_id):
 
         else:
             # Move winning application to Step 6.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
-            a = ApplicationStatus.objects.get(id=application_ids[0])
-            a.current_step = step
-            a.save()
-            review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
-            review.save()
+            if applications:
+                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
+                a = ApplicationStatus.objects.get(id=application_ids[0])
+                a.current_step = step
+                a.save()
+                review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
+                review.save()
 
         # Deny unchecked applications.
         application_status = ApplicationStatus.objects.get(id=application_id)
         lot_pin = application_status.lot.pin
+
         applicants_to_deny = ApplicationStatus.objects.filter(lot=lot_pin, denied=False).exclude(id__in=application_ids)
 
         for a in applicants_to_deny:
@@ -607,8 +609,12 @@ def send_email(request, application_status):
     app = application_status.application
     lot = application_status.lot
     review = Review.objects.filter(application=application_status).latest('id')
+    today = datetime.now().date()
 
-    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host()})
+    print(review.denial_reason)
+    print(isinstance(review.denial_reason, str))
+
+    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host(), 'today': today})
     html = "deny_html_email.html"
     txt = "deny_text_email.txt"
     html_template = get_template(html)
