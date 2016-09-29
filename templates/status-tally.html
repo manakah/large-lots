@@ -21,9 +21,22 @@
                 <th>Tally</th>
             </thead>
             <tbody>
-                <tr>
+                <!-- Step 2 -->
+                <tr data-toggle="collapse" data-target=".step2">
                     <td>Step 2: Deed check</td>
                     <td>{{ step2|length }}</td>
+                </tr>
+                <tr>
+                    <td class="hiddenRow">
+                        {% for app in step2 %}
+                        <div class="collapse step2">
+                                <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong></br>
+                                Lot Pin #: {{ app.lot.pin }}</br>
+                                Ward {{ app.lot.address.ward }}</br>
+                                <a href="/review-status-log/{{ app.id }}">Review history</a><br>
+                        </div>
+                        {% endfor %}
+                    </td>
                 </tr>
                 <tr>
                     <td>Step 3: Location check</td>
@@ -61,9 +74,18 @@
                     <td>Sold</td>
                     <td>{{ sold|length }}</td>
                 </tr>
-                <tr>
+                <tr data-toggle="collapse" data-target=".denied">
                     <td>Denied</td>
                     <td>{{ denied|length }}</td>
+                </tr>
+                <tr>
+                    <td class="hiddenRow">
+                        <div class="collapse denied">
+                            {% for app in denied %}
+                                {{ app.application.first_name }} {{ app.application.last_name }}
+                            {% endfor %}
+                        </div>
+                    </td>
                 </tr>
                 <tr class="table-info">
                     <td>Total</td>
@@ -74,4 +96,14 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.collapse').on('show.bs.collapse', function () {
+                $('.collapse.in').collapse('hide');
+            });
+        })
+    </script>
 {% endblock %}

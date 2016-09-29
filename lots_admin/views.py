@@ -573,6 +573,7 @@ def bulk_deny_submit(request):
 @login_required(login_url='/lots-login/')
 def status_tally(request):
     total = ApplicationStatus.objects.all()
+    # Order by ward.
     step2 = ApplicationStatus.objects.filter(current_step__step=2)
     step3 = ApplicationStatus.objects.filter(current_step__step=3)
     step4 = ApplicationStatus.objects.filter(current_step__step=4)

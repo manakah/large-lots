@@ -351,3 +351,6 @@ ul.bulk-deny {
 select.bulk-deny {
     width: 60%;
 }
+
+/* Styles for Tally */
+.step2 { margin-bottom: 1em; }
