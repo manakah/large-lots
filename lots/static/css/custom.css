@@ -243,12 +243,8 @@ select.update {
 #letter-checkbox { padding-left: 0; }
 
 .right-nav {
-    float: right;
+    float: left;
     font-size: 16px;
-}
-
-.table-info {
-    background-color: rgba(161,40,93,0.1)
 }
 
 /* Style for review_status_log.html */
@@ -350,4 +346,10 @@ ul.bulk-deny {
 
 select.bulk-deny {
     width: 60%;
+}
+
+/* Styles for Tally */
+
+.table-info {
+    background-color: #e6e6e6;
 }

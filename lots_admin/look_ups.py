@@ -1,8 +1,9 @@
 DENIAL_REASONS = {
+    'document': 'Applicant did not provide a property deed',
     'church': 'Applicant\'s owned property is a church',
     'name': 'Applicant name does not match deed',
     'address': 'Applicant address does not match deed',
-    'name-address': 'Applicant name and address do not match deed',
+    'nameaddress': 'Applicant name and address do not match deed',
     'block': 'Applicant is not on same block as lot',
     'adjacent': 'Another applicant is adjacent to lot',
     'lottery': 'Another applicant won the lottery',
@@ -10,7 +11,7 @@ DENIAL_REASONS = {
     'EDS': 'Incomplete information on EDS and principal profile',
     'debts': 'Applicant did not pay city debts',
     'commission': 'Plan Commission did not approve application',
-    'city-council': 'City Council did not approve application',
+    'citycouncil': 'City Council did not approve application',
     'none': 'None',
 }
 

@@ -3,14 +3,14 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-md-12">
         <div class="right-nav">
             <a href="/lots-admin/" id="viewMode"><i class="fa fa-table" aria-hidden="true"></i> Applications to review</a> |
             <a href="/status-tally/"><i class="fa fa-list-ul" aria-hidden="true"></i> Status tally</a>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="row">
     <div class="col-md-12">
@@ -21,52 +21,53 @@
                 <th>Tally</th>
             </thead>
             <tbody>
+                <!-- Step 2 -->
                 <tr>
-                    <td>Step 2: Deed check</td>
+                    <td><a href="{% url 'lots_admin' '2' %}">Step 2: Deed check</a></td>
                     <td>{{ step2|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 3: Location check</td>
+                    <td><a href="{% url 'lots_admin' '3' %}">Step 3: Location check</a></td>
                     <td>{{ step3|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 4: Multiple location check</td>
+                    <td><a href="{% url 'lots_admin' '4' %}">Step 4: Multiple location check</a></td>
                     <td>{{ step4|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 5: Lottery</td>
+                    <td><a href="{% url 'lots_admin' '5' %}">Step 5: Lottery</a></td>
                     <td>{{ step5|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 6: Alderman letter of support</td>
+                    <td><a href="{% url 'lots_admin' '6' %}">Step 6: Alderman letter of support</a></td>
                     <td>{{ step6|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 7: Submit EDS and principal profile</td>
+                    <td><a href="{% url 'lots_admin' '7' %}">Step 7: Submit EDS and principal profile</a></td>
                     <td>{{ step7|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 8: Certify as free and clear of debts to the city</td>
+                    <td><a href="{% url 'lots_admin' '8' %}">Step 8: Certify as free and clear of debts to the city</a></td>
                     <td>{{ step8|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 9: Approval by Plan Commission</td>
+                    <td><a href="{% url 'lots_admin' '9' %}">Step 9: Approval by Plan Commission</a></td>
                     <td>{{ step9|length }}</td>
                 </tr>
                 <tr>
-                    <td>Step 10: Approval by City Council</td>
+                    <td><a href="{% url 'lots_admin' '10' %}">Step 10: Approval by City Council</a></td>
                     <td>{{ step10|length }}</td>
                 </tr>
                 <tr>
-                    <td>Sold</td>
+                    <td><a href="{% url 'lots_admin' '11' %}">Sold</a></td>
                     <td>{{ sold|length }}</td>
                 </tr>
                 <tr>
-                    <td>Denied</td>
+                    <td><a href="{% url 'lots_admin' 'denied' %}">Denied</a></td>
                     <td>{{ denied|length }}</td>
                 </tr>
                 <tr class="table-info">
-                    <td>Total</td>
+                    <td><a href="{% url 'lots_admin' 'all' %}">Total</a></td>
                     <td>{{ total|length }}</td>
                 </tr>
             </tbody>
@@ -74,4 +75,14 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.collapse').on('show.bs.collapse', function () {
+                $('.collapse.in').collapse('hide');
+            });
+        })
+    </script>
 {% endblock %}
