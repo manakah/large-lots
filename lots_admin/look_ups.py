@@ -1,4 +1,5 @@
 DENIAL_REASONS = {
+    'document': 'Applicant did not provide a property deed',
     'church': 'Applicant\'s owned property is a church',
     'name': 'Applicant name does not match deed',
     'address': 'Applicant address does not match deed',

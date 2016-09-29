@@ -203,11 +203,13 @@ def deed_check_submit(request, application_id):
     if request.method == 'POST':
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
+        document = request.POST.get('document')
+        print(document)
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
         # Move to step 3 of review process.
-        if (name == 'on' and address == 'on' and church == '2'):
+        if (name == 'on' and address == 'on' and church == '2' and document == '2'):
             # If applicant applied for another lot, then also move that ApplicationStatus to Step 3.
             apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
 
@@ -222,7 +224,9 @@ def deed_check_submit(request, application_id):
             return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
         # Deny application.
         else:
-            if (church == '1'):
+            if (document == '1'):
+                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
+            elif (church == '1'):
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['church'])
             elif (name == 'off' and address == 'on'):
                 reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name'])
