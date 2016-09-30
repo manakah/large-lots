@@ -65,13 +65,14 @@ var LargeLotsAdmin = {
 
       LargeLotsAdmin.info.addTo(LargeLotsAdmin.map);
 
-      var fields = "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class"
+      // var fields = "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
           cartodb_logo: false,
           sublayers: [
-              
+
               {
                   sql: "select * from egp_parcels where city_owned='T' and residential='T' and alderman_hold != 'T'",
                   cartocss: $('#egp-styles').html().trim(),
