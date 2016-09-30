@@ -70,7 +70,7 @@ var LargeLots = {
 
       LargeLots.info.addTo(LargeLots.map);
 
-      var fields = "pin, pin_nbr, street_name, street_direction, street_type, square_feet, ward, community"
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, square_feet, zone_class, ward, community"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -186,11 +186,11 @@ var LargeLots = {
         <table class='table table-bordered table-condensed'><tbody>\
           <tr><td>Address</td><td>" + address + "</td></tr>\
           <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
-      if (props.zoning_classification){
-          info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zoning_classification + "' target='_blank'>" + props.zoning_classification + "</a>)</td></tr>";
+      if (props.zone_class){
+          info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zone_class + "' target='_blank'>" + props.zone_class + "</a>)</td></tr>";
       }
-      if (props.sq_ft){
-          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.sq_ft)) + "</td></tr>";
+      if (props.square_feet){
+          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
 
       }
       info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
