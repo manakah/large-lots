@@ -270,8 +270,11 @@ div#location .radio {
     margin-top: 20px;
 }
 
-/* Styles for multiple locations map legend */
+.fa-3x {
+font-size: 4em;
+}
 
+/* Styles for multiple locations map legend */
 ul.location-legend {
     list-style: none;
     -webkit-margin-before: 0;

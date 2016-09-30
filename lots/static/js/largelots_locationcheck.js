@@ -127,6 +127,19 @@ var LargeLots = {
       };
       LargeLots.locationsLegend.addTo(LargeLots.map);
 
+      // Make loading box.
+
+      LargeLots.loadingInfo = L.control({position: 'topright'});
+
+      LargeLots.loadingInfo.onAdd = function (map) {
+          this._div = L.DomUtil.create('div', 'loadingInfo');
+          this._div.innerHTML = '<i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>' + '<span class="sr-only">Loading...</span>'
+          return this._div;
+      };
+      LargeLots.loadingInfo.addTo(LargeLots.map);
+
+
+
       var sqlApplied = "select * from " + LargeLots.cartodb_table + " where pin_nbr='" + lotPin + "'";
 
       var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class"
@@ -171,10 +184,10 @@ var LargeLots = {
       //fetch the applicant's lot geometry based on their pin
       $.when($.get('/get-parcel-geometry/?pin=' + ownedPin)).then(
         function(ownedParcel){
+          $(".loadingInfo").hide();
           L.geoJson(ownedParcel, {
               style: {"fillColor": "#A1285D", "fillOpacity": 0.7, "color": "#A1285D", 'opacity': 1, 'weight': 1},
               onEachFeature: function(feature, layer) {
-                console.log(feature.properties);
                 layer.on('mouseover', function() {
                   LargeLots.infoOwned.update(feature.properties);
                 });
