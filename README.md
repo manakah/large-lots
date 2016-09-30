@@ -4,9 +4,12 @@ The City of Chicago is selling lots in Englewood for $1 until April 21, 2014. He
 
 ## Configuring and running locally
 
-Clone the repo and install the requirements:
+We recommend using [virtualenv](http://virtualenv.readthedocs.org/en/latest/virtualenv.html) and [virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/install.html) for working in a virtualized development environment. [Read how to set up virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 
-``` bash
+Once you have virtualenvwrapper set up, do this:
+
+```bash
+mkvirtualenv largelots -p /path/to/your/python3
 git clone git@github.com:datamade/large-lots.git
 cd large-lots
 pip install -r requirements.txt
@@ -14,8 +17,7 @@ pip install -r requirements.txt
 
 Setup a few Environmental variables:
 
-``DJANGO_SECRET_KEY`` Django’s [Secret
-Key](https://docs.djangoproject.com/en/1.5/ref/settings/#std:setting-SECRET_KEY)
+``DJANGO_SECRET_KEY`` Django’s [Secret Key](https://docs.djangoproject.com/en/1.10/ref/settings/#secret-key)
 used by the project. Can be any relatively hard to guess string.
 
 ``AWS_ACCESS_KEY`` AWS key used by the file storage mechanism to store files in
@@ -31,7 +33,7 @@ Django. See [Django docs](https://docs.djangoproject.com/en/1.6/topics/email/) f
 
 Run the app:
 
-```bash 
+```bash
 python manage.py runserver
 ```
 
@@ -73,7 +75,7 @@ If something is not behaving intuitively, it is a bug, and should be reported.
 Report it here: https://github.com/datamade/englewood-large-lots/issues
 
 ## Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Commit, do not mess with rakefile, version, or history.
