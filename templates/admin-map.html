@@ -22,7 +22,7 @@
     </style>
 {% endblock %}
 {% block content %}
-<p><a href='/lots-admin/'>&laquo; back to the list</a></p>
+<p><a href="{% url 'lots_admin' 'all' %}">&laquo; back to the list</a></p>
 <h2><span id='pin_count'></span> Lots applied for </h2>
 
 <p>
