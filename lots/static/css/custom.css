@@ -216,7 +216,7 @@ table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, t
     float: right;
 }
 
-.wait {
+.emphasis {
     font-style: italic;
     color: #9D9C9C;
 }
@@ -270,8 +270,11 @@ div#location .radio {
     margin-top: 20px;
 }
 
-/* Styles for multiple locations map legend */
+.fa-3x {
+font-size: 4em;
+}
 
+/* Styles for multiple locations map legend */
 ul.location-legend {
     list-style: none;
     -webkit-margin-before: 0;
@@ -330,6 +333,12 @@ button.winners {
 
 thead#table-stripe {
     background-color: #f9f9f9;
+}
+
+.notification {
+    font-style: italic;
+    color: #9D9C9C;
+    text-align: center;
 }
 
 /* Styles for bulk_deny.html */

@@ -21,7 +21,7 @@
             Application for Lot #{{ a.lot.pin }}</br>
             {% csrf_token %}
             <input type="hidden" name="application" value='{{ a.id }}'>
-            <span class="block wait">Select denial reason:</span>
+            <span class="block emphasis">Select denial reason:</span>
             <select name='denial-reason' class="bulk-deny form-control block">
                 <option value="none">None</option>
                 <option value="letter">Alderman did not provide letter of support</option>
@@ -40,7 +40,7 @@
       {% endfor %}
         </ul>
       <p><button type="submit" class="btn btn-success bulk"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Deny applications</button></p>
-      <p>All applicants on this list will receive an email notification.</p>
+      <p><strong>All applicants on this list will receive an email notification.</strong></p>
     </form>
   </div>
 </div>

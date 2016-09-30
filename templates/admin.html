@@ -96,7 +96,7 @@
                     {% elif applicant.current_step.step == 4 %}
                         {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
                             Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
-                            <span class='wait'>Waiting for other applications</span>
+                            <span class='emphasis'>Waiting for other applications</span>
                         {% else %}
                             <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
                         {% endif %}
@@ -107,7 +107,7 @@
                     {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
                         <div class='col-sm-10' id="letter-checkbox">
                             Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
-                            {% if on_steps2345|length == 0 %}<span class='wait'>Ready for bulk submit</span>{% endif %}
+                            {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
                         </div>
                         </div>
                         {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
@@ -123,7 +123,7 @@
                     <!-- Step 11: Sold -->
                     {% elif applicant.current_step.step == 11 %}
                         Sold</br>
-                        <span class="wait">Official closing event to be held</span>
+                        <span class="emphasis">Official closing event to be held</span>
                     {% endif %}
                 </td>
                 {% else %}
@@ -137,44 +137,6 @@
 
 </form>
 
-<!-- <div id="deniedDiv" style="display: none">
-    <table id="deniedTable" class="table table-striped tablesorter">
-        <thead>
-            <th>ID</th>
-            <th>Date received</th>
-            <th>Name/Organization</th>
-            <th>Details</th>
-            <th>Ward</th>
-        </thead>
-        <tbody>
-        {% for applicant in denied_application_list %}
-            <tr>
-                <td>
-                    {{applicant.application.id}}
-                </td>
-                <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
-                <td>
-                    {{applicant.application.first_name}} {{applicant.application.last_name}}
-                    {% if applicant.application.organization %}
-                    <br />
-                      {{applicant.application.organization}}
-                    {% endif %}
-                </td>
-                <td class="no-wrap">
-                        Status: denied
-                    </br>
-                    <a href="/review-status-log/{{ applicant.id }}">
-                        Review history
-                    </a></br>
-                    <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
-                </td>
-                <td class="ward">{{ applicant.lot.address.ward }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div> -->
-
 {% endblock %}
 {% block extra_js %}
     <script src="{% static 'js/jquery-1.12.3.js' %}" type="text/javascript"></script>
@@ -186,27 +148,6 @@
                 "info": false,
                 "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
             });
-
-            // $('#deniedTable').DataTable({
-            //     "order": [[0, 'asc']],
-            //     "info": false,
-            //     "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
-            // });
-
-            // $('#viewMode').click(function(){
-            //     if ($('#receivedDiv').is(":visible")){
-            //       $('#viewMode').html('<i class="fa fa-table" aria-hidden="true"></i> Applications to review');
-            //       $('#receivedDiv').hide();
-            //       $('#deniedDiv').show();
-            //       $('#bulkDiv').hide();
-            //     }
-            //     else {
-            //       $('#viewMode').html('<i class="fa fa-table" aria-hidden="true"></i> Denied applications');
-            //       $('#receivedDiv').show();
-            //       $('#deniedDiv').hide();
-            //       $('#bulkDiv').show();
-            //     }
-            // });
         })
     </script>
 {% endblock %}
