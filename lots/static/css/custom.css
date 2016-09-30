@@ -216,7 +216,7 @@ table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, t
     float: right;
 }
 
-.wait {
+.emphasis {
     font-style: italic;
     color: #9D9C9C;
 }
@@ -330,6 +330,12 @@ button.winners {
 
 thead#table-stripe {
     background-color: #f9f9f9;
+}
+
+.notification {
+    font-style: italic;
+    color: #9D9C9C;
+    text-align: center;
 }
 
 /* Styles for bulk_deny.html */
