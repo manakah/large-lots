@@ -134,9 +134,9 @@ def home(request):
 def application_active(request):
     apps = Application.objects.all()
     chicago_time = timezone.localtime(timezone.now())
-    start_date = timezone.make_aware(datetime(2016, 10, 1, 0, 0),
+    start_date = timezone.make_aware(datetime(2016, 11, 1, 0, 0),
         timezone.get_current_timezone())
-    end_date = timezone.make_aware(datetime(2016, 10, 31, 23, 59),
+    end_date = timezone.make_aware(datetime(2016, 11, 31, 23, 59),
         timezone.get_current_timezone())
 
     if settings.APPLICATION_DISPLAY: # override with configuration setting
