@@ -294,22 +294,22 @@ def get_parcel_geometry(request):
         query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
         dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44',
                             extra_query_args=query_args)
-        
+
         try:
             geometry = next(dumper.iter())
             response = HttpResponse(json.dumps(geometry), content_type='application/json')
-        except EsriDownloadError as e:
+        except (EsriDownloadError, StopIteration) as e:
             resp = {'status': 'error', 'message': "PIN '{}' could not be found".format(pin)}
             response = HttpResponseNotFound(json.dumps(resp), content_type='application/json')
         except Exception as e:
             client.captureException()
             resp = {'status': 'error', 'message': "Unknown error occured '{}'".format(str(e))}
             response = HttpResponse(json.dumps(resp), content_type='application/json')
-            response.status = 500
+            response.status_code = 500
     else:
         resp = {'status': 'error', 'message': "'pin' is a required parameter"}
         response = HttpResponse(json.dumps(resp), content_type='application/json')
-        response.status = 400
+        response.status_code = 400
 
     return response
 

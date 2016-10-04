@@ -193,7 +193,12 @@ var LargeLots = {
               }
           }).addTo(LargeLots.map);
       }).error(function(e) {
-        var message = "<span class='help-block error-msg'>The applicant entered <strong>Pin # " + ownedPin + "</strong> for their own property. We cannot locate this pin in the system.</span>";
+        var msg = e.responseJSON["message"];
+        var status = e.status;
+        if(status == '404') {
+          msg += ". Applicant did not enter a pin in our system."
+        }
+        var message = "<span class='help-block error-msg'>" + msg + " (HTTP Status " + status + ")</span>";
         $(".loadingInfo").hide();
         $(".pin-error").append(message);
       });
@@ -215,7 +220,12 @@ var LargeLots = {
                   }
               }).addTo(LargeLots.map);
           }).error(function(e) {
-            var message = "<span class='help-block error-msg'>An applicant entered <strong>Pin # " + pin + "</strong> for their own property. We cannot locate this pin in the system.</span>";
+            var msg = e.responseJSON["message"];
+            var status = e.status;
+            if(status == '404') {
+              msg += ". Applicant did not enter a pin in our system."
+            }
+            var message = "<span class='help-block error-msg'>" + msg + " (HTTP Status " + status + ")</span>";
             $(".loadingInfo").hide();
             $(".pin-error").append(message);
           });
