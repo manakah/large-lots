@@ -80,8 +80,6 @@ class ApplicationForm(forms.Form):
             'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
         }
         r = requests.get(carto, params=params)
-        print(params)
-        print(r.json())
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
                 return pin
@@ -99,6 +97,17 @@ class ApplicationForm(forms.Form):
             raise forms.ValidationError('Please provide a valid PIN')
         else:
             return self._check_pin(pin)
+
+    def _clean_phone(self, key):
+        phone = self.cleaned_data[key]
+        pattern = re.compile('[^0-9]')
+        if len(pattern.sub('', phone)) != 10:
+            raise forms.ValidationError('Please provide a valid phone (10 digits)')
+        else:
+            return self._check_pin(pin)
+
+    def clean_phone(self):
+        return self._clean_phone('phone')
 
     def clean_lot_1_pin(self):
         return self._clean_pin('lot_1_pin')
