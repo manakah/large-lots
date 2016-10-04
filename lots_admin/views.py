@@ -9,10 +9,14 @@ from datetime import datetime
 from django import forms
 
 from esridump.dumper import EsriDumper
+from esridump.errors import EsriDownloadError
+
+from raven.contrib.django.raven_compat.models import client
 
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, \
+    HttpResponseNotFound
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.forms import AuthenticationForm
@@ -23,7 +27,6 @@ from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
-
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
 
@@ -281,13 +284,29 @@ def location_check(request, application_id):
 # @login_required(login_url='/lots-login/')
 def get_parcel_geometry(request):
     pin = request.GET.get('pin')
-    query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
-    dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44',
-                        extra_query_args=query_args)
 
-    geometry = next(dumper.iter())
+    if pin:
+        query_args = {'f': 'json', 'outSR': 4326, 'where': 'PIN14={}'.format(pin)}
+        dumper = EsriDumper('http://cookviewer1.cookcountyil.gov/arcgis/rest/services/cookVwrDynmc/MapServer/44',
+                            extra_query_args=query_args)
+        
+        try:
+            geometry = next(dumper.iter())
+            response = HttpResponse(json.dumps(geometry), content_type='application/json')
+        except EsriDownloadError as e:
+            resp = {'status': 'error', 'message': "PIN '{}' could not be found".format(pin)}
+            response = HttpResponseNotFound(json.dumps(resp), content_type='application/json')
+        except Exception as e:
+            client.captureException()
+            resp = {'status': 'error', 'message': "Unknown error occured '{}'".format(str(e))}
+            response = HttpResponse(json.dumps(resp), content_type='application/json')
+            response.status = 500
+    else:
+        resp = {'status': 'error', 'message': "'pin' is a required parameter"}
+        response = HttpResponse(json.dumps(resp), content_type='application/json')
+        response.status = 400
 
-    return HttpResponse(json.dumps(geometry), content_type='application/json')
+    return response
 
 @login_required(login_url='/lots-login/')
 def location_check_submit(request, application_id):
