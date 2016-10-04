@@ -133,17 +133,12 @@ def home(request):
 
 def application_active(request):
     apps = Application.objects.all()
-    chicago_time = timezone.localtime(timezone.now())
-    start_date = timezone.make_aware(datetime(2016, 11, 1, 0, 0),
-        timezone.get_current_timezone())
-    end_date = timezone.make_aware(datetime(2016, 11, 30, 23, 59),
-        timezone.get_current_timezone())
 
     if settings.APPLICATION_DISPLAY: # override with configuration setting
         return True
     elif request.user.is_authenticated(): # or if you're logged in
         return True
-    elif (start_date < chicago_time < end_date): # otherwise, check the dates
+    elif (settings.START_DATE < settings.CHICAGO_TIME < settings.END_DATE): # otherwise, check the dates
         return True
     else:
         return False

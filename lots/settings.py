@@ -1,4 +1,6 @@
 import os
+from django.utils import timezone
+from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 from .local_settings import *
 
@@ -26,7 +28,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'lots.urls'
 
 WSGI_APPLICATION = 'lots.wsgi.application'
-
 
 
 # Internationalization
