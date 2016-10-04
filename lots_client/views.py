@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*
-
 import re
 import json
 from uuid import uuid4
