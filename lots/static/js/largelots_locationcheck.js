@@ -9,7 +9,6 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  // cartodb_table: 'large_lots_citywide_test',
   cartodb_table: 'large_lots_citywide_expansion_data',
 
   initialize: function() {
@@ -50,9 +49,9 @@ var LargeLots = {
         var date_formatted = '';
         if (props) {
           var info = "<h4>" + LargeLots.formatAddress(props) + "</h4>";
-          info += "<h5>Lot for sale</h5>"
-          info += "<p>PIN: " + LargeLots.formatPin(props.pin_nbr) + "<br />";
-          info += "Ward: " + props.ward + "<br />";
+          info += "<h5>Lot for sale</h5>";
+          info += "<p><strong>PIN: " + props.pin + "</strong></p>";
+          info += "<p>Ward: " + props.ward + "<br />";
           info += "Zoned: " + props.zone_class + "<br />";
           info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";
           info += "</p>"

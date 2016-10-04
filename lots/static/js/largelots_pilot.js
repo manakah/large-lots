@@ -34,7 +34,8 @@ var LargeLots = {
         }
       ];
 
-      var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}});
+      var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}
+      });
       LargeLots.map.addLayer(layer);
 
       // code for info box bubble
@@ -53,9 +54,9 @@ var LargeLots = {
           var info = '';
           if(props.street_name){
               info += "<h4>" + LargeLots.formatAddress(props) + "</h4>";
+              info += "<strong>PIN: " + props.pin + "</strong><br />";
               info += "Community: " + props.community + "<br />";
               info += "Ward: " + props.ward + "<br />";
-              info += "PIN: " + props.pin + "<br />";
           }
           if (props.square_feet){
               info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";

@@ -52,8 +52,13 @@ def lots_admin_map(request):
     for lot in Lot.objects.all():
         applied_pins.add(lot.pin)
 
+    applied_count = len(applied_pins)
     pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
-    return render(request, 'admin-map.html', {'applied_pins': pins_str})
+
+    return render(request, 'admin-map.html', {
+        'applied_count': applied_count,
+        'applied_pins': pins_str
+        })
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request, step):
