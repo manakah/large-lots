@@ -92,14 +92,15 @@
                           <div class="col-sm-6">
                             <div class="row">
                               <div class="col-sm-12">
-                                <h3>Lot #1<span class="red">*</span></h3>
+                                <h3>Lot #1</h3>
                                 {% if form.lot_1_address.errors %}
                                 <div class="form-group has-error">
                                 {% else %}
                                 <div class="form-group">
                                 {% endif %}
+                                  <label for="lot_1_pin">House number and street<span class="red">*</span></label>
                                   <div class="input-group">
-                                    <input type="text" value="{{ lot_1_address }}" class="form-control" id="id_lot_1_address" name="lot_1_address" placeholder="Street" />
+                                    <input type="text" value="{{ lot_1_address }}" class="form-control" id="id_lot_1_address" name="lot_1_address" placeholder="Ex. 118 N Clark St" />
                                     <div class="input-group-addon">Chicago, IL</div>
                                   </div>
                                   {% for error in form.lot_1_address.errors %}
@@ -113,7 +114,7 @@
                             {% else %}
                             <div class="form-group">
                             {% endif %}
-                              <label for="lot_1_pin">PIN</label>
+                              <label for="lot_1_pin">PIN<span class="red">*</span></label>
                               <input type="text" value="{{lot_1_pin}}" class="form-control" id="id_lot_1_pin" name="lot_1_pin" placeholder="##-##-###-###-####">
                               {% for error in form.lot_1_pin.errors %}
                                   <span class="help-block">{{ error }}</span>
@@ -143,8 +144,9 @@
                                 {% else %}
                                 <div class="form-group">
                                 {% endif %}
+                                  <label for="lot_2_pin">House number and street</label>
                                   <div class="input-group">
-                                    <input type="text" value="{{lot_2_address}}" class="form-control" id="id_lot_2_address" name="lot_2_address" placeholder="Street" />
+                                    <input type="text" value="{{lot_2_address}}" class="form-control" id="id_lot_2_address" name="lot_2_address" placeholder="Ex. 118 N Clark St" />
                                     <span class="input-group-addon">Chicago, IL</span>
                                     {% for error in form.lot_2_address.errors %}
                                         <span class="help-block">{{ error }}</span>
