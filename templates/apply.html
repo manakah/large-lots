@@ -347,6 +347,8 @@
                             {% endif %}
                             <label for="id_organization"><i class="fa fa-group"></i> Organization</label>
                             <input type="text" value="{{organization}}" class="form-control" id="id_organization" name="organization" />
+                            <p class="help-block">Input an organization name i
+                              f an organization owns the deeded property (above).</p>
                             {% for error in form.organization.errors %}
                                 <span class="help-block">{{ error }}</span>
                             {% endfor %}
