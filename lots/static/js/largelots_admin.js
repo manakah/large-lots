@@ -2,18 +2,13 @@ var LargeLotsAdmin = LargeLotsAdmin || {};
 var LargeLotsAdmin = {
 
   map: null,
-  map_centroid: [41.8787248907554, -87.7055433591891],
-  defaultZoom: 15,
+  map_centroid: [41.7872, -87.6345],
+  defaultZoom: 11,
   lastClickedLayer: null,
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  boundingBox: {
-    'bottom': 41.868506217235485,
-    'top': 41.891607773180716,
-    'right': -87.68617630004883,
-    'left': -87.7223539352417
-  },
+  cartodb_table: 'large_lots_citywide_expansion_data',
 
   initialize: function() {
 
@@ -28,32 +23,42 @@ var LargeLotsAdmin = {
       // render a map!
       L.Icon.Default.imagePath = '/static/images/'
 
-      L.tileLayer('https://{s}.tiles.mapbox.com/v3/datamade.hn83a654/{z}/{x}/{y}.png', {
-          attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
-      }).addTo(LargeLotsAdmin.map);
+      var google_map_styles = [
+        {
+          stylers: [
+            { saturation: -100 },
+            { lightness: 40 }
+          ]
+        }
+      ];
+
+      var layer = new L.Google('ROADMAP', {mapOptions: {styles: google_map_styles}
+      });
+      LargeLotsAdmin.map.addLayer(layer);
 
       LargeLotsAdmin.info = L.control({position: 'bottomright'});
 
       LargeLotsAdmin.info.onAdd = function (map) {
-          this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+          this._div = L.DomUtil.create('div', 'mapInfo'); // create a div with a class "info"
           this.update();
           return this._div;
       };
 
-      // method that we will use to update the control based on feature properties passed
+      // Info box: method that we will use to update the control based on feature properties passed
+      var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community"
+
       LargeLotsAdmin.info.update = function (props) {
         var date_formatted = '';
         if (props) {
           var info = '';
-          if(props.street_number){
+          if(props.street_name){
               info += "<h4>" + LargeLotsAdmin.formatAddress(props) + "</h4>";
-              info += "<p>PIN: " + props.pin14 + "<br />";
+              info += "<p><strong>PIN: " + props.pin + "</strong></p>";
+              info += "Community: " + props.community + "<br />";
+              info += "Ward: " + props.ward + "<br />";
           }
-          if (props.zoning_classification){
-              info += "Zoned: " + props.zoning_classification + "<br />";
-          }
-          if (props.sq_ft){
-              info += "Sq Ft: " + props.sq_ft + "<br />";
+          if (props.square_feet){
+              info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";
           }
           this._div.innerHTML  = info;
         }
@@ -65,8 +70,6 @@ var LargeLotsAdmin = {
 
       LargeLotsAdmin.info.addTo(LargeLotsAdmin.map);
 
-      var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class"
-      // var fields = "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,city_owned,residential"
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -74,18 +77,18 @@ var LargeLotsAdmin = {
           sublayers: [
 
               {
-                  sql: "select * from egp_parcels where city_owned='T' and residential='T' and alderman_hold != 'T'",
+                  sql: "select * from large_lots_citywide_expansion_data",
                   cartocss: $('#egp-styles').html().trim(),
                   interactivity: fields
               },
               {
-                  sql: "select * from egp_parcels where pin14 in (" + applied_pins + ")",
+                  sql: "select * from large_lots_citywide_expansion_data where pin_nbr in (" + applied_pins + ")",
                   cartocss: $('#egp-styles-applied').html().trim(),
                   interactivity: fields
               },
               {
-                  sql: 'select * from east_garfield_park',
-                  cartocss: "#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.4;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
+                  cartocss: "#" + LargeLotsAdmin.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
           ]
       }
@@ -114,7 +117,15 @@ var LargeLotsAdmin = {
 
   formatAddress: function (prop) {
     if (prop.street_type == null) prop.street_type = "";
-    return prop.street_number + " " + prop.street_dir + " " + prop.street_name + " " + prop.street_type;
+    if (prop.low_address == null) prop.low_address = "";
+    if (prop.street_direction == null) prop.street_direction = "";
+    if (prop.street_name == null) prop.street_name = "";
+
+    var ret = prop.low_address + " " + prop.street_direction + " " + prop.street_name + " " + prop.street_type;
+    if (ret.trim() == "")
+      return "Unknown";
+    else
+      return ret;
   },
 
   getOneParcel: function(pin14){
@@ -122,14 +133,16 @@ var LargeLotsAdmin = {
         LargeLotsAdmin.map.removeLayer(LargeLotsAdmin.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from egp_parcels where pin14 = cast({{pin14}} as text)', {pin14:pin14})
+      sql.execute('select * from large_lots_citywide_expansion_data where pin14 = cast({{pin14}} as text)', {pin14:pin14})
         .done(function(data){
             var shape = data.features[0];
             LargeLotsAdmin.lastClickedLayer = L.geoJson(shape);
             LargeLotsAdmin.lastClickedLayer.addTo(LargeLotsAdmin.map);
             LargeLotsAdmin.lastClickedLayer.setStyle({fillColor:'#f7fcb9', weight: 2, fillOpacity: 1, color: '#000'});
             LargeLotsAdmin.map.setView(LargeLotsAdmin.lastClickedLayer.getBounds().getCenter(), 17);
-        }).error(function(e){console.log(e)});
+        }).error(function(e){
+          console.log(e);
+        });
       window.location.hash = 'browse';
   },
 
