@@ -138,8 +138,6 @@ var LargeLots = {
       };
       LargeLots.loadingInfo.addTo(LargeLots.map);
 
-
-
       var sqlApplied = "select * from " + LargeLots.cartodb_table + " where pin_nbr='" + lotPin + "'";
 
       var fields = "pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class"
@@ -180,9 +178,8 @@ var LargeLots = {
         console.log(e)
       });
 
-
       //fetch the applicant's lot geometry based on their pin
-      $.when($.get('/get-parcel-geometry/?pin=' + ownedPin)).then(
+      $.get('/get-parcel-geometry/?pin=' + ownedPin).done(
         function(ownedParcel){
           $(".loadingInfo").hide();
           L.geoJson(ownedParcel, {
@@ -196,26 +193,35 @@ var LargeLots = {
                 });
               }
           }).addTo(LargeLots.map);
+      }).error(function(e) {
+        var message = "<span class='help-block error-msg'>The applicant entered <strong>Pin # " + ownedPin + "</strong> for their own property. We cannot locate this pin in the system.</span>";
+        $(".loadingInfo").hide();
+        $(".pin-error").append(message);
       });
 
       //for everyone else who applied to the lot, fetch their property geometry based on their pin
       $.each(otherOwnedPins, function(i, pin){
-        $.when($.get('/get-parcel-geometry/?pin=' + pin)).then(
-          function(otherOwnedParcel){
-            L.geoJson(otherOwnedParcel, {
-                style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1},
-                onEachFeature: function(feature, layer) {
-                  layer.on('mouseover', function() {
-                    LargeLots.infoOtherApplicants.update(feature.properties);
-                  });
-                  layer.on('mouseout', function() {
-                    LargeLots.clear(LargeLots.infoOtherApplicants);
-                  });
-                }
-            }).addTo(LargeLots.map);
-        });
+        if(pin !== '0') {
+          $.get('/get-parcel-geometry/?pin=' + pin).done(
+            function(otherOwnedParcel){
+              L.geoJson(otherOwnedParcel, {
+                  style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1},
+                  onEachFeature: function(feature, layer) {
+                    layer.on('mouseover', function() {
+                      LargeLots.infoOtherApplicants.update(feature.properties);
+                    });
+                    layer.on('mouseout', function() {
+                      LargeLots.clear(LargeLots.infoOtherApplicants);
+                    });
+                  }
+              }).addTo(LargeLots.map);
+          }).error(function(e) {
+            var message = "<span class='help-block error-msg'>An applicant entered <strong>Pin # " + pin + "</strong> for their own property. We cannot locate this pin in the system.</span>";
+            $(".loadingInfo").hide();
+            $(".pin-error").append(message);
+          });
+        }
       });
-
   },
 
   formatPin: function(pin) {

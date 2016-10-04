@@ -274,6 +274,10 @@ div#location .radio {
 font-size: 4em;
 }
 
+.error-msg {
+    color: #ff4136;
+}
+
 /* Styles for multiple locations map legend */
 ul.location-legend {
     list-style: none;
