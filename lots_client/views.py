@@ -103,7 +103,7 @@ class ApplicationForm(forms.Form):
         if len(pattern.sub('', phone)) != 10:
             raise forms.ValidationError('Please provide a valid phone (10 digits)')
         else:
-            return self._check_pin(pin)
+            return phone
 
     def clean_phone(self):
         return self._clean_phone('phone')
