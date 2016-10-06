@@ -152,7 +152,7 @@ var LargeLots = {
               }
           ]
       }
-      cartodb.createLayer(LargeLots.map, layerOpts)
+      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
             // Make a sublayer for the applicant's owned property
