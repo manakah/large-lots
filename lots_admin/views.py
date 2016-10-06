@@ -296,9 +296,9 @@ def get_parcel_geometry(request):
                             extra_query_args=query_args)
 
         try:
-            geometry = next(dumper.iter())
+            geometry = list(dumper)[0]
             response = HttpResponse(json.dumps(geometry), content_type='application/json')
-        except (EsriDownloadError, StopIteration) as e:
+        except (EsriDownloadError, StopIteration, IndexError) as e:
             resp = {'status': 'error', 'message': "PIN '{}' could not be found".format(pin)}
             response = HttpResponseNotFound(json.dumps(resp), content_type='application/json')
         except Exception as e:
