@@ -445,9 +445,12 @@ def lottery(request):
     # Deduplicate applied_pins array.
     lots_list = list(set(lots))
 
+    counter = 0
+
     return render(request, 'lottery.html', {
         'applications': applications,
-        'lots_list': lots_list
+        'lots_list': lots_list,
+        'counter': counter
         })
 
 @login_required(login_url='/lots-login/')
