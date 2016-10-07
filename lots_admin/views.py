@@ -194,6 +194,9 @@ def deny_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
+    first = application_status.application.first_name
+    last = application_status.application.last_name
+    other_applications = Application.objects.filter(first_name=first, last_name=last)
 
     # Delete last Review(s), if someone hits "no, go back" on deny page.
     denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
@@ -206,7 +209,8 @@ def deed_check(request, application_id):
         a.save()
 
     return render(request, 'deed_check.html', {
-        'application_status': application_status
+        'application_status': application_status,
+        'other_applications': other_applications
         })
 
 @login_required(login_url='/lots-login/')
