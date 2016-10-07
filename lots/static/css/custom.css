@@ -257,6 +257,25 @@ ul.nav-wizard li {
 /* Styles for deed-check.html*/
 #pdf-embed { margin-top: 20px; }
 
+#sideInfo.affix-top {
+    position: static;
+    margin-bottom: 80px;
+    width: 300px;
+    z-index: 999;
+}
+
+#sideInfo.affix {
+    position: fixed;
+    top: 320px;
+    width: 300px;
+    margin-bottom: 80px;
+    z-index: 999;
+}
+
+.affix,.affix-top {
+   position:static;
+}
+
 /* Styles for location-check.html*/
 div#location .radio+.radio { margin-top: 0px; }
 

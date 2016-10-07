@@ -58,7 +58,17 @@
       </div>
 
       <p><button type="submit" class="btn btn-success">Submit</button></p>
+
     </form>
+
+    <div class="well" data-spy="affix" data-offset-top="100" id='sideInfo'>
+      <p><strong>Applicant info</strong></p>
+      <p>
+        {{ application_status.application.first_name }} {{ application_status.application.last_name }}<br />
+        {{ application_status.application.owned_address }}
+      </p>
+    </div>
+
   </div>
   <div class="col-md-6">
     {% if application_status.application.deed_image.url|check_for_pdf %}

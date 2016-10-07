@@ -1,4 +1,5 @@
-<p class="review-header">{{ app.application.first_name }} {{ app.application.last_name }}'s application for <strong>{{ app.lot.address}}</strong></p>
+<p class="review-header">Applicant <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong> owns <strong>{{ app.application.owned_address }}</strong> and requests the lot on <strong>{{ app.lot.address}}</strong></p>
+
 <ul class='nav nav-wizard'>
   <li>Step 1</li>
   <li class="{% if app.current_step.step == 2 %} active {% endif %}">Step 2{% if app.current_step.step == 2 %}: Deed check {% endif %}</li>
