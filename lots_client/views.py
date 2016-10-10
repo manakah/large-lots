@@ -197,6 +197,12 @@ def get_lot_address(address, pin):
 def apply(request):
     applications = Application.objects.all()
 
+    allLots = Lot.objects.all()
+
+    applied_pins = [lot.pin for lot in allLots ]
+
+    pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
+
     if request.method == 'POST':
         form = ApplicationForm(request.POST, request.FILES)
         context = {}
@@ -322,7 +328,9 @@ def apply(request):
                 error = form.errors.get(field)
                 if label and error:
                     context['error_messages'][label] = form.errors[field][0]
-            return render(request, 'apply.html', context)
+            return render(request, 'apply.html', context, {
+                'applied_pins': pins_str
+                })
     else:
         if application_active(request):
             form = ApplicationForm()
@@ -330,7 +338,8 @@ def apply(request):
             form = None
     return render(request, 'apply.html', {
         'form': form,
-        'applications': applications
+        'applications': applications,
+        'applied_pins': pins_str
     })
 
 def apply_confirm(request, tracking_id):
