@@ -196,11 +196,7 @@ def get_lot_address(address, pin):
 
 def apply(request):
     applications = Application.objects.all()
-    # applied_pins = set()
-    # for lot in Lot.objects.all():
-    #     applied_pins.add(lot.pin)
 
-    # print(applied_pins)
     allLots = Lot.objects.all()
 
     applied_pins = [lot.pin for lot in allLots ]
