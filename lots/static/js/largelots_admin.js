@@ -107,7 +107,8 @@ var LargeLotsAdmin = {
               LargeLotsAdmin.info.clear();
             });
             LargeLotsAdmin.lotsLayer.on('featureClick', function(e, pos, latlng, data){
-                LargeLotsAdmin.getOneParcel(data['pin14']);
+                console.log(data)
+                LargeLotsAdmin.getOneParcel(data['pin_nbr']);
             });
         }).error(function(e) {
         //console.log('ERROR')
@@ -128,12 +129,12 @@ var LargeLotsAdmin = {
       return ret;
   },
 
-  getOneParcel: function(pin14){
+  getOneParcel: function(pin_nbr){
       if (LargeLotsAdmin.lastClickedLayer){
         LargeLotsAdmin.map.removeLayer(LargeLotsAdmin.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from large_lots_citywide_expansion_data where pin14 = cast({{pin14}} as text)', {pin14:pin14})
+      sql.execute('select * from large_lots_citywide_expansion_data where pin_nbr = cast({{pin_nbr}} as text)', {pin_nbr:pin_nbr})
         .done(function(data){
             var shape = data.features[0];
             LargeLotsAdmin.lastClickedLayer = L.geoJson(shape);
