@@ -83,6 +83,10 @@ var LargeLots = {
                   interactivity: fields
               },
               {
+                  sql: "select * from large_lots_citywide_expansion_data where pin_nbr in (" + applied_pins + ")",
+                  cartocss: $('#map-styles-applied').html().trim(),
+              },
+              {
                   sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
               }
