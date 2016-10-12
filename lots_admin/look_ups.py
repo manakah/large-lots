@@ -1,4 +1,5 @@
 DENIAL_REASONS = {
+    'duplicate': 'Applicant used the same deed for more than two lots',
     'document': 'Applicant did not provide a property deed',
     'church': 'Applicant\'s owned property is a church',
     'name': 'Applicant name does not match deed',

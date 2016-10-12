@@ -5,7 +5,7 @@ from lots_client.views import home, status_pilot_1, status_pilot_2, \
     get_pin_from_address
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
-    lots_logout,pdfviewer, deed_check, deed_check_submit, location_check, location_check_submit, \
+    lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, location_check, location_check_submit, \
     multiple_applicant_check, multiple_location_check_submit, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry
@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^pdfviewer/$', pdfviewer, name='pdfviewer'),
     url(r'^application-review/step-2/(?P<application_id>\d+)/$', deed_check, name='deed_check'),
     url(r'^deed_check_submit/(?P<application_id>\d+)$', deed_check_submit, name='deed_check_submit'),
+    url(r'^deed_duplicate_submit/(?P<application_id>\d+)$', deed_duplicate_submit, name='deed_duplicate_submit'),
     url(r'^application-review/step-3/(?P<application_id>\d+)/$', location_check, name='location_check'),
     url(r'^location_check_submit/(?P<application_id>\d+)$', location_check_submit, name='location_check_submit'),
     url(r'^application-review/step-4/(?P<application_id>\d+)/$', multiple_applicant_check, name='multiple_applicant_check'),
