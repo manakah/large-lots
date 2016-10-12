@@ -75,11 +75,13 @@
     </form>
 
     <div class="well" data-spy="affix" data-offset-top="100" id='sideInfo'>
-      <p><strong>Applicant info</strong></p>
-      <p>
-        {{ application_status.application.first_name }} {{ application_status.application.last_name }}<br />
-        {{ application_status.application.owned_address }}
-      </p>
+      <!-- <p> -->
+        <!-- {{ application_status.application.first_name }} {{ application_status.application.last_name }}<br />
+        {{ application_status.application.owned_address }} -->
+        <p><i class="fa fa-user" aria-hidden="true"></i> <strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}</strong><p>
+        <p>Owns: {{ application_status.application.owned_address }}</p>
+        <p>Requested: {{ application_status.lot.address}}</p>
+      <!-- </p> -->
     </div>
 
   </div>

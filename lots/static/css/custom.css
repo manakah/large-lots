@@ -259,14 +259,14 @@ ul.nav-wizard li {
 #sideInfo.affix-top {
     position: static;
     margin-bottom: 80px;
-    width: 300px;
+    width: 380px;
     z-index: 999;
 }
 
 #sideInfo.affix {
     position: fixed;
     top: 320px;
-    width: 300px;
+    width: 380px;
     margin-bottom: 80px;
     z-index: 999;
 }
