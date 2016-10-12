@@ -38,3 +38,7 @@ def remove_str(label_type, extra_text):
 @register.filter
 def check_for_pdf(image_path):
     return image_path.endswith('pdf')
+
+@register.filter
+def make_display_pin(pin):
+    return '-'.join([pin[:2], pin[2:4], pin[4:7], pin[7:10], pin[10:]])
