@@ -14,7 +14,8 @@
             <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
             {% endfor %}
             <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
-            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>
+            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
+            <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
 </div>
