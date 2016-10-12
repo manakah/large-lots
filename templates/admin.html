@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load lots_filters %}
 {% load staticfiles %}
 {% block extra_css %}
 <link href="{% static 'css/jquery.dataTables.min.css' %}" rel="stylesheet">
@@ -13,7 +14,8 @@
             <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
             {% endfor %}
             <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
-            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>
+            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
+            <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
 </div>
@@ -56,6 +58,7 @@
             <th>Date received</th>
             <th>Name/Organization</th>
             <th>Details</th>
+            <th>Lot requested</th>
             <th>Ward</th>
             <th class="no-wrap">Next review step</th>
         </thead>
@@ -84,6 +87,10 @@
                         Review history
                     </a></br>
                     <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
+                </td>
+                <td>
+                    {{ applicant.lot.address }}</br>
+                    {{ applicant.lot.pin|make_display_pin }}
                 </td>
                 <td class="ward">{{ applicant.lot.address.ward }}</td>
 
