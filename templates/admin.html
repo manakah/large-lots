@@ -2,7 +2,7 @@
 {% load lots_filters %}
 {% load staticfiles %}
 {% block extra_css %}
-<link href="{{ STATIC_URL }}css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="{% static 'css/jquery.dataTables.min.css' %}" rel="stylesheet">
 {% endblock %}
 {% block title %}Application list{% endblock %}
 {% block content %}
