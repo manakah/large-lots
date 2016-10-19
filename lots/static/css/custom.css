@@ -81,9 +81,8 @@ a.dropdown-toggle:hover {
 }
 
 .btn-success {
-    /*background-color: #389250;
-    border-color: #389250;*/
-    background-color: red;
+    background-color: #389250;
+    border-color: #389250;
 }
 
 .btn-success:hover {
