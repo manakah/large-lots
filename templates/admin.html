@@ -36,7 +36,7 @@
                 <p class="info-text">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
             {% else %}
                 {% csrf_token %}
-
+                <p class="info-text">Move multiple applications to the next step! Select checkboxes (far right column), pick the next step in the dropdown, and click "Update."</p>
                 <select name='step' class="form-control update">
                     <option>-----------------</option>
                     <option value="step6">Complete step 6: Alderman letter of support</option>
