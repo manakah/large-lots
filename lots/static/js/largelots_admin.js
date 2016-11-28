@@ -8,7 +8,7 @@ var LargeLotsAdmin = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_citywide_expansion_data',
+  cartodb_table: 'large_lots_2016_fall_expansion',
 
   initialize: function() {
 
@@ -77,12 +77,12 @@ var LargeLotsAdmin = {
           sublayers: [
 
               {
-                  sql: "select * from large_lots_citywide_expansion_data",
+                  sql: "select * from large_lots_2016_fall_expansion",
                   cartocss: $('#egp-styles').html().trim(),
                   interactivity: fields
               },
               {
-                  sql: "select * from large_lots_citywide_expansion_data where pin_nbr in (" + applied_pins + ")",
+                  sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
                   cartocss: $('#egp-styles-applied').html().trim(),
                   interactivity: fields
               },
@@ -134,7 +134,7 @@ var LargeLotsAdmin = {
         LargeLotsAdmin.map.removeLayer(LargeLotsAdmin.lastClickedLayer);
       }
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-      sql.execute('select * from large_lots_citywide_expansion_data where pin_nbr = cast({{pin_nbr}} as text)', {pin_nbr:pin_nbr})
+      sql.execute('select * from large_lots_2016_fall_expansion where pin_nbr = cast({{pin_nbr}} as text)', {pin_nbr:pin_nbr})
         .done(function(data){
             var shape = data.features[0];
             LargeLotsAdmin.lastClickedLayer = L.geoJson(shape);

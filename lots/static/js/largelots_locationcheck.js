@@ -9,7 +9,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_citywide_expansion_data',
+  cartodb_table: 'large_lots_2016_fall_expansion',
 
   initialize: function() {
 

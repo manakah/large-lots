@@ -10,7 +10,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_citywide_expansion_data',
+  cartodb_table: 'large_lots_2016_fall_expansion',
 
   initialize: function() {
 
@@ -84,7 +84,7 @@ var LargeLots = {
               },
               // Uncomment this: to add 'purple' parcels to the map, indicating properties already requested.
               // {
-              //     sql: "select * from large_lots_citywide_expansion_data where pin_nbr in (" + applied_pins + ")",
+              //     sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
               //     cartocss: $('#map-styles-applied').html().trim(),
               // },
               {
