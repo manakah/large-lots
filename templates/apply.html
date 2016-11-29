@@ -134,7 +134,7 @@
                             {% else %}
                             <div class="form-group">
                             {% endif %}
-                            <label for="lot_1_use">How do you plan on using this lot?</label>
+                            <label for="lot_1_use">How do you plan on using this lot? (500 character max.)</label>
                             <input type="text" value="{{lot_1_use}}" class="form-control" id="id_lot_1_use" name="lot_1_use" placeholder="Community garden, side lot or yard, etc.">
                             {% for error in form.lot_1_use.errors %}
                                 <span class="help-block">{{ error }}</span>
