@@ -119,7 +119,7 @@ class ApplicationForm(forms.Form):
 
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
-        pin = pin.replace("-", "")
+        pin = pin.replace("-", "").replace(" ", "")
         pattern = re.compile('[^0-9]')
         if len(pattern.sub('', pin)) != 14:
             raise forms.ValidationError('Please provide a valid PIN')
@@ -212,7 +212,6 @@ def apply(request):
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
         if form.is_valid():
-            print(form.cleaned_data['lot_1_pin'])
             l1_address = get_lot_address(form.cleaned_data['lot_1_address'],
                                          form.cleaned_data['lot_1_pin'])
             lot1_info = {
@@ -247,7 +246,7 @@ def apply(request):
                 'zip_code': form.cleaned_data['contact_zip_code']
             }
             c_address, created = Address.objects.get_or_create(**c_address_info)
-            print(form.cleaned_data['owned_pin'])
+
             owned_address = get_lot_address(form.cleaned_data['owned_address'],
                                             form.cleaned_data['owned_pin'])
 
