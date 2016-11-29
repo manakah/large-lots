@@ -50,8 +50,9 @@ var LargeLots = {
       // method that we will use to update the control based on feature properties passed
       LargeLots.info.update = function (props) {
         var date_formatted = '';
+        var info = 'Hover over a lot to learn more';
         if (props) {
-          var info = '';
+          info = '';
           if(props.street_name){
               info += "<h4>" + LargeLots.formatAddress(props) + "</h4>";
               info += "<strong>PIN: " + props.pin + "</strong><br />";
@@ -61,12 +62,12 @@ var LargeLots = {
           if (props.square_feet){
               info += "Sq Ft: " + Math.floor(props.square_feet) + "<br />";
           }
-          this._div.innerHTML = info;
         }
+        this._div.innerHTML = info;
       };
 
       LargeLots.info.clear = function(){
-          this._div.innerHTML = '';
+          this._div.innerHTML = 'Hover over a lot to learn more';
       }
 
       LargeLots.info.addTo(LargeLots.map);

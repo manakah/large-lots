@@ -134,7 +134,7 @@
                             {% else %}
                             <div class="form-group">
                             {% endif %}
-                            <label for="lot_1_use">How do you plan on using this lot? (500 character max.)</label>
+                            <label for="lot_1_use">How do you plan on using this lot?</label>
                             <input type="text" value="{{lot_1_use}}" class="form-control" id="id_lot_1_use" name="lot_1_use" placeholder="Community garden, side lot or yard, etc.">
                             {% for error in form.lot_1_use.errors %}
                                 <span class="help-block">{{ error }}</span>
@@ -302,7 +302,8 @@
                                 </div>
                               </div>
                             </div>
-                          </div>
+
+                            </br>
 
                             {% if form.deed_image.errors %}
                             <div class="form-group has-error">
@@ -315,8 +316,9 @@
                                 <span class="help-block">{{ error }}</span>
                             {% endfor %}
                             <p class="help-block">Your deed must be in PDF or image (JPG, PNG) format. Max size 5mb.</p>
-                          </div>
+                            </div>
 
+                        </div>
                       </div>
                     </div>
                   </div>
