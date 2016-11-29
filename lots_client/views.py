@@ -142,14 +142,16 @@ def home(request):
 def application_active(request):
     apps = Application.objects.all()
 
-    if settings.APPLICATION_DISPLAY: # override with configuration setting
-        return True
-    elif request.user.is_authenticated(): # or if you're logged in
-        return True
-    elif (settings.START_DATE < settings.CHICAGO_TIME < settings.END_DATE): # otherwise, check the dates
-        return True
-    else:
-        return False
+    return True
+
+    # if settings.APPLICATION_DISPLAY: # override with configuration setting
+    #     return True
+    # elif request.user.is_authenticated(): # or if you're logged in
+    #     return True
+    # elif (settings.START_DATE < settings.CHICAGO_TIME < settings.END_DATE): # otherwise, check the dates
+    #     return True
+    # else:
+    #     return False
 
 def get_ward(pin):
     carto = 'http://datamade.cartodb.com/api/v2/sql'
