@@ -56,8 +56,9 @@
               <p>To get started:</p>
 
               <ol>
-                <li>Enter your address to view available lots near you</li>
-                <li>Click on a lot on the map for details</li>
+                <li>Enter your address</li>
+                <li>View lots near you</li>
+                <li>Click on a lot for details</li>
               </ol>
             </div>
           </div>
@@ -101,7 +102,7 @@
         }
         LargeLots.initialize(init_params);
       });
-      
+
       var autocomplete = new google.maps.places.Autocomplete(document.getElementById('search_address'));
 
       $("#search").on("click", LargeLots.addressSearch);
