@@ -101,19 +101,24 @@ var LargeLots = {
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
-            LargeLots.lotsLayer = layer.getSubLayer(0)
+            LargeLots.lotsLayer = layer.getSubLayer(0);
             LargeLots.lotsLayer.setInteraction(true);
+
             LargeLots.lotsLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
               $('#map div').css('cursor','pointer');
               LargeLots.info.update(data);
             });
+
             LargeLots.lotsLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
               $('#map div').css('cursor','inherit');
               LargeLots.info.clear();
             });
+
             LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
                 LargeLots.getOneParcel(data['pin14']);
-                        window.setTimeout(function(){
+            });
+
+            window.setTimeout(function(){
                 if($.address.parameter('pin')){
                     LargeLots.getOneParcel($.address.parameter('pin'))
                 }
@@ -126,12 +131,13 @@ var LargeLots = {
       LargeLots.addressSearch();
       $('.toggle-parcels').on('click', function(e){
           if($(e.target).is(':checked')){
-              $(e.target).prop('checked', true)
-          } else {
+              $(e.target).prop('checked', true);
+          }
+          else {
               $(e.target).prop('checked', false);
           }
-          LargeLots.toggleParcels()
-      })
+          LargeLots.toggleParcels();
+      });
   },
 
   toggleParcels: function(){
@@ -158,7 +164,8 @@ var LargeLots = {
       if(clauses.length > 0){
           clauses = clauses.join(' or ');
           sql += clauses;
-      } else {
+      }
+      else {
           sql = 'select * from ' + LargeLots.tableName + ' where false'
       }
 
