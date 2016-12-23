@@ -6,7 +6,7 @@ The City of Chicago is selling vacant lots for $1. Here's how you get one.
 
 We recommend using [virtualenv](http://virtualenv.readthedocs.org/en/latest/virtualenv.html) and [virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/install.html) for working in a virtualized development environment. [Read how to set up virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 
-Once you have virtualenvwrapper set up, do this:
+Once you have virtualenvwrapper set up, run the following commands in your terminal:
 
 ```bash
 mkvirtualenv largelots -p /path/to/your/python3
@@ -15,21 +15,17 @@ cd large-lots
 pip install -r requirements.txt
 ```
 
-Setup a few Environmental variables:
+Set the environmental variables in [local_settings.py.example](https://github.com/datamade/large-lots/blob/master/lots/local_settings.py.example) (then drop the .example suffix):
 
-``DJANGO_SECRET_KEY`` Django’s [Secret Key](https://docs.djangoproject.com/en/1.10/ref/settings/#secret-key)
-used by the project. Can be any relatively hard to guess string.
+  * ``SECRET_KEY`` - Django’s [Secret Key](https://docs.djangoproject.com/en/1.10/ref/settings/#secret-key) used by the project. Can be any relatively hard to guess string.
 
-``AWS_ACCESS_KEY`` AWS key used by the file storage mechanism to store files in
-S3.
+  * ``AWS_ACCESS_KEY`` - AWS key used by the file storage mechanism to store files in S3.
 
-``AWS_SECRET_KEY`` The secret that goes with the key above.
+  * ``AWS_SECRET_ACCESS_KEY`` - The secret that goes with the key above.
 
-``LOTS_EMAIL_HOST, LOTS_EMAIL_PORT, LOTS_EMAIL_USE_TLS, LOTS_EMAIL_HOST_USER,
-LOTS_EMAIL_HOST_PASSWORD`` These are used to configure the email settings for
-Django. See [Django docs](https://docs.djangoproject.com/en/1.6/topics/email/) for more info.
-
-``SENTRY_DSN`` This is a connection string for [Sentry](http://getsentry.com)
+  * ``EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD`` - These are used to configure the email settings for Django. See [Django docs](https://docs.djangoproject.com/en/1.6/topics/email/) for more info.
+  
+  * ``SENTRY_DSN`` - This is a connection string for [Sentry](http://getsentry.com).
 
 Run the app:
 
@@ -37,7 +33,7 @@ Run the app:
 python manage.py runserver
 ```
 
-navigate to http://localhost:8000/
+Navigate to [http://localhost:8000/](http://localhost:8000/).
 
 ## Data
 
@@ -67,7 +63,6 @@ We used the following open source tools:
 
 * Aya O'Connor - logo
 * Juan-Pablo Velez - content
-
 
 ## Errors / Bugs
 
