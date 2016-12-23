@@ -1,3 +1,5 @@
+![large lots logo](lots/static/images/large_lots.png)
+
 # Large Lots
 
 The City of Chicago is selling vacant lots for $1. Here's how you get one.
