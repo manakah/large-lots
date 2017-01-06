@@ -184,7 +184,11 @@ var LargeLots = {
       //fetch the applicant's lot geometry based on their pin
       $.get('/get-parcel-geometry/?pin=' + ownedPin).done(
         function(ownedParcel){
-          $(".loadingInfo").hide();
+
+          if(otherOwnedPins[0] == '0') {
+            $(".loadingInfo").hide();
+          }
+
           L.geoJson(ownedParcel, {
               style: {"fillColor": "#A1285D", "fillOpacity": 0.7, "color": "#A1285D", 'opacity': 1, 'weight': 1},
               onEachFeature: function(feature, layer) {
@@ -208,6 +212,8 @@ var LargeLots = {
       });
 
       //for everyone else who applied to the lot, fetch their property geometry based on their pin
+      var count = otherOwnedPins.length;
+
       $.each(otherOwnedPins, function(i, pin){
         if(pin !== '0') {
           $.get('/get-parcel-geometry/?pin=' + pin).done(
@@ -222,7 +228,8 @@ var LargeLots = {
                       LargeLots.clear(LargeLots.infoOtherApplicants);
                     });
                   }
-              }).addTo(LargeLots.map);
+              }).addTo(LargeLots.map)
+              if (!--count) $(".loadingInfo").hide();
           }).error(function(e) {
             var msg = e.responseJSON["message"];
             var status = e.status;

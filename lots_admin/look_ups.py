@@ -1,7 +1,7 @@
 DENIAL_REASONS = {
     'deedoveruse': 'Applicant used the same deed for more than two lots',
     'duplicate': 'Applicant submitted the same or similar application more than once',
-    'document': 'Applicant did not provide a property deed',
+    'document': 'Applicant did not provide a valid property deed',
     'church': 'Applicant\'s owned property is a church',
     'name': 'Applicant name does not match deed',
     'address': 'Applicant address does not match deed',
