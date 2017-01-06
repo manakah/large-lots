@@ -27,9 +27,11 @@
             <strong>
             <!-- Denial reasons for emails. Can be customized by Jeanne, if she so wishes. -->
             {% if review.denial_reason|slugify == DENIAL_REASONS.document|slugify %}
-                you did not include a deed for the property that you own.
-            {% elif review.denial_reason|slugify == DENIAL_REASONS.duplicate|slugify %}
+                you did not include a valid deed for the property that you own.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.deedoveruse|slugify %}
                 you used the same property deed for more than two lots.
+            {% elif review.denial_reason|slugify == DENIAL_REASONS.duplicate|slugify %}
+                you submitted the same or a similar application more than once.
             {% elif review.denial_reason|slugify == DENIAL_REASONS.church|slugify %}
                 the property that you own is a church.
             {% elif review.denial_reason|slugify == DENIAL_REASONS.name|slugify %}
