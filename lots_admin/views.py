@@ -280,6 +280,21 @@ def deed_duplicate_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
 
+        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['deedoveruse'])
+        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+        review.save()
+
+        application_status.denied = True
+        application_status.save()
+
+        return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
+
+@login_required(login_url='/lots-login/')
+def applicant_duplicate_submit(request, application_id):
+    if request.method == 'POST':
+        application_status = ApplicationStatus.objects.get(id=application_id)
+        user = request.user
+
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['duplicate'])
         review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
         review.save()
