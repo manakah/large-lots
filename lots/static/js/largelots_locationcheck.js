@@ -152,7 +152,7 @@ var LargeLots = {
               },
               {
                   sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
-                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
+                  cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc; polygon-opacity: 0.25; line-color: #606060; line-width: 0.8; line-opacity: 1;}"
               }
           ]
       }
