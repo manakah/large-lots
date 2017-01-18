@@ -14,6 +14,7 @@ class Address(models.Model):
     state = models.CharField(max_length=20, default='IL')
     zip_code = models.CharField(max_length=15, null=True)
     ward = models.CharField(max_length=15, null=True)
+    community = models.CharField(max_length=255, null=True)
 
     def __str__(self):
         return '%s %s, %s %s' % \

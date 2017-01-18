@@ -171,6 +171,25 @@ def get_ward(pin):
             ward_nbr = ward[0]['ward']
     return ward_nbr
 
+def get_community(pin):
+    carto = 'http://datamade.cartodb.com/api/v2/sql'
+    params = {
+        'api_key': settings.CARTODB_API_KEY,
+        'q':  "SELECT community FROM %s WHERE pin_nbr = '%s'" % \
+            (settings.CURRENT_CARTODB, pin),
+    }
+    community_name = None
+    r = requests.get(carto, params=params)
+    if r.status_code is 200:
+        resp = json.loads(r.text)
+        if resp['rows']:
+            community = resp['rows']
+            community_name = community[0]['community']
+
+    print(community_name)
+
+    return community_name
+
 def parse_address(address):
     parsed = usaddress.parse(address)
     street_number = ' '.join([p[0] for p in parsed if p[1] == 'AddressNumber'])
@@ -184,6 +203,7 @@ def parse_address(address):
 def get_lot_address(address, pin):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
     ward = get_ward(pin)
+    community = get_community(pin)
     add_info = {
         'street': address,
         'street_number': street_number,
@@ -193,7 +213,8 @@ def get_lot_address(address, pin):
         'city': 'Chicago',
         'state': 'IL',
         'zip_code': '',
-        'ward': ward
+        'ward': ward,
+        'community': community,
     }
     add_obj, created = Address.objects.get_or_create(**add_info)
     return add_obj
