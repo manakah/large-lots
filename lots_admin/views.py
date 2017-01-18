@@ -114,9 +114,10 @@ def csv_dump(request, pilot):
         'Lot PIN',
         'Lot Address',
         'Lot Full Address',
+        'Ward',
+        'Community',
         'Lot Image URL',
         'Lot Planned Use',
-        'Ward'
     ]
     rows = []
     for application in applications:
@@ -139,6 +140,7 @@ def csv_dump(request, pilot):
                 getattr(lot.address, 'zip_code', ''))
             pin = lot.pin
             ward = lot.address.ward
+            community = lot.address.community
             image_url = 'https://pic.datamade.us/%s.jpg' % pin.replace('-', '')
             lot_use = lot.planned_use
 
@@ -160,9 +162,10 @@ def csv_dump(request, pilot):
                 pin,
                 addr,
                 addr_full,
+                ward,
+                community,
                 image_url,
                 lot_use,
-                ward
             ])
     writer = csv.writer(response)
     writer.writerow(header)
