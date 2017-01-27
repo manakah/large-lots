@@ -2,11 +2,10 @@
 {% load staticfiles %}
 {% block title %}Lottery{% endblock %}
 {% block content %}
-<form role="form" method="POST" action="{% url 'lottery_submit' %}">
+<form role="form" method="POST" action="{% url 'lottery_submit' lot.pin %}">
 <h2>Large Lots Lottery</h2>
-{% for lot in lots_list %}
-<h3>{{ lot.address }}</h3>
-<h3>Lot #{{ lot.pin }}</h3>
+<p>Pin #{{lot.pin}}</p>
+<p>{{lot.address}}</p>
 <table class="table">
     <thead id="table-stripe">
       <th class="no-wrap">Application ID</th>
@@ -18,7 +17,6 @@
     <tbody>
       {% for applicant in applications %}
         {% csrf_token %}
-        {% if applicant.lot == lot %}
         <tr>
           <td>{{ applicant.application.id }}</td>
           <td>
@@ -30,7 +28,7 @@
           </td>
           <td>{{ applicant.application.email}}</td>
           <td class="ball">{{ forloop.counter }}</td>
-          <td>
+          <td class="winner">
             <div class="form-group">
               <div class="radio">
                 <label>
@@ -40,14 +38,13 @@
             </div>
           </td>
         </tr>
-        {% endif %}
       {% endfor %}
     </tbody>
 </table>
-{% endfor %}
+
 <div class="row">
   <div class="col-md-6">
-    <a href="{% url 'lots_admin' 'all' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a>
+    <a href="{% url 'lotteries' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a>
   </div>
   <div class="col-md-6">
     <button type="submit" class="btn btn-success winners"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Submit winners</button>
