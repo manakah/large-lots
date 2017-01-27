@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% block title %}Lottery{% endblock %}
 {% block content %}
-<form role="form" method="POST" action="{% url 'lottery_submit' %}">
+<form role="form" method="POST" action="{% url 'lottery_submit' lot.pin %}">
 <h2>Large Lots Lottery</h2>
 <p>Pin #{{lot.pin}}</p>
 <p>{{lot.address}}</p>

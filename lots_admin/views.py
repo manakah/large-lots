@@ -501,27 +501,25 @@ def lottery(request, lot_pin):
         })
 
 @login_required(login_url='/lots-login/')
-def lottery_submit(request):
+def lottery_submit(request, lot_pin):
     if request.method == 'POST':
         user = request.user
-        winners = [value for name, value in request.POST.items()
+        winner = [value for name, value in request.POST.items()
                 if name.startswith('winner')]
-        winners_id = [int(a) for a in winners]
-        winning_apps = ApplicationStatus.objects.filter(id__in=winners_id)
+        winner_id = int(winner[0])
+        winning_app = ApplicationStatus.objects.get(id=winner_id)
 
-        # Move lottery winners to Step 6.
-        for a in winning_apps:
-            # Move each application to Step 6.
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
-            a.current_step = step
-            a.save()
+        # Move lottery winner to Step 6.
+        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
+        winning_app.current_step = step
+        winning_app.save()
 
-            # Create a review.
-            review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
-            review.save()
+        # Create a review.
+        review = Review(reviewer=user, email_sent=False, application=winning_app, step_completed=5)
+        review.save()
 
         # Deny lottery losers: find all applications on Step 5.
-        losing_apps = ApplicationStatus.objects.filter(current_step__step=5)
+        losing_apps = ApplicationStatus.objects.filter(current_step__step=5).filter(lot=lot_pin)
         for a in losing_apps:
             # Deny each application.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['lottery'])
@@ -533,7 +531,9 @@ def lottery_submit(request):
 
             send_email(request, a)
 
-        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+        # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+        return HttpResponseRedirect(reverse('lotteries'))
+
 
 @login_required(login_url='/lots-login/')
 def review_EDS(request, application_id):
