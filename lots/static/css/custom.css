@@ -349,6 +349,10 @@ div.text { padding-top: 1%; }
     text-align: center;
 }
 
+.winner .form-group {
+    margin-left: 48%;
+}
+
 button.winners {
     float: right;
 }

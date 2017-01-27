@@ -109,7 +109,7 @@
                         {% endif %}
                     <!-- Step 5 -->
                     {% elif applicant.current_step.step == 5 %}
-                        <a href="/lottery/">Step {{ applicant.current_step.step }}: Lottery</a>
+                        <a href="{% url 'lotteries' %}">Step {{ applicant.current_step.step }}: Lottery</a>
                     <!-- Steps 6-10 -->
                     {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
                         <div class='col-sm-10' id="letter-checkbox">

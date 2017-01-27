@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Lottery{% endblock %}
+{% block content %}
+<form role="form" method="POST" action="{% url 'lottery_submit' %}">
+<h2>Large Lots Lottery</h2>
+<p>The City will hold a lottery for these lots. <strong>Click on the lot number</strong> to see competing applicants and chose a winner.</p>
+<table class="table table-striped">
+    <thead>
+      <th class="no-wrap">Address</th>
+      <th>Lot number</th>
+    </thead>
+    <tbody>
+      {% for lot in lots_list %}
+        <tr>
+          <td>{{ lot.address }}</td>
+          <td><a href="{% url 'lottery' lot.pin %}">{{ lot.pin }}</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+<div class="row">
+  <div class="col-md-6">
+    <a href="{% url 'lots_admin' 'all' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a>
+  </div>
+  </form>
+</div>
+
+{% endblock %}

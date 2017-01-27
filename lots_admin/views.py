@@ -472,9 +472,8 @@ def multiple_location_check_submit(request, application_id):
 
         return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
-
 @login_required(login_url='/lots-login/')
-def lottery(request):
+def lotteries(request):
     # Get all applications that will go to lottery.
     applications = ApplicationStatus.objects.filter(current_step__step=5).order_by('application__last_name')
     applications_list = list(applications)
@@ -485,12 +484,20 @@ def lottery(request):
     # Deduplicate applied_pins array.
     lots_list = list(set(lots))
 
-    counter = 0
+    return render(request, 'lotteries.html', {
+        'lots_list': lots_list,
+        })
+
+@login_required(login_url='/lots-login/')
+def lottery(request, lot_pin):
+    lot = Lot.objects.get(pin=lot_pin)
+
+    applications = ApplicationStatus.objects.filter(current_step__step=5).filter(lot=lot_pin).order_by('application__last_name')
+    applications_list = list(applications)
 
     return render(request, 'lottery.html', {
         'applications': applications,
-        'lots_list': lots_list,
-        'counter': counter
+        'lot': lot,
         })
 
 @login_required(login_url='/lots-login/')
