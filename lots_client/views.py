@@ -85,8 +85,6 @@ def get_community(pin):
             community = resp['rows']
             community_name = community[0]['community']
 
-    print(community_name)
-
     return community_name
 
 def parse_address(address):
