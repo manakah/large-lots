@@ -13,7 +13,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'lots_client',
     'lots_admin',
-    'raven.contrib.django.raven_compat'
+    'raven.contrib.django.raven_compat',
+    'bootstrap_pagination',
 )
 
 MIDDLEWARE_CLASSES = (

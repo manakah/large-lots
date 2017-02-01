@@ -233,8 +233,8 @@ button.update {
     height: 36px;
 }
 
-select.update {
-    width: 70%;
+select.update, input.update {
+    width: 80%;
     margin-top: 20px;
     display: inline-block;
 }
