@@ -6,7 +6,7 @@
 
 {% include "review-header.html" with app=application_status %}
 
-{% if other_applications|length >= 2 %}
+<!-- {# if other_applications|length >= 2 %}
 <br>
 <div class="row">
   <div class="col-md-12 well">
@@ -16,22 +16,22 @@
         <li>that {{ application_status.application.first_name }} did not submit <em>duplicate applications</em>.</li>
       </ol>
     </p>
-    <p>You can find all applications for {{ application_status.application.first_name }} on the <strong><a href="{% url 'lots_admin' 'all' %}"> main page</a></strong> by typing "{{ application_status.application.first_name }} {{ application_status.application.last_name }}" in the search bar. If you find problems with the deed or duplicates, then deny this specific application. Note: denying this application will not deny other applications from {{ application_status.application.first_name }}; for this step, you need to individually review each application from {{ application_status.application.first_name }}.</p>
+    <p>You can find all applications for {{ application_status.application.first_name }} on the <strong><a href="{# url 'lots_admin' 'all' %}"> main page</a></strong> by typing "{{ application_status.application.first_name }} {{ application_status.application.last_name }}" in the search bar. If you find problems with the deed or duplicates, then deny this specific application. Note: denying this application will not deny other applications from {{ application_status.application.first_name }}; for this step, you need to individually review each application from {{ application_status.application.first_name }}.</p>
 
-      <form style="display: inline-block" role="form" method="POST" action="{% url 'deed_duplicate_submit' application_status.id %}">
-        {% csrf_token %}
+      <form style="display: inline-block" role="form" method="POST" action="{# url 'deed_duplicate_submit' application_status.id %}">
+        {# csrf_token %}
         <p><button type="submit" class="btn btn-danger">Deny! Used deed in excess.</button></p>
       </form>
 
-      <form style="display: inline-block" role="form" method="POST" action="{% url 'applicant_duplicate_submit' application_status.id %}">
-        {% csrf_token %}
+      <form style="display: inline-block" role="form" method="POST" action="{# url 'applicant_duplicate_submit' application_status.id %}">
+        {# csrf_token %}
         <p><button type="submit" class="btn btn-danger">Deny! Duplicate application.</button></p>
       </form>
 
   </div>
 </div>
-{% endif %}
-
+{# endif %}
+ -->
 <div class="row">
   <div class="col-md-6">
     <h3>Deed Check</h3>
@@ -91,6 +91,7 @@
         <p><i class="fa fa-user" aria-hidden="true"></i> <strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}</strong><p>
         <p>Owns: {{ application_status.application.owned_address }}</p>
         <p>Requested: {{ application_status.lot.address}}</p>
+        <p>{{ application_status.application.first_name }} submitted this application on <strong>{{ application_status.application.received_date }}</strong></p>
     </div>
 
   </div>

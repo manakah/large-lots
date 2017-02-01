@@ -656,7 +656,7 @@ def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
     status = ApplicationStep.objects.all()
-    print(status)
+
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
@@ -676,7 +676,7 @@ def bulk_submit(request):
         for a in applications:
             if selected_step == 'step6':
                 # Move application to step 7.
-                l = 'EDS', 'valid', 7, a
+                l = 'commission', 'valid', 7, a
                 next_step(*l)
 
                 # Create a review.
@@ -684,7 +684,7 @@ def bulk_submit(request):
                 review.save()
             elif selected_step == 'step7':
                  # Move application to step 8.
-                l = 'debts', 'valid', 8, a
+                l = 'city_council', 'valid', 8, a
                 next_step(*l)
 
                 # Create a review.
@@ -692,7 +692,7 @@ def bulk_submit(request):
                 review.save()
             elif selected_step == 'step8':
                 # Move application to step 9.
-                l = 'commission', 'valid', 9, a
+                l = 'EDS', 'valid', 9, a
                 next_step(*l)
 
                 # Create a review.
@@ -700,7 +700,7 @@ def bulk_submit(request):
                 review.save()
             elif selected_step == 'step9':
                 # Move application to step 10.
-                l = 'city_council', 'valid', 10, a
+                l = 'debts', 'valid', 10, a
                 next_step(*l)
 
                 # Create a review.
@@ -822,3 +822,11 @@ def send_email(request, application_status):
     msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
     msg.attach_alternative(html_content, 'text/html')
     msg.send()
+
+@login_required(login_url='/lots-login/')
+def deed(request, application_id):
+    application_status = ApplicationStatus.objects.get(id=application_id)
+
+    return render(request, 'deed.html', {
+        'application_status': application_status,
+        })

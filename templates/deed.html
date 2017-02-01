@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load lots_filters %}
+{% block title %}Deed{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        {% include "review-header.html" with app=application_status %}
+
+        <h3>Deed submitted by {{ application_status.application.first_name }} {{ application_status.application.last_name }}</h3>
+
+        <a href="{% url 'lots_admin' 'all' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a>
+        </br></br>
+        {% if application_status.application.deed_image.url|check_for_pdf %}
+            <iframe
+                id="pdf-embed"
+                class="pdf-viewer"
+                frameborder="0"
+                seamless="true"
+                width="100%"
+                height="600px"
+                src="/pdfviewer/?file={{ application_status.application.deed_image.url|urlencode }}">
+            </iframe>
+        {% else %}
+            <img src="{{ application_status.application.deed_image.url }}">
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
