@@ -35,11 +35,7 @@ class Command(BaseCommand):
 
 
     def scrub(self, deed_image):
-        try:
-            filetype = magic.from_buffer(deed_image.file.read(), mime=True)
-
-        except OSError:
-            return deed_image
+        filetype = magic.from_buffer(deed_image.file.read(), mime=True)
 
         deed_image.file.seek(0)
 
