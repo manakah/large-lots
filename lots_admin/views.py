@@ -2,6 +2,7 @@ from datetime import datetime
 import csv
 import json
 import re
+from collections import namedtuple
 
 from operator import __or__ as OR
 from functools import reduce
@@ -13,6 +14,8 @@ from esridump.errors import EsriDownloadError
 
 from raven.contrib.django.raven_compat.models import client
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db import connection, connections
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, \
@@ -62,23 +65,121 @@ def lots_admin_map(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request, step):
-    # Variables: list of step specific, denied, and all.
-    if step.isdigit():
-        step = int(step)
-        application_status_list = ApplicationStatus.objects.filter(current_step__step=step)
-    elif step == "denied":
-        application_status_list = ApplicationStatus.objects.filter(denied=True)
-    elif step == "all":
-        application_status_list = ApplicationStatus.objects.all()
-    step2 = Q(current_step__step=2)
-    step3 = Q(current_step__step=3)
-    step4 = Q(current_step__step=4)
-    step5 = Q(current_step__step=5)
-    before_step4 = ApplicationStatus.objects.filter(step2 | step3)
-    on_steps2345 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
-    app_count = len(ApplicationStatus.objects.all())
+
+    with connection.cursor() as cursor:
+        # Order by last name ascending by default.
+        order_by = request.GET.get('order_by', 'last_name')
+        sort_order = request.GET.get('sort_order', 'asc')
+        print("Printing these things")
+        print(order_by)
+        print(sort_order)
+
+        toggle_order = 'asc'
+        if sort_order.lower() == 'asc':
+            toggle_order = 'desc'
+
+        # Variables: list of step specific, denied, and all.
+        if step.isdigit():
+            step = int(step)
+
+            sql = '''
+            SELECT
+                lots_admin_applicationstatus.id as status_id,
+                lots_admin_application.id as app_id, lots_admin_application.received_date,
+                lots_admin_application.first_name, lots_admin_application.last_name,
+                lots_admin_application.organization, lots_admin_application.tracking_id,
+                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
+                lots_admin_applicationstep.description as step_description,
+                lots_admin_lot.address_id, lots_admin_lot.pin,
+                lots_admin_address.street, lots_admin_address.ward
+            FROM lots_admin_applicationstatus
+            JOIN lots_admin_application
+            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
+            JOIN lots_admin_applicationstep
+            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
+            JOIN lots_admin_lot
+            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
+            JOIN lots_admin_address
+            ON lots_admin_lot.address_id=lots_admin_address.id
+            WHERE lots_admin_applicationstep.step={0}
+            ORDER BY {1} {2}
+            '''.format(step, order_by, sort_order)
+
+        elif step == "denied":
+
+            sql = '''
+            SELECT
+                lots_admin_applicationstatus.id as status_id,
+                lots_admin_application.id as app_id, lots_admin_application.received_date,
+                lots_admin_application.first_name, lots_admin_application.last_name,
+                lots_admin_application.organization, lots_admin_application.tracking_id,
+                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
+                lots_admin_applicationstep.description as step_description,
+                lots_admin_lot.address_id, lots_admin_lot.pin,
+                lots_admin_address.street, lots_admin_address.ward
+            FROM lots_admin_applicationstatus
+            JOIN lots_admin_application
+            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
+            JOIN lots_admin_applicationstep
+            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
+            JOIN lots_admin_lot
+            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
+            JOIN lots_admin_address
+            ON lots_admin_lot.address_id=lots_admin_address.id
+            WHERE lots_admin_applicationstatus.denied=True
+            ORDER BY {0} {1}
+            '''.format(order_by, sort_order)
+
+        elif step == "all":
+
+            sql = '''
+            SELECT
+                lots_admin_applicationstatus.id as status_id,
+                lots_admin_application.id as app_id, lots_admin_application.received_date,
+                lots_admin_application.first_name, lots_admin_application.last_name,
+                lots_admin_application.organization, lots_admin_application.tracking_id,
+                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
+                lots_admin_applicationstep.description as step_description,
+                lots_admin_lot.address_id, lots_admin_lot.pin,
+                lots_admin_address.street, lots_admin_address.ward
+            FROM lots_admin_applicationstatus
+            JOIN lots_admin_application
+            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
+            JOIN lots_admin_applicationstep
+            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
+            JOIN lots_admin_lot
+            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
+            JOIN lots_admin_address
+            ON lots_admin_lot.address_id=lots_admin_address.id
+            ORDER BY {0} {1}
+            '''.format(order_by, sort_order)
+
+        cursor.execute(sql)
+        columns = [c[0] for c in cursor.description]
+        result_tuple = namedtuple('ApplicationStatus', columns)
+        application_status_list = [result_tuple(*r) for r in cursor]
+
+        step2 = Q(current_step__step=2)
+        step3 = Q(current_step__step=3)
+        step4 = Q(current_step__step=4)
+        step5 = Q(current_step__step=5)
+        before_step4 = ApplicationStatus.objects.filter(step2 | step3)
+        on_steps2345 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
+        app_count = len(ApplicationStatus.objects.all())
+
 
     counter_range = range(2, 11)
+
+    paginator = Paginator(application_status_list, 5)
+
+    page = request.GET.get('page')
+
+    try:
+        application_status_list = paginator.page(page)
+    except PageNotAnInteger:
+        application_status_list = paginator.page(1)
+    except EmptyPage:
+        application_status_list = paginator.page(paginator.num_pages)
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
@@ -88,7 +189,9 @@ def lots_admin(request, step):
         'on_steps2345': on_steps2345,
         'app_count': app_count,
         'step': step,
-        'counter_range': counter_range
+        'counter_range': counter_range,
+        'order_by': order_by,
+        'toggle_order': toggle_order
         })
 
 @login_required(login_url='/lots-login/')

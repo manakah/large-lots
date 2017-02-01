@@ -1,4 +1,5 @@
 from django import template
+import re
 
 register = template.Library()
 
@@ -42,3 +43,25 @@ def check_for_pdf(image_path):
 @register.filter
 def make_display_pin(pin):
     return '-'.join([pin[:2], pin[2:4], pin[4:7], pin[7:10], pin[10:]])
+
+@register.simple_tag
+def query_transform(request, **kwargs):
+    updated = request.GET.copy()
+    for k,v in kwargs.items():
+        updated[k] = v
+    return updated.urlencode()
+
+@register.filter
+def get_sort_icon(s):
+    if 'desc' in str(s.lower()):
+        return ' <i class="fa fa-sort-amount-asc"> </i>'
+    return ' <i class="fa fa-sort-amount-desc"> </i>'
+
+@register.filter
+def get_step_all_denied(request):
+    if 'all' in request:
+        return 'all'
+    elif 'denied' in request:
+        return 'denied'
+    else:
+        return re.search(r'(lots-admin\/)(\d+)(\/)', request).group(2)

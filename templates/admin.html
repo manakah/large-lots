@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load lots_filters %}
 {% load staticfiles %}
+{% load bootstrap_pagination %}
 {% block extra_css %}
 <link href="{% static 'css/dataTables.bootstrap.css' %}" rel="stylesheet">
 {% endblock %}
@@ -54,66 +55,121 @@
 
     <table id="receivedTable" class="table table-striped tablesorter">
         <thead>
-            <th>ID</th>
-            <th>Date received</th>
-            <th>Name/Organization</th>
+            <th class="no-wrap">
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='app_id' sort_order=toggle_order %}">
+                        ID
+                        {% if order_by == 'app_id' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
+            <th>
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='received_date' sort_order=toggle_order %}">
+                        Date received
+                        {% if order_by == 'received_date' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
+            <th>
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='last_name' sort_order=toggle_order %}">
+                        Name/Organization
+                        {% if order_by == 'last_name' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
             <th>Details</th>
-            <th>Lot requested</th>
-            <th>Ward</th>
-            <th class="no-wrap">Next review step</th>
+            <th>
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='pin' sort_order=toggle_order %}">
+                        Lot requested
+                        {% if order_by == 'pin' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
+            <th class="no-wrap">
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='ward' sort_order=toggle_order %}">
+                        Ward
+                        {% if order_by == 'ward' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
+            <th class="no-wrap">
+                {% with path=request.path|get_step_all_denied %}
+                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='step' sort_order=toggle_order %}">
+                        Next review step
+                        {% if order_by == 'step' %}
+                            {{ toggle_order|get_sort_icon|safe }}
+                        {% endif %}
+                    </a>
+                {% endwith %}
+            </th>
         </thead>
         <tbody>
         {% for applicant in application_status_list %}
             <tr>
                 <td>
-                    {{applicant.application.id}}
+                    {{applicant.app_id}}
                 </td>
-                <td>{{applicant.application.received_date|date:'Y-m-d g:i a'}}</td>
+                <td>{{applicant.received_date|date:'Y-m-d g:i a'}}</td>
                 <td>
-                    {{applicant.application.first_name}} {{applicant.application.last_name}}
-                    {% if applicant.application.organization %}
+                    {{applicant.first_name}} {{applicant.last_name}}
+                    {% if applicant.organization %}
                     <br />
-                      {{applicant.application.organization}}
+                      {{applicant.organization}}
                     {% endif %}
                 </td>
                 <td class="no-wrap">
                     {% if applicant.denied %}
                         Status: denied
                     {% else %}
-                        Status: {{ applicant.current_step.public_status }}
+                        Status: {{ applicant.public_status }}
                     {% endif %}
                     </br>
-                    <a href="/review-status-log/{{ applicant.id }}">
+                    <a href="/review-status-log/{{ applicant.status_id }}">
                         Review history
                     </a></br>
-                    <a href="{% url 'apply_confirm' applicant.application.tracking_id %}" target="_blank">Confirmation page</a></br>
+                    <a href="{% url 'apply_confirm' applicant.tracking_id %}" target="_blank">Confirmation page</a></br>
                 </td>
                 <td>
-                    {{ applicant.lot.address }}</br>
-                    {{ applicant.lot.pin|make_display_pin }}
+                    <!-- {{ applicant.address }}</br> -->
+                    {{ applicant.street }}</br>
+                    {{ applicant.pin|make_display_pin }}
                 </td>
-                <td class="ward">{{ applicant.lot.address.ward }}</td>
+                <td class="ward">{{ applicant.ward }}</td>
 
-                {% if applicant.current_step %}
-                <td data-order='{{ applicant.current_step.step }}'>
+                {% if applicant.step %}
+                <td data-order='{{ applicant.step }}'>
                     <!-- Steps 2 and 3 -->
-                    {% if applicant.current_step.step == 2 or applicant.current_step.step == 3 %}
-                        <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
+                    {% if applicant.step == 2 or applicant.step == 3 %}
+                        <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.step }}: {{ applicant.step_description }}</a>
                     <!-- Step 4 -->
-                    {% elif applicant.current_step.step == 4 %}
+                    {% elif applicant.step == 4 %}
                         {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
-                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
+                            Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                             <span class='emphasis'>Waiting for other applications</span>
                         {% else %}
-                            <a href="/application-review/step-{{ applicant.current_step.step }}/{{ applicant.id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</a>
+                            <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.step }}: {{ applicant.step_description }}</a>
                         {% endif %}
                     <!-- Step 5 -->
-                    {% elif applicant.current_step.step == 5 %}
-                        <a href="{% url 'lotteries' %}">Step {{ applicant.current_step.step }}: Lottery</a>
+                    {% elif applicant.step == 5 %}
+                        <a href="{% url 'lotteries' %}">Step {{ applicant.step }}: Lottery</a>
                     <!-- Steps 6-10 -->
-                    {% elif applicant.current_step.step == 6 or applicant.current_step.step == 7 or applicant.current_step.step == 8 or applicant.current_step.step == 9 or applicant.current_step.step == 10 %}
+                    {% elif applicant.step == 6 or applicant.step == 7 or applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
                         <div class='col-sm-10' id="letter-checkbox">
-                            Step {{ applicant.current_step.step }}: {{ applicant.current_step }}</br>
+                            Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                             {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
                         </div>
                         </div>
@@ -122,13 +178,13 @@
                             <div class="form-group col-sm-2">
                                 <div class="checkbox">
                                   <label>
-                                    <input name="letter-received" value="{{applicant.id}}" type="checkbox"/>
+                                    <input name="letter-received" value="{{applicant.status_id}}" type="checkbox"/>
                                   </label>
                                 </div>
                             </div>
                         {% endif %}
                     <!-- Step 11: Sold -->
-                    {% elif applicant.current_step.step == 11 %}
+                    {% elif applicant.step == 11 %}
                         Sold</br>
                         <span class="emphasis">Official closing event to be held</span>
                     {% endif %}
@@ -141,7 +197,7 @@
         {% endfor %}
         </tbody>
     </table>
-
+    {% bootstrap_paginate application_status_list %}
 </form>
 
 {% endblock %}
@@ -151,11 +207,11 @@
     <script src="{% static 'js/dataTables.bootstrap.js' %}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#receivedTable').DataTable({
-                "order": [[6, 'asc']],
-                "info": false,
-                "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
-            });
+            // $('#receivedTable').DataTable({
+            //     "order": [[6, 'asc']],
+            //     "info": false,
+            //     "dom": '<"top"f><"wrapper"l>t<"bottom"p>'
+            // });
         })
     </script>
 {% endblock %}
