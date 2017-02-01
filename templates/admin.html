@@ -21,23 +21,29 @@
     </div>
 </div>
 
-<!-- Form for bulk submit. -->
-<form role="form" method="POST" action="{% url 'bulk_submit' %}">
-    <div class="row">
-        <div class='col-md-7'>
-            <h3>
-                Large Lots received {{app_count}} applications
-                <small><a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
-            </h3>
-            <p>{{ application_status_list|length }} applications shown below</p>
-        </div>
+<div class="row">
+    <div class='col-md-8'>
+        <h3>
+            Large Lots received {{app_count}} applications
+            <small><a href="{% url 'csv_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
+        </h3>
 
-        <div class="col-md-5" id="bulkDiv">
-            {% if on_steps2345 %}
-                <p class="info-text">You will be given an option to deny or advance multiple applications, once all applications reach Step 6.</p>
-            {% else %}
-                {% csrf_token %}
-                <p class="info-text">Move multiple applications to the next step! Select checkboxes (far-right column), pick a step in the dropdown, and click "Update."</p>
+        <form type="get" action="." style="margin: 0">
+            <input class="form-control update" id="search_box" type="text" name="search_box"  placeholder="Search for a name or ward..." >
+            <button class="btn btn-success update" id="search_submit" type="submit" style="border-width: 0px;"><i class="fa fa-search" aria-hidden="true"></i> Submit</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Form for bulk submit. -->
+    <form role="form" method="POST" action="{% url 'bulk_submit' %}">
+        {% if on_steps2345 %}
+        <div class="col-md-8" id="bulkDiv">
+            <p class="info-text">You will have an option to deny or advance multiple applications, once all applications reach Step 6.</p>
+        </div>
+        {% else %}
+        <div class="col-md-8">
                 <select name='step' class="form-control update">
                     <option>-----------------</option>
                     <option value="step6">Complete step 6: Alderman letter of support</option>
@@ -48,156 +54,161 @@
                     <option value="deny">Deny application</option>
                 </select>
                 <button type="submit" class="btn btn-success update"><i class="fa fa-check" aria-hidden="true"></i> Update</button>
-
-            {% endif %}
         </div>
-    </div>
+        <div class="col-md-4">
+                {% csrf_token %}
+                <p class="info-text">Move multiple applications to the next step! Select checkboxes (far-right column), pick a step in the dropdown, and click "Update."</p>
+        </div>
+        {% endif %}
+</div>
 
-    <table id="receivedTable" class="table table-striped tablesorter">
-        <thead>
-            <th class="no-wrap">
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='app_id' sort_order=toggle_order %}">
-                        ID
-                        {% if order_by == 'app_id' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-            <th>
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='received_date' sort_order=toggle_order %}">
-                        Date received
-                        {% if order_by == 'received_date' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-            <th>
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='last_name' sort_order=toggle_order %}">
-                        Name/Organization
-                        {% if order_by == 'last_name' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-            <th>Details</th>
-            <th>
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='pin' sort_order=toggle_order %}">
-                        Lot requested
-                        {% if order_by == 'pin' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-            <th class="no-wrap">
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='ward' sort_order=toggle_order %}">
-                        Ward
-                        {% if order_by == 'ward' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-            <th class="no-wrap">
-                {% with path=request.path|get_step_all_denied %}
-                    <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='step' sort_order=toggle_order %}">
-                        Next review step
-                        {% if order_by == 'step' %}
-                            {{ toggle_order|get_sort_icon|safe }}
-                        {% endif %}
-                    </a>
-                {% endwith %}
-            </th>
-        </thead>
-        <tbody>
-        {% for applicant in application_status_list %}
-            <tr>
-                <td>
-                    {{applicant.app_id}}
-                </td>
-                <td>{{applicant.received_date|date:'Y-m-d g:i a'}}</td>
-                <td>
-                    {{applicant.first_name}} {{applicant.last_name}}
-                    {% if applicant.organization %}
-                    <br />
-                      {{applicant.organization}}
+<table id="receivedTable" class="table table-striped tablesorter">
+    <thead>
+        <th class="no-wrap">
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='app_id' sort_order=toggle_order %}">
+                    ID
+                    {% if order_by == 'app_id' %}
+                        {{ toggle_order|get_sort_icon|safe }}
                     {% endif %}
-                </td>
-                <td class="no-wrap">
-                    {% if applicant.denied %}
-                        Status: denied
-                    {% else %}
-                        Status: {{ applicant.public_status }}
+                </a>
+            {% endwith %}
+        </th>
+        <th>
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='received_date' sort_order=toggle_order %}">
+                    Date received
+                    {% if order_by == 'received_date' %}
+                        {{ toggle_order|get_sort_icon|safe }}
                     {% endif %}
-                    </br>
-                    <a href="/review-status-log/{{ applicant.status_id }}">
-                        Review history
-                    </a></br>
-                    <a href="{% url 'apply_confirm' applicant.tracking_id %}" target="_blank">Confirmation page</a></br>
-                </td>
-                <td>
-                    <!-- {{ applicant.address }}</br> -->
-                    {{ applicant.street }}</br>
-                    {{ applicant.pin|make_display_pin }}
-                </td>
-                <td class="ward">{{ applicant.ward }}</td>
-
-                {% if applicant.step %}
-                <td data-order='{{ applicant.step }}'>
-                    <!-- Steps 2 and 3 -->
-                    {% if applicant.step == 2 or applicant.step == 3 %}
-                        <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.step }}: {{ applicant.step_description }}</a>
-                    <!-- Step 4 -->
-                    {% elif applicant.step == 4 %}
-                        {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
-                            Step {{ applicant.step }}: {{ applicant.step_description }}</br>
-                            <span class='emphasis'>Waiting for other applications</span>
-                        {% else %}
-                            <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.step }}: {{ applicant.step_description }}</a>
-                        {% endif %}
-                    <!-- Step 5 -->
-                    {% elif applicant.step == 5 %}
-                        <a href="{% url 'lotteries' %}">Step {{ applicant.step }}: Lottery</a>
-                    <!-- Steps 6-10 -->
-                    {% elif applicant.step == 6 or applicant.step == 7 or applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
-                        <div class='col-sm-10' id="letter-checkbox">
-                            Step {{ applicant.step }}: {{ applicant.step_description }}</br>
-                            {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
-                        </div>
-                        </div>
-                        {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
-                            {% csrf_token %}
-                            <div class="form-group col-sm-2">
-                                <div class="checkbox">
-                                  <label>
-                                    <input name="letter-received" value="{{applicant.status_id}}" type="checkbox"/>
-                                  </label>
-                                </div>
-                            </div>
-                        {% endif %}
-                    <!-- Step 11: Sold -->
-                    {% elif applicant.step == 11 %}
-                        Sold</br>
-                        <span class="emphasis">Official closing event to be held</span>
+                </a>
+            {% endwith %}
+        </th>
+        <th class="no-wrap">
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='last_name' sort_order=toggle_order %}">
+                    Name/Organization
+                    {% if order_by == 'last_name' %}
+                        {{ toggle_order|get_sort_icon|safe }}
                     {% endif %}
-                </td>
-                {% else %}
-                <td data-order="99">None</td>
+                </a>
+            {% endwith %}
+        </th>
+        <th>Details</th>
+        <th>
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='pin' sort_order=toggle_order %}">
+                    Lot requested
+                    {% if order_by == 'pin' %}
+                        {{ toggle_order|get_sort_icon|safe }}
+                    {% endif %}
+                </a>
+            {% endwith %}
+        </th>
+        <th class="no-wrap">
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='ward' sort_order=toggle_order %}">
+                    Ward
+                    {% if order_by == 'ward' %}
+                        {{ toggle_order|get_sort_icon|safe }}
+                    {% endif %}
+                </a>
+            {% endwith %}
+        </th>
+        <th class="no-wrap">
+            {% with path=request.path|get_step_all_denied %}
+                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='step' sort_order=toggle_order %}">
+                    Next review step
+                    {% if order_by == 'step' %}
+                        {{ toggle_order|get_sort_icon|safe }}
+                    {% endif %}
+                </a>
+            {% endwith %}
+        </th>
+    </thead>
+    <tbody>
+    {% for applicant in application_status_list %}
+        <tr>
+            <td>
+                {{applicant.app_id}}
+            </td>
+            <td>{{applicant.received_date|date:'Y-m-d g:i a'}}</td>
+            <td>
+                {{applicant.first_name}} {{applicant.last_name}}
+                {% if applicant.organization %}
+                <br />
+                  {{applicant.organization}}
                 {% endif %}
-                <!-- End Next Step -->
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% bootstrap_paginate application_status_list %}
+            </td>
+            <td class="no-wrap">
+                {% if applicant.denied %}
+                    Status: denied
+                {% else %}
+                    Status: {{ applicant.public_status }}
+                {% endif %}
+                </br>
+                <a href="/review-status-log/{{ applicant.status_id }}">
+                    Review history
+                </a></br>
+                <a href="{% url 'apply_confirm' applicant.tracking_id %}" target="_blank">Confirmation page</a></br>
+            </td>
+            <td>
+                <!-- {{ applicant.address }}</br> -->
+                {{ applicant.street }}</br>
+                {{ applicant.pin|make_display_pin }}
+            </td>
+            <td class="ward">{{ applicant.ward }}</td>
+
+            {% if applicant.step %}
+            <td data-order='{{ applicant.step }}'>
+                <!-- Steps 2 and 3 -->
+                {% if applicant.step == 2 or applicant.step == 3 %}
+                    <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i> Step {{ applicant.step }}: {{ applicant.step_description }}</a>
+                <!-- Step 4 -->
+                {% elif applicant.step == 4 %}
+                    {% if before_step4 %} <!-- Check if other applications are on Steps 2 or 3 -->
+                        Step {{ applicant.step }}: {{ applicant.step_description }}</br>
+                        <span class='emphasis'>Waiting for other applications</span>
+                    {% else %}
+                        <a href="/application-review/step-{{ applicant.step }}/{{ applicant.status_id }}/" class="btn btn-danger"><i class="fa fa-angle-double-right" aria-hidden="true"></i>Step {{ applicant.step }}: {{ applicant.step_description }}</a>
+                    {% endif %}
+                <!-- Step 5 -->
+                {% elif applicant.step == 5 %}
+                    <a href="{% url 'lotteries' %}">Step {{ applicant.step }}: Lottery</a>
+                <!-- Steps 6-10 -->
+                {% elif applicant.step == 6 or applicant.step == 7 or applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
+                    <div class='col-sm-10' id="letter-checkbox">
+                        Step {{ applicant.step }}: {{ applicant.step_description }}</br>
+                        {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
+                    </div>
+                    </div>
+                    {% if on_steps2345|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
+                        {% csrf_token %}
+                        <div class="form-group col-sm-2">
+                            <div class="checkbox">
+                              <label>
+                                <input name="letter-received" value="{{applicant.status_id}}" type="checkbox"/>
+                              </label>
+                            </div>
+                        </div>
+                    {% endif %}
+                <!-- Step 11: Sold -->
+                {% elif applicant.step == 11 %}
+                    Sold</br>
+                    <span class="emphasis">Official closing event to be held</span>
+                {% endif %}
+            </td>
+            {% else %}
+            <td data-order="99">None</td>
+            {% endif %}
+            <!-- End Next Step -->
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% bootstrap_paginate application_status_list %}
+
 </form>
 
 {% endblock %}

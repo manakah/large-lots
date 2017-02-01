@@ -10,3 +10,4 @@ psycopg2==2.6.2
 -e git+https://github.com/datamade/pyesridump.git#egg=pyesridump
 pytz==2016.7
 python-magic==0.4.12
+django-bootstrap-pagination==1.6.2

@@ -65,6 +65,7 @@ def lots_admin_map(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request, step):
+    query = request.GET.get('search_box', None)
 
     with connection.cursor() as cursor:
         # Order by last name ascending by default.
@@ -102,7 +103,6 @@ def lots_admin(request, step):
             JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
-            ORDER BY {1} {2}
             '''.format(step, order_by, sort_order)
 
         elif step == "denied":
@@ -127,8 +127,7 @@ def lots_admin(request, step):
             JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
-            ORDER BY {0} {1}
-            '''.format(order_by, sort_order)
+            '''
 
         elif step == "all":
 
@@ -151,9 +150,15 @@ def lots_admin(request, step):
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
             JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
-            ORDER BY {0} {1}
-            '''.format(order_by, sort_order)
+            '''
 
+        if query:
+            sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
+
+        else:
+            sql += " ORDER BY {0} {1}".format(order_by, sort_order)
+
+        print(sql)
         cursor.execute(sql)
         columns = [c[0] for c in cursor.description]
         result_tuple = namedtuple('ApplicationStatus', columns)
