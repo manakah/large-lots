@@ -25,6 +25,7 @@ class Command(BaseCommand):
         self.bucket = s3_conn.get_bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
         for application in applications:
+            self.stdout.write(self.style.HTTP_NOT_MODIFIED('Working on {}'.format(application.deed_image.name)))
             scrubbed_image = self.scrub(application.deed_image)
 
             key = self.bucket.get_key(application.deed_image.name)
@@ -32,7 +33,7 @@ class Command(BaseCommand):
 
             application.deed_image = scrubbed_image
             application.save()
-            self.stdout.write(self.style.HTTP_NOT_MODIFIED('Cleaned {}'.format(application.deed_image.name)))
+            self.stdout.write(self.style.HTTP_SUCCESS('Cleaned {}'.format(application.deed_image.name)))
 
 
     def scrub(self, deed_image):
