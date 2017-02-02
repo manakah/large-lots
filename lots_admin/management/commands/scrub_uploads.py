@@ -32,6 +32,7 @@ class Command(BaseCommand):
 
             application.deed_image = scrubbed_image
             application.save()
+            self.stdout.write(self.style.HTTP_NOT_MODIFIED('Cleaned {}'.format(application.deed_image.name)))
 
 
     def scrub(self, deed_image):
