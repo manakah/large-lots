@@ -233,6 +233,7 @@ def csv_dump(request, pilot, status):
         'Lot Image URL',
         'Lot Planned Use',
     ]
+
     rows = []
     for application_status in applications:
         owned_address = '%s %s %s %s' % \
@@ -258,6 +259,10 @@ def csv_dump(request, pilot, status):
         image_url = 'https://pic.datamade.us/%s.jpg' % application_status.lot.pin.replace('-', '')
         lot_use = application_status.lot.planned_use
 
+        try:
+            deed_image = application_status.application.deed_image.url
+        except ValueError:
+            deed_image = None
 
         rows.append([
             application_status.application.id,
@@ -268,7 +273,7 @@ def csv_dump(request, pilot, status):
             getattr(application_status.application.owned_address, 'street', '').upper(),
             owned_address,
             application_status.application.owned_pin,
-            application_status.application.deed_image.url,
+            deed_image,
             contact_address,
             application_status.application.phone,
             application_status.application.email,
