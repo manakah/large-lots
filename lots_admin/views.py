@@ -71,9 +71,9 @@ def lots_admin(request, step):
         # Order by last name ascending by default.
         order_by = request.GET.get('order_by', 'last_name')
         sort_order = request.GET.get('sort_order', 'asc')
-        print("Printing these things")
-        print(order_by)
-        print(sort_order)
+
+        if order_by == 'ward':
+            order_by = 'ward::int'
 
         toggle_order = 'asc'
         if sort_order.lower() == 'asc':
@@ -94,13 +94,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
             '''.format(step, order_by, sort_order)
@@ -110,6 +110,7 @@ def lots_admin(request, step):
             sql = '''
             SELECT
                 lots_admin_applicationstatus.id as status_id,
+                lots_admin_applicationstatus.denied,
                 lots_admin_application.id as app_id, lots_admin_application.received_date,
                 lots_admin_application.first_name, lots_admin_application.last_name,
                 lots_admin_application.organization, lots_admin_application.tracking_id,
@@ -118,13 +119,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
             '''
@@ -142,13 +143,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             '''
 
@@ -158,7 +159,6 @@ def lots_admin(request, step):
         else:
             sql += " ORDER BY {0} {1}".format(order_by, sort_order)
 
-        print(sql)
         cursor.execute(sql)
         columns = [c[0] for c in cursor.description]
         result_tuple = namedtuple('ApplicationStatus', columns)
