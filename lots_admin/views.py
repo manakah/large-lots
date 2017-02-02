@@ -172,10 +172,9 @@ def lots_admin(request, step):
         on_steps2345 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5)
         app_count = len(ApplicationStatus.objects.all())
 
-
     counter_range = range(2, 11)
 
-    paginator = Paginator(application_status_list, 5)
+    paginator = Paginator(application_status_list, 20)
 
     page = request.GET.get('page')
 
