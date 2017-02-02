@@ -51,7 +51,7 @@
             <input name="multi-check" type="checkbox" value="{{ app.id }}"/>
             <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong></br>
             {{ app.application.owned_address }}</br>
-            Property pin: {{ app.application.owned_pin }}
+            Property pin: {{ app.application.owned_pin | make_display_pin }}
           </label>
         </div>
       </div>

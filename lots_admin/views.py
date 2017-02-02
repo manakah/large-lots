@@ -71,9 +71,9 @@ def lots_admin(request, step):
         # Order by last name ascending by default.
         order_by = request.GET.get('order_by', 'last_name')
         sort_order = request.GET.get('sort_order', 'asc')
-        print("Printing these things")
-        print(order_by)
-        print(sort_order)
+
+        if order_by == 'ward':
+            order_by = 'ward::int'
 
         toggle_order = 'asc'
         if sort_order.lower() == 'asc':
@@ -94,13 +94,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
             '''.format(step, order_by, sort_order)
@@ -110,6 +110,7 @@ def lots_admin(request, step):
             sql = '''
             SELECT
                 lots_admin_applicationstatus.id as status_id,
+                lots_admin_applicationstatus.denied,
                 lots_admin_application.id as app_id, lots_admin_application.received_date,
                 lots_admin_application.first_name, lots_admin_application.last_name,
                 lots_admin_application.organization, lots_admin_application.tracking_id,
@@ -118,13 +119,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
             '''
@@ -142,13 +143,13 @@ def lots_admin(request, step):
                 lots_admin_lot.address_id, lots_admin_lot.pin,
                 lots_admin_address.street, lots_admin_address.ward
             FROM lots_admin_applicationstatus
-            JOIN lots_admin_application
+            LEFT JOIN lots_admin_application
             ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            JOIN lots_admin_applicationstep
+            LEFT JOIN lots_admin_applicationstep
             ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            JOIN lots_admin_lot
+            LEFT JOIN lots_admin_lot
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            JOIN lots_admin_address
+            LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             '''
 
@@ -158,7 +159,6 @@ def lots_admin(request, step):
         else:
             sql += " ORDER BY {0} {1}".format(order_by, sort_order)
 
-        print(sql)
         cursor.execute(sql)
         columns = [c[0] for c in cursor.description]
         result_tuple = namedtuple('ApplicationStatus', columns)
@@ -199,11 +199,18 @@ def lots_admin(request, step):
         })
 
 @login_required(login_url='/lots-login/')
-def csv_dump(request, pilot):
+def csv_dump(request, pilot, status):
     response = HttpResponse(content_type='text/csv')
     now = datetime.now().isoformat()
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Applications_%s_%s.csv' % (pilot, now)
-    applications = Application.objects.filter(pilot=pilot)
+
+    if status == 'all':
+        applications = ApplicationStatus.objects.filter(application__pilot=pilot)
+    elif status == 'denied':
+        applications = ApplicationStatus.objects.filter(application__pilot=pilot).filter(denied=True)
+    else:
+        applications = ApplicationStatus.objects.filter(application__pilot=pilot).filter(current_step__step=status)
+
     header = [
         'ID',
         'Date received',
@@ -227,53 +234,53 @@ def csv_dump(request, pilot):
         'Lot Planned Use',
     ]
     rows = []
-    for application in applications:
+    for application_status in applications:
         owned_address = '%s %s %s %s' % \
-            (getattr(application.owned_address, 'street', ''),
-            getattr(application.owned_address, 'city', ''),
-            getattr(application.owned_address, 'state', ''),
-            getattr(application.owned_address, 'zip_code', ''))
+            (getattr(application_status.application.owned_address, 'street', ''),
+            getattr(application_status.application.owned_address, 'city', ''),
+            getattr(application_status.application.owned_address, 'state', ''),
+            getattr(application_status.application.owned_address, 'zip_code', ''))
         contact_address = '%s %s %s %s' % \
-            (getattr(application.contact_address, 'street', ''),
-            getattr(application.contact_address, 'city', ''),
-            getattr(application.contact_address, 'state', ''),
-            getattr(application.contact_address, 'zip_code', ''))
-        for lot in application.lot_set.all():
-            addr = getattr(lot.address, 'street', '').upper()
-            addr_full = '%s %s %s %s' % \
-                (getattr(lot.address, 'street', ''),
-                getattr(lot.address, 'city', ''),
-                getattr(lot.address, 'state', ''),
-                getattr(lot.address, 'zip_code', ''))
-            pin = lot.pin
-            ward = lot.address.ward
-            community = lot.address.community
-            image_url = 'https://pic.datamade.us/%s.jpg' % pin.replace('-', '')
-            lot_use = lot.planned_use
+            (getattr(application_status.application.contact_address, 'street', ''),
+            getattr(application_status.application.contact_address, 'city', ''),
+            getattr(application_status.application.contact_address, 'state', ''),
+            getattr(application_status.application.contact_address, 'zip_code', ''))
+
+        addr = getattr(application_status.lot.address, 'street', '').upper()
+        addr_full = '%s %s %s %s' % \
+            (getattr(application_status.lot.address, 'street', ''),
+            getattr(application_status.lot.address, 'city', ''),
+            getattr(application_status.lot.address, 'state', ''),
+            getattr(application_status.lot.address, 'zip_code', ''))
+        pin = application_status.lot.pin
+        ward = application_status.lot.address.ward
+        community = application_status.lot.address.community
+        image_url = 'https://pic.datamade.us/%s.jpg' % application_status.lot.pin.replace('-', '')
+        lot_use = application_status.lot.planned_use
 
 
-            rows.append([
-                application.id,
-                application.received_date.strftime('%Y-%m-%d %H:%m %p'),
-                application.first_name,
-                application.last_name,
-                application.organization,
-                getattr(application.owned_address, 'street', '').upper(),
-                owned_address,
-                application.owned_pin,
-                application.deed_image.url,
-                contact_address,
-                application.phone,
-                application.email,
-                application.how_heard,
-                pin,
-                addr,
-                addr_full,
-                ward,
-                community,
-                image_url,
-                lot_use,
-            ])
+        rows.append([
+            application_status.application.id,
+            application_status.application.received_date.strftime('%Y-%m-%d %H:%m %p'),
+            application_status.application.first_name,
+            application_status.application.last_name,
+            application_status.application.organization,
+            getattr(application_status.application.owned_address, 'street', '').upper(),
+            owned_address,
+            application_status.application.owned_pin,
+            application_status.application.deed_image.url,
+            contact_address,
+            application_status.application.phone,
+            application_status.application.email,
+            application_status.application.how_heard,
+            pin,
+            addr,
+            addr_full,
+            ward,
+            community,
+            image_url,
+            lot_use,
+        ])
     writer = csv.writer(response)
     writer.writerow(header)
     writer.writerows(rows)

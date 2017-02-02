@@ -32,7 +32,7 @@ urlpatterns = [
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
 
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
-    url(r'^csv-dump/(?P<pilot>\S+)/$', csv_dump, name='csv_dump'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/$', csv_dump, name='csv_dump'),
     url(r'^lots-login/$', lots_login, name='lots_login'),
     url(r'^logout/$', lots_logout, name='logout'),
 

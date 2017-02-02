@@ -18,7 +18,7 @@
       {% for a in applications %}
           <li>
             <strong>{{ a.application.first_name }} {{ a.application.last_name }}</strong></br>
-            Application for Lot #{{ a.lot.pin }}</br>
+            Application for Lot #{{ a.lot.pin | make_display_pin }}</br>
             {% csrf_token %}
             <input type="hidden" name="application" value='{{ a.id }}'>
             <span class="block emphasis">Select denial reason:</span>
