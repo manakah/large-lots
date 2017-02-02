@@ -9,8 +9,22 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Deny application?</h3>
-    <p>You are about to deny this application for the following reason:</p>
-    <p><strong>{{ review.denial_reason }}</strong></p>
+    <p>You are about to deny this application.</p>
+    <div class="row">
+      <div class="col-sm-2">Applicant: </div>
+      <div class="col-sm-8"><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}</strong></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-2">Lot requested: </div>
+      <div class="col-sm-8"><strong>{{ application_status.lot.pin | make_display_pin }}</strong></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-2">Denial reason: </div>
+      <div class="col-sm-8"><strong>{{ review.denial_reason }}</strong></div>
+    </div>
+
+    <br>
+
     <p>Are you sure? If yes, the applicant will receive an email notification.</p>
     <div class='block'><a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/" class="btn btn-danger">No, go back.</a></div>
     <div class='block'>
