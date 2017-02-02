@@ -26,7 +26,12 @@ class Command(BaseCommand):
 
         for application in applications:
             self.stdout.write(self.style.HTTP_NOT_MODIFIED('Working on {}'.format(application.deed_image.name)))
-            scrubbed_image = self.scrub(application.deed_image)
+
+            try:
+                scrubbed_image = self.scrub(application.deed_image)
+            except ValueError:
+                self.stdout.write(self.style.ERROR('Deed image for {} has no file'.format(application)))
+                continue
 
             key = self.bucket.get_key(application.deed_image.name)
             key.delete()
@@ -37,6 +42,7 @@ class Command(BaseCommand):
 
 
     def scrub(self, deed_image):
+
         filetype = magic.from_buffer(deed_image.file.read(), mime=True)
 
         deed_image.file.seek(0)
