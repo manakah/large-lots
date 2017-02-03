@@ -337,7 +337,13 @@ def get_pin_from_address(request):
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
 def deed_upload(request, tracking_id):
-    form = DeedUploadForm()
+    form          = DeedUploadForm()
+    application   = Application.objects.get(tracking_id=tracking_id)
+    lots          = [l for l in application.lot_set.all()]
+    deed_uploaded = False
+
+    if application.deed_image:
+        deed_uploaded = True
 
     if request.method == 'POST':
         form = DeedUploadForm(request.POST, request.FILES)
@@ -378,6 +384,9 @@ def deed_upload(request, tracking_id):
     return render(request, 'deed_upload.html', {
         'form': form,
         'tracking_id': tracking_id,
+        'application': application,
+        'lots': lots,
+        'deed_uploaded': deed_uploaded,
     })
 
 def upload_confirm(request, tracking_id):
