@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, \
     apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
-    get_pin_from_address
+    get_pin_from_address, deed_upload
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
@@ -64,4 +64,5 @@ urlpatterns = [
     url(r'^bulk-deny-submit/$', bulk_deny_submit, name='bulk_deny_submit'),
     url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
+    url(r'^deed-upload/$', deed_upload, name='deed_upload'),
 ]

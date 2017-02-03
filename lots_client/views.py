@@ -29,7 +29,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
-from lots_client.forms import ApplicationForm
+from lots_client.forms import ApplicationForm, DeedUploadForm
 
 
 def home(request):
@@ -336,3 +336,9 @@ def get_pin_from_address(request):
 
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
+def deed_upload(request):
+    form = DeedUploadForm()
+
+    return render(request, 'deed_upload.html', {
+        'form': form,
+    })
