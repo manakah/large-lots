@@ -145,29 +145,29 @@ class DeedUploadForm(forms.Form):
         error_messages={'required': 'Provide an image of the deed of the building you own'
         }, label="Electronic version of your deed")
 
-    def clean_deed_image(self):
+    # def clean_deed_image(self):
 
-        image = self.cleaned_data['deed_image']
-        filetype = magic.from_buffer(image.file.read(), mime=True)
+    #     image = self.cleaned_data['deed_image']
+    #     filetype = magic.from_buffer(image.file.read(), mime=True)
 
-        image.file.seek(0)
+    #     image.file.seek(0)
 
-        ok_types = [
-            'image/gif',
-            'image/jpeg',
-            'image/png',
-            'application/pdf'
-        ]
+    #     ok_types = [
+    #         'image/gif',
+    #         'image/jpeg',
+    #         'image/png',
+    #         'application/pdf'
+    #     ]
 
-        if filetype == 'application/pdf':
+    #     if filetype == 'application/pdf':
 
-            outfile = BytesIO()
+    #         outfile = BytesIO()
 
-            _, self.cleaned_data['deed_image'].file = PDFiD(image.file,
-                                                            disarm=True,
-                                                            outfile=outfile)
+    #         _, self.cleaned_data['deed_image'].file = PDFiD(image.file,
+    #                                                         disarm=True,
+    #                                                         outfile=outfile)
 
-        elif filetype not in ok_types:
-            raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
+    #     elif filetype not in ok_types:
+    #         raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
-        return self.cleaned_data['deed_image']
+    #     return self.cleaned_data['deed_image']

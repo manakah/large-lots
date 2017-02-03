@@ -344,14 +344,31 @@ def deed_upload(request, tracking_id):
 
         if form.is_valid():
 
-            new_deed_image = form.cleaned_data['deed_image']
+            # new_deed_image = form.cleaned_data['deed_image']
 
-            application = Application.objects.filter(tracking_id=tracking_id)
+            application = Application.objects.get(tracking_id=tracking_id)
 
             print(application)
-            application.deed_image = new_deed_image
-            print(application.deed_image)
+            # application.deed_image = new_deed_image
+            # print(application.deed_image)
             # application.save()
+
+            html_template = get_template('deed_upload_email.html')
+            text_template = get_template('deed_upload_email.txt')
+            context = Context({'app': application, 'host': request.get_host()})
+            html_content = html_template.render(context)
+            text_content = text_template.render(context)
+            subject = 'Large Lots Deed Upload for %s %s' % (application.first_name, application.last_name)
+
+            from_email = settings.EMAIL_HOST_USER
+            to_email = [from_email]
+
+            if application.email:
+                to_email.append(application.email)
+
+            msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+            msg.attach_alternative(html_content, 'text/html')
+            msg.send()
 
             return HttpResponseRedirect('/upload-confirm/%s/' % tracking_id)
 
