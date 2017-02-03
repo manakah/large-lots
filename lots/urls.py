@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, \
     apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
-    get_pin_from_address
+    get_pin_from_address, deed_upload, upload_confirm
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
@@ -28,9 +28,10 @@ urlpatterns = [
     url(r'^about/$', about, name='about'),
     url(r'^lot-uses/(?P<use_id>\d+)/$', lot_uses_page, name='lot_uses_page'),
     url(r'^lot-uses/$', lot_uses, name='lot_uses'),
-    # url(r'^lots-admin/$', lots_admin, name='lots_admin'),
-    url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
+    url(r'^deed-upload/(?P<tracking_id>\S+)/$', deed_upload, name='deed_upload'),
+    url(r'^upload-confirm/(?P<tracking_id>\S+)/$', upload_confirm, name='upload_confirm'),
 
+    url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
     url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/$', csv_dump, name='csv_dump'),
     url(r'^lots-login/$', lots_login, name='lots_login'),
