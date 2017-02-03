@@ -12,7 +12,7 @@
 
     <p>The name on your application and the address entered here must exactly match the name and address on your deed.</p>
 
-    <form role="form" id="application" method="POST" enctype="multipart/form-data">
+    <form role="form" method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
       <div class="panel panel-default" id='selected_lots'>
@@ -34,6 +34,8 @@
             {% endfor %}
             <br>
             <p class="help-block">Your deed must be in PDF or image (JPG, PNG) format. Max size 5mb.</p>
+
+            <p><button type="submit" class="btn btn-success btn-lg">Submit deed</button></p>
           </div>
 
       </div>

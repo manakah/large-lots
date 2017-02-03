@@ -336,9 +336,30 @@ def get_pin_from_address(request):
 
     return HttpResponse(json.dumps(response), mimetype="application/json")
 
-def deed_upload(request):
+def deed_upload(request, tracking_id):
     form = DeedUploadForm()
+
+    if request.method == 'POST':
+        form = DeedUploadForm(request.POST, request.FILES)
+
+        if form.is_valid():
+
+            new_deed_image = form.cleaned_data['deed_image']
+
+            application = Application.objects.filter(tracking_id=tracking_id)
+
+            print(application)
+            application.deed_image = new_deed_image
+            print(application.deed_image)
+            # application.save()
+
+            return HttpResponseRedirect('/upload-confirm/%s/' % tracking_id)
 
     return render(request, 'deed_upload.html', {
         'form': form,
+        'tracking_id': tracking_id,
     })
+
+def upload_confirm(request, tracking_id):
+
+    return render(request, 'upload_confirm.html')
