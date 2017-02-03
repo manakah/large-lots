@@ -343,19 +343,22 @@ def deed_upload(request, tracking_id):
         form = DeedUploadForm(request.POST, request.FILES)
 
         if form.is_valid():
-
-            # new_deed_image = form.cleaned_data['deed_image']
-
             application = Application.objects.get(tracking_id=tracking_id)
+            lots = [l for l in application.lot_set.all()]
 
-            print(application)
-            # application.deed_image = new_deed_image
-            # print(application.deed_image)
-            # application.save()
+            # Add deed.
+            new_deed_image = form.cleaned_data['deed_image']
+            application.deed_image = new_deed_image
 
+            # Add timestamp.
+            timezone = pytz.timezone('America/Chicago')
+            application.deed_timestamp = datetime.now(timezone)
+            application.save()
+
+            # Send email.
             html_template = get_template('deed_upload_email.html')
             text_template = get_template('deed_upload_email.txt')
-            context = Context({'app': application, 'host': request.get_host()})
+            context = Context({'app': application, 'lots': lots, 'host': request.get_host()})
             html_content = html_template.render(context)
             text_content = text_template.render(context)
             subject = 'Large Lots Deed Upload for %s %s' % (application.first_name, application.last_name)
@@ -378,5 +381,10 @@ def deed_upload(request, tracking_id):
     })
 
 def upload_confirm(request, tracking_id):
+    application = Application.objects.get(tracking_id=tracking_id)
+    lots = [l for l in application.lot_set.all()]
 
-    return render(request, 'upload_confirm.html')
+    return render(request, 'upload_confirm.html', {
+        'application': application,
+        'lots': lots,
+    })

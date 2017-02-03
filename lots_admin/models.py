@@ -36,6 +36,7 @@ class Application(models.Model):
     owned_pin = models.CharField(max_length=14)
     owned_address = models.ForeignKey(Address, related_name='owned_address')
     deed_image = models.FileField(max_length=1000, upload_to=upload_name)
+    deed_timestamp = models.DateTimeField(null=True)
     contact_address = models.ForeignKey(Address, related_name='contact_address')
     phone = models.CharField(max_length=15)
     email = models.CharField(max_length=255)
