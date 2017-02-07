@@ -8,17 +8,17 @@
 
 Dear {{ app.first_name }},
 
-Thank you for your application to the Large Lots program in Chicago. The City has reviewed your application for the following property:
+Thank you for applying to the Large Lots program. The City has reviewed your application for the following property:
 
 {{ lot.address.street }}
 Pin #: {{ lot.pin }}
 
-Unfortunately, we have to deny your application, because:
+Unfortunately, your application has been denied because:
 
 {% if review.denial_reason|slugify == DENIAL_REASONS.document|slugify %}
     you did not include a valid deed for the property that you own.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.deedoveruse|slugify %}
-    you used the same property deed for more than two lots.
+    you applied for more than two lots using the same deed.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.duplicate|slugify %}
     you submitted the same or a similar application more than once.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.church|slugify %}
@@ -26,29 +26,27 @@ Unfortunately, we have to deny your application, because:
 {% elif review.denial_reason|slugify == DENIAL_REASONS.name|slugify %}
     the name on your application does not match the name on your deed.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.address|slugify %}
-    the address given on your application does not match the address on your deed.
+    the address on your deed does not match the owned address on your application.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.nameaddress|slugify %}
     the name and address on your application do not match the name and address on your deed.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.block|slugify %}
     you own property on a different block than the lot you requested.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.adjacent|slugify %}
-    other individuals also submitted applications for the lot that you requested, and another applicant owns property adjacent to this lot.
+    priority is given to the adjacent property owner when multiple applications are received for the same lot.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.lottery|slugify %}
-    other individuals also submitted applications for the lot that you requested, and you were not selected to purchase the property in the lottery.
-{% elif review.denial_reason|slugify == DENIAL_REASONS.affordable_housing|slugify %}
-    the city reserved this lot for an affordable housing project.
-{% elif review.denial_reason|slugify == DENIAL_REASONS.market_rate_housing|slugify %}
-    the city reserved this lot for market rate housing planning.
-{% elif review.denial_reason|slugify == DENIAL_REASONS.commercial|slugify %}
-    the lot abuts a commercial corridor and the community is working on a plan.
+    it was not selected in the lottery.
+{% elif review.denial_reason|slugify == DENIAL_REASONS.residential|slugify %}
+    the City reserved this lot for a residential development project.
+{% elif review.denial_reason|slugify == DENIAL_REASONS.economic|slugify %}
+    the City reserved this lot for an economic development project.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.open_space|slugify %}
-    the lot participates in NeighborSpace, of which the City was previously unaware.
+    the City reserved this lot for community open space.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.landmark|slugify %}
-    the lot resides in a Landmark District and its sale depended on the criteria established by the Historic Preservation staff.
+    the City reserved this lot due to its Landmark District designation.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.EDS|slugify %}
-    you did not have complete information on your Economic Disclosure Statement and Affidavit (“EDS”) for the City of Chicago.
+    you failed to complete the Economic Disclosure Statement and Affidavit (EDS).
 {% elif review.denial_reason|slugify == DENIAL_REASONS.debts|slugify %}
-    you owe the City money. We allowed six weeks for you to pay dues, and you failed to do so.
+    you failed to resolve your indebtedness to the City.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.commission|slugify %}
     the Chicago Plan Commission did not approve your application.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.citycouncil|slugify %}
@@ -59,12 +57,11 @@ Unfortunately, we have to deny your application, because:
 
 You can learn more about our evaluation process by visiting our frequently asked questions (FAQ) page: <a target='_blank' href='https://www.largelots.org/faq/'>https://www.largelots.org/faq/</a>.
 
-Again, thank you for your application. We look forward to working with you in the future. You may stay informed on the Large Lots program through  <a target='_blank' href='https://www.largelots.org/'>largelots.org</a> or <a target='_blank' href="https://www.cityofchicago.org/city/en/depts/dcd.html">cityofchicago.org/DPD</a>.
+Again, thank you for your application. You can stay informed on the Large Lots program through <a target='_blank' href='https://www.largelots.org/'>largelots.org</a> or <a target='_blank' href="https://www.cityofchicago.org/city/en/depts/dcd.html">cityofchicago.org/DPD</a>.
 
-Feel free to contact me, if you have any questions.
+Feel free to contact me by email, if you have any questions.
 
 Jeanne Chandler, Department of Planning and Development
-Phone: (312) 744-0605
 Email: Jeanne.Chandler@cityofchicago.org
 
 Sincerely,
