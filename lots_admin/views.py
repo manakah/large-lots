@@ -270,7 +270,7 @@ def csv_dump(request, pilot, status):
             getattr(application_status.lot.address, 'city', ''),
             getattr(application_status.lot.address, 'state', ''),
             getattr(application_status.lot.address, 'zip_code', ''))
-        pin = application_status.lot.pin
+        pin = application_status.lot.pin[:-4]
         ward = application_status.lot.address.ward
         community = application_status.lot.address.community
         image_url = 'https://pic.datamade.us/%s.jpg' % application_status.lot.pin.replace('-', '')
