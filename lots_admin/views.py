@@ -104,6 +104,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
             AND coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
             '''.format(step, order_by, sort_order)
 
             if query:
@@ -136,6 +137,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
             AND coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
             '''
 
             if query:
@@ -166,10 +168,10 @@ def lots_admin(request, step):
             LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
             '''
 
             if query:
-                # sql += " WHERE plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
                 sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
 
             else:
