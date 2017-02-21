@@ -32,6 +32,17 @@
 </div>
 {# endif %}
  -->
+
+{% if warning %}
+<div class="col-sm-8 col-sm-offset-2">
+    <div class="row">
+        <br>
+        <div class="col-sm-12 well">
+          <p><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s</strong> application for lot #{{application_status.lot}} has completed this review step. Please move ahead to <a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/">Step {{ application_status.current_step.step }}</a>.</p>
+        </div>
+    </div>
+</div>
+{% else %}
 <div class="row">
   <div class="col-md-6">
     <h3>Deed Check</h3>
@@ -89,6 +100,9 @@
 
     <div class="well" data-spy="affix" data-offset-top="260" id='sideInfo'>
         <p><i class="fa fa-user" aria-hidden="true"></i> <strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}</strong><p>
+        {% if application_status.application.organization %}
+          <p><i class="fa fa-building" aria-hidden="true"></i><strong> Organization: {{ application_status.application.organization }}</strong><p>
+        {% endif %}
         <p>Owns: {{ application_status.application.owned_address }}</p>
         <p>Requested: {{ application_status.lot.address}}</p>
         <p>{{ application_status.application.first_name }} submitted this application on <strong>{{ application_status.application.received_date }}</strong></p>
@@ -112,6 +126,7 @@
   </div>
 </div>
 
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
