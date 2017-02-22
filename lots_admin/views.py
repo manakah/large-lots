@@ -317,10 +317,17 @@ def pdfviewer(request):
 @login_required(login_url='/lots-login/')
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    review = Review.objects.filter(application=application_status).latest('id')
+    review             = Review.objects.filter(application=application_status).latest('id')
+    warning            = None
+
+    # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+
     return render(request, 'deny_application.html', {
         'application_status': application_status,
-        'review': review
+        'review': review,
+        'warning': warning,
         })
 
 @login_required(login_url='/lots-login/')
@@ -334,6 +341,13 @@ def deny_submit(request, application_id):
 
     return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
 
+@login_required(login_url='/lots-login/')
+def double_submit(request, application_id):
+    application_status = ApplicationStatus.objects.get(id=application_id)
+
+    return render(request, 'double_submit.html', {
+        'application_status': application_status,
+        })
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
@@ -342,7 +356,7 @@ def deed_check(request, application_id):
     last = application_status.application.last_name
     other_applications = Application.objects.filter(first_name=first, last_name=last)
 
-     # Check if application has been denied and has a current step of None.
+    # Check if application has been denied and has a current step of None.
     if application_status.current_step is None:
         warning = 'Denied'
     # If not, then check if application has step different than the view.
@@ -375,8 +389,15 @@ def deed_check_submit(request, application_id):
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
+
+        # Check if application has already been denied.
+        if application_status.current_step == None:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        # Check if application has moved past step 2.
+        elif application_status.current_step.step != 2:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
         # Move to step 3 of review process.
-        if (name == 'on' and address == 'on' and church == '2' and document == '2'):
+        elif (name == 'on' and address == 'on' and church == '2' and document == '2'):
             # If applicant applied for another lot, then also move that ApplicationStatus to Step 3.
             apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
 
@@ -524,7 +545,13 @@ def location_check_submit(request, application_id):
         user = request.user
         block = request.POST.get('block')
 
-        if (block == 'yes'):
+       # Check if application has already been denied.
+        if application_status.current_step == None:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        # Check if application has moved past step 2.
+        elif application_status.current_step.step != 3:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        elif block == 'yes':
             # Create a new review for completing this step.
             review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=3)
             review.save()
