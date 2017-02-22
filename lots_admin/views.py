@@ -337,25 +337,28 @@ def deny_submit(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
-    warning = None
     application_status = ApplicationStatus.objects.get(id=application_id)
     first = application_status.application.first_name
     last = application_status.application.last_name
     other_applications = Application.objects.filter(first_name=first, last_name=last)
 
-    # Delete last Review(s) and reset ApplicationStatus, if someone hits "no, go back" on deny page.
-    denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id).filter(denied=True)
+     # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+    # If not, then check if application has step different than the view.
+    elif application_status.current_step.step != 2:
+        warning = 'Reviewed'
+    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
+    else:
+        warning = None
+        denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id).filter(denied=True)
 
-    for a in denied_apps:
-        Review.objects.filter(application=a, step_completed=2).delete()
-        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
-        a.current_step = step
-        a.denied = False
-        a.save()
-
-    if application_status.current_step:
-        if application_status.current_step.step != 2:
-            warning = 'Application already reviewed.'
+        for a in denied_apps:
+            Review.objects.filter(application=a, step_completed=2).delete()
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
+            a.current_step = step
+            a.denied = False
+            a.save()
 
     return render(request, 'deed_check.html', {
         'application_status': application_status,
@@ -453,22 +456,27 @@ def applicant_duplicate_submit(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
-    warning = None
-
     application_status = ApplicationStatus.objects.get(id=application_id)
-    # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    Review.objects.filter(application=application_status, step_completed=3).filter(application__denied=True).delete()
-    application_status.denied = False
-    application_status.save()
+
+    # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+    # If not, then check if application has step different than the view.
+    elif application_status.current_step.step != 3:
+        warning = 'Reviewed'
+    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
+    else:
+        warning = None
+        # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
+        Review.objects.filter(application=application_status, step_completed=3).filter(application__denied=True).delete()
+        application_status.denied = False
+        application_status.save()
+
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin
 
     # Location of the lot.
     lot_pin = application_status.lot.pin
-
-    if application_status.current_step:
-        if application_status.current_step.step != 3:
-            warning = 'Application already reviewed.'
 
     step2 = Q(current_step__step=2)
     step3 = Q(current_step__step=3)

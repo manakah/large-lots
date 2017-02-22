@@ -32,8 +32,16 @@
 </div>
 {# endif %}
  -->
-
-{% if warning %}
+{% if warning == 'Denied' %}
+<div class="col-sm-8 col-sm-offset-2">
+    <div class="row">
+        <br>
+        <div class="col-sm-12 well">
+          <p><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s</strong> application for lot #{{application_status.lot}} has been denied.</p>
+        </div>
+    </div>
+</div>
+{% elif warning == 'Reviewed' %}
 <div class="col-sm-8 col-sm-offset-2">
     <div class="row">
         <br>

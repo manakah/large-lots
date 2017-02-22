@@ -31,18 +31,21 @@
 
 {% include "review-header.html" with app=application_status %}
 
-{% if warning %}
+{% if warning == 'Denied' %}
 <div class="col-sm-8 col-sm-offset-2">
     <div class="row">
         <br>
         <div class="col-sm-12 well">
-          <p><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s</strong> application for lot #{{application_status.lot}} has completed this review step.
-          {% if before_step4 %}
-            Please return to the <a href="{% url 'lots_admin' 'all' %}">main page</a>.
-          {% else %}
-            Please move ahead to <a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/">Step {{ application_status.current_step.step }}</a>.
-          {% endif %}
-          </p>
+          <p><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s</strong> application for lot #{{application_status.lot}} has been denied.</p>
+        </div>
+    </div>
+</div>
+{% elif warning == 'Reviewed' %}
+<div class="col-sm-8 col-sm-offset-2">
+    <div class="row">
+        <br>
+        <div class="col-sm-12 well">
+          <p><strong>{{ application_status.application.first_name }} {{ application_status.application.last_name }}'s</strong> application for lot #{{application_status.lot}} has completed this review step. Please move ahead to <a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/">Step {{ application_status.current_step.step }}</a>.</p>
         </div>
     </div>
 </div>
@@ -68,7 +71,35 @@
           </label>
         </div>
       </div>
-      <p><button type="submit" class="btn btn-success">Submit</button></p>
+      <!-- <p><button type="submit" class="btn btn-success">Submit</button></p> -->
+
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">
+        Submit
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2 class="modal-title" id="exampleModalLabel">Are you sure?</h2>
+            </div>
+            <div class="modal-body">
+              <p>By hitting "Submit," the applications without a check will be denied, and these applicants will <em>receive an email</em>.<p>
+              <p>If you check multiple applications, they will advance to the Large Lots lottery.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal">No, look again.</button>
+              <button type="submit" class="btn btn-success">Yes, deny.</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+
     </form>
 
     <h3>Definition of a Block</h3>
