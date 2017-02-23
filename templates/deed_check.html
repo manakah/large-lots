@@ -61,7 +61,7 @@
   <div class="col-md-6">
     <h3>Deed Check</h3>
 
-    <form role="form" method="POST" action="{% url 'deed_check_submit' application_status.id %}">
+    <form id="deedCheckForm" role="form" method="POST" action="{% url 'deed_check_submit' application_status.id %}">
       {% csrf_token %}
       <p>Is the submitted document a property deed?</p>
       <div class="radio">
@@ -107,7 +107,7 @@
           </label>
         </div>
       </div>
-      <p><button type="submit" class="btn btn-success">Submit</button></p>
+      <p><button id="deedCheckButton" type="submit" class="btn btn-success">Submit</button></p>
     </form>
 
     <div class="well" data-spy="affix" data-offset-top="260" id='sideInfo'>
@@ -151,6 +151,13 @@
           $('#deedNo').on('click', function(){
             $('#deedQuestions').hide();
           });
+
+          // Prevent double click.
+          $("#deedCheckForm").submit(function () {
+              $("#deedCheckButton").attr("disabled", true);
+              return true;
+          });
+
         })
     </script>
 {% endblock %}
