@@ -428,20 +428,19 @@ def deed_check_submit(request, application_id):
             application_status.denied = True
             application_status.save()
 
+            # REMOVE THIS STEP. It may be causing issues.
             # If applicant applied for another lot, then also deny that ApplicationStatus.
-            other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
+            # other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
 
-            if other_app:
-                app = other_app[0]
+            # if other_app:
+            #     app = other_app[0]
 
-                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
-                review.save()
+            #     review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
+            #     review.save()
 
-                app.denied = True
-                app.current_step = None
-                app.save()
-
-                send_email(request, app)
+            #     app.denied = True
+            #     app.current_step = None
+            #     app.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
