@@ -352,6 +352,8 @@ def double_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
+    print("asdfkjasdlkj")
+    print(application_status)
     first = application_status.application.first_name
     last = application_status.application.last_name
     other_applications = Application.objects.filter(first_name=first, last_name=last)
@@ -365,14 +367,11 @@ def deed_check(request, application_id):
     # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
     else:
         warning = None
-        denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id).filter(denied=True)
-
-        for a in denied_apps:
-            Review.objects.filter(application=a, step_completed=2).delete()
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
-            a.current_step = step
-            a.denied = False
-            a.save()
+        Review.objects.filter(application=application_status, step_completed=2).delete()
+        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
+        application_status.current_step = step
+        application_status.denied = False
+        application_status.save()
 
     return render(request, 'deed_check.html', {
         'application_status': application_status,
@@ -398,16 +397,20 @@ def deed_check_submit(request, application_id):
             return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
         # Move to step 3 of review process.
         elif (name == 'on' and address == 'on' and church == '2' and document == '2'):
-            # If applicant applied for another lot, then also move that ApplicationStatus to Step 3.
-            apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=3)
+            application_status.current_step = step
+            application_status.save()
 
-            for app in apps:
-                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
-                app.current_step = step
-                app.save()
+            review = Review(reviewer=user, email_sent=False, application=app, step_completed=2)
+            review.save()
 
-                review = Review(reviewer=user, email_sent=False, application=app, step_completed=2)
-                review.save()
+            # for app in apps:
+            #     step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
+            #     app.current_step = step
+            #     app.save()
+
+            #     review = Review(reviewer=user, email_sent=False, application=app, step_completed=2)
+            #     review.save()
 
             return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
         # Deny application.
