@@ -65,7 +65,3 @@ def get_step_all_denied(request):
         return 'denied'
     else:
         return re.search(r'(lots-admin\/)(\d+)(\/)', request).group(2)
-
-@register.filter
-def lower_case_pdf(img_url):
-    return img_url.replace('.PDF', '.pdf')
