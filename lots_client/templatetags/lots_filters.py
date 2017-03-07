@@ -38,7 +38,7 @@ def remove_str(label_type, extra_text):
 
 @register.filter
 def check_for_pdf(image_path):
-    return image_path.endswith('pdf')
+    return image_path.endswith('pdf') or image_path.endswith('PDF')
 
 @register.filter
 def make_display_pin(pin):
@@ -65,3 +65,7 @@ def get_step_all_denied(request):
         return 'denied'
     else:
         return re.search(r'(lots-admin\/)(\d+)(\/)', request).group(2)
+
+@register.filter
+def lower_case_pdf(img_url):
+    return img_url.replace('.PDF', '.pdf')
