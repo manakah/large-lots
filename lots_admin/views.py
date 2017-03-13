@@ -104,7 +104,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
             AND coalesce(deed_image, '') <> ''
-            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
+            AND lots_admin_address.ward NOT IN ('27')
             '''.format(step, order_by, sort_order)
 
             if query:
@@ -137,7 +137,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
             AND coalesce(deed_image, '') <> ''
-            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
+            AND lots_admin_address.ward NOT IN ('27')
             '''
 
             if query:
@@ -168,7 +168,7 @@ def lots_admin(request, step):
             LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE coalesce(deed_image, '') <> ''
-            AND lots_admin_address.ward NOT IN ('27', '4', '3', '9', '8', '5')
+            AND lots_admin_address.ward NOT IN ('27')
             '''
 
             if query:
