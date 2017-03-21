@@ -104,6 +104,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstep.step={0}
             AND coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27')
             '''.format(step, order_by, sort_order)
 
             if query:
@@ -136,6 +137,7 @@ def lots_admin(request, step):
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE lots_admin_applicationstatus.denied=True
             AND coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27')
             '''
 
             if query:
@@ -166,10 +168,10 @@ def lots_admin(request, step):
             LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
             WHERE coalesce(deed_image, '') <> ''
+            AND lots_admin_address.ward NOT IN ('27')
             '''
 
             if query:
-                # sql += " WHERE plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
                 sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
 
             else:
@@ -270,7 +272,7 @@ def csv_dump(request, pilot, status):
             getattr(application_status.lot.address, 'city', ''),
             getattr(application_status.lot.address, 'state', ''),
             getattr(application_status.lot.address, 'zip_code', ''))
-        pin = application_status.lot.pin
+        pin = application_status.lot.pin[:-4]
         ward = application_status.lot.address.ward
         community = application_status.lot.address.community
         image_url = 'https://pic.datamade.us/%s.jpg' % application_status.lot.pin.replace('-', '')
@@ -315,10 +317,17 @@ def pdfviewer(request):
 @login_required(login_url='/lots-login/')
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    review = Review.objects.filter(application=application_status).latest('id')
+    review             = Review.objects.filter(application=application_status).latest('id')
+    warning            = None
+
+    # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+
     return render(request, 'deny_application.html', {
         'application_status': application_status,
-        'review': review
+        'review': review,
+        'warning': warning,
         })
 
 @login_required(login_url='/lots-login/')
@@ -332,6 +341,13 @@ def deny_submit(request, application_id):
 
     return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
 
+@login_required(login_url='/lots-login/')
+def double_submit(request, application_id):
+    application_status = ApplicationStatus.objects.get(id=application_id)
+
+    return render(request, 'double_submit.html', {
+        'application_status': application_status,
+        })
 
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
@@ -340,19 +356,25 @@ def deed_check(request, application_id):
     last = application_status.application.last_name
     other_applications = Application.objects.filter(first_name=first, last_name=last)
 
-    # Delete last Review(s), if someone hits "no, go back" on deny page.
-    denied_apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
-    # Reset ApplicationStatus, if some hits "no, go back" on deny page.
-    for a in denied_apps:
-        Review.objects.filter(application=a, step_completed=2).delete()
+    # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+    # If not, then check if application has step different than the view.
+    elif application_status.current_step.step != 2:
+        warning = 'Reviewed'
+    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
+    else:
+        warning = None
+        Review.objects.filter(application=application_status, step_completed=2).delete()
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
-        a.current_step = step
-        a.denied = False
-        a.save()
+        application_status.current_step = step
+        application_status.denied = False
+        application_status.save()
 
     return render(request, 'deed_check.html', {
         'application_status': application_status,
-        'other_applications': other_applications
+        'other_applications': other_applications,
+        'warning': warning,
         })
 
 @login_required(login_url='/lots-login/')
@@ -364,18 +386,21 @@ def deed_check_submit(request, application_id):
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
+
+        # Check if application has already been denied.
+        if application_status.current_step == None:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        # Check if application has moved past step 2.
+        elif application_status.current_step.step != 2:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
         # Move to step 3 of review process.
-        if (name == 'on' and address == 'on' and church == '2' and document == '2'):
-            # If applicant applied for another lot, then also move that ApplicationStatus to Step 3.
-            apps = ApplicationStatus.objects.filter(application__id=application_status.application.id)
+        elif (name == 'on' and address == 'on' and church == '2' and document == '2'):
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
+            application_status.current_step = step
+            application_status.save()
 
-            for app in apps:
-                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
-                app.current_step = step
-                app.save()
-
-                review = Review(reviewer=user, email_sent=False, application=app, step_completed=2)
-                review.save()
+            review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=2)
+            review.save()
 
             return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
         # Deny application.
@@ -396,20 +421,19 @@ def deed_check_submit(request, application_id):
             application_status.denied = True
             application_status.save()
 
+            # REMOVE THIS STEP. It may be causing issues.
             # If applicant applied for another lot, then also deny that ApplicationStatus.
-            other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
+            # other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
 
-            if other_app:
-                app = other_app[0]
+            # if other_app:
+            #     app = other_app[0]
 
-                review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
-                review.save()
+            #     review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
+            #     review.save()
 
-                app.denied = True
-                app.current_step = None
-                app.save()
-
-                send_email(request, app)
+            #     app.denied = True
+            #     app.current_step = None
+            #     app.save()
 
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
@@ -446,20 +470,37 @@ def applicant_duplicate_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def location_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    Review.objects.filter(application=application_status, step_completed=3).delete()
-    application_status.denied = False
-    application_status.save()
+
+    # Check if application has been denied and has a current step of None.
+    if application_status.current_step is None:
+        warning = 'Denied'
+    # If not, then check if application has step different than the view.
+    elif application_status.current_step.step != 3:
+        warning = 'Reviewed'
+    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
+    else:
+        warning = None
+        # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
+        Review.objects.filter(application=application_status, step_completed=3).filter(application__denied=True).delete()
+        application_status.denied = False
+        application_status.save()
+
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin
 
     # Location of the lot.
     lot_pin = application_status.lot.pin
 
+    step2 = Q(current_step__step=2)
+    step3 = Q(current_step__step=3)
+    before_step4 = ApplicationStatus.objects.filter(step2 | step3)
+
     return render(request, 'location_check.html', {
         'application_status': application_status,
         'owned_pin': owned_pin,
-        'lot_pin': lot_pin
+        'lot_pin': lot_pin,
+        'warning': warning,
+        'before_step4': before_step4,
         })
 
 # @login_required(login_url='/lots-login/')
@@ -496,7 +537,13 @@ def location_check_submit(request, application_id):
         user = request.user
         block = request.POST.get('block')
 
-        if (block == 'yes'):
+       # Check if application has already been denied.
+        if application_status.current_step == None:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        # Check if application has moved past step 2.
+        elif application_status.current_step.step != 3:
+            return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
+        elif block == 'yes':
             # Create a new review for completing this step.
             review = Review(reviewer=user, email_sent=False, application=application_status, step_completed=3)
             review.save()
@@ -532,10 +579,11 @@ def location_check_submit(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def multiple_applicant_check(request, application_id):
+    warning = None
     application_status = ApplicationStatus.objects.get(id=application_id)
 
      # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    Review.objects.filter(application=application_status, step_completed=4).delete()
+    Review.objects.filter(application=application_status, step_completed=4).filter(application__denied=True).delete()
     application_status.denied = False
     application_status.save()
 
@@ -553,12 +601,17 @@ def multiple_applicant_check(request, application_id):
     other_owned_pins = [s.application.owned_pin for s in applicants_list ]
     other_owned_pins.remove(owned_pin)
 
+    if application_status.current_step:
+        if application_status.current_step.step != 4:
+            warning = 'Application already reviewed.'
+
     return render(request, 'multiple_applicant_check.html', {
         'application_status': application_status,
         'owned_pin': owned_pin,
         'lot_pin': lot_pin,
         'applicants_list': applicants_list,
-        'other_owned_pins': other_owned_pins
+        'other_owned_pins': other_owned_pins,
+        'warning': warning,
         })
 
 @login_required(login_url='/lots-login/')

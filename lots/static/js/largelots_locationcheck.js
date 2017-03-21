@@ -182,7 +182,7 @@ var LargeLots = {
       });
 
       //fetch the applicant's lot geometry based on their pin
-      $.get('/get-parcel-geometry/?pin=' + ownedPin).done(
+      $.get('/get-parcel-geometry/?pin=' + LargeLots.roundPin(ownedPin)).done(
         function(ownedParcel){
 
           if(otherOwnedPins[0] == '0') {
@@ -216,7 +216,7 @@ var LargeLots = {
 
       $.each(otherOwnedPins, function(i, pin){
         if(pin !== '0') {
-          $.get('/get-parcel-geometry/?pin=' + pin).done(
+          $.get('/get-parcel-geometry/?pin=' + LargeLots.roundPin(pin)).done(
             function(otherOwnedParcel){
               L.geoJson(otherOwnedParcel, {
                   style: {"fillColor": "#A1285D", "fillOpacity": 0.2, "color": "#A1285D", 'opacity': 1, 'weight': 1},
@@ -247,6 +247,21 @@ var LargeLots = {
   formatPin: function(pin) {
     pin = pin + '';
     return pin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5');
+  },
+
+  roundPin: function(pin) {
+    // Check if pin has only ten digits.
+    if (pin.length == 10) {
+        return pin
+    }
+    // Check if pin ends with four zeroes
+    else if (pin.match(/^[0-9]{10}[0]{4}$/)) {
+        return pin
+    }
+    else {
+        pin_front = pin.match(/^([0-9]{10})([0-9]{4})$/)[1]
+        return pin_front + '0000'
+    }
   },
 
   formatAddress: function (prop) {

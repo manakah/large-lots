@@ -11,7 +11,7 @@ from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lotteries, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, \
-    deed
+    deed, double_submit
 
 from django.contrib import admin
 admin.autodiscover()
@@ -59,6 +59,7 @@ urlpatterns = [
     url(r'^application-review/step-7/(?P<application_id>\d+)/$', review_EDS, name='review_EDS'),
     url(r'^deny-application/(?P<application_id>\d+)/$', deny_application, name='deny_application'),
     url(r'^deny-submit/(?P<application_id>\d+)/$', deny_submit, name='deny_submit'),
+    url(r'^double-submit/(?P<application_id>\d+)/$', double_submit, name='double_submit'),
     url(r'^review-status-log/(?P<application_id>\d+)$', review_status_log, name='review_status_log'),
     url(r'^bulk_submit/$', bulk_submit, name='bulk_submit'),
     url(r'^bulk-deny/$', bulk_deny, name='bulk_deny'),
