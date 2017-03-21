@@ -20,7 +20,8 @@ class Command(BaseCommand):
                 wards.append(status.lot.address.ward)
 
             # if application.deed_image == '' and '27' not in wards:
-            if application.deed_image == '' and '3' in wards:
+            # if application.deed_image == '' and '3' in wards:
+            if application.id = '46' or application.id = '2268':
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 self.send_email(application)
 
