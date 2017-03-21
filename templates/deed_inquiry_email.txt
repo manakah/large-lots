@@ -12,7 +12,7 @@ Dear {{ app.first_name}},
 
 There was a technical problem with the Large Lots website at the time of your application, and your deed failed to upload. Please use the link below to upload your deed again so that we may review your application. Once your deed has been re-submitted you will receive another confirmation.
 
-<a href="{% url 'deed_upload' app.tracking_id %}">Click to re-submit your deed.</a>
+<a href="https://www.largelots.org/deed_upload/{{app.tracking_id }}">Click to re-submit your deed.</a>
 
 Sorry for the inconvenience.
 

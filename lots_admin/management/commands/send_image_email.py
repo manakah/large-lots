@@ -11,6 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         applications = Application.objects.all()
 
+        print("Emails sent to:")
         for application in applications:
             # Check for ward 27.
             application_status_objs = ApplicationStatus.objects.filter(application_id=application.id)
@@ -20,6 +21,7 @@ class Command(BaseCommand):
 
             # if application.deed_image == '' and '27' not in wards:
             if application.deed_image == '' and '3' in wards:
+                print(application.first_name, application.last_name, " - Application ID", application.id)
                 self.send_email(application)
 
 
