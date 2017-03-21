@@ -159,15 +159,7 @@ class DeedUploadForm(forms.Form):
             'application/pdf'
         ]
 
-        if filetype == 'application/pdf':
-
-            outfile = BytesIO()
-
-            _, self.cleaned_data['deed_image'].file = PDFiD(image.file,
-                                                            disarm=True,
-                                                            outfile=outfile)
-
-        elif filetype not in ok_types:
+        if filetype not in ok_types:
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
         return self.cleaned_data['deed_image']
