@@ -20,9 +20,10 @@ class Command(BaseCommand):
                 wards.append(status.lot.address.ward)
 
             # if application.deed_image == '' and '27' not in wards:
-            # if application.deed_image == '' and '3' in wards:
-            if application.id == 46 or application.id == 2268:
+            if application.deed_image == '' and '3' in wards:
+            # if application.id == 46 or application.id == 2268:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
+                print('Wards:', wards)
                 self.send_email(application)
 
 
@@ -38,7 +39,7 @@ class Command(BaseCommand):
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)
 
-        msg = EmailMultiAlternatives('Special notice from Large Lots',
+        msg = EmailMultiAlternatives('Important notice from Large Lots',
                                 txt_content,
                                 settings.EMAIL_HOST_USER,
                                 [application.email])
