@@ -24,7 +24,10 @@ class Command(BaseCommand):
             # if application.id == 46 or application.id == 2268:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
-                self.send_email(application)
+                try:
+                    self.send_email(application)
+                except:
+                    print("Not able to send email.")
 
 
     def send_email(self, application):
