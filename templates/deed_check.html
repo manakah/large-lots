@@ -133,7 +133,7 @@
             src="/pdfviewer/?file={{ application_status.application.deed_image.url|urlencode }}">
         </iframe>
     {% else %}
-        <img src="{{ application_status.application.deed_image.url }}">
+        <img class="image-viewer" src="{{ application_status.application.deed_image.url }}">
     {% endif %}
   </div>
 </div>

@@ -275,6 +275,10 @@ ul.nav-wizard li {
    position:static;
 }
 
+.image-viewer {
+    width: 100%;
+}
+
 /* Styles for location-check.html*/
 div#location .radio+.radio { margin-top: 0px; }
 
