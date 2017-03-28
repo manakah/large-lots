@@ -31,8 +31,17 @@ PILOT_INFO = {
     'pilot_2': {
         'human_name': 'Pilot 2: East Garfield Park'
     },
-    "pilot_3": {
+    "pilot_3_dev": {
         'human_name': 'Pilot 3: Austin'
+    },
+    "pilot_4_dev": {
+        'human_name': 'Pilot 4: Roseland/Pullman'
+    },
+    "pilot_5_dev": {
+        'human_name': 'Pilot 5: Auburn Gresham'
+    },
+    "pilot_6_dev": {
+        'human_name': 'Pilot 6: Fall 2016 Expansion'
     }
 }
 
@@ -47,5 +56,5 @@ DATABASES = {
    }
 }
 
-CURRENT_PILOT = "pilot_3"
-CURRENT_CARTODB = "my_cartodb_table"
+CURRENT_PILOT = "pilot_6_dev"
+CURRENT_CARTODB = "large_lots_2016_fall_expansion"
