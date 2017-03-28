@@ -21,12 +21,14 @@ Set the environmental variables in [local_settings.py.example](https://github.co
 
   * ``SECRET_KEY`` - Django’s [Secret Key](https://docs.djangoproject.com/en/1.10/ref/settings/#secret-key) used by the project. Can be any relatively hard to guess string.
 
+  * ``AWS_STORAGE_BUCKET_NAME`` - the name of the AMS bucket where deed uploads (PDFs, images) reside; for local development you can use: largelots-test-uploads
+
   * ``AWS_ACCESS_KEY`` - AWS key used by the file storage mechanism to store files in S3.
 
   * ``AWS_SECRET_ACCESS_KEY`` - The secret that goes with the key above.
 
   * ``EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD`` - These are used to configure the email settings for Django. See [Django docs](https://docs.djangoproject.com/en/1.6/topics/email/) for more info.
-  
+
   * ``SENTRY_DSN`` - This is a connection string for [Sentry](http://getsentry.com).
 
 Run the app:
