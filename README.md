@@ -21,7 +21,7 @@ Set the environmental variables in [local_settings.py.example](https://github.co
 
   * ``SECRET_KEY`` - Django’s [Secret Key](https://docs.djangoproject.com/en/1.10/ref/settings/#secret-key) used by the project. Can be any relatively hard to guess string.
 
-  * ``AWS_STORAGE_BUCKET_NAME`` - the name of the AMS bucket where deed uploads (PDFs, images) reside; for local development you can use: largelots-test-uploads
+  * ``AWS_STORAGE_BUCKET_NAME`` - the name of the AWS bucket where deed uploads (PDFs, images) reside; for local development you can use: largelots-test-uploads
 
   * ``AWS_ACCESS_KEY`` - AWS key used by the file storage mechanism to store files in S3.
 
