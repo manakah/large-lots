@@ -21,8 +21,8 @@ class Command(BaseCommand):
 
             # if application.deed_image == '' and '27' not in wards:
             # if application.deed_image == '' and '3' in wards and application.id not in [65, 76, 114, 98, 279, 301, 303, 304, 306, 1224, 387, 442, 469, 489, 462, 506, 547, 571, 588, 596, 601, 610, 640, 638, 722, 726, 759, 786, 806, 820, 823, 872, 894, 897, 908, 943, 946, 969, 990, 1223, 1024, 1042, 1076, 1089, 1110, 1138, 1139, 1175, 1229, 1232, 1257, 1258, 1306, 1317, 1315, 1395, 1424, 1432, 1456, 1488, 1525, 1544, 1550, 1569, 1578, 1615, 1627, 1683, 1742, 1755, 1774, 1849, 1860, 1861, 1911, 1924, 1936, 1937, 1940, 1944, 1959, 2000]:
-            # Wards complete: 3, 4, 5, 6, 8
-            if application.deed_image == '' and '7' in wards:
+            # Wards complete: 3, 4, 5, 6, 7, 8, 9
+            if application.deed_image == '' and '9' in wards:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
                 try:
