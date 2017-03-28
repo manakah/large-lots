@@ -20,14 +20,14 @@ class Command(BaseCommand):
                 wards.append(status.lot.address.ward)
 
             # if application.deed_image == '' and '27' not in wards:
-            sent_emails = ['3', '4', '5', '6', '7', '8', '9']
+            sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20']
             first_ward = wards[0]
             try:
                 second_ward = wards[1]
             except:
                 second_ward = ''
 
-            if application.deed_image == '' and '20' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
+            if application.deed_image == '' and '34' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
                 try:
