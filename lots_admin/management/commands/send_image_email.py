@@ -20,7 +20,7 @@ class Command(BaseCommand):
                 wards.append(status.lot.address.ward)
 
             # if application.deed_image == '' and '27' not in wards:
-            sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18', '19']
+            sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18']
             first_ward = wards[0]
             try:
                 second_ward = wards[1]
