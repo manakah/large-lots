@@ -22,14 +22,13 @@ class Command(BaseCommand):
             # if application.deed_image == '' and '27' not in wards:
             sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18', '19', '21', '22', '24', '26', '28', '29']
             first_ward = wards[0]
-             # TODO: 37 and check on "not able to send"
+
             try:
                 second_ward = wards[1]
             except:
                 second_ward = ''
 
-            # if application.deed_image == '' and '29' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
-            if application.id in [32, 31, 56, 693, 1002, 1057, 1778, 132, 223, 226, 245, 316, 351, 404, 578, 734, 913, 917, 972, 994, 1071, 1141, 1184, 1260, 1256, 1360, 1364, 1374, 1813, 2382, 2445, 2566, 2633, 2769, 2778]:
+            if application.deed_image == '' and '37' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
                 try:
