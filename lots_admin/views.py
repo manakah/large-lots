@@ -21,7 +21,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, \
     HttpResponseNotFound
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -66,6 +66,11 @@ def lots_admin_map(request):
 @login_required(login_url='/lots-login/')
 def lots_admin(request, step):
     query = request.GET.get('search_box', None)
+    page = request.GET.get('page', None)
+
+    # Add session variables for easy return to search results after step 3 and denials.
+    request.session['page'] = page
+    request.session['query'] = query
 
     with connection.cursor() as cursor:
         # Order by last name ascending by default.
@@ -195,8 +200,7 @@ def lots_admin(request, step):
 
     paginator = Paginator(application_status_list, 20)
 
-    page = request.GET.get('page')
-
+    print(before_step4)
     try:
         application_status_list = paginator.page(page)
     except PageNotAnInteger:
@@ -333,13 +337,24 @@ def deny_application(request, application_id):
 @login_required(login_url='/lots-login/')
 def deny_submit(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    # step_arg = str(application_status.current_step.step)
     application_status.current_step = None
     application_status.save()
 
     send_email(request, application_status)
 
-    return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
+    page = request.session['page']
+    query = request.session['query']
+    path = '?'
+
+    if page:
+        path += 'page={}&'.format(page)
+    if query:
+        path += 'search_box={}'.format(query)
+
+    clean_path = path.rstrip('?').rstrip('&')
+
+    return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+    # return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
 
 @login_required(login_url='/lots-login/')
 def double_submit(request, application_id):
@@ -536,6 +551,17 @@ def location_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block')
+        # Get values for Redirect
+        page = request.session['page']
+        query = request.session['query']
+        path = '?'
+
+        if page:
+            path += 'page={}&'.format(page)
+        if query:
+            path += 'search_box={}'.format(query)
+
+        clean_path = path.rstrip('?').rstrip('&')
 
        # Check if application has already been denied.
         if application_status.current_step == None:
@@ -559,14 +585,16 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
             else:
                 # No other applicants: move application to Step 6.
                 step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
         else:
             # Deny application, since applicant does not live on same block as lot.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
@@ -619,10 +647,21 @@ def multiple_location_check_submit(request, application_id):
     if request.method == 'POST':
         user = request.user
         applications = request.POST.getlist('multi-check')
-        print(applications)
         application_ids = [int(i) for i in applications]
 
         applications = ApplicationStatus.objects.filter(id__in=application_ids)
+
+        # Get values for Redirect
+        page = request.session['page']
+        query = request.session['query']
+        path = '?'
+
+        if page:
+            path += 'page={}&'.format(page)
+        if query:
+            path += 'search_box={}'.format(query)
+
+        clean_path = path.rstrip('?').rstrip('&')
 
         if(len(applications) > 1):
             # Move applicants to lottery.
@@ -659,7 +698,8 @@ def multiple_location_check_submit(request, application_id):
 
             send_email(request, a)
 
-        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+        # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+        return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
 
 @login_required(login_url='/lots-login/')
 def lotteries(request):
