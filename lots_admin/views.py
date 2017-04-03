@@ -200,7 +200,6 @@ def lots_admin(request, step):
 
     paginator = Paginator(application_status_list, 20)
 
-    print(before_step4)
     try:
         application_status_list = paginator.page(page)
     except PageNotAnInteger:
