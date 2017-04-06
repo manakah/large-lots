@@ -21,7 +21,11 @@ class Command(BaseCommand):
 
             # if application.deed_image == '' and '27' not in wards:
             sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18', '19', '21', '22', '24', '26', '28', '29', '37']
-            first_ward = wards[0]
+
+            try:
+                first_ward = wards[0]
+            except:
+                first_ward = ''
 
             try:
                 second_ward = wards[1]
