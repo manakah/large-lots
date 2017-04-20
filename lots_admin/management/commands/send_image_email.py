@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 second_ward = ''
 
             # if application.deed_image == '' and '37' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
-            blank_deeds = [1330, 1332, 1205, 2015, 2696, 1395, 575, 2723, 1473, 168, 562, 331, 2170, 1607, 301, 2180, 1128, 2422, 19, 2565, 578, 1405, 676, 1725, 497]
+            blank_deeds = [842, 840, 979, 2105]
 
             if application.deed_image == '' and application.id in blank_deeds:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
