@@ -14,6 +14,9 @@ There was a technical problem with the Large Lots website at the time of your ap
 
 <a href="https://www.largelots.org/deed-upload/{{app.tracking_id }}">Click to re-submit your deed.</a>
 
+
+Please do this soon. Failure to upload your deed by Friday, April 28th will result in denial of your application.
+
 Sorry for the inconvenience.
 
 Sincerely,
