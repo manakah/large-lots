@@ -36,7 +36,7 @@ class Command(BaseCommand):
             blank_deeds = [842, 840, 979, 2105]
 
             # if application.deed_image == '' and application.id in blank_deeds:
-            if application.deed_image == '' and wards != ['27', '27'] and application.id > 720:
+            if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
                 try:
