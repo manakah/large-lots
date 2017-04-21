@@ -3,6 +3,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 
+from smtplib import SMTPException
+
 from lots_admin.models import Application, ApplicationStatus
 
 class Command(BaseCommand):
@@ -41,7 +43,11 @@ class Command(BaseCommand):
                 print('Wards:', wards)
                 try:
                     self.send_email(application)
-                except:
+                except SMTPException as stmp_e:
+                    print(stmp_e)
+                    print("Not able to send email due to smtp exception.")
+                except Exception as e:
+                    print(e)
                     print("Not able to send email.")
 
 
