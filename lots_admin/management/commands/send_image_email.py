@@ -11,46 +11,46 @@ class Command(BaseCommand):
     help = 'Send emails to applicants who need to resubmit deeds'
 
     def handle(self, *args, **options):
-        self.test_send_email()
-        print("DID it!")
-        # applications = Application.objects.all()
+        # self.test_send_email()
+        # print("DID it!")
+        applications = Application.objects.all()
 
-        # print("Emails sent to:")
-        # for application in applications:
-        #     application_status_objs = ApplicationStatus.objects.filter(application_id=application.id)
-        #     wards = []
-        #     for status in application_status_objs:
-        #         wards.append(status.lot.address.ward)
+        print("Emails sent to:")
+        for application in applications:
+            application_status_objs = ApplicationStatus.objects.filter(application_id=application.id)
+            wards = []
+            for status in application_status_objs:
+                wards.append(status.lot.address.ward)
 
-        #     # if application.deed_image == '' and '27' not in wards:
-        #     # Ward numbers.
-        #     sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18', '19', '21', '22', '24', '26', '28', '29', '37']
+            # if application.deed_image == '' and '27' not in wards:
+            # Ward numbers.
+            sent_emails = ['3', '4', '5', '6', '7', '8', '9', '20', '34', '10', '11', '15', '16', '17', '18', '19', '21', '22', '24', '26', '28', '29', '37']
 
-        #     try:
-        #         first_ward = wards[0]
-        #     except:
-        #         first_ward = ''
+            try:
+                first_ward = wards[0]
+            except:
+                first_ward = ''
 
-        #     try:
-        #         second_ward = wards[1]
-        #     except:
-        #         second_ward = ''
+            try:
+                second_ward = wards[1]
+            except:
+                second_ward = ''
 
-        #     # if application.deed_image == '' and '37' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
-        #     blank_deeds = [42, 339, 146, 153]
+            # if application.deed_image == '' and '37' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
+            blank_deeds = [42, 339, 146, 153]
 
-        #     if application.deed_image == '' and application.id in blank_deeds:
-        #     # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
-        #         print(application.first_name, application.last_name, " - Application ID", application.id)
-        #         print('Wards:', wards)
-        #         try:
-        #             self.send_email(application)
-        #         except SMTPException as stmp_e:
-        #             print(stmp_e)
-        #             print("Not able to send email due to smtp exception.")
-        #         except Exception as e:
-        #             print(e)
-        #             print("Not able to send email.")
+            if application.deed_image == '' and application.id in blank_deeds:
+            # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
+                print(application.first_name, application.last_name, " - Application ID", application.id)
+                print('Wards:', wards)
+                try:
+                    self.send_email(application)
+                except SMTPException as stmp_e:
+                    print(stmp_e)
+                    print("Not able to send email due to smtp exception.")
+                except Exception as e:
+                    print(e)
+                    print("Not able to send email.")
 
 
     def send_email(self, application):
