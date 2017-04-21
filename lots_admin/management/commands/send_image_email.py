@@ -4,6 +4,7 @@ from django.template.loader import get_template
 from django.conf import settings
 
 from smtplib import SMTPException
+import time
 
 from lots_admin.models import Application, ApplicationStatus
 
@@ -37,10 +38,10 @@ class Command(BaseCommand):
                 second_ward = ''
 
             # if application.deed_image == '' and '37' in wards and first_ward not in sent_emails and second_ward not in sent_emails:
-            blank_deeds = [42, 339, 146, 153]
+            # blank_deeds = [42, 339, 146, 153]
 
-            if application.deed_image == '' and application.id in blank_deeds:
-            # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
+            # if application.deed_image == '' and application.id in blank_deeds:
+            if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
                 print(application.first_name, application.last_name, " - Application ID", application.id)
                 print('Wards:', wards)
                 try:
@@ -51,6 +52,8 @@ class Command(BaseCommand):
                 except Exception as e:
                     print(e)
                     print("Not able to send email.")
+
+                time.sleep(2)
 
 
     def send_email(self, application):
