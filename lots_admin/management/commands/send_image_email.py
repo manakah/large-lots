@@ -71,8 +71,9 @@ class Command(BaseCommand):
                 # reviews = Review.objects.filter(application=app.id)
                 # reviews.latest('created_at') > datetime.datetime(2017, 4, 28, 12, 30, 00)
                 # 12:30 on April 28, 2017...workout comparison logic....
+                sent_ids = [2417, 5, 7, 2614, 2268, 9, 6, 2031, 2472, 228, 857, 228, 2789, 1589, 848, 2042, 2672, 713, 1880, 515, 1500, 1503, 515, 1502, 2788, 1251, 760, 1265, 2788, 1595, 1595, 890, 1855, 248, 620, 1327, 2693, 2109, 1176, 2692, 941, 1494, 1435, 941, 2389, 2455, 2459, 609, 2278, 1963, 2461, 1580, 2528, 2528, 321, 2016, 2016, 2023, 321, 1717, 1894, 1717, 1393, 2241, 2240, 2240, 574, 1678, 1749, 2330, 1749, 2636, 1784, 2636, 2507, 1010, 30, 30, 49, 49 , 59 , 89 , 54 , 54 , 67 , 86, 37, 61, 86, 18, 74, 55, 38, 22, 36, 79]
                 if app.current_step:
-                    if app.current_step.step in [4, 6] and app.denied == False:
+                    if app.current_step.step in [4, 6] and app.denied == False and app.application.id not in sent_ids:
 
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                         print(datetime.now())
@@ -86,6 +87,7 @@ class Command(BaseCommand):
                             print(e)
                             print("Not able to send email.")
 
+                        time.sleep(3)
 
     def send_deed_email(self, application):
         context = {
