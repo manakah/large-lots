@@ -45,7 +45,8 @@ class Command(BaseCommand):
                 except:
                     second_ward = ''
 
-                if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
+                # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
+                if application.deed_image == '' and application.id == 2599:
                     print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
                     try:
