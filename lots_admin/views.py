@@ -235,6 +235,7 @@ def csv_dump(request, pilot, status):
 
     header = [
         'ID',
+        'Current application step',
         'Date received',
         'First Name',
         'Last Name',
@@ -286,8 +287,15 @@ def csv_dump(request, pilot, status):
         except ValueError:
             deed_image = None
 
+
+        if application_status.current_step:
+            current_step = str(application_status.current_step.step) + ': ' + str(application_status.current_step)
+        else:
+            current_step = 'Denied'
+
         rows.append([
             application_status.application.id,
+            current_step,
             application_status.application.received_date.strftime('%Y-%m-%d %H:%m %p'),
             application_status.application.first_name,
             application_status.application.last_name,
