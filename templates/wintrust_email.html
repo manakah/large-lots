@@ -1,0 +1,33 @@
+{% load lots_filters %}
+
+<div style="font-family: Calibri, Arial, sans-serif; font-size: 14px;">
+    <div class="row">
+        <div class="col-md-12">
+            <a id='logo' href="http://largelots.org">
+            <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+            </a>
+            <p>{{ today|date:'F j, Y' }}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {{ app.first_name}} {{ app.last_name }}<br />
+            {{ app.owned_address }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Dear {{ app.first_name }},</p>
+
+            <p>Wintrust Bank is hosting two events to provide you with information and resources regarding the Large Lot Program. Presenters include Landscaper, Contractor, Real Estate Attorney, and the Cook County Board of Appeals. Bring your questions!</p>
+
+            <p>Please see attached invitation and flyer for more information and to RSVP.</p>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+              <p>Best,</p>
+              <p>Jeanne Chandler</p>
+          </div>
+        </div>
+    </div>
+</div>

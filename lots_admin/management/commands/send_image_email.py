@@ -22,8 +22,34 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send emails to insure applicants that "everything is okay"')
 
+        parser.add_argument('--wintrust_email',
+                            action='store_true',
+                            help='Send emails about a special event')
+
 
     def handle(self, *args, **options):
+        if options['wintrust_email']:
+            application_statuses = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_statuses:
+                if app.current_step:
+                        if app.current_step.step in [4, 6] and app.denied == False:
+
+                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                            print(datetime.now())
+
+                            try:
+                                self.send_wintrust_email(app)
+                            except SMTPException as stmp_e:
+                                print(stmp_e)
+                                print("Not able to send email due to smtp exception.")
+                            except Exception as e:
+                                print(e)
+                                print("Not able to send email.")
+
+                            time.sleep(3)
+
 
         if options['deed_upload']:
             applications = Application.objects.all()
@@ -129,3 +155,26 @@ class Command(BaseCommand):
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
 
+
+    def send_wintrust_email(self, application_status):
+        context = {
+            'app': application_status.application,
+            'lot': application_status.lot
+        }
+
+        html_template = get_template('wintrust_email.html')
+        txt_template = get_template('wintrust_email.txt')
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives('Special event for Large Lots applicants',
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [application_status.application.email])
+
+        msg.attach_file('lots/static/images/Everyday_Loan_LargeLot.pdf')
+        msg.attach_file('lots/static/images/Invitation_LargeLot_Workshop.pdf')
+
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
