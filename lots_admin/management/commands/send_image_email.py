@@ -34,7 +34,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False:
+                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id <= 1000:
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                             print(datetime.now())
