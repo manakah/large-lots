@@ -34,7 +34,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id <= 1000:
+                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id > 996 and app.application.id =< 1800:
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                             print(datetime.now())
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                     second_ward = ''
 
                 # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
-                if application.deed_image == '' and application.id == 2599:
+                if application.deed_image == '' and application.id == 1574:
                     print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
                     try:
