@@ -2,7 +2,8 @@ from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 from lots_client.views import home, status_pilot_1, status_pilot_2, \
     apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
-    get_pin_from_address, deed_upload, upload_confirm
+    get_pin_from_address, deed_upload, upload_confirm, \
+    wintrust_invitation, wintrust_announcement
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
@@ -30,6 +31,8 @@ urlpatterns = [
     url(r'^lot-uses/$', lot_uses, name='lot_uses'),
     url(r'^deed-upload/(?P<tracking_id>\S+)/$', deed_upload, name='deed_upload'),
     url(r'^upload-confirm/(?P<tracking_id>\S+)/$', upload_confirm, name='upload_confirm'),
+    url(r'^wintrust-invitation/$', wintrust_invitation, name='wintrust_invitation'),
+    url(r'^wintrust-announcement/$', wintrust_announcement, name='wintrust_announcement'),
 
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),

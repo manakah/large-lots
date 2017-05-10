@@ -397,3 +397,15 @@ def upload_confirm(request, tracking_id):
         'application': application,
         'lots': lots,
     })
+
+def wintrust_invitation(request):
+    with open('lots/static/images/Invitation_LargeLot_Workshop.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(),content_type='application/pdf')
+        response['Content-Disposition'] = 'filename=some_file.pdf'
+        return response
+
+def wintrust_announcement(request):
+    with open('lots/static/images/Everyday_Loan_LargeLot.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(),content_type='application/pdf')
+        response['Content-Disposition'] = 'filename=some_file.pdf'
+        return response
