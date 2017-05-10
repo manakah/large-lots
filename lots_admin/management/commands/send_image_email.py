@@ -34,7 +34,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id > 996 and app.application.id <= 1150:
+                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id > 1150 and app.application.id <= 1500:
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                             print(datetime.now())
@@ -173,8 +173,8 @@ class Command(BaseCommand):
                                 settings.EMAIL_HOST_USER,
                                 [application_status.application.email])
 
-        msg.attach_file('lots/static/images/Everyday_Loan_LargeLot.pdf')
-        msg.attach_file('lots/static/images/Invitation_LargeLot_Workshop.pdf')
+        # msg.attach_file('lots/static/images/Everyday_Loan_LargeLot.pdf')
+        # msg.attach_file('lots/static/images/Invitation_LargeLot_Workshop.pdf')
 
         msg.attach_alternative(html_content, 'text/html')
         msg.send()

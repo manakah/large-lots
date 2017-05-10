@@ -2,7 +2,9 @@
 
 Dear {{ app.first_name }},
 
-Wintrust Bank is hosting two events to provide you with information and resources regarding the Large Lot Program. Presenters include Landscaper, Contractor, Real Estate Attorney, and the Cook County Board of Appeals. Bring your questions!
+Wintrust Bank is hosting two events to provide you with information and resources regarding the Large Lot Program. Presenters include Landscaper, Contractor, Real Estate Attorney, and the Cook County Board of Appeals. Bring your questions, and please remember to RSVP!
+
+Read about <a href="https://www.largelots.org/wintrust_announcement">the event</a>, and <a href="https://www.largelots.org/wintrust_invitation">view the event date and time</a>.
 
 ------------------------------------------------------------
 

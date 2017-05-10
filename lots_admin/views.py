@@ -958,3 +958,4 @@ def deed(request, application_id):
     return render(request, 'deed.html', {
         'application_status': application_status,
         })
+
