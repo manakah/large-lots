@@ -595,7 +595,6 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
                 return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
             else:
                 # Move to Step 5: Adlerman letter.
@@ -673,21 +672,19 @@ def multiple_location_check_submit(request, application_id):
         clean_path = path.rstrip('?').rstrip('&')
 
         if(len(applications) > 1):
-            # Move applicants to lottery.
             # Tag application with lottery boolean.
             for a in applications:
-                print("going to lotto: ", a)
                 a.lottery = True
                 a.save()
 
                 step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 a.current_step = step
                 a.save()
-                review = Review(reviewer=user, email_sent=True, application=a, step_completed=4)
+                review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
                 review.save()
 
         else:
-        # Move winning application to Step 6.
+        # Move winning application to Aldermanic review.
             if applications:
                 step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 a = ApplicationStatus.objects.get(id=application_ids[0])
@@ -695,7 +692,6 @@ def multiple_location_check_submit(request, application_id):
                 a.save()
                 review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
                 review.save()
-                print("no lotto!", a)
 
         # Deny unchecked applications.
         application_status = ApplicationStatus.objects.get(id=application_id)
@@ -704,7 +700,6 @@ def multiple_location_check_submit(request, application_id):
         applicants_to_deny = ApplicationStatus.objects.filter(lot=lot_pin, denied=False).exclude(id__in=application_ids)
 
         for a in applicants_to_deny:
-            print("deeenyyy", a)
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
             review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
             review.save()
@@ -714,13 +709,11 @@ def multiple_location_check_submit(request, application_id):
 
             send_email(request, a)
 
-        # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
         return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
 
 @login_required(login_url='/lots-login/')
 def lotteries(request):
     # Get all applications that will go to lottery.
-    # applications = ApplicationStatus.objects.filter(current_step__step=5).order_by('application__last_name')
     applications = ApplicationStatus.objects.filter(current_step__step=6).order_by('application__last_name')
     applications_list = list(applications)
     # Get all lots.
@@ -738,7 +731,6 @@ def lotteries(request):
 def lottery(request, lot_pin):
     lot = Lot.objects.get(pin=lot_pin)
 
-    # applications = ApplicationStatus.objects.filter(current_step__step=5).filter(lot=lot_pin).order_by('application__last_name')
     applications = ApplicationStatus.objects.filter(current_step__step=6).filter(lot=lot_pin).order_by('application__last_name')
     applications_list = list(applications)
 
@@ -756,8 +748,7 @@ def lottery_submit(request, lot_pin):
         winner_id = int(winner[0])
         winning_app = ApplicationStatus.objects.get(id=winner_id)
 
-        # Move lottery winner to Step 6.
-        # step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=6)
+        # Move lottery winner to Step 7.
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['commission'], public_status='valid', step=7)
         winning_app.current_step = step
         winning_app.save()
@@ -767,7 +758,6 @@ def lottery_submit(request, lot_pin):
         review.save()
 
         # Deny lottery losers: find all applications on Step 5.
-        # losing_apps = ApplicationStatus.objects.filter(current_step__step=5).filter(lot=lot_pin)
         losing_apps = ApplicationStatus.objects.filter(current_step__step=6).filter(lot=lot_pin)
         for a in losing_apps:
             # Deny each application.
@@ -780,7 +770,6 @@ def lottery_submit(request, lot_pin):
 
             send_email(request, a)
 
-        # return HttpResponseRedirect(reverse('lots_admin', args=['all']))
         return HttpResponseRedirect(reverse('lotteries'))
 
 
@@ -819,16 +808,13 @@ def bulk_submit(request):
                 # Check if applicant goes to lottery.
                 if a.lottery == True:
                     # Move applicantion to step 6: lottery.
-                    print("This applicant goes to the lottery", a.application.first_name)
                     l = 'lottery', 'valid', 6, a
                     next_step(*l)
 
                     # Create a review.
                     review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
                     review.save()
-
                 else:
-                    print("This applicant goes to step 7", a.application.first_name)
                     # Move application to step 7.
                     l = 'commission', 'valid', 7, a
                     next_step(*l)
@@ -952,9 +938,6 @@ def send_email(request, application_status):
     lot = application_status.lot
     review = Review.objects.filter(application=application_status).latest('id')
     today = datetime.now().date()
-
-    print(review.denial_reason)
-    print(isinstance(review.denial_reason, str))
 
     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host(), 'today': today})
     html = "deny_html_email.html"
