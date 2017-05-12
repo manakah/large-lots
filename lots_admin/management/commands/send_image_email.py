@@ -91,28 +91,29 @@ class Command(BaseCommand):
 
             print("Emails sent to:")
             for app in application_statuses:
-                reviews = Review.objects.filter(application=app.id)
+                # reviews = Review.objects.filter(application=app.id)
 
-                if reviews:
-                    last_email_sent = datetime(2017, 4, 30, 12, 30, 00).replace(tzinfo=None)
-                    latest_review = reviews.latest('created_at').created_at.replace(tzinfo=None)
+                # if reviews:
+                #     last_email_sent = datetime(2017, 4, 30, 12, 30, 00).replace(tzinfo=None)
+                #     latest_review = reviews.latest('created_at').created_at.replace(tzinfo=None)
 
-                    if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False and latest_review > last_email_sent:
+                #     if app.current_step:
+                #         if app.current_step.step in [4, 6] and app.denied == False and latest_review > last_email_sent:
 
-                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-                            print(datetime.now())
+                if app.id in [710, 1156, 1171, 1996, 2274, 2567, 2893, 2912, 3198, 3591, 3734, 3208, 502]:
+                    print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                    print(datetime.now())
 
-                            try:
-                                self.send_update_email(app)
-                            except SMTPException as stmp_e:
-                                print(stmp_e)
-                                print("Not able to send email due to smtp exception.")
-                            except Exception as e:
-                                print(e)
-                                print("Not able to send email.")
+                    try:
+                        self.send_update_email(app)
+                    except SMTPException as stmp_e:
+                        print(stmp_e)
+                        print("Not able to send email due to smtp exception.")
+                    except Exception as e:
+                        print(e)
+                        print("Not able to send email.")
 
-                            time.sleep(3)
+                    time.sleep(5)
 
     def send_deed_email(self, application):
         context = {
