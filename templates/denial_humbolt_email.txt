@@ -1,0 +1,21 @@
+{% load lots_filters %}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+        
+Dear {{ app.first_name }},
+
+Over the past few months we have been reviewing the 4,500 requests for property we received from the 2,800 Large Lot applications.
+
+At this time, the Department of Planning and Development will not be proceeding with the sale of the lot listed below:
+
+{{ lot.address }}
+{{ lot.pin | make_display_pin }}
+            
+This summer, the Department of Planning and Development will be launching a new housing program in this area.  More information on the program will be available at www.cityofchicago.org/dpd.
+
+Thank you for your application and we look forward to working with you in the future.
+        
+Sincerely,
+
+Jeanne Chandler

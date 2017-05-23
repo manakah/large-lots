@@ -26,6 +26,14 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send emails about a special event')
 
+        parser.add_argument('--humbolt_denial',
+                            action='store_true',
+                            help='Send denial emails to applicants in Hombolt Park and Ward 27')
+
+        parser.add_argument('--garfield_denial',
+                            action='store_true',
+                            help='Send denial emails to applicants in Garfield and Ward 27')
+
 
     def handle(self, *args, **options):
         if options['wintrust_email']:
@@ -50,7 +58,6 @@ class Command(BaseCommand):
 
                             time.sleep(5)
 
-
         if options['deed_upload']:
             applications = Application.objects.all()
 
@@ -71,7 +78,6 @@ class Command(BaseCommand):
                 except:
                     second_ward = ''
 
-                # if application.deed_image == '' and wards != ['27', '27'] and application.id > 1268:
                 if application.deed_image == '' and application.id == 1574:
                     print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
@@ -91,15 +97,6 @@ class Command(BaseCommand):
 
             print("Emails sent to:")
             for app in application_statuses:
-                # reviews = Review.objects.filter(application=app.id)
-
-                # if reviews:
-                #     last_email_sent = datetime(2017, 4, 30, 12, 30, 00).replace(tzinfo=None)
-                #     latest_review = reviews.latest('created_at').created_at.replace(tzinfo=None)
-
-                #     if app.current_step:
-                #         if app.current_step.step in [4, 6] and app.denied == False and latest_review > last_email_sent:
-
                 if app.id in [710, 1156, 1171, 1996, 2274, 2567, 2893, 2912, 3198, 3591, 3734, 3208, 502]:
                     print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                     print(datetime.now())
@@ -114,6 +111,30 @@ class Command(BaseCommand):
                         print("Not able to send email.")
 
                     time.sleep(5)
+
+
+        if options['humbolt_denial']:
+            application_statuses = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_statuses:
+                if app.current_step:
+                        if app.current_step.step == 2 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
+
+                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                            print(datetime.now())
+
+                            # try:
+                            #     self.send_denial_humbolt_email(app)
+                            # except SMTPException as stmp_e:
+                            #     print(stmp_e)
+                            #     print("Not able to send email due to smtp exception.")
+                            # except Exception as e:
+                            #     print(e)
+                            #     print("Not able to send email.")
+
+                            # time.sleep(5)
+
 
     def send_deed_email(self, application):
         context = {
@@ -174,8 +195,46 @@ class Command(BaseCommand):
                                 settings.EMAIL_HOST_USER,
                                 [application_status.application.email])
 
-        # msg.attach_file('lots/static/images/Everyday_Loan_LargeLot.pdf')
-        # msg.attach_file('lots/static/images/Invitation_LargeLot_Workshop.pdf')
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+
+    def send_denial_humbolt_email(self, application_status):
+        context = {
+            'app': application_status.application,
+            'lot': application_status.lot
+        }
+
+        html_template = get_template('denial_humbolt_email.html')
+        txt_template = get_template('denial_humbolt_email.txt')
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives('Large Lots Application',
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [application_status.application.email])
+
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+    def send_denial_garfield_email(self, application_status):
+        context = {
+            'app': application_status.application,
+            'lot': application_status.lot
+        }
+
+        html_template = get_template('denial_garfield_email.html')
+        txt_template = get_template('denial_garfield_email.txt')
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives('Large Lots Application',
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [application_status.application.email])
 
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
