@@ -119,7 +119,8 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step == 2 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
+
+                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                             print(datetime.now())
@@ -141,7 +142,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step == 2 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['WEST GARFIELD PARK', 'EAST GARFIELD PARK']:
+                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['WEST GARFIELD PARK', 'EAST GARFIELD PARK']:
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                             print(datetime.now())
