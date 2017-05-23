@@ -173,7 +173,7 @@ def lots_admin(request, step):
             '''
 
             if query:
-                sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
+                sql += " WHERE plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
 
             else:
                 sql += " ORDER BY {0} {1}".format(order_by, sort_order)
