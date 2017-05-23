@@ -135,6 +135,28 @@ class Command(BaseCommand):
 
                             # time.sleep(5)
 
+        if options['garfield_denial']:
+            application_statuses = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_statuses:
+                if app.current_step:
+                        if app.current_step.step == 2 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['WEST GARFIELD PARK', 'EAST GARFIELD PARK']:
+
+                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                            print(datetime.now())
+
+                            # try:
+                            #     self.send_denial_garfield_email(app)
+                            # except SMTPException as stmp_e:
+                            #     print(stmp_e)
+                            #     print("Not able to send email due to smtp exception.")
+                            # except Exception as e:
+                            #     print(e)
+                            #     print("Not able to send email.")
+
+                            # time.sleep(5)
+
 
     def send_deed_email(self, application):
         context = {
