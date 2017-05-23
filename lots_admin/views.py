@@ -170,7 +170,6 @@ def lots_admin(request, step):
             ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
             LEFT JOIN lots_admin_address
             ON lots_admin_lot.address_id=lots_admin_address.id
-            WHERE coalesce(deed_image, '') <> ''
             '''
 
             if query:
