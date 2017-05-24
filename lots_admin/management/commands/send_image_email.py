@@ -125,16 +125,16 @@ class Command(BaseCommand):
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                             print(datetime.now())
 
-                            # try:
-                            #     self.send_denial_humboldt_email(app)
-                            # except SMTPException as stmp_e:
-                            #     print(stmp_e)
-                            #     print("Not able to send email due to smtp exception.")
-                            # except Exception as e:
-                            #     print(e)
-                            #     print("Not able to send email.")
+                            try:
+                                self.send_denial_humboldt_email(app)
+                            except SMTPException as smtp_e:
+                                print(smtp_e)
+                                print("Not able to send email due to smtp exception.")
+                            except Exception as e:
+                                print(e)
+                                print("Not able to send email.")
 
-                            # time.sleep(5)
+                            time.sleep(5)
 
         if options['garfield_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -147,16 +147,16 @@ class Command(BaseCommand):
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                             print(datetime.now())
 
-                            # try:
-                            #     self.send_denial_garfield_email(app)
-                            # except SMTPException as stmp_e:
-                            #     print(stmp_e)
-                            #     print("Not able to send email due to smtp exception.")
-                            # except Exception as e:
-                            #     print(e)
-                            #     print("Not able to send email.")
+                            try:
+                                self.send_denial_garfield_email(app)
+                            except SMTPException as smtp_e:
+                                print(smtp_e)
+                                print("Not able to send email due to smtp exception.")
+                            except Exception as e:
+                                print(e)
+                                print("Not able to send email.")
 
-                            # time.sleep(5)
+                            time.sleep(5)
 
 
     def send_deed_email(self, application):
