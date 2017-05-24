@@ -26,9 +26,9 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send emails about a special event')
 
-        parser.add_argument('--humbolt_denial',
+        parser.add_argument('--humboldt_denial',
                             action='store_true',
-                            help='Send denial emails to applicants in Hombolt Park and Ward 27')
+                            help='Send denial emails to applicants in Homboldt Park and Ward 27')
 
         parser.add_argument('--garfield_denial',
                             action='store_true',
@@ -113,7 +113,7 @@ class Command(BaseCommand):
                     time.sleep(5)
 
 
-        if options['humbolt_denial']:
+        if options['humboldt_denial']:
             application_statuses = ApplicationStatus.objects.all()
 
             print("Emails sent to:")
@@ -126,7 +126,7 @@ class Command(BaseCommand):
                             print(datetime.now())
 
                             # try:
-                            #     self.send_denial_humbolt_email(app)
+                            #     self.send_denial_humboldt_email(app)
                             # except SMTPException as stmp_e:
                             #     print(stmp_e)
                             #     print("Not able to send email due to smtp exception.")
@@ -142,7 +142,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['WEST GARFIELD PARK', 'EAST GARFIELD PARK']:
+                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['NEAR WEST SIDE', 'EAST GARFIELD PARK']:
 
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                             print(datetime.now())
@@ -222,14 +222,14 @@ class Command(BaseCommand):
         msg.send()
 
 
-    def send_denial_humbolt_email(self, application_status):
+    def send_denial_humboldt_email(self, application_status):
         context = {
             'app': application_status.application,
             'lot': application_status.lot
         }
 
-        html_template = get_template('denial_humbolt_email.html')
-        txt_template = get_template('denial_humbolt_email.txt')
+        html_template = get_template('denial_humboldt_email.html')
+        txt_template = get_template('denial_humboldt_email.txt')
 
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)
