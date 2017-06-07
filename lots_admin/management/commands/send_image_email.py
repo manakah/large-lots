@@ -172,7 +172,7 @@ class Command(BaseCommand):
 
                         # Check if the same application is on Step 4 or 5
                         for app_duplicate in application_statuses:
-                            if (app.application.first_name == app_duplicate.application.first_name) and (app.application.last_name == app_duplicate.application.last_name) and (app.lot == app_duplicate.lot) and (app.application.id != app_duplicate.application.id):
+                            if (app.application.first_name == app_duplicate.application.first_name) and (app.application.last_name == app_duplicate.application.last_name) and (app.lot == app_duplicate.lot) and (app.application.id != app_duplicate.application.id) and (app_duplicate.current_step.step != 2) and (app_duplicate.denied == False):
                                 print("Duplicate Found:")
                                 print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                                 send_email = False
