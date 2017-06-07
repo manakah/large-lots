@@ -164,34 +164,23 @@ class Command(BaseCommand):
 
         if options['blank_deed_denial']:
             application_statuses = ApplicationStatus.objects.all()
-            send_email = True
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
                     if app.current_step.step == 2 and app.denied == False and app.application.deed_image == '':
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
+                        # print(datetime.now())
 
-                        # Check if the same application is on Step 4 or 5
-                        for app_duplicate in application_statuses:
-                            if app_duplicate.current_step:
-                                if (app.application.first_name == app_duplicate.application.first_name) and (app.application.last_name == app_duplicate.application.last_name) and (app.lot == app_duplicate.lot) and (app.application.id != app_duplicate.application.id) and (app_duplicate.current_step.step != 2):
-                                    print("Duplicate Found:")
-                                    print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
-                                    send_email = False
+                        # try:
+                        #     self.send_denial_email(app)
+                        # except SMTPException as smtp_e:
+                        #     print(smtp_e)
+                        #     print("Not able to send email due to smtp exception.")
+                        # except Exception as e:
+                        #     print(e)
+                        #     print("Not able to send email.")
 
-                        # if send_email == True
-                        #     print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
-                        #     print(datetime.now())
-
-                        #     try:
-                        #         self.send_denial_email(app)
-                        #     except SMTPException as smtp_e:
-                        #         print(smtp_e)
-                        #         print("Not able to send email due to smtp exception.")
-                        #     except Exception as e:
-                        #         print(e)
-                        #         print("Not able to send email.")
-
-                        #     time.sleep(5)
+                        # time.sleep(5)
 
     def send_denial_email(self, application_status):
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
