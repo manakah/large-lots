@@ -196,8 +196,8 @@ class Command(BaseCommand):
             'review': review,
         }
 
-        html_template = get_template('denial_html_email.html')
-        txt_template = get_template('denial_text_email.txt')
+        html_template = get_template('deny_html_email.html')
+        txt_template = get_template('deny_text_email.txt')
 
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)
