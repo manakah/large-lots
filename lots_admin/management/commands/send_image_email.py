@@ -7,7 +7,7 @@ from smtplib import SMTPException
 import time
 from datetime import datetime
 
-from lots_admin.models import Application, ApplicationStatus, Review, DenialReason
+from lots_admin.models import Application, ApplicationStatus, Review, DenialReason, User
 from lots_admin.look_ups import DENIAL_REASONS
 
 class Command(BaseCommand):
@@ -165,6 +165,7 @@ class Command(BaseCommand):
 
         if options['blank_deed_denial']:
             application_statuses = ApplicationStatus.objects.all()
+
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
@@ -184,8 +185,9 @@ class Command(BaseCommand):
                         time.sleep(5)
 
     def send_denial_email(self, application_status):
+        user = User.objects.get(id=5)
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
-        review = Review(reviewer='Jeanne Chandler', email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
         review.save()
 
         context = {
