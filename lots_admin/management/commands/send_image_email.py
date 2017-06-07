@@ -194,6 +194,7 @@ class Command(BaseCommand):
             'app': application_status.application,
             'lot': application_status.lot,
             'review': review,
+            'DENIAL_REASONS': DENIAL_REASONS,
         }
 
         html_template = get_template('deny_html_email.html')
