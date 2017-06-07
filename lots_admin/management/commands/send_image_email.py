@@ -169,18 +169,18 @@ class Command(BaseCommand):
                 if app.current_step:
                     if app.current_step.step == 2 and app.denied == False and app.application.deed_image == '':
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
-                        # print(datetime.now())
+                        print(datetime.now())
 
-                        # try:
-                        #     self.send_denial_email(app)
-                        # except SMTPException as smtp_e:
-                        #     print(smtp_e)
-                        #     print("Not able to send email due to smtp exception.")
-                        # except Exception as e:
-                        #     print(e)
-                        #     print("Not able to send email.")
+                        try:
+                            self.send_denial_email(app)
+                        except SMTPException as smtp_e:
+                            print(smtp_e)
+                            print("Not able to send email due to smtp exception.")
+                        except Exception as e:
+                            print(e)
+                            print("Not able to send email.")
 
-                        # time.sleep(5)
+                        time.sleep(5)
 
     def send_denial_email(self, application_status):
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
