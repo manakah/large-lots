@@ -7,7 +7,7 @@ from smtplib import SMTPException
 import time
 from datetime import datetime
 
-from lots_admin.models import Application, ApplicationStatus, Review
+from lots_admin.models import Application, ApplicationStatus, Review, DenialReason
 
 class Command(BaseCommand):
     help = 'Send emails to applicants who need to resubmit deeds'
