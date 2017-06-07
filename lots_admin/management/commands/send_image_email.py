@@ -34,6 +34,10 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send denial emails to applicants in Garfield and Ward 27')
 
+        parser.add_argument('--blank_deed_denial',
+                            action='store_true',
+                            help='Send denial emails to applicants who did not resubmit blank deeds')
+
 
     def handle(self, *args, **options):
         if options['wintrust_email']:
@@ -196,7 +200,7 @@ class Command(BaseCommand):
         context = {
             'app': application_status.application,
             'lot': application_status.lot,
-            'review': # create a review...
+            'review': review,
         }
 
         html_template = get_template('denial_html_email.html')
