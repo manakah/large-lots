@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 
 from lots_admin.models import Application, ApplicationStatus, Review, DenialReason
+from .look_ups import DENIAL_REASONS
 
 class Command(BaseCommand):
     help = 'Send emails to applicants who need to resubmit deeds'
