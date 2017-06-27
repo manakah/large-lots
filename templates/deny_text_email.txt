@@ -37,6 +37,8 @@ Unfortunately, your application has been denied because:
     it was not selected in the lottery.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.residential|slugify %}
     the City reserved this lot for a residential development project.
+{% elif review.denial_reason|slugify == DENIAL_REASONS.alderman|slugify %}
+    the alderman has reserved this lot for future development.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.economic|slugify %}
     the City reserved this lot for an economic development project.
 {% elif review.denial_reason|slugify == DENIAL_REASONS.open_space|slugify %}
