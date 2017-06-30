@@ -194,7 +194,7 @@ def lots_admin(request, step):
         on_steps23456 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5 | step6)
         app_count = len(ApplicationStatus.objects.all())
 
-    counter_range = range(2, 11)
+    counter_range = range(2, 12)
 
     paginator = Paginator(application_status_list, 20)
 
@@ -745,7 +745,7 @@ def lottery_submit(request, lot_pin):
         winning_app = ApplicationStatus.objects.get(id=winner_id)
 
         # Move lottery winner to Step 7.
-        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['commission'], public_status='valid', step=7)
+        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_waiting'], public_status='valid', step=7)
         winning_app.current_step = step
         winning_app.save()
 
@@ -812,23 +812,16 @@ def bulk_submit(request):
                     review.save()
                 else:
                     # Move application to step 7.
-                    l = 'commission', 'valid', 7, a
+                    l = 'EDS_waiting', 'valid', 7, a
                     next_step(*l)
 
                     # Create a review.
                     review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
                     review.save()
-            elif selected_step == 'step7':
-                 # Move application to step 8.
-                l = 'city_council', 'valid', 8, a
-                next_step(*l)
-
-                # Create a review.
-                review = Review(reviewer=user, email_sent=False, application=a, step_completed=7)
-                review.save()
+            # Note: moving from step 7 (EDS_waiting) to step 8 (EDS_submission) happens automatically.
             elif selected_step == 'step8':
-                # Move application to step 9.
-                l = 'EDS', 'valid', 9, a
+                 # Move application to step 9.
+                l = 'debts', 'valid', 9, a
                 next_step(*l)
 
                 # Create a review.
@@ -836,19 +829,28 @@ def bulk_submit(request):
                 review.save()
             elif selected_step == 'step9':
                 # Move application to step 10.
-                l = 'debts', 'valid', 10, a
+                l = 'commission', 'valid', 10, a
                 next_step(*l)
 
                 # Create a review.
                 review = Review(reviewer=user, email_sent=False, application=a, step_completed=9)
                 review.save()
             elif selected_step == 'step10':
-                 # Move application to step 11.
-                l = 'sold', 'valid', 11, a
+                # Move application to step 11.
+                l = 'city_council', 'valid', 11, a
                 next_step(*l)
 
                 # Create a review.
                 review = Review(reviewer=user, email_sent=False, application=a, step_completed=10)
+                review.save()
+            elif selected_step == 'step11':
+                print("herereeee!")
+                 # Move application to step 12.
+                l = 'sold', 'valid', 12, a
+                next_step(*l)
+
+                # Create a review.
+                review = Review(reviewer=user, email_sent=False, application=a, step_completed=11)
                 review.save()
             elif selected_step == 'deny':
                 # Redirect to bulk deny view. Save application ids in session.
@@ -906,7 +908,8 @@ def status_tally(request):
     step8 = ApplicationStatus.objects.filter(current_step__step=8)
     step9 = ApplicationStatus.objects.filter(current_step__step=9)
     step10 = ApplicationStatus.objects.filter(current_step__step=10)
-    sold = ApplicationStatus.objects.filter(current_step__step=11)
+    step11 = ApplicationStatus.objects.filter(current_step__step=11)
+    sold = ApplicationStatus.objects.filter(current_step__step=12)
     denied = ApplicationStatus.objects.filter(denied=True)
 
     return render(request, 'status-tally.html', {
@@ -920,6 +923,7 @@ def status_tally(request):
         'step8': step8,
         'step9': step9,
         'step10': step10,
+        'step11': step11,
         'sold': sold,
         'denied': denied
         })
