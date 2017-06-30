@@ -14,7 +14,7 @@
             {% for i in counter_range %}
             <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
             {% endfor %}
-            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
+            <a href="{% url 'lots_admin' '12' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
             <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
             <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
@@ -40,17 +40,17 @@
     <form role="form" method="POST" action="{% url 'bulk_submit' %}">
         {% if on_steps234 %}
         <div class="col-md-8" id="bulkDiv">
-            <p class="info-text">You will have an option to deny or advance multiple applications, once all applications reach Step 6.</p>
+            <p class="info-text">You will have an option to deny or advance multiple applications, once all applications reach Step 5.</p>
         </div>
         {% else %}
         <div class="col-md-8">
                 <select name='step' class="form-control update">
                     <option>-----------------</option>
                     <option value="step5">Complete step 5: Alderman letter of support</option>
-                    <option value="step7">Complete step 7: Approval by Plan Commission</option>
-                    <option value="step8">Complete step 8: Approval by City Council</option>
-                    <option value="step9">Complete step 9: Submit EDS and principal profile</option>
-                    <option value="step10">Complete step 10: Certify as free and clear of debts</option>
+                    <option value="step8">Complete step 8: Approval of EDS - Applicant submitted EDS and principal profile</option>
+                    <option value="step9">Complete step 9: Certify as free and clear of debts</option>
+                    <option value="step10">Complete step 10: Approval by Plan Commission</option>
+                    <option value="step11">Complete step 11: Approval by City Council</option>
                     <option value="deny">Deny application</option>
                 </select>
                 <button type="submit" class="btn btn-success update"><i class="fa fa-check" aria-hidden="true"></i> Update</button>
@@ -180,7 +180,7 @@
                         {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
                     </div>
                     </div>
-                    {% if on_steps234|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
+                    {% if on_steps234|length == 0 %} <!-- Do not show checkbox until steps 2, 3, and 4 are complete on all applications -->
                         {% csrf_token %}
                         <div class="form-group col-sm-2">
                             <div class="checkbox">
@@ -193,8 +193,13 @@
                 <!-- Lottery -->
                 {% elif applicant.step == 6 %}
                     <a href="{% url 'lotteries' %}">Step {{ applicant.step }}: Lottery</a>
-                <!-- Steps 6-10 -->
-                {% elif applicant.step == 7 or applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
+                <!-- Waiting for EDS -->
+                {% elif applicant.step == 7 %}
+                    <div class='col-sm-10'>
+                        Step {{ applicant.step }}: {{ applicant.step_description }}</br>
+                    </div>
+                <!-- Steps 6-11 -->
+                {% elif applicant.step == 8 or applicant.step == 9 or applicant.step == 10 or applicant.step == 11 %}
                     <div class='col-sm-10' id="letter-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         {% if on_steps23456|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
@@ -210,8 +215,8 @@
                             </div>
                         </div>
                     {% endif %}
-                <!-- Step 11: Sold -->
-                {% elif applicant.step == 11 %}
+                <!-- Step 12: Sold -->
+                {% elif applicant.step == 12 %}
                     Sold</br>
                     <span class="emphasis">Official closing event to be held</span>
                 {% endif %}
