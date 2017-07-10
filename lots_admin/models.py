@@ -44,6 +44,7 @@ class Application(models.Model):
     tracking_id = models.CharField(max_length=40)
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
+    eds_sent = models.BooleanField(default=False)
 
     def __str__(self):
         if self.first_name and self.last_name:
@@ -91,7 +92,6 @@ class ApplicationStatus(models.Model):
     lot = models.ForeignKey('Lot', blank=True, null=True)
     current_step = models.ForeignKey('ApplicationStep', blank=True, null=True)
     lottery = models.BooleanField(default=False)
-    eds_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.application) + " " + str(self.lot)

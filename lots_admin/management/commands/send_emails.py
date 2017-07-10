@@ -46,7 +46,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['eds_email']:
-            print('hello')
+            applications = Application.objects.all()
+            application_status_objs = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_status_objs:
+                if app.current_step.step == 7 and app.application.eds_sent == False:
+                        # Send an email.
+                        # Update application eds_sent to True
+
 
         if options['deed_upload']:
             applications = Application.objects.all()
@@ -71,16 +79,8 @@ class Command(BaseCommand):
                 if application.deed_image == '' and application.id == 1574:
                     print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
-                    try:
-                        self.send_deed_email(application)
-                    except SMTPException as stmp_e:
-                        print(stmp_e)
-                        print("Not able to send email due to smtp exception.")
-                    except Exception as e:
-                        print(e)
-                        print("Not able to send email.")
 
-                    time.sleep(2)
+                    self.try_send_email(self.send_deed_email, args=[application])
 
         if options['humboldt_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -88,22 +88,12 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
+                    if app.current_step.step != 7 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
 
-                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
+                        print(datetime.now())
 
-                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
-                            print(datetime.now())
-
-                            try:
-                                self.send_denial_humboldt_email(app)
-                            except SMTPException as smtp_e:
-                                print(smtp_e)
-                                print("Not able to send email due to smtp exception.")
-                            except Exception as e:
-                                print(e)
-                                print("Not able to send email.")
-
-                            time.sleep(5)
+                        self.try_send_email(self.send_denial_humboldt_email, args=[app])
 
         if options['garfield_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -116,16 +106,7 @@ class Command(BaseCommand):
                             print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                             print(datetime.now())
 
-                            try:
-                                self.send_denial_garfield_email(app)
-                            except SMTPException as smtp_e:
-                                print(smtp_e)
-                                print("Not able to send email due to smtp exception.")
-                            except Exception as e:
-                                print(e)
-                                print("Not able to send email.")
-
-                            time.sleep(5)
+                            self.try_send_email(self.send_denial_garfield_email, args=[app])
 
         if options['blank_deed_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -137,16 +118,7 @@ class Command(BaseCommand):
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
-                        try:
-                            self.send_denial_email(app)
-                        except SMTPException as smtp_e:
-                            print(smtp_e)
-                            print("Not able to send email due to smtp exception.")
-                        except Exception as e:
-                            print(e)
-                            print("Not able to send email.")
-
-                        time.sleep(5)
+                        self.try_send_email(self.send_denial_email, args=[app])
 
         if options['update_email']:
             application_statuses = ApplicationStatus.objects.all()
@@ -157,16 +129,7 @@ class Command(BaseCommand):
                     print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                     print(datetime.now())
 
-                    try:
-                        self.send_update_email(app)
-                    except SMTPException as stmp_e:
-                        print(stmp_e)
-                        print("Not able to send email due to smtp exception.")
-                    except Exception as e:
-                        print(e)
-                        print("Not able to send email.")
-
-                    time.sleep(5)
+                    self.try_send_email(self.send_update_email, args=[app])
 
         if options['wintrust_email']:
             application_statuses = ApplicationStatus.objects.all()
@@ -174,25 +137,15 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False:
+                    if app.current_step.step in [4, 6] and app.denied == False:
 
-                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-                            print(datetime.now())
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                        print(datetime.now())
 
-                            self.try_send_email(self.send_wintrust_email, args=[app])
-                            # try:
-                            #     self.send_wintrust_email(app)
-                            # except SMTPException as stmp_e:
-                            #     print(stmp_e)
-                            #     print("Not able to send email due to smtp exception.")
-                            # except Exception as e:
-                            #     print(e)
-                            #     print("Not able to send email.")
+                        self.try_send_email(self.send_wintrust_email, args=[app])
 
-                            # time.sleep(5)
 
     def try_send_email(self, function, args):
-        print("wheeee!!!!!")
         try:
             function(*args)
         except SMTPException as stmp_e:
@@ -203,34 +156,6 @@ class Command(BaseCommand):
             print("Not able to send email.")
 
         time.sleep(5)
-
-
-    def send_denial_email(self, application_status):
-        user = User.objects.get(id=5)
-        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
-        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
-        review.save()
-
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot,
-            'review': review,
-            'DENIAL_REASONS': DENIAL_REASONS,
-        }
-
-        html_template = get_template('deny_html_email.html')
-        txt_template = get_template('deny_text_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Large Lots Application',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
 
 
     def send_deed_email(self, application):
@@ -254,40 +179,26 @@ class Command(BaseCommand):
         msg.send()
 
 
-    def send_update_email(self, application_status):
+    def send_denial_email(self, application_status):
+        user = User.objects.get(id=5)
+        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
+        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+        review.save()
+
         context = {
             'app': application_status.application,
-            'lot': application_status.lot
+            'lot': application_status.lot,
+            'review': review,
+            'DENIAL_REASONS': DENIAL_REASONS,
         }
 
-        html_template = get_template('update_email.html')
-        txt_template = get_template('update_email.txt')
+        html_template = get_template('deny_html_email.html')
+        txt_template = get_template('deny_text_email.txt')
 
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)
 
-        msg = EmailMultiAlternatives('Important update from Large Lots',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
-
-
-    def send_wintrust_email(self, application_status):
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot
-        }
-
-        html_template = get_template('wintrust_email.html')
-        txt_template = get_template('wintrust_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Special event for Large Lots applicants',
+        msg = EmailMultiAlternatives('Large Lots Application',
                                 txt_content,
                                 settings.EMAIL_HOST_USER,
                                 [application_status.application.email])
@@ -336,4 +247,47 @@ class Command(BaseCommand):
 
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
+
+
+    def send_update_email(self, application_status):
+        context = {
+            'app': application_status.application,
+            'lot': application_status.lot
+        }
+
+        html_template = get_template('update_email.html')
+        txt_template = get_template('update_email.txt')
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives('Important update from Large Lots',
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [application_status.application.email])
+
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+
+    def send_wintrust_email(self, application_status):
+        context = {
+            'app': application_status.application,
+            'lot': application_status.lot
+        }
+
+        html_template = get_template('wintrust_email.html')
+        txt_template = get_template('wintrust_email.txt')
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives('Special event for Large Lots applicants',
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [application_status.application.email])
+
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
 
