@@ -56,7 +56,7 @@ class Command(BaseCommand):
                         context = {
                             'app': app.application,
                         }
-                        self.try_send_email(self.send_email, args=['eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context])
+                        self.send_email('eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context)
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
 
                         # Find other applications and change status
@@ -87,11 +87,16 @@ class Command(BaseCommand):
                 except:
                     second_ward = ''
 
-                if application.deed_image == '' and application.id == 1574:
+                if application.deed_image == '':
                     print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
 
-                    self.try_send_email(self.send_deed_email, args=[application])
+                    context = {
+                        'app': application,
+                        'lots': application.lot_set.all()
+                    }
+
+                    self.send_email('deed_inquiry_email', 'Important notice from Large Lots', application.email, context)
 
         if options['humboldt_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -100,11 +105,15 @@ class Command(BaseCommand):
             for app in application_statuses:
                 if app.current_step:
                     if app.current_step.step != 7 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
-
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
-                        self.try_send_email(self.send_denial_humboldt_email, args=[app])
+                        context = {
+                            'app': app.application,
+                            'lot': app.lot
+                        }
+
+                        self.send_email('denial_humboldt_email', 'Large Lots Application', app.application.email, context)
 
         if options['garfield_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -112,12 +121,16 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.current_step:
-                        if app.current_step.step != 7 and app.denied == False and app.lot.address.ward in ['27', '26'] and app.lot.address.community in ['NEAR WEST SIDE', 'EAST GARFIELD PARK']:
+                    if app.current_step.step != 7:
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
+                        print(datetime.now())
 
-                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
-                            print(datetime.now())
+                        context = {
+                            'app': app.application,
+                            'lot': app.lot
+                        }
 
-                            self.try_send_email(self.send_denial_garfield_email, args=[app])
+                        self.send_email('denial_garfield_email', 'Large Lots Application', app.application.email, context)
 
         if options['blank_deed_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -129,7 +142,19 @@ class Command(BaseCommand):
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
-                        self.try_send_email(self.send_denial_email, args=[app])
+                        user = User.objects.get(id=5)
+                        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
+                        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+                        review.save()
+
+                        context = {
+                            'app': application_status.application,
+                            'lot': application_status.lot,
+                            'review': review,
+                            'DENIAL_REASONS': DENIAL_REASONS,
+                        }
+
+                        self.send_email('deny_html_email', 'Large Lots Application', application_status.application.email, context)
 
         if options['update_email']:
             application_statuses = ApplicationStatus.objects.all()
@@ -140,7 +165,12 @@ class Command(BaseCommand):
                     print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                     print(datetime.now())
 
-                    self.try_send_email(self.send_update_email, args=[app])
+                    context = {
+                        'app': app.application,
+                        'lot': app.lot
+                    }
+
+                    self.send_email('update_email', 'Important update from Large Lots', app.application.email, context)
 
         if options['wintrust_email']:
             application_statuses = ApplicationStatus.objects.all()
@@ -153,20 +183,12 @@ class Command(BaseCommand):
                         print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                         print(datetime.now())
 
-                        self.try_send_email(self.send_wintrust_email, args=[app])
+                        context = {
+                            'app': app.application,
+                            'lot': app.lot
+                        }
 
-
-    def try_send_email(self, function, args):
-        try:
-            function(*args)
-        except SMTPException as stmp_e:
-            print(stmp_e)
-            print("Not able to send email due to smtp exception.")
-        except Exception as e:
-            print(e)
-            print("Not able to send email.")
-
-        time.sleep(5)
+                        self.send_email('wintrust_email', 'Special event for Large Lots applicants', app.application.email, context)
 
 
     def send_email(self, template_name, email_subject, email_to_address, context):
@@ -182,71 +204,17 @@ class Command(BaseCommand):
                                 [email_to_address])
 
         msg.attach_alternative(html_content, 'text/html')
-        msg.send()
 
+        try:
+            msg.send()
+        except SMTPException as stmp_e:
+            print(stmp_e)
+            print("Not able to send email due to smtp exception.")
+        except Exception as e:
+            print(e)
+            print("Not able to send email.")
 
-    # def send_eds_email(self, app):
+        time.sleep(5)
 
-
-
-    def send_deed_email(self, application):
-        context = {
-            'app': application,
-            'lots': application.lot_set.all()
-        }
-
-        self.send_email('deed_inquiry_email', 'Important notice from Large Lots', application.email, context)
-
-
-    def send_denial_email(self, application_status):
-        user = User.objects.get(id=5)
-        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
-        review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
-        review.save()
-
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot,
-            'review': review,
-            'DENIAL_REASONS': DENIAL_REASONS,
-        }
-
-        self.send_email('deny_html_email', 'Large Lots Application', application_status.application.email, context)
-
-
-    def send_denial_humboldt_email(self, application_status):
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot
-        }
-
-        self.send_email('denial_humboldt_email', 'Large Lots Application', application_status.application.email, context)
-
-
-    def send_denial_garfield_email(self, application_status):
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot
-        }
-
-        self.send_email('denial_garfield_email', 'Large Lots Application', application_status.application.email, context)
-
-
-    def send_update_email(self, application_status):
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot
-        }
-
-        self.send_email('update_email', 'Important update from Large Lots', application_status.application.email, context)
-
-
-    def send_wintrust_email(self, application_status):
-        context = {
-            'app': application_status.application,
-            'lot': application_status.lot
-        }
-
-        self.send_email('wintrust_email', 'Special event for Large Lots applicants', application_status.application.email, context)
 
 
