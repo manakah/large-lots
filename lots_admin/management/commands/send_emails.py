@@ -46,14 +46,25 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['eds_email']:
-            applications = Application.objects.all()
             application_status_objs = ApplicationStatus.objects.all()
 
             print("Emails sent to:")
             for app in application_status_objs:
-                if app.current_step.step == 7 and app.application.eds_sent == False:
-                        # Send an email.
-                        # Update application eds_sent to True
+                if app.current_step:
+                    if app.current_step.step == 7 and app.application.eds_sent != True:
+                        # Send email
+                        context = {
+                            'app': app.application,
+                        }
+                        self.try_send_email(self.send_email, args=['eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context])
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+
+                        # Find other applications and change status
+                        related_applications = Application.objects.filter(email=app.application.email).filter(applicationstatus__current_step__step=7)
+                        print("Apps with the same email: ", related_applications)
+                        for application in related_applications:
+                            application.eds_sent = True
+                            application.save()
 
 
         if options['deed_upload']:
@@ -158,25 +169,33 @@ class Command(BaseCommand):
         time.sleep(5)
 
 
+    def send_email(self, template_name, email_subject, email_to_address, context):
+        html_template = get_template('{}.html'.format(template_name))
+        txt_template = get_template('{}.txt'.format(template_name))
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives(email_subject,
+                                txt_content,
+                                settings.EMAIL_HOST_USER,
+                                [email_to_address])
+
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+
+    # def send_eds_email(self, app):
+
+
+
     def send_deed_email(self, application):
         context = {
             'app': application,
             'lots': application.lot_set.all()
         }
 
-        html_template = get_template('deed_inquiry_email.html')
-        txt_template = get_template('deed_inquiry_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Important notice from Large Lots',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('deed_inquiry_email', 'Important notice from Large Lots', application.email, context)
 
 
     def send_denial_email(self, application_status):
@@ -192,19 +211,7 @@ class Command(BaseCommand):
             'DENIAL_REASONS': DENIAL_REASONS,
         }
 
-        html_template = get_template('deny_html_email.html')
-        txt_template = get_template('deny_text_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Large Lots Application',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('deny_html_email', 'Large Lots Application', application_status.application.email, context)
 
 
     def send_denial_humboldt_email(self, application_status):
@@ -213,19 +220,7 @@ class Command(BaseCommand):
             'lot': application_status.lot
         }
 
-        html_template = get_template('denial_humboldt_email.html')
-        txt_template = get_template('denial_humboldt_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Large Lots Application',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('denial_humboldt_email', 'Large Lots Application', application_status.application.email, context)
 
 
     def send_denial_garfield_email(self, application_status):
@@ -234,19 +229,7 @@ class Command(BaseCommand):
             'lot': application_status.lot
         }
 
-        html_template = get_template('denial_garfield_email.html')
-        txt_template = get_template('denial_garfield_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Large Lots Application',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('denial_garfield_email', 'Large Lots Application', application_status.application.email, context)
 
 
     def send_update_email(self, application_status):
@@ -255,19 +238,7 @@ class Command(BaseCommand):
             'lot': application_status.lot
         }
 
-        html_template = get_template('update_email.html')
-        txt_template = get_template('update_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Important update from Large Lots',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('update_email', 'Important update from Large Lots', application_status.application.email, context)
 
 
     def send_wintrust_email(self, application_status):
@@ -276,18 +247,6 @@ class Command(BaseCommand):
             'lot': application_status.lot
         }
 
-        html_template = get_template('wintrust_email.html')
-        txt_template = get_template('wintrust_email.txt')
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives('Special event for Large Lots applicants',
-                                txt_content,
-                                settings.EMAIL_HOST_USER,
-                                [application_status.application.email])
-
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        self.send_email('wintrust_email', 'Special event for Large Lots applicants', application_status.application.email, context)
 
 
