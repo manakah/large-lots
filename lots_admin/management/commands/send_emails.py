@@ -15,17 +15,13 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--eds_email',
+                            action='store_true',
+                            help='Send email with link to complete EDS')
+
         parser.add_argument('--deed_upload',
                             action='store_true',
                             help='Send emails to applicants who need to resubmit a deed')
-
-        parser.add_argument('--update_email',
-                            action='store_true',
-                            help='Send emails to insure applicants that "everything is okay"')
-
-        parser.add_argument('--wintrust_email',
-                            action='store_true',
-                            help='Send emails about a special event')
 
         parser.add_argument('--humboldt_denial',
                             action='store_true',
@@ -39,29 +35,18 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send denial emails to applicants who did not resubmit blank deeds')
 
+        parser.add_argument('--update_email',
+                            action='store_true',
+                            help='Send emails to insure applicants that "everything is okay"')
+
+        parser.add_argument('--wintrust_email',
+                            action='store_true',
+                            help='Send emails about a special event')
+
 
     def handle(self, *args, **options):
-        if options['wintrust_email']:
-            application_statuses = ApplicationStatus.objects.all()
-
-            print("Emails sent to:")
-            for app in application_statuses:
-                if app.current_step:
-                        if app.current_step.step in [4, 6] and app.denied == False and app.application.id > 2300:
-
-                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-                            print(datetime.now())
-
-                            try:
-                                self.send_wintrust_email(app)
-                            except SMTPException as stmp_e:
-                                print(stmp_e)
-                                print("Not able to send email due to smtp exception.")
-                            except Exception as e:
-                                print(e)
-                                print("Not able to send email.")
-
-                            time.sleep(5)
+        if options['eds_email']:
+            print('hello')
 
         if options['deed_upload']:
             applications = Application.objects.all()
@@ -96,27 +81,6 @@ class Command(BaseCommand):
                         print("Not able to send email.")
 
                     time.sleep(2)
-
-        if options['update_email']:
-            application_statuses = ApplicationStatus.objects.all()
-
-            print("Emails sent to:")
-            for app in application_statuses:
-                if app.id in [710, 1156, 1171, 1996, 2274, 2567, 2893, 2912, 3198, 3591, 3734, 3208, 502]:
-                    print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-                    print(datetime.now())
-
-                    try:
-                        self.send_update_email(app)
-                    except SMTPException as stmp_e:
-                        print(stmp_e)
-                        print("Not able to send email due to smtp exception.")
-                    except Exception as e:
-                        print(e)
-                        print("Not able to send email.")
-
-                    time.sleep(5)
-
 
         if options['humboldt_denial']:
             application_statuses = ApplicationStatus.objects.all()
@@ -184,6 +148,63 @@ class Command(BaseCommand):
 
                         time.sleep(5)
 
+        if options['update_email']:
+            application_statuses = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_statuses:
+                if app.id in [710, 1156, 1171, 1996, 2274, 2567, 2893, 2912, 3198, 3591, 3734, 3208, 502]:
+                    print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                    print(datetime.now())
+
+                    try:
+                        self.send_update_email(app)
+                    except SMTPException as stmp_e:
+                        print(stmp_e)
+                        print("Not able to send email due to smtp exception.")
+                    except Exception as e:
+                        print(e)
+                        print("Not able to send email.")
+
+                    time.sleep(5)
+
+        if options['wintrust_email']:
+            application_statuses = ApplicationStatus.objects.all()
+
+            print("Emails sent to:")
+            for app in application_statuses:
+                if app.current_step:
+                        if app.current_step.step in [4, 6] and app.denied == False:
+
+                            print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+                            print(datetime.now())
+
+                            self.try_send_email(self.send_wintrust_email, args=[app])
+                            # try:
+                            #     self.send_wintrust_email(app)
+                            # except SMTPException as stmp_e:
+                            #     print(stmp_e)
+                            #     print("Not able to send email due to smtp exception.")
+                            # except Exception as e:
+                            #     print(e)
+                            #     print("Not able to send email.")
+
+                            # time.sleep(5)
+
+    def try_send_email(self, function, args):
+        print("wheeee!!!!!")
+        try:
+            function(*args)
+        except SMTPException as stmp_e:
+            print(stmp_e)
+            print("Not able to send email due to smtp exception.")
+        except Exception as e:
+            print(e)
+            print("Not able to send email.")
+
+        time.sleep(5)
+
+
     def send_denial_email(self, application_status):
         user = User.objects.get(id=5)
         reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
@@ -210,6 +231,7 @@ class Command(BaseCommand):
 
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
+
 
     def send_deed_email(self, application):
         context = {
@@ -294,6 +316,7 @@ class Command(BaseCommand):
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
 
+
     def send_denial_garfield_email(self, application_status):
         context = {
             'app': application_status.application,
@@ -313,3 +336,4 @@ class Command(BaseCommand):
 
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
+
