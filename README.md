@@ -39,6 +39,16 @@ python manage.py runserver
 
 Navigate to [http://localhost:8000/](http://localhost:8000/).
 
+## Sending emails
+
+We have a management command that facilitates sending emails in bulk. It takes several arguments, including an option to send emails to applicants needing to complete the Economic Disclosure Statement:
+
+```bash
+python manage.py send_emails --eds_email=1-25
+```
+
+The arguments after `--eds_email` refer to the range of applications who should receive emails. It is inclusive, i.e., in the above example, applicants 1 and 25 would receive emails.
+
 ## Data
 
 Our map was built using open data from Chicago and Cook County:
