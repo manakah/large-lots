@@ -420,7 +420,7 @@ def eds_submission(request):
             tracking_id = request.POST['tracking_id']
             try: 
                 application = Application.objects.get(tracking_id=tracking_id)
-                related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=False).filter(current_step__step=7)
+                related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
 
                 for application_status in related_application_statuses:
                     step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
