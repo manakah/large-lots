@@ -430,5 +430,5 @@ def eds_submission(request):
         else:
             return HttpResponse('No application id - request: {}'.format(request), status=400)
     else:
-        return HttpResponse('No EDS submission - not a post request', status=400)
+        return HttpResponse('No EDS submission - not a post request: {}'.format(request.method), status=400)
 
