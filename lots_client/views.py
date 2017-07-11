@@ -427,6 +427,8 @@ def eds_submission(request):
                 print('Application moved to step 8: ', application_status)  
 
             return HttpResponse('Successful EDS submission', status=200)
-
-    return HttpResponse('No EDS submission', status=400)
+        else:
+            return HttpResponse('No application id - request: {}'.format(request), status=400)
+    else:
+        return HttpResponse('No EDS submission - not a post request', status=400)
 
