@@ -16,7 +16,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--eds_email',
-                            action='store_true',
                             help='Send email with link to complete EDS')
 
         parser.add_argument('--deed_upload',
@@ -47,11 +46,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['eds_email']:
             application_status_objs = ApplicationStatus.objects.all()
-
+            id_range = options['eds_email'].split('-')
+            lower_id = int(id_range[0])
+            upper_id = int(id_range[1])
+            
             print("Emails sent to:")
             for app in application_status_objs:
                 if app.current_step:
-                    if app.current_step.step == 7 and app.application.eds_sent != True:
+                    if app.current_step.step == 7 and app.application.eds_sent != True and app.application.id >= lower_id and app.application.id <= upper_id:
                         # Send email
                         context = {
                             'app': app.application,
