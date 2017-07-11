@@ -27,6 +27,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
@@ -414,21 +415,23 @@ def wintrust_announcement(request):
 @csrf_exempt
 def eds_submission(request):
     if request.method == 'POST':
-        app_id = request.POST.get('app_id', None)
-        if app_id:
-            app_id = request.POST['app_id']
-            application = Application.objects.get(id=int(app_id))
-            related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
+        tracking_id = request.POST.get('tracking_id', None)
+        if tracking_id:
+            tracking_id = request.POST['tracking_id']
+            try: 
+                application = Application.objects.get(tracking_id=tracking_id)
+                related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=False).filter(current_step__step=7)
 
-            for application_status in related_application_statuses:
-                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
-                application_status.current_step = step
-                application_status.save()
-                print('Application moved to step 8: ', application_status)  
+                for application_status in related_application_statuses:
+                    step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
+                    application_status.current_step = step
+                    application_status.save()
+                return HttpResponse('Successful EDS submission for {}'.format(application.email), status=200)
 
-            return HttpResponse('Successful EDS submission', status=200)
+            except ObjectDoesNotExist: 
+                return HttpResponse('Application does not exist', status=400)
         else:
-            return HttpResponse('No application id - request: {}'.format(request), status=400)
+            return HttpResponse('Did not find tracking_id in request: {}'.format(request), status=400)
     else:
         return HttpResponse('No EDS submission - not a post request: {}'.format(request.method), status=400)
 
