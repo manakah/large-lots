@@ -1,0 +1,26 @@
+{% load lots_filters %}
+
+
+** $1 LARGE LOTS
+------------------------------------------------------------
+{{ today|date:'F j, Y' }}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+
+
+Dear {{ app.first_name}},
+
+Congratulations! The City is moving forward with your Large Lot application. The next step in the process is to collect an <strong>Economic Disclosure Statement (EDS)</strong> and <strong>Principal Profile Form (PPF)</strong> from each applicant. The EDS helps us to identify you, and the PPF provides us with the information necessary to make sure you do not owe money to the City.
+
+For organizations and corporations, you must use <a href="https://webapps1.cityofchicago.org/EDSWeb/appmanager/OnlineEDS/desktop?_nfpb=true&_pageLabel=OnlineEDS_portal_page_26" target="_blank">the standard EDS form</a>. 
+
+For individuals, please use <a href="https://eds.datamade.us/?app_id={{app.id}}">the following link to complete the EDS</a>
+
+For all applicants, please complete <a href="">the PPF</a>, and email back to me at Jeanne.Chandler@Cityofchicago.org.
+
+If you need assistance completing the EDS or PPF please reach out to the Large Lot Staff. <strong>Failure to complete these two documents by August 9 will result in your removal from the Large Lot Program.</strong>
+        
+Sincerely,
+
+Jeanne Chandler
