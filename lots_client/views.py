@@ -417,7 +417,7 @@ def eds_submission(request):
         app_id = request.POST.get('app_id', None)
         if app_id:
             app_id = request.POST['app_id']
-            application = Application.objects.get(id=app_id)
+            application = Application.objects.get(id=int(app_id))
             related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
 
             for application_status in related_application_statuses:
