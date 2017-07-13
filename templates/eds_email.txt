@@ -15,9 +15,9 @@ Congratulations! The City is moving forward with your Large Lot application. The
 
 For organizations and corporations, you must use <a href="https://webapps1.cityofchicago.org/EDSWeb/appmanager/OnlineEDS/desktop?_nfpb=true&_pageLabel=OnlineEDS_portal_page_26" target="_blank">the standard EDS form</a>. 
 
-For individuals, please use <a href="https://eds.datamade.us/?tracking_id={{app.tracking_id}}">the following link to complete the EDS</a>
+For individuals, please use <a href="https://eds.largelots.org/?tracking_id={{app.tracking_id}}">the following link to complete the EDS</a>.
 
-For all applicants, please complete <a href="">the PPF</a>, and email back to me at Jeanne.Chandler@Cityofchicago.org.
+For all applicants, please <a href="https://www.largelots.org/principal-profile-form/">download and complete the PPF</a>. Email your completed form to Jeanne.Chandler@Cityofchicago.org.
 
 If you need assistance completing the EDS or PPF please reach out to the Large Lot Staff. <strong>Failure to complete these two documents by August 9 will result in your removal from the Large Lot Program.</strong>
         

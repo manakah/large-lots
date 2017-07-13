@@ -2,6 +2,7 @@
 import re
 import json
 import pytz
+import os
 from uuid import uuid4
 from collections import OrderedDict
 from datetime import datetime
@@ -411,6 +412,14 @@ def wintrust_announcement(request):
         response = HttpResponse(pdf.read(),content_type='application/pdf')
         response['Content-Disposition'] = 'filename=some_file.pdf'
         return response
+
+def principal_profile_form(request):
+    filename = 'lots/static/images/PrincipalProfileForm.docx'
+    data = open(filename, "rb").read()
+    response = HttpResponse(data, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Length'] = os.path.getsize(filename)
+
+    return response
 
 @csrf_exempt
 def eds_submission(request):
