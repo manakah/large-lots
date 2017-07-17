@@ -45,28 +45,31 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['eds_email']:
-            application_status_objs = ApplicationStatus.objects.all()
-            id_range = options['eds_email'].split('-')
-            lower_id = int(id_range[0])
-            upper_id = int(id_range[1])
+            limit = options['eds_email']
+            applicants = ApplicationStatus.objects\
+                                          .filter(current_step__step=7)\
+                                          .filter(application__eds_sent=False)\
+                                          .distinct('application__email')[:limit]
             
             print("Emails sent to:")
-            for app in application_status_objs:
-                if app.current_step:
-                    if app.current_step.step == 7 and app.application.eds_sent != True and app.application.id >= lower_id and app.application.id <= upper_id:
-                        # Send email
-                        context = {
-                            'app': app.application,
-                        }
-                        self.send_email('eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context)
-                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+            for app in applicants:
+                context = {
+                    'app': app.application,
+                }
+                self.send_email('eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context)
+                print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
 
-                        # Find other applications and change status
-                        related_applications = Application.objects.filter(email=app.application.email).filter(applicationstatus__current_step__step=7)
-                        print("Apps with the same email: ", related_applications)
-                        for application in related_applications:
-                            application.eds_sent = True
-                            application.save()
+                # Find other applications and change status
+                related_applications = Application.objects\
+                                                  .filter(email=app.application.email)\
+                                                  .filter(applicationstatus__current_step__step=7)\
+                                                  .exclude(id=app.application.id)
+
+                print("Apps with the same email: ", related_applications)
+                
+                for application in related_applications:
+                    application.eds_sent = True
+                    application.save()
 
 
         if options['deed_upload']:
