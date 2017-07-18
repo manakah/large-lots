@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
+from django.db import connection
 
 from smtplib import SMTPException
 import time
@@ -46,33 +47,63 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['eds_email']:
             limit = options['eds_email']
-            applicants = ApplicationStatus.objects\
-                                          .filter(current_step__step=7)\
-                                          .filter(application__eds_sent=False)\
-                                          .distinct('application__email')[:limit]
-            
-            for app in applicants:                
-                context = {'app': app.application}
+
+            # Select only applicants whose non-denied applications
+            # are all on step 7 in order to avoid a situation where
+            # an applicant has active applications at other steps,
+            # as these will get stuck if the applicant submits an
+            # EDS prior to their reaching step 7. (The applicant
+            # will not submit another EDS, thus the endpoint to 
+            # advance the remaining applications will never be
+            # pinged.)
+
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT
+                      MIN(id) as id,
+                      email
+                    FROM (
+                      SELECT
+                        app.id,
+                        email,
+                        step,
+                        denied
+                      FROM lots_admin_application AS app
+                      JOIN lots_admin_applicationstatus AS status
+                      ON app.id=status.application_id
+                      JOIN lots_admin_applicationstep AS step
+                      ON status.current_step_id=step.id
+                      WHERE eds_sent = False 
+                        AND denied = False
+                    ) AS applicants
+                    GROUP BY email 
+                    HAVING (EVERY(step = 7))
+                    LIMIT {limit}
+                '''.format(limit=limit)
+
+                cursor.execute(query)
+
+                applicants = [(app_id, email_address) for app_id, email_address in cursor]
+
+            for app_id, email_address in applicants:
                 
+                application = Application.objects.filter(id=app_id).first()               
+                context = {'app': application}
                 self.send_email(
                     'eds_email', 
                     'LargeLots application - Economic Disclosure Statement (EDS)', 
-                    app.application.email, 
+                    email_address, 
                     context
                 )
 
-                applicant = self.applicant_detail_str(app.application)
-
+                applicant = self.applicant_detail_str(application)
                 print('Notified {}'.format(applicant))
 
                 # Set `eds_sent` = True on all applications for given applicant
                 # (since we only need one EDS per applicant)
-
-                all_applications = Application.objects\
-                                              .filter(email=app.application.email)
+                all_applications = Application.objects.filter(email=email_address)
 
                 print('Updated applications for {}:'.format(applicant))
-                
                 for application in all_applications:
                     print(self.applicant_detail_str(application))
                     application.eds_sent = True
