@@ -116,6 +116,48 @@
         }
     },
     {
+        "model": "lots_admin.application",
+        "pk": 5,
+        "fields": {
+            "first_name": "Karen",
+            "last_name": "Oh",
+            "organization": "",
+            "owned_pin": "12345",
+            "owned_address": 2,
+            "deed_image": "img/yayaya.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "302-123-4567",
+            "email": "goldlion@hotmail.com",
+            "how_heard": "the year 2004",
+            "tracking_id": "cffd359c-af8b-4286-8ac9-9a33748a9f9c",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 6,
+        "fields": {
+            "first_name": "Karen",
+            "last_name": "Oh",
+            "organization": "",
+            "owned_pin": "12345",
+            "owned_address": 2,
+            "deed_image": "img/yayaya.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "302-123-4567",
+            "email": "goldlion@hotmail.com",
+            "how_heard": "the year 2004",
+            "tracking_id": "09328127-fa9a-4979-a0bc-09734c91737c",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
         "model": "lots_admin.lot",
         "pk": "34343",
         "fields": {
@@ -191,6 +233,28 @@
             "denied": false,
             "application": 4,
             "lot": "34343",
+            "current_step": 2,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 5,
+        "fields": {
+            "denied": true,
+            "application": 5,
+            "lot": "34343",
+            "current_step": 1,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 6,
+        "fields": {
+            "denied": false,
+            "application": 6,
+            "lot": "13131",
             "current_step": 2,
             "lottery": false
         }

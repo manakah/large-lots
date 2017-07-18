@@ -101,14 +101,16 @@ class Command(BaseCommand):
 
                 # Set `eds_sent` = True on all applications for given applicant
                 # (since we only need one EDS per applicant)
-                all_applications = Application.objects.filter(email=email_address)
+                active_applications = ApplicationStatus.objects\
+                                                       .filter(application__email=email_address)\
+                                                       .filter(denied=False)
 
                 print('Updated applications for {}:'.format(applicant))
-                for application in all_applications:
-                    print(self.applicant_detail_str(application))
-                    application.eds_sent = True
-                    application.save()
-
+                for app in active_applications:
+                    print(self.applicant_detail_str(app.application))
+                    app.application.eds_sent = True
+                    app.application.save()
+                    
 
         if options['deed_upload']:
             applications = Application.objects.all()

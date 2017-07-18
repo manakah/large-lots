@@ -4,30 +4,17 @@ from django.core.management import call_command
 
 @pytest.fixture(scope='session')
 def django_db_setup(django_db_setup, django_db_blocker):
-    '''Insert the following into the test_largelots database:
+    '''Insert test_data.json into the `test_largelots` database,
+    resulting in the following field of applicants: 
 
-    * Two addresses
-      * 1 - 4539 N Paulina
-      * 2 - 440 S LaSalle
-
-    * Two lots
-      * 13131 - corresponds to address 1
-      * 34343 - corresponds to address 2
-
-    * Two application steps
-      * 1 - Step 6: Alderman letter
-      * 2 - Step 7: EDS needed
-
-    * Three applications
-      * 1 - Rivers Cuomo
-      * 2 - Robin Peckinold
-      * 3 - Lana Del Rey
-
-    * Three application statuses
-      * 1 - Rivers Cuomo, EDS needed, not sent (13131)
-      * 2 - Rivers Cuomo, EDS needed, not sent (34343)
-      * 3 - Robin Peckinold, Alderman letter (34343)
-      * 4 - Lana Del Rey, EDS needed and sent (34343)
+     first_name | last_name |            email            | eds_sent | step | denied
+    ------------+-----------+-----------------------------+----------+------+--------
+     Rivers     | Cuomo     | weezerules@yahoo.com        | f        |    7 | f
+     Rivers     | Cuomo     | weezerules@yahoo.com        | f        |    7 | f
+     Robin      | Peckinold | fleetfoxesfanclub@yahoo.com | f        |    6 | f
+     Lana       | Del Rey   | natlanthemmm@gmail.com      | t        |    7 | f
+     Karen      | Oh        | goldlion@hotmail.com        | f        |    6 | t
+     Karen      | Oh        | goldlion@hotmail.com        | f        |    7 | f
     '''
     with django_db_blocker.unblock():
         call_command('loaddata', 'lots_admin/tests/test_data.json')
