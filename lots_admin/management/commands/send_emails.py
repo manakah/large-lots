@@ -65,12 +65,11 @@ class Command(BaseCommand):
 
                 print('Notified {}'.format(applicant))
 
-                # Find all EDS-ready applications for for given applicant 
-                # and set `eds_sent` = True
+                # Set `eds_sent` = True on all applications for given applicant
+                # (since we only need one EDS per applicant)
 
                 all_applications = Application.objects\
-                                              .filter(email=app.application.email)\
-                                              .filter(applicationstatus__current_step__step=7)
+                                              .filter(email=app.application.email)
 
                 print('Updated applications for {}:'.format(applicant))
                 
