@@ -43,6 +43,8 @@ def test_eds_email(django_db_setup, capsys):
     updated_applications = Application.objects.filter(first_name='Rivers', 
                                                       last_name='Cuomo')
 
+    assert len(updated_applications) == 2
+
     for application in updated_applications:
         assert application.eds_sent == True
-        
+
