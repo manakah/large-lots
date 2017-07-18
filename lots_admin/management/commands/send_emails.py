@@ -51,23 +51,31 @@ class Command(BaseCommand):
                                           .filter(application__eds_sent=False)\
                                           .distinct('application__email')[:limit]
             
-            print("Emails sent to:")
-            for app in applicants:
-                context = {
-                    'app': app.application,
-                }
-                self.send_email('eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context)
-                print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-
-                # Find other applications and change status
-                related_applications = Application.objects\
-                                                  .filter(email=app.application.email)\
-                                                  .filter(applicationstatus__current_step__step=7)\
-                                                  .exclude(id=app.application.id)
-
-                print("Apps with the same email: ", related_applications)
+            for app in applicants:                
+                context = {'app': app.application}
                 
-                for application in related_applications:
+                self.send_email(
+                    'eds_email', 
+                    'LargeLots application - Economic Disclosure Statement (EDS)', 
+                    app.application.email, 
+                    context
+                )
+
+                applicant = self.applicant_detail_str(app.application)
+
+                print('Notified {}'.format(applicant))
+
+                # Find all EDS-ready applications for for given applicant 
+                # and set `eds_sent` = True
+
+                all_applications = Application.objects\
+                                              .filter(email=app.application.email)\
+                                              .filter(applicationstatus__current_step__step=7)
+
+                print('Updated applications for {}:'.format(applicant))
+                
+                for application in all_applications:
+                    print(self.applicant_detail_str(application))
                     application.eds_sent = True
                     application.save()
 
@@ -194,6 +202,11 @@ class Command(BaseCommand):
                         }
 
                         self.send_email('wintrust_email', 'Special event for Large Lots applicants', app.application.email, context)
+
+    def applicant_detail_str(self, application):
+        return "{0} {1} - Application ID {2}".format(application.first_name,
+                                                     application.last_name,
+                                                     application.id)
 
 
     def send_email(self, template_name, email_subject, email_to_address, context):

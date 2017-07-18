@@ -30,4 +30,4 @@ def django_db_setup(django_db_setup, django_db_blocker):
       * 4 - Lana Del Rey, EDS needed and sent (34343)
     '''
     with django_db_blocker.unblock():
-        call_command('loaddata', 'tests/test_data.json')
+        call_command('loaddata', 'lots_admin/tests/test_data.json')
