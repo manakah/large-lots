@@ -70,9 +70,9 @@ class Command(BaseCommand):
                         denied
                       FROM lots_admin_application AS app
                       JOIN lots_admin_applicationstatus AS status
-                      ON app.id=status.application_id
+                      ON app.id = status.application_id
                       JOIN lots_admin_applicationstep AS step
-                      ON status.current_step_id=step.id
+                      ON status.current_step_id = step.id
                       WHERE eds_sent = False 
                         AND denied = False
                     ) AS applicants
