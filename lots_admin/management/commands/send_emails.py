@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
+from django.db import connection
 
 from smtplib import SMTPException
 import time
@@ -45,29 +46,71 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['eds_email']:
-            application_status_objs = ApplicationStatus.objects.all()
-            id_range = options['eds_email'].split('-')
-            lower_id = int(id_range[0])
-            upper_id = int(id_range[1])
-            
-            print("Emails sent to:")
-            for app in application_status_objs:
-                if app.current_step:
-                    if app.current_step.step == 7 and app.application.eds_sent != True and app.application.id >= lower_id and app.application.id <= upper_id:
-                        # Send email
-                        context = {
-                            'app': app.application,
-                        }
-                        self.send_email('eds_email', 'LargeLots application - Economic Disclosure Statement (EDS)', app.application.email, context)
-                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
+            limit = options['eds_email']
 
-                        # Find other applications and change status
-                        related_applications = Application.objects.filter(email=app.application.email).filter(applicationstatus__current_step__step=7)
-                        print("Apps with the same email: ", related_applications)
-                        for application in related_applications:
-                            application.eds_sent = True
-                            application.save()
+            # Select only applicants whose non-denied applications
+            # are all on step 7 in order to avoid a situation where
+            # an applicant has active applications at other steps,
+            # as these will get stuck if the applicant submits an
+            # EDS prior to their reaching step 7. (The applicant
+            # will not submit another EDS, thus the endpoint to 
+            # advance the remaining applications will never be
+            # pinged.)
 
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT
+                      MIN(id) as id,
+                      email
+                    FROM (
+                      SELECT
+                        app.id,
+                        email,
+                        step,
+                        denied
+                      FROM lots_admin_application AS app
+                      JOIN lots_admin_applicationstatus AS status
+                      ON app.id = status.application_id
+                      JOIN lots_admin_applicationstep AS step
+                      ON status.current_step_id = step.id
+                      WHERE eds_sent = False 
+                        AND denied = False
+                    ) AS applicants
+                    GROUP BY email 
+                    HAVING (EVERY(step = 7))
+                    LIMIT {limit}
+                '''.format(limit=limit)
+
+                cursor.execute(query)
+
+                applicants = [(app_id, email_address) for app_id, email_address in cursor]
+
+            for app_id, email_address in applicants:
+                
+                application = Application.objects.filter(id=app_id).first()               
+                context = {'app': application}
+                self.send_email(
+                    'eds_email', 
+                    'LargeLots application - Economic Disclosure Statement (EDS)', 
+                    email_address, 
+                    context
+                )
+
+                applicant = self.applicant_detail_str(application)
+                print('Notified {}'.format(applicant))
+
+                # Set `eds_sent` = True on all applications for given applicant
+                # (since we only need one EDS per applicant)
+                active_applications = ApplicationStatus.objects\
+                                                       .filter(application__email=email_address)\
+                                                       .filter(denied=False)
+
+                print('Updated applications for {}:'.format(applicant))
+                for app in active_applications:
+                    print(self.applicant_detail_str(app.application))
+                    app.application.eds_sent = True
+                    app.application.save()
+                    
 
         if options['deed_upload']:
             applications = Application.objects.all()
@@ -191,6 +234,11 @@ class Command(BaseCommand):
                         }
 
                         self.send_email('wintrust_email', 'Special event for Large Lots applicants', app.application.email, context)
+
+    def applicant_detail_str(self, application):
+        return "{0} {1} - Application ID {2}".format(application.first_name,
+                                                     application.last_name,
+                                                     application.id)
 
 
     def send_email(self, template_name, email_subject, email_to_address, context):
