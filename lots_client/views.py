@@ -414,9 +414,10 @@ def wintrust_announcement(request):
         return response
 
 def principal_profile_form(request):
-    filename = 'lots/static/images/PrincipalProfileForm.docx'
+    filename = 'lots/static/documents/PrincipalProfileForm.pdf'
     data = open(filename, "rb").read()
-    response = HttpResponse(data, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response = HttpResponse(data, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename=PrincipalProfileForm.pdf'
     response['Content-Length'] = os.path.getsize(filename)
 
     return response
