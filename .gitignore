@@ -12,3 +12,4 @@
 .env
 /static
 local_settings.py
+.cache

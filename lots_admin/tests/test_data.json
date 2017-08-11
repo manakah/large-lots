@@ -1,0 +1,262 @@
+[
+    {
+        "model": "lots_admin.address",
+        "pk": 1,
+        "fields": {
+            "street": "4539 N Paulina",
+            "street_number": null,
+            "street_dir": null,
+            "street_name": null,
+            "street_type": null,
+            "city": "Chicago",
+            "state": "IL",
+            "zip_code": "60640",
+            "ward": null,
+            "community": null
+        }
+    },
+    {
+        "model": "lots_admin.address",
+        "pk": 2,
+        "fields": {
+            "street": "440 S LaSalle",
+            "street_number": null,
+            "street_dir": null,
+            "street_name": null,
+            "street_type": null,
+            "city": "Chicago",
+            "state": "IL",
+            "zip_code": null,
+            "ward": null,
+            "community": null
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 1,
+        "fields": {
+            "first_name": "Rivers",
+            "last_name": "Cuomo",
+            "organization": "",
+            "owned_pin": "45678",
+            "owned_address": 1,
+            "deed_image": "img/cool-deed-1.png",
+            "deed_timestamp": null,
+            "contact_address": 1,
+            "phone": "312-675-3463",
+            "email": "weezerules@yahoo.com",
+            "how_heard": "really big headphones",
+            "tracking_id": "db92f88c-64f8-4cbf-95fe-2420c36c13a3",
+            "received_date": "2017-07-17T14:34:23.075",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 2,
+        "fields": {
+            "first_name": "Rivers",
+            "last_name": "Cuomo",
+            "organization": "",
+            "owned_pin": "45678",
+            "owned_address": 1,
+            "deed_image": "img/cool-deed-1.png",
+            "deed_timestamp": null,
+            "contact_address": 1,
+            "phone": "312-675-3463",
+            "email": "weezerules@yahoo.com",
+            "how_heard": "really big headphones",
+            "tracking_id": "db92f88c-64f8-4cbf-95fe-2420c36c13a3",
+            "received_date": "2017-07-17T14:34:23.075",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 3,
+        "fields": {
+            "first_name": "Robin",
+            "last_name": "Peckinold",
+            "organization": "",
+            "owned_pin": "12345",
+            "owned_address": 2,
+            "deed_image": "img/montezuma.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "302-123-4567",
+            "email": "fleetfoxesfanclub@yahoo.com",
+            "how_heard": "pitchfork dot com",
+            "tracking_id": "fc8be17e-9f58-4f4c-b403-caa3cfb2b995",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 4,
+        "fields": {
+            "first_name": "Lana",
+            "last_name": "Del Rey",
+            "organization": "",
+            "owned_pin": "09876",
+            "owned_address": 1,
+            "deed_image": "img/kiss-kiss.png",
+            "deed_timestamp": null,
+            "contact_address": 1,
+            "phone": "987-324-8792",
+            "email": "natlanthemmm@gmail.com",
+            "how_heard": "bulletin board",
+            "tracking_id": "7370eab5-4e16-4648-89e3-f2cfcf139ac5",
+            "received_date": "2017-07-17T14:34:23.075",
+            "pilot": "3",
+            "eds_sent": true
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 5,
+        "fields": {
+            "first_name": "Karen",
+            "last_name": "Oh",
+            "organization": "",
+            "owned_pin": "12345",
+            "owned_address": 2,
+            "deed_image": "img/yayaya.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "302-123-4567",
+            "email": "goldlion@hotmail.com",
+            "how_heard": "the year 2004",
+            "tracking_id": "cffd359c-af8b-4286-8ac9-9a33748a9f9c",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 6,
+        "fields": {
+            "first_name": "Karen",
+            "last_name": "Oh",
+            "organization": "",
+            "owned_pin": "12345",
+            "owned_address": 2,
+            "deed_image": "img/yayaya.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "302-123-4567",
+            "email": "goldlion@hotmail.com",
+            "how_heard": "the year 2004",
+            "tracking_id": "09328127-fa9a-4979-a0bc-09734c91737c",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.lot",
+        "pk": "34343",
+        "fields": {
+            "address": 2,
+            "planned_use": null,
+            "application": []
+        }
+    },
+    {
+        "model": "lots_admin.lot",
+        "pk": "13131",
+        "fields": {
+            "address": 1,
+            "planned_use": null,
+            "application": []
+        }
+    },
+    {
+        "model": "lots_admin.applicationstep",
+        "pk": 1,
+        "fields": {
+            "description": "Alderman letter of support",
+            "public_status": "valid",
+            "step": 6
+        }
+    },
+    {
+        "model": "lots_admin.applicationstep",
+        "pk": 2,
+        "fields": {
+            "description": "Wait for applicant to submit EDS and principal profile",
+            "public_status": "valid",
+            "step": 7
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 1,
+        "fields": {
+            "denied": false,
+            "application": 1,
+            "lot": "34343",
+            "current_step": 2,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 2,
+        "fields": {
+            "denied": false,
+            "application": 2,
+            "lot": "13131",
+            "current_step": 2,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 3,
+        "fields": {
+            "denied": false,
+            "application": 3,
+            "lot": "34343",
+            "current_step": 1,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 4,
+        "fields": {
+            "denied": false,
+            "application": 4,
+            "lot": "34343",
+            "current_step": 2,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 5,
+        "fields": {
+            "denied": true,
+            "application": 5,
+            "lot": "34343",
+            "current_step": 1,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 6,
+        "fields": {
+            "denied": false,
+            "application": 6,
+            "lot": "13131",
+            "current_step": 2,
+            "lottery": false
+        }
+    }
+]
