@@ -1,0 +1,18 @@
+{% load lots_filters %}
+
+<table class="table table-striped">
+  <thead>
+    <th class="no-wrap">Address</th>
+    <th>Lot number</th>
+    <th></th>
+  </thead>
+  <tbody>
+      {% for lot in lots_list %}
+        <tr>
+          <td>{{ lot.address }}</td>
+          <td>{{ lot.pin | make_display_pin }}</td>
+          <td><a href="{% url 'lottery' lot.pin %}" class="btn btn-success">Run lottery</a></td>
+        </tr>
+      {% endfor %}
+  </tbody>
+</table>

@@ -710,7 +710,7 @@ def multiple_location_check_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def lotteries(request):
     # Get all applications that will go to lottery.
-    applications = ApplicationStatus.objects.filter(current_step__step=6).order_by('application__last_name')
+    applications = ApplicationStatus.objects.filter(current_step__step=6).filter(lottery=True).order_by('application__last_name')
     applications_list = list(applications)
     # Get all lots.
     lots = []
@@ -718,16 +718,22 @@ def lotteries(request):
         lots.append(a.lot)
     # Deduplicate applied_pins array.
     lots_list = list(set(lots))
+    lots_list_sorted = sorted(lots_list, key=lambda lot: lot.pin)
 
+    # Break into morning and afternoon groups. 
+    pin_boundary = 20081180210000
+    lots_morning = [lot for lot in lots_list_sorted if int(lot.pin) <= pin_boundary]
+    lots_afternoon = [lot for lot in lots_list_sorted if int(lot.pin) > pin_boundary]
     return render(request, 'lotteries.html', {
-        'lots_list': lots_list,
+        'lots_morning': lots_morning,
+        'lots_afternoon': lots_afternoon,
         })
 
 @login_required(login_url='/lots-login/')
 def lottery(request, lot_pin):
     lot = Lot.objects.get(pin=lot_pin)
 
-    applications = ApplicationStatus.objects.filter(current_step__step=6).filter(lot=lot_pin).order_by('application__last_name')
+    applications = ApplicationStatus.objects.filter(current_step__step=6).filter(lottery=True).filter(lot=lot_pin).order_by('application__last_name')
     applications_list = list(applications)
 
     return render(request, 'lottery.html', {
