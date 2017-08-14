@@ -11,9 +11,9 @@ def django_db_setup(django_db_setup, django_db_blocker):
     ------------+-----------+-----------------------------+----------+------+--------
      Rivers     | Cuomo     | weezerules@yahoo.com        | f        |    7 | f
      Rivers     | Cuomo     | weezerules@yahoo.com        | f        |    7 | f
-     Robin      | Peckinold | fleetfoxesfanclub@yahoo.com | f        |    6 | f
+     Robin      | Peckinold | fleetfoxesfanclub@yahoo.com | f        |    5 | f
      Lana       | Del Rey   | natlanthemmm@gmail.com      | t        |    7 | f
-     Karen      | Oh        | goldlion@hotmail.com        | f        |    6 | t
+     Karen      | Oh        | goldlion@hotmail.com        | f        |    5 | t
      Karen      | Oh        | goldlion@hotmail.com        | f        |    7 | f
     '''
     with django_db_blocker.unblock():

@@ -92,6 +92,7 @@ class ApplicationStatus(models.Model):
     lot = models.ForeignKey('Lot', blank=True, null=True)
     current_step = models.ForeignKey('ApplicationStep', blank=True, null=True)
     lottery = models.BooleanField(default=False)
+    lottery_email_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.application) + " " + str(self.lot)

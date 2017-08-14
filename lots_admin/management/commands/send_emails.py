@@ -19,8 +19,8 @@ class Command(BaseCommand):
         parser.add_argument('--lotto_email',
                             help='Send email with notification of lottery. Use one of two arguments: morning or afternoon.')
 
-        parser.add_argument('--lotto_limit',
-                            help='Set application limit.')
+        parser.add_argument('--lotto_offset',
+                            help='Set SQL offset.')
 
         parser.add_argument('--eds_email',
                             help='Send email with link to complete EDS')
@@ -53,7 +53,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['lotto_email']:
             time = options['lotto_email']
-            limit = options['lotto_limit']
+            limit = options['lotto_offset']
 
             if time == 'morning':
                 comparator = '<='
@@ -80,22 +80,24 @@ class Command(BaseCommand):
 
             with connection.cursor() as cursor:
                 query = '''
-                    SELECT status.application_id, status.lot_id, email 
+                    SELECT status.id, status.lot_id, email 
                     FROM lots_admin_applicationstatus as status
                     JOIN lots_admin_applicationstep as step
                     ON status.current_step_id=step.id
                     JOIN lots_admin_application as app
                     ON app.id=status.application_id
                     WHERE step=6
+                    AND status.lottery_email_sent = False
                     AND status.lot_id {comparator} '{lot_id}'
                     ORDER BY status.lot_id
                 '''.format(comparator=comparator, lot_id=lot_id)
 
                 cursor.execute(query)
-                applicants = [(app_id, lot_id, email_address) for app_id, lot_id, email_address in cursor]
+                applicants = [(status_id, lot_id, email_address) for status_id, lot_id, email_address in cursor]
 
-            for app_id, lot_id, email_address in applicants:
-                application = Application.objects.get(id=app_id)
+            for status_id, lot_id, email_address in applicants:
+                status = ApplicationStatus.objects.get(id=status_id)
+                application = Application.objects.get(id=status.application_id)
                 lot = Lot.objects.get(pin=lot_id)              
                 context = {'app': application, 
                            'lot': lot}
@@ -105,6 +107,9 @@ class Command(BaseCommand):
                     email_address, 
                     context
                 )
+
+                status.lottery_email_sent = True
+                status.save()
 
                 applicant = self.applicant_detail_str(application)
                 print('Notified {}'.format(applicant))
