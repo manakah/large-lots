@@ -215,7 +215,7 @@
         "pk": 8,
         "fields": {
             "first_name": "Nathalie",
-            "last_name": "Stutzmann.",
+            "last_name": "Stutzmann",
             "organization": "",
             "owned_pin": "987654",
             "owned_address": 2,

@@ -44,10 +44,23 @@ Navigate to [http://localhost:8000/](http://localhost:8000/).
 We have a management command that facilitates sending emails in bulk. It takes several arguments, including an option to send emails to applicants needing to complete the Economic Disclosure Statement:
 
 ```bash
-python manage.py send_emails --eds_email=1-25
+python manage.py send_emails --eds_email=87
 ```
 
-The arguments after `--eds_email` refer to the range of applications who should receive emails. It is inclusive, i.e., in the above example, applicants 1 and 25 would receive emails.
+The arguments after `--eds_email` refer to the number of applications who should receive emails.
+
+## Testing
+
+Export your settings:
+
+```bash
+export DJANGO_SETTINGS_MODULE=lots_admin.tests.test_config
+```
+
+Run the tests:
+```bash
+pytest lots_admin/tests
+```
 
 ## Data
 

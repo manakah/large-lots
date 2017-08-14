@@ -53,16 +53,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['lotto_email']:
             time = options['lotto_email']
-            limit = options['lotto_offset']
+            offset = int(options['lotto_offset']) - 1
 
             if time == 'morning':
                 comparator = '<='
             if time == 'afternoon':
                 comparator = '>' 
 
-            # We will schedule the first 85 lotteries for the morning, 
-            # and the remaining 73 for the afternoon.
-            # When limit is 84, the query retrieves the 85th row. 
+            # This query grabs the lot pin, which lies at a specified mid-way point, e.g.,
+            # if we want to notify the applicants who applied to the first 85 lots (in ascending order),
+            # then the offset will be 84.  
             with connection.cursor() as cursor:
                 query = '''
                     SELECT lot_id
@@ -72,8 +72,8 @@ class Command(BaseCommand):
                     WHERE step=6
                     GROUP BY lot_id
                     ORDER BY lot_id ASC
-                    LIMIT 1 OFFSET {limit}
-                '''.format(limit=limit)
+                    LIMIT 1 OFFSET {offset}
+                '''.format(offset=offset)
 
                 cursor.execute(query)
                 lot_id = cursor.fetchone()[0]
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                 context = {'app': application, 
                            'lot': lot}
                 self.send_email(
-                    'lottery_notification', 
+                    'lottery_notification_{}'.format(time), 
                     'LargeLots application - Lottery', 
                     email_address, 
                     context
