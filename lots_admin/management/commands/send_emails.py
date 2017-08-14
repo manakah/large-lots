@@ -8,14 +8,20 @@ from smtplib import SMTPException
 import time
 from datetime import datetime
 
-from lots_admin.models import Application, ApplicationStatus, Review, DenialReason, User
+from lots_admin.models import Application, ApplicationStatus, Review, DenialReason, User, Lot
 from lots_admin.look_ups import DENIAL_REASONS
 
 class Command(BaseCommand):
-    help = 'Send emails to applicants who need to resubmit deeds'
+    help = 'Send bulk emails to Large Lots applicants'
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--lotto_email',
+                            help='Send email with notification of lottery. Use one of two arguments: morning or afternoon.')
+
+        parser.add_argument('--lotto_offset',
+                            help='Set SQL offset.')
+
         parser.add_argument('--eds_email',
                             help='Send email with link to complete EDS')
 
@@ -45,6 +51,69 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['lotto_email']:
+            time = options['lotto_email']
+            offset = int(options['lotto_offset']) - 1
+
+            if time == 'morning':
+                comparator = '<='
+            if time == 'afternoon':
+                comparator = '>' 
+
+            # This query grabs the lot pin, which lies at a specified mid-way point, e.g.,
+            # if we want to notify the applicants who applied to the first 85 lots (in ascending order),
+            # then the offset will be 84.  
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT DISTINCT lot_id
+                    FROM lots_admin_applicationstatus as status
+                    JOIN lots_admin_applicationstep as step
+                    ON status.current_step_id=step.id
+                    WHERE step=6
+                    ORDER BY lot_id
+                    LIMIT 1 OFFSET {offset}
+                '''.format(offset=offset)
+
+                cursor.execute(query)
+                lot_id = cursor.fetchone()[0]
+
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT status.id, status.lot_id, email 
+                    FROM lots_admin_applicationstatus as status
+                    JOIN lots_admin_applicationstep as step
+                    ON status.current_step_id=step.id
+                    JOIN lots_admin_application as app
+                    ON app.id=status.application_id
+                    WHERE step=6
+                    AND status.lottery_email_sent = False
+                    AND status.lot_id {comparator} '{lot_id}'
+                    ORDER BY status.lot_id
+                '''.format(comparator=comparator, lot_id=lot_id)
+
+                cursor.execute(query)
+                applicants = [(status_id, lot_id, email_address) for status_id, lot_id, email_address in cursor]
+
+            for status_id, lot_id, email_address in applicants:
+                status = ApplicationStatus.objects.get(id=status_id)
+                application = Application.objects.get(id=status.application_id)
+                lot = Lot.objects.get(pin=lot_id)              
+                context = {'app': application, 
+                           'lot': lot}
+                self.send_email(
+                    'lottery_notification_{}'.format(time), 
+                    'LargeLots application - Lottery', 
+                    email_address, 
+                    context
+                )
+
+                status.lottery_email_sent = True
+                status.save()
+
+                applicant = self.applicant_detail_str(application)
+                print('Notified {}'.format(applicant))
+
+
         if options['eds_email']:
             limit = options['eds_email']
 

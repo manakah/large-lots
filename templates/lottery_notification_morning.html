@@ -1,0 +1,30 @@
+{% load lots_filters %}
+<div class="row">
+    <div class="col-md-12">
+        <a id='logo' href="http://largelots.org">
+        <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>Dear {{ app.first_name }},</p>
+        <p>The following lot you applied for through the Large Lot Program will be included in the lottery.</p>
+        <p>
+            <strong>Lot address:</strong> {{ lot.address.street }}<br />
+            <strong>Lot PIN:</strong> #{{ lot.pin }}
+        </p>
+        <p>Just a reminder, a lottery is triggered when more than one application was received for a lot. The Large Lot Program does give priority to the adjacent property owner if they applied and in instances where both adjacent property owners applied, a lottery is also held. DPD will be hosting this lottery on <strong>Monday, August 28th at 9:30 am in the City Hall (121 N. LaSalle St) 11th floor, 1103 conference room.</strong></p>
+        <p>You do not need to be present for the lottery. You will be informed of the results on Tuesday, August 30th. If you do attend, please anticipate the event lasting several hours.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>Feel free to email me if you have any questions.</p>
+        <p>Best,</p>
+        <p>
+           Jeanne Chandler, Department of Planning and Development<br />
+           Jeanne.Chandler@cityofchicago.org
+        </p>
+    </div>
+</div>

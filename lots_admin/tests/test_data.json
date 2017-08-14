@@ -32,6 +32,38 @@
         }
     },
     {
+        "model": "lots_admin.address",
+        "pk": 3,
+        "fields": {
+            "street": "1140 S Mozart St",
+            "street_number": null,
+            "street_dir": null,
+            "street_name": null,
+            "street_type": null,
+            "city": "Chicago",
+            "state": "IL",
+            "zip_code": "60612",
+            "ward": null,
+            "community": null
+        }
+    },
+    {
+        "model": "lots_admin.address",
+        "pk": 4,
+        "fields": {
+            "street": "1137 S Mozart St",
+            "street_number": null,
+            "street_dir": null,
+            "street_name": null,
+            "street_type": null,
+            "city": "Chicago",
+            "state": "IL",
+            "zip_code": "60612",
+            "ward": null,
+            "community": null
+        }
+    },
+    {
         "model": "lots_admin.application",
         "pk": 1,
         "fields": {
@@ -158,6 +190,48 @@
         }
     },
     {
+        "model": "lots_admin.application",
+        "pk": 7,
+        "fields": {
+            "first_name": "Barbara",
+            "last_name": "Hannigan",
+            "organization": "",
+            "owned_pin": "234567",
+            "owned_address": 2,
+            "deed_image": "img/hahaha.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "999-888-1234",
+            "email": "berio@aol.com",
+            "how_heard": "paper flyer",
+            "tracking_id": "b0df4483-60b2-4920-820e-22e2f14ed3ca",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
+        "model": "lots_admin.application",
+        "pk": 8,
+        "fields": {
+            "first_name": "Nathalie",
+            "last_name": "Stutzmann",
+            "organization": "",
+            "owned_pin": "987654",
+            "owned_address": 2,
+            "deed_image": "img/lalala.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "234-432-9999",
+            "email": "cesare@aol.com",
+            "how_heard": "best friend",
+            "tracking_id": "7d6ad284-a338-4711-943c-8268fa005b6a",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
         "model": "lots_admin.lot",
         "pk": "34343",
         "fields": {
@@ -176,12 +250,30 @@
         }
     },
     {
+        "model": "lots_admin.lot",
+        "pk": "56565",
+        "fields": {
+            "address": 3,
+            "planned_use": null,
+            "application": []
+        }
+    },
+    {
+        "model": "lots_admin.lot",
+        "pk": "78787",
+        "fields": {
+            "address": 4,
+            "planned_use": null,
+            "application": []
+        }
+    },
+    {
         "model": "lots_admin.applicationstep",
         "pk": 1,
         "fields": {
             "description": "Alderman letter of support",
             "public_status": "valid",
-            "step": 6
+            "step": 5
         }
     },
     {
@@ -191,6 +283,15 @@
             "description": "Wait for applicant to submit EDS and principal profile",
             "public_status": "valid",
             "step": 7
+        }
+    },
+    {
+        "model": "lots_admin.applicationstep",
+        "pk": 3,
+        "fields": {
+            "description": "Lottery",
+            "public_status": "valid",
+            "step": 6
         }
     },
     {
@@ -257,6 +358,39 @@
             "lot": "13131",
             "current_step": 2,
             "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 7,
+        "fields": {
+            "denied": false,
+            "application": 7,
+            "lot": "56565",
+            "current_step": 3,
+            "lottery": true
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 8,
+        "fields": {
+            "denied": false,
+            "application": 7,
+            "lot": "78787",
+            "current_step": 3,
+            "lottery": true
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 9,
+        "fields": {
+            "denied": false,
+            "application": 8,
+            "lot": "56565",
+            "current_step": 3,
+            "lottery": true
         }
     }
 ]
