@@ -65,13 +65,12 @@ class Command(BaseCommand):
             # then the offset will be 84.  
             with connection.cursor() as cursor:
                 query = '''
-                    SELECT lot_id
+                    SELECT DISTINCT lot_id
                     FROM lots_admin_applicationstatus as status
                     JOIN lots_admin_applicationstep as step
                     ON status.current_step_id=step.id
                     WHERE step=6
-                    GROUP BY lot_id
-                    ORDER BY lot_id ASC
+                    ORDER BY lot_id
                     LIMIT 1 OFFSET {offset}
                 '''.format(offset=offset)
 
