@@ -1,0 +1,29 @@
+{% load lots_filters %}
+<div class="row">
+    <div class="col-md-12">
+        <a id='logo' href="http://largelots.org">
+        <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>Dear {{ app.first_name }},</p>
+        <p>The following lot you applied for through the Large Lot Program won the lottery!</p>
+        <p>
+            <strong>Lot address:</strong> {{ lot.address.street }}<br />
+            <strong>Lot PIN:</strong> #{{ lot.pin }}
+        </p>
+        <p>The City will soon send you more information about next steps.</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <p>Congratulations, and feel free to email me if you have any questions.</p>
+        <p>Best,</p>
+        <p>
+           Jeanne Chandler, Department of Planning and Development<br />
+           Jeanne.Chandler@cityofchicago.org
+        </p>
+    </div>
+</div>
