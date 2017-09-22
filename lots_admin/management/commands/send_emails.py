@@ -16,6 +16,10 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--eds_final_email',
+                            action='store_true',
+                            help='Send email to all applicants on Step 7.')
+
         parser.add_argument('--lotto_winner_email',
                             action='store_true',
                             help='Send email to winners of the lottery.')
@@ -55,6 +59,49 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['eds_final_email']:
+            # Send final notice email to all applicants on Step 7.
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT
+                      MIN(id) as id,
+                      email
+                    FROM (
+                      SELECT
+                        app.id,
+                        email,
+                        step,
+                        denied
+                      FROM lots_admin_application AS app
+                      JOIN lots_admin_applicationstatus AS status
+                      ON app.id = status.application_id
+                      JOIN lots_admin_applicationstep AS step
+                      ON status.current_step_id = step.id
+                      WHERE denied = False
+                      AND step = 7
+                    ) AS applicants
+                    GROUP BY email 
+                '''
+
+                cursor.execute(query)
+
+                applicants = [(app_id, email_address) for app_id, email_address in cursor]
+
+            for app_id, email_address in applicants:
+                
+                application = Application.objects.filter(id=app_id).first()               
+                context = {'app': application}
+                self.send_email(
+                    'eds_email', 
+                    'LargeLots application - Economic Disclosure Statement (EDS)', 
+                    email_address, 
+                    context
+                )
+
+                applicant = self.applicant_detail_str(application)
+                print('Notified {}'.format(applicant))
+
+
         if options['lotto_winner_email']:
             with connection.cursor() as cursor:
                 query = '''
