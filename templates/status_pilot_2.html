@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% block title %}Application status{% endblock %}
 {% block extra_css %}
-    <style id="egp-styles">
+    <style id="map-styles">
       #egp_parcels {
         polygon-fill: #6ac682;
         polygon-opacity: 0.7;
@@ -71,6 +71,20 @@
           </div>
         </div>
       </div>
+
+       <!-- Modal -->
+      <div class="modal fade" id="modalGeocode" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-body">
+              <p><strong id='addr_search_modal'></strong> is not in the Large Lots program area. Please try again.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">OK, thanks</button>
+            </div>
+          </div>
+        </div>
+      </div>
 {% endblock %}
 {% block extra_js %}
     <script type="infowindow/html" id="infowindow_template">
@@ -93,19 +107,17 @@
     <script src="https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"></script>
     <script src="{% static 'js/lib/leaflet.label.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/lib/leaflet-google.js' %}" ></script>
-    <script src="{% static 'js/largelots_status.js' %}"></script>
+    // <script src="{% static 'js/largelots_mapmaker.js' %}"></script>
 
     <script>
       $(function() {
         var init_params = {
             map_centroid: [41.8787248907554, -87.7055433591891],
-            boundaryCartocss: '#east_garfield_park{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}',
-            parcelsCartocss: $('#egp-styles').html().trim(),
             defaultZoom: 14,
-            tableName: 'egp_parcels',
+            cartodb_table: 'egp_parcels',
             mainWhere: " where status = 3",
             overlayName: "chicago_community_areas WHERE community = 'EAST GARFIELD PARK'",
-            fields: "pin14,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
+            fields: "pin_nbr,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
         }
         LargeLots.initialize(init_params);
       });
