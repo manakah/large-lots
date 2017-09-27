@@ -271,18 +271,6 @@ def apply_confirm(request, tracking_id):
     lots = [l for l in app.lot_set.all()]
     return render(request, 'apply_confirm.html', {'app': app, 'lots': lots})
 
-# def status_pilot_1(request):
-#     return render(request, 'status_pilot_1.html')
-
-# def status_pilot_2(request):
-#     return render(request, 'status_pilot_2.html')
-
-# def status_pilot_3(request):
-#     return render(request, 'status_pilot_3.html')
-
-# def status_pilot_4(request):
-#     return render(request, 'status_pilot_4.html')
-
 def faq(request):
     return render(request, 'faq.html')
 

@@ -4,7 +4,6 @@ from lots_client.views import home, apply_confirm, faq, about, lot_uses_page, lo
     get_pin_from_address, deed_upload, upload_confirm, \
     wintrust_invitation, wintrust_announcement, \
     principal_profile_form, eds_submission
-    # status_pilot_1, status_pilot_2, \
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
@@ -21,9 +20,6 @@ admin.autodiscover()
 urlpatterns = [
     # Examples:
     url(r'^$', home, name='home'),
-    # url(r'^status/$', RedirectView.as_view(url='/status/pilot_1', permanent=False), name='status'),
-    # url(r'^status/pilot_2$', status_pilot_2, name='status_pilot_2'),
-    # url(r'^status/pilot_1$', status_pilot_1, name='status_pilot_1'),
     url(r'^apply/$', apply, name='apply'),
     url(r'^apply-confirm/(?P<tracking_id>\S+)/$', apply_confirm, name='apply_confirm'),
     url(r'^faq/$', faq, name='faq'),
