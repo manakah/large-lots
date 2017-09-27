@@ -84,6 +84,7 @@ var LargeLots = {
       if (LargeLots.mainWhere){
           mainSQL = mainSQL + LargeLots.mainWhere;
       }
+
       var layerOpts = {
           user_name: 'datamade',
           type: 'cartodb',
@@ -98,6 +99,7 @@ var LargeLots = {
                   cartocss: LargeLots.boundaryCartocss
               }]
       }
+
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
