@@ -16,6 +16,7 @@ var LargeLots = {
       LargeLots.mainWhere = init_params.mainWhere;
       LargeLots.overlayName = init_params.overlayName;
       LargeLots.fields = init_params.fields;
+      LargeLots.sublayer = init_params.sublayer;
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('map', {
@@ -89,15 +90,11 @@ var LargeLots = {
                   cartocss: $('#map-styles').html().trim(),
                   interactivity: LargeLots.fields
               },
-              // Uncomment this: to add 'purple' parcels to the map, indicating properties already requested.
-              // {
-              //     sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
-              //     cartocss: $('#map-styles-applied').html().trim(),
-              // },
               {
                   sql: "select * from " +  LargeLots.overlayName,
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
-              }
+              },
+              LargeLots.sublayer,
           ]
       }
 
@@ -117,17 +114,25 @@ var LargeLots = {
             LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
                 LargeLots.getOneParcel(data['pin_nbr']);
             });
-            window.setTimeout(function(){
-                if($.address.parameter('pin')){
-                    LargeLots.getOneParcel($.address.parameter('pin'))
-                }
-            }, 1000)
+
+            if($("#search_address").length != 0) {
+              window.setTimeout(function(){
+                  if($.address.parameter('pin')){
+                      LargeLots.getOneParcel($.address.parameter('pin'))
+                  }
+              }, 1000)
+            };
+
         }).error(function(e) {
         console.log('ERROR')
         console.log(e)
       });
-      $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
-      LargeLots.addressSearch();
+
+      if($("#search_address").length != 0) {
+        $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
+        LargeLots.addressSearch();
+      };
+
       $('.toggle-parcels').on('click', function(e){
           if($(e.target).is(':checked')){
               $(e.target).prop('checked', true)
@@ -135,7 +140,7 @@ var LargeLots = {
               $(e.target).prop('checked', false);
           }
           LargeLots.toggleParcels()
-      })
+      });
   },
 
   toggleParcels: function(){

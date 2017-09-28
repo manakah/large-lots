@@ -106,7 +106,8 @@
             mainWhere: " where status = 3",
             // Create the boundary layer (one of the Carto sublayers)
             overlayName: " chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
-            fields: "pin_nbr,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft"
+            fields: "pin_nbr,zoning_classification,ward,street_name,street_dir,street_number,street_type,status,sq_ft",
+            sublayer: {}
         }
         LargeLots.initialize(init_params);
       });
