@@ -198,7 +198,6 @@ var LargeLots = {
   },
 
   getOneParcel: function(pin_nbr){
-      console.log(pin_nbr)
       if (LargeLots.lastClickedLayer){
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
