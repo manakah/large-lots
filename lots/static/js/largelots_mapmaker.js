@@ -93,9 +93,12 @@ var LargeLots = {
               {
                   sql: "select * from " +  LargeLots.overlayName,
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc;polygon-opacity: 0.25;line-color: #FFF;line-width: 3;line-opacity: 1;}"
-              },
-              LargeLots.sublayer,
+              }
           ]
+      }
+
+      if (LargeLots.sublayer) {
+        layerOpts.sublayers.push(LargeLots.sublayer)
       }
 
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
@@ -195,6 +198,7 @@ var LargeLots = {
   },
 
   getOneParcel: function(pin_nbr){
+      console.log(pin_nbr)
       if (LargeLots.lastClickedLayer){
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
