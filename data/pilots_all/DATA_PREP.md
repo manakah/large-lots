@@ -10,4 +10,8 @@ Then, request a list of all properties sold in previous pilots from the Departme
 
 Finally, run the Makefile. It will accomplish two things: (1) create a table in your postgres database called `lots_sold_all_pilots`, and (2) query your database to create a Carto-friendly CSV file with lot PINs, addresses, communities, wards, and geoms.
 
-Look inside `pilots_all/processed` to see the newly generated file. You are ready to upload it to Carto!
+Look inside `pilots_all/processed` to find the newly generated file, and upload it to Carto!
+
+
+
+
