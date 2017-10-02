@@ -37,7 +37,7 @@ var SCALE_SELECT_PADDING = 22;
 var PAGE_NUMBER_LOADING_INDICATOR = 'visiblePageIsLoading';
 
 PDFJS.imageResourcesPath = '/static/css/images/';
-  PDFJS.workerSrc = '/static/js/pdf.worker.js';
+  PDFJS.workerSrc = '/static/js/lib/pdf.worker.js';
   PDFJS.cMapUrl = '/static/cmaps/';
   PDFJS.cMapPacked = true;
 
