@@ -26,11 +26,15 @@ all_sold_lots.csv:
 				ST_AsGeoJSON(ST_transform(pins.geom, 4326)) as the_geom, \
 				low_address, high_address, street_direction, street_name, street_type, \
         community, ward, status \
-        FROM (SELECT pin14, \"PIN number\" as pin, status, parcel.geom as geom, \"Lot Address\" as full_address from parcel \
+        FROM (SELECT pin14, \"PIN number\" as pin, status, \
+        	parcel.geom as geom, \"Lot Address\" as full_address \
+        	FROM parcel \
           JOIN lots_sold_all_pilots \
           ON trim(replace(\"PIN number\", '-', ''))=parcel.pin14 \
           UNION \
-          SELECT pin14, \"PIN number\" as pin, status, parcel.geom as geom, \"Lot Address\" as full_address from parcel \
+          SELECT pin14, \"PIN number\" as pin, status, \
+          parcel.geom as geom, \"Lot Address\" as full_address \
+          FROM parcel \
           JOIN lots_sold_all_pilots \
           ON trim(replace(\"PIN number\", '-', ''))=parcel.pin10 \
       ) as pins \
