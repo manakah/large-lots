@@ -1,4 +1,6 @@
 # Variables
+VPATH=raw:processed
+# Be sure that PG_DB matches the postgres database from which the Makefile will do its business.
 PG_DB=lis
 SOLD_LOTS=raw/Large\ Lot\ Sold\ GHN\ EGP\ and\ Austin\ Roseland\ and\ Auburn\ Gresham.csv
 
@@ -19,7 +21,7 @@ lots_sold_all_pilots.table: $(SOLD_LOTS)
 	touch processed/$@
 
 # Query database and make a csv
-all_sold_lots.csv: processed/lots_sold_all_pilots.table
+all_sold_lots.csv: lots_sold_all_pilots.table
 	psql -d $(PG_DB) -c \
 	"COPY (SELECT \
 		pin14 as pin_nbr, pins.pin, \
