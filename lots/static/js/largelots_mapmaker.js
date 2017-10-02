@@ -8,6 +8,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
+  allLayers: 'banana',
 
   initialize: function(init_params) {
       LargeLots.map_centroid = init_params.map_centroid;
@@ -101,6 +102,25 @@ var LargeLots = {
         layerOpts.sublayers.push(LargeLots.sublayer)
       }
 
+      LargeLots.createCartoLayer(layerOpts);
+
+      if($("#search_address").length != 0) {
+        $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
+        LargeLots.addressSearch();
+      };
+
+      $('.toggle-parcels').on('click', function(e){
+          if($(e.target).is(':checked')){
+              $(e.target).prop('checked', true)
+          } else {
+              $(e.target).prop('checked', false);
+          }
+          LargeLots.toggleParcels()
+      });
+  },
+
+
+  createCartoLayer: function(layerOpts) {
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
@@ -129,20 +149,6 @@ var LargeLots = {
         }).error(function(e) {
         console.log('ERROR')
         console.log(e)
-      });
-
-      if($("#search_address").length != 0) {
-        $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
-        LargeLots.addressSearch();
-      };
-
-      $('.toggle-parcels').on('click', function(e){
-          if($(e.target).is(':checked')){
-              $(e.target).prop('checked', true)
-          } else {
-              $(e.target).prop('checked', false);
-          }
-          LargeLots.toggleParcels()
       });
   },
 
@@ -204,14 +210,18 @@ var LargeLots = {
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
       sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr = {{pin_nbr}}::VARCHAR', {pin_nbr:pin_nbr})
         .done(function(data){
-            var shape = data.features[0];
-            LargeLots.lastClickedLayer = L.geoJson(shape);
-            LargeLots.lastClickedLayer.addTo(LargeLots.map);
-            LargeLots.lastClickedLayer.setStyle({fillColor:'#f7fcb9', weight: 2, fillOpacity: 1, color: '#000'});
-            LargeLots.map.setView(LargeLots.lastClickedLayer.getBounds().getCenter(), 17);
-            LargeLots.selectParcel(shape.properties);
+          LargeLots.createParcelShape(data);
         }).error(function(e){console.log(e)});
       window.location.hash = 'browse';
+  },
+
+  createParcelShape: function(data){
+    var shape = data.features[0];
+    LargeLots.lastClickedLayer = L.geoJson(shape);
+    LargeLots.lastClickedLayer.addTo(LargeLots.map);
+    LargeLots.lastClickedLayer.setStyle({fillColor:'#f7fcb9', weight: 2, fillOpacity: 1, color: '#000'});
+    LargeLots.map.setView(LargeLots.lastClickedLayer.getBounds().getCenter(), 17);
+    LargeLots.selectParcel(shape.properties);
   },
 
   selectParcel: function (props){

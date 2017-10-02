@@ -105,11 +105,75 @@
             sublayer: {
                 sql: "select * from all_sold_lots",
                 cartocss: $('#map-styles-sold').html().trim(),
-                interactivity: 'pin, pin_nbr, full_address, ward, community',
+                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community',
             }
         }
 
+        // Overwrite object functions, before initializing
+        LargeLots.createCartoLayer = function(layerOpts) {
+          cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
+              .addTo(LargeLots.map)
+              .done(function(layer) {
+                    for (var i = 0; i < layer.getSubLayerCount(); i++) {
+                      layerOpts[i] = layer.getSubLayer(i);
+                      layerOpts[i].setInteraction(true);
+
+                      layerOpts[i].on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
+                          $('#map div').css('cursor','pointer');
+                          LargeLots.info.update(data);
+                      });
+                      layerOpts[i].on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
+                          $('#map div').css('cursor','inherit');
+                          LargeLots.info.clear();
+                      });
+                      layerOpts[i].on('featureClick', function(e, pos, latlng, data){
+                          LargeLots.getOneParcel(data['pin_nbr']);
+                      });
+
+                    }
+                  // LargeLots.soldLayer = layer.getSubLayer(2);
+                  // LargeLots.soldLayer.setInteraction(true);
+                  // LargeLots.soldLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
+                  //     $('#map div').css('cursor','pointer');
+                  //     LargeLots.info.update(data);
+                  // });
+                  // LargeLots.soldLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
+                  //     $('#map div').css('cursor','inherit');
+                  //     LargeLots.info.clear();
+                  // });
+                  // LargeLots.soldLayer.on('featureClick', function(e, pos, latlng, data){
+                  //     LargeLots.getOneParcel(data['pin_nbr']);
+                  // });
+
+                  // LargeLots.lotsLayer = layer.getSubLayer(0);
+                  // LargeLots.lotsLayer.setInteraction(true);
+                  // LargeLots.lotsLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
+                  //     $('#map div').css('cursor','pointer');
+                  //     LargeLots.info.update(data);
+                  // });
+                  // LargeLots.lotsLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
+                  //     $('#map div').css('cursor','inherit');
+                  //     LargeLots.info.clear();
+                  // });
+                  // LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
+                  //     LargeLots.getOneParcel(data['pin_nbr']);
+                  // });
+
+                  if($("#search_address").length != 0) {
+                    window.setTimeout(function(){
+                        if($.address.parameter('pin')){
+                            LargeLots.getOneParcel($.address.parameter('pin'))
+                        }
+                    }, 1000)
+                  };
+              }).error(function(e) {
+              console.log('ERROR')
+              console.log(e)
+            });
+        };
+
         LargeLots.initialize(init_params);
+
       });
 
       var autocomplete = new google.maps.places.Autocomplete(document.getElementById('search_address'));
