@@ -11,7 +11,7 @@ clean:
 	rm processed/*
 	psql -d $(PG_DB) -c 'DROP TABLE lots_sold_all_pilots' 
 
-all: lots_sold_all_pilots.table all_sold_lots.csv
+all: all_sold_lots.csv
 
 # Create table with necessary columns in database
 lots_sold_all_pilots.table: $(SOLD_LOTS)
