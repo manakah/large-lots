@@ -19,7 +19,7 @@ lots_sold_all_pilots.table: $(SOLD_LOTS)
 	touch processed/$@
 
 # Query database and make a csv
-all_sold_lots.csv: lots_sold_all_pilots.table
+all_sold_lots.csv: processed/lots_sold_all_pilots.table
 	psql -d $(PG_DB) -c \
 	"COPY (SELECT \
 		pin14 as pin_nbr, pins.pin, \
