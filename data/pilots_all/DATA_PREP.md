@@ -8,7 +8,16 @@ First, you need a Postgress database with all city parcels, communities, and war
 
 Then, request a list of all properties sold in previous pilots from the Department of Planning and Development (contact: Jeanne Chandler). Add that file to `pilots_all/raw/`. 
 
-Finally, run the Makefile. It will accomplish two things: (1) create a table in your postgres database called `lots_sold_all_pilots`, and (2) query your database to create a Carto-friendly CSV file with lot PINs, addresses, communities, wards, and geoms.
+Finally, run the Makefile:
+
+```bash
+make all
+
+# Run this, if you need to start from scratch
+make clean
+``` 
+
+Make will accomplish two things: (1) create a table in your postgres database called `lots_sold_all_pilots`, and (2) query your database to create a Carto-friendly CSV file with lot PINs, addresses, communities, wards, and geoms.
 
 Look inside `pilots_all/processed` to find the newly generated file, and upload it to Carto!
 
