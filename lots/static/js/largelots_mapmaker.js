@@ -101,7 +101,43 @@ var LargeLots = {
         layerOpts.sublayers.push(LargeLots.sublayer)
       }
 
-      LargeLots.createCartoLayer(layerOpts);
+      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
+        .addTo(LargeLots.map)
+        .done(function(layer) {
+            allLayers = [];
+            LargeLots.lotsLayer = layer.getSubLayer(0);
+            allLayers.push(LargeLots.lotsLayer);
+            
+            if (LargeLots.sublayer) {
+              LargeLots.soldLotsLayer = layer.getSubLayer(2);
+              allLayers.push(LargeLots.soldLotsLayer);
+            }
+
+            // Set interactivity for multiple layers
+            $.each(allLayers, function(index, value) {
+                value.setInteraction(true);
+                value.on('mouseover', function(e, latlng, pos, data, value) {
+                    $('#map div').css('cursor','pointer');
+                    LargeLots.info.update(data);
+                });
+                value.on('mouseout', function(e, latlng, pos, data, value) {
+                    $('#map div').css('cursor','inherit');
+                    LargeLots.info.clear();
+                });
+                value.on('featureClick', function(e, pos, latlng, data){
+                    LargeLots.getOneParcel(data['pin_nbr']);
+                });
+            });
+
+            window.setTimeout(function(){
+                if($.address.parameter('pin')){
+                    LargeLots.getOneParcel($.address.parameter('pin'))
+                }
+            }, 1000)
+        }).error(function(e) {
+            console.log('ERROR')
+            console.log(e)
+      });
 
       if($("#search_address").length != 0) {
         $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
@@ -118,100 +154,30 @@ var LargeLots = {
       });
   },
 
-  createCartoLayer: function(layerOpts) {
-      cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
-        .addTo(LargeLots.map)
-        .done(function(layer) {
-            // Set interactivity for multiple layers
-            // for (var i = 0; i < layer.getSubLayerCount(); i++) {
-            //   thisSublayer = layer.getSubLayer(i);
-            //   thisSublayer.setInteraction(true);
-            //   thisSublayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
-            //       $('#map div').css('cursor','pointer');
-            //       LargeLots.info.update(data);
-            //   });
-            //   thisSublayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
-            //       $('#map div').css('cursor','inherit');
-            //       LargeLots.info.clear();
-            //   });
-            //   thisSublayer.on('featureClick', function(e, pos, latlng, data){
-            //       LargeLots.getOneParcel(data['pin_nbr']);
-            //   });
-            // }
-            LargeLots.lotsLayer = layer.getSubLayer(0);
-            LargeLots.lotsLayer.setInteraction(true);
-            LargeLots.lotsLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
-              $('#map div').css('cursor','pointer');
-              LargeLots.info.update(data);
-            });
-            LargeLots.lotsLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
-              $('#map div').css('cursor','inherit');
-              LargeLots.info.clear();
-            });
-            LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
-                LargeLots.getOneParcel(data['pin_nbr']);
-            });
-
-            // LargeLots.soldLotsLayer = layer.getSubLayer(2);
-            // LargeLots.soldLotsLayer.setInteraction(true);
-            // LargeLots.soldLotsLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
-            //   $('#map div').css('cursor','pointer');
-            //   LargeLots.info.update(data);
-            // });
-            // LargeLots.soldLotsLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
-            //   $('#map div').css('cursor','inherit');
-            //   LargeLots.info.clear();
-            // });
-            // LargeLots.soldLotsLayer.on('featureClick', function(e, pos, latlng, data){
-            //     LargeLots.getOneParcel(data['pin_nbr']);
-            // });
-
-            if($("#search_address").length != 0) {
-              window.setTimeout(function(){
-                  if($.address.parameter('pin')){
-                      LargeLots.getOneParcel($.address.parameter('pin'))
-                  }
-              }, 1000)
-            };
-
-        }).error(function(e) {
-        console.log('ERROR')
-        console.log(e)
-      });
-  },
-
   toggleParcels: function(){
       var checks = []
       $.each($('.toggle-parcels'), function(i, box){
           if($(box).is(':checked')){
-              // checks.push($(box).attr('id'))
               checks.push($(box).attr('data-type'))
           }
       });
       var sql = 'select * from ' + LargeLots.cartodb_table + ' where ';
       var clauses = []
       if(checks.indexOf('sold') >= 0){
-          clauses.push('status = 3')
+          soldSQL = 'select * from all_sold_lots';
       }
-      if(checks.indexOf('applied') >= 0){
-          clauses.push('status = 1')
+      else {
+          soldSQL = 'select * from all_sold_lots where false';
       }
-      if(checks.indexOf('received') >= 0){
-          clauses.push('status = 1')
+      if(checks.indexOf('current') >= 0){
+          currentSQL = 'select * from ' + LargeLots.cartodb_table;
       }
-      if(checks.indexOf('available') >= 0){
-          clauses.push('status = 0')
-      }
-      if(clauses.length > 0){
-          clauses = clauses.join(' or ');
-          sql += clauses;
-      } else {
-          sql = 'select * from ' + LargeLots.cartodb_table;
+      else {
+          currentSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
       }
 
-      console.log(sql)
-      console.log(checks)
-      LargeLots.lotsLayer.setSQL(sql);
+      LargeLots.soldLotsLayer.setSQL(soldSQL);
+      LargeLots.lotsLayer.setSQL(currentSQL);
   },
 
   checkZone: function (ZONING_CLA, value) {
