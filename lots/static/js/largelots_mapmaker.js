@@ -104,31 +104,39 @@ var LargeLots = {
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
         .addTo(LargeLots.map)
         .done(function(layer) {
+            allLayers = [];
             LargeLots.lotsLayer = layer.getSubLayer(0);
-            LargeLots.lotsLayer.setInteraction(true);
-            LargeLots.lotsLayer.on('featureOver', function(e, latlng, pos, data, subLayerIndex) {
-              $('#map div').css('cursor','pointer');
-              LargeLots.info.update(data);
-            });
-            LargeLots.lotsLayer.on('featureOut', function(e, latlng, pos, data, subLayerIndex) {
-              $('#map div').css('cursor','inherit');
-              LargeLots.info.clear();
-            });
-            LargeLots.lotsLayer.on('featureClick', function(e, pos, latlng, data){
-                LargeLots.getOneParcel(data['pin_nbr']);
+            allLayers.push(LargeLots.lotsLayer);
+            
+            if (LargeLots.sublayer) {
+              LargeLots.soldLotsLayer = layer.getSubLayer(2);
+              allLayers.push(LargeLots.soldLotsLayer);
+            }
+
+            // Set interactivity for multiple layers
+            $.each(allLayers, function(index, value) {
+                value.setInteraction(true);
+                value.on('mouseover', function(e, latlng, pos, data, value) {
+                    $('#map div').css('cursor','pointer');
+                    LargeLots.info.update(data);
+                });
+                value.on('mouseout', function(e, latlng, pos, data, value) {
+                    $('#map div').css('cursor','inherit');
+                    LargeLots.info.clear();
+                });
+                value.on('featureClick', function(e, pos, latlng, data){
+                    LargeLots.getOneParcel(data['pin_nbr']);
+                });
             });
 
-            if($("#search_address").length != 0) {
-              window.setTimeout(function(){
-                  if($.address.parameter('pin')){
-                      LargeLots.getOneParcel($.address.parameter('pin'))
-                  }
-              }, 1000)
-            };
-
+            window.setTimeout(function(){
+                if($.address.parameter('pin')){
+                    LargeLots.getOneParcel($.address.parameter('pin'))
+                }
+            }, 1000)
         }).error(function(e) {
-        console.log('ERROR')
-        console.log(e)
+            console.log('ERROR')
+            console.log(e)
       });
 
       if($("#search_address").length != 0) {
@@ -150,31 +158,26 @@ var LargeLots = {
       var checks = []
       $.each($('.toggle-parcels'), function(i, box){
           if($(box).is(':checked')){
-              // checks.push($(box).attr('id'))
               checks.push($(box).attr('data-type'))
           }
       });
       var sql = 'select * from ' + LargeLots.cartodb_table + ' where ';
       var clauses = []
       if(checks.indexOf('sold') >= 0){
-          clauses.push('status = 3')
+          soldSQL = 'select * from all_sold_lots';
       }
-      if(checks.indexOf('applied') >= 0){
-          clauses.push('status = 1')
+      else {
+          soldSQL = 'select * from all_sold_lots where false';
       }
-      if(checks.indexOf('received') >= 0){
-          clauses.push('status = 1')
+      if(checks.indexOf('current') >= 0){
+          currentSQL = 'select * from ' + LargeLots.cartodb_table;
       }
-      if(checks.indexOf('available') >= 0){
-          clauses.push('status = 0')
+      else {
+          currentSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
       }
-      if(clauses.length > 0){
-          clauses = clauses.join(' or ');
-          sql += clauses;
-      } else {
-          sql = 'select * from ' + LargeLots.cartodb_table;
-      }
-      LargeLots.lotsLayer.setSQL(sql);
+
+      LargeLots.soldLotsLayer.setSQL(soldSQL);
+      LargeLots.lotsLayer.setSQL(currentSQL);
   },
 
   checkZone: function (ZONING_CLA, value) {
@@ -201,36 +204,31 @@ var LargeLots = {
       if (LargeLots.lastClickedLayer){
         LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
       }
+      
       var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+      
       sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr = {{pin_nbr}}::VARCHAR', {pin_nbr:pin_nbr})
         .done(function(data){
-            var shape = data.features[0];
-            LargeLots.lastClickedLayer = L.geoJson(shape);
-            LargeLots.lastClickedLayer.addTo(LargeLots.map);
-            LargeLots.lastClickedLayer.setStyle({fillColor:'#f7fcb9', weight: 2, fillOpacity: 1, color: '#000'});
-            LargeLots.map.setView(LargeLots.lastClickedLayer.getBounds().getCenter(), 17);
-            LargeLots.selectParcel(shape.properties);
+          if (typeof data.features[0] != 'undefined') {
+            LargeLots.createParcelShape(data);
+          }
         }).error(function(e){console.log(e)});
+
       window.location.hash = 'browse';
   },
 
-  selectParcel: function (props){
-      var address = LargeLots.formatAddress(props);
-      var pin_formatted = LargeLots.formatPin(props.pin_nbr);
-      var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
-        <table class='table table-bordered table-condensed'><tbody>\
-          <tr><td>Address</td><td>" + address + "</td></tr>\
-          <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
-      if (props.zone_class){
-          info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zone_class + "' target='_blank'>" + props.zone_class + "</a>)</td></tr>";
-      }
-      if (props.square_feet){
-          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
+  createParcelShape: function(data){
+    var shape = data.features[0];
+    LargeLots.lastClickedLayer = L.geoJson(shape);
+    LargeLots.lastClickedLayer.addTo(LargeLots.map);
+    LargeLots.lastClickedLayer.setStyle({fillColor:'#f7fcb9', weight: 2, fillOpacity: 1, color: '#000'});
+    LargeLots.map.setView(LargeLots.lastClickedLayer.getBounds().getCenter(), 17);
+    LargeLots.selectParcel(shape.properties);
+  },
 
-      }
-      info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
-      info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
-      <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin_nbr + ".jpg' /></div></div>";
+  selectParcel: function (props){
+      info = LargeLots.createParcelInfo(props);
+
       $.address.parameter('pin', props.pin_nbr)
       $('#lot-info').html(info);
 
@@ -247,6 +245,27 @@ var LargeLots = {
         $(this).html("<i class='fa fa-check'></i> Selected");
         $("#selected_lots").ScrollTo({offsetTop: "70px", 'axis':'y'});
       });
+  },
+
+  createParcelInfo: function(props) {
+      var address = LargeLots.formatAddress(props);
+      var pin_formatted = LargeLots.formatPin(props.pin_nbr);
+      var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
+        <table class='table table-bordered table-condensed'><tbody>\
+          <tr><td>Address</td><td>" + address + "</td></tr>\
+          <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
+      if (props.zone_class){
+          info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zone_class + "' target='_blank'>" + props.zone_class + "</a>)</td></tr>";
+      }
+      if (props.square_feet){
+          info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
+
+      }
+      info += "<tr><td colspan='2'><button type='button' id='lot_apply' data-pin='" + pin_formatted + "' data-address='" + address + "' href='#' class='btn btn-success'>Select this lot</button></td></tr>"
+      info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
+      <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin_nbr + ".jpg' /></div></div>";
+
+      return info
   },
 
   addressSearch: function (e) {

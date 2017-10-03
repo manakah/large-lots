@@ -25,17 +25,29 @@
   <div class='col-md-12'>
     <br />
     <p class='lead'>The City of Chicago is selling vacant residential lots for <strong>$1</strong>.</p> <!-- Here's how you get one.</p> -->
-    <hr>
     <p class='lead'>As part of the Fall 2016 Expansion, the City will sell nearly 1,000 lots. More information on a future round coming soon! Check back later this fall.</p>
 
-    <p>
-      <form class='form-inline hidden-print' id='lot-form'>
-        <div class="form-group">
-          <input class='form-control input-lg' id='search_address' placeholder='Enter your address' type='text' />
-          <input class='btn btn-primary btn-lg' id='search' type='button' value='Search' />
-        </div>
-      </form>
-    </p>
+    <hr>
+    <div class="row">  
+      <div class="col-md-12">  
+        <h3>Explore all properties in the Large Lot program</h3>
+        <p>
+          <form class='form-inline hidden-print' id='lot-form'>
+            <div class="form-group">
+              <input class='form-control input' id='search_address' placeholder='Enter your address' type='text' />
+              <input class='btn btn-primary btn-sm' id='search' type='button' value='Search' />
+            </div>
+            <div class="form-group">
+              <input id="current" data-type='current' class="toggle-parcels checkbox" type="checkbox" checked=true />
+              <label for='current'><span class="label label-current">Current program</span></label>
+
+              <input id="applied" data-type='sold' class="toggle-parcels checkbox" type="checkbox" checked=true />
+              <label for='applied'><span class="label label-applied">Sold</span></label>
+            </div>
+          </form>
+        </p>
+      </div>
+    </div>
 
     <div class='row'>
       <div class='col-md-8'>
@@ -105,11 +117,63 @@
             sublayer: {
                 sql: "select * from all_sold_lots",
                 cartocss: $('#map-styles-sold').html().trim(),
-                interactivity: 'pin, pin_nbr, full_address, ward, community',
+                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community, status',
             }
         }
 
+        LargeLots.getOneParcel = function(pin_nbr){
+            if (LargeLots.lastClickedLayer){
+              LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
+            }
+            
+            var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
+            // Query both Carto layers: current and sold.
+            sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr=' + pin_nbr + '::VARCHAR')
+              .done(function(data){
+                if (typeof data.features[0] != 'undefined') {
+                  LargeLots.createParcelShape(data);
+                }
+              }).error(function(e){console.log(e)});
+
+             sql.execute('select * from ' + 'all_sold_lots' + ' where pin_nbr=' + pin_nbr + '::VARCHAR')
+              .done(function(data){
+                if (typeof data.features[0] != 'undefined') {
+                  LargeLots.createParcelShape(data);
+                }
+              }).error(function(e){console.log(e)});
+
+            window.location.hash = 'browse';
+        };
+
+        LargeLots.createParcelInfo = function(props) {
+            var address = LargeLots.formatAddress(props);
+            var pin_formatted = LargeLots.formatPin(props.pin_nbr);
+            var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
+              <table class='table table-bordered table-condensed'><tbody>\
+                <tr><td>Address</td><td>" + address + "</td></tr>\
+                <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
+  
+            info += "<tr><td>Community</td><td>" + props.community + "</td></tr>";
+            info += "<tr><td>Ward</td><td>" + props.ward + "</td></tr>";                
+
+            if (props.zone_class){
+                info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zone_class + "' target='_blank'>" + props.zone_class + "</a>)</td></tr>";
+            }
+            if (props.square_feet){
+                info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
+            }
+            if (props.status){
+                info += "<tr><td>Status</td><td>" + props.status.toUpperCase() + "</td></tr>";                
+            }
+            
+            info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
+            <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin_nbr + ".jpg' /></div></div>";
+
+            return info
+        };
+
         LargeLots.initialize(init_params);
+
       });
 
       var autocomplete = new google.maps.places.Autocomplete(document.getElementById('search_address'));

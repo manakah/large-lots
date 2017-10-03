@@ -153,7 +153,7 @@ table a, .table a { text-decoration: none; }
     opacity: 0.7;
 }
 
-.label-available { background-color: #389250; }
+.label-available, .label-current { background-color: #389250; }
 .label-applied { background-color: #A1285D; }
 
 .label-danger { background-color: #BE4630; }
