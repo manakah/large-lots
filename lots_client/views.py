@@ -37,10 +37,36 @@ from lots_client.forms import ApplicationForm, DeedUploadForm
 
 def home(request):
     applications = Application.objects.all()
+    sold_count = get_lot_count('all_sold_lots')
+    current_count = get_lot_count(settings.CURRENT_CARTODB)
+
+    applied_pins = set()
+    for lot in Lot.objects.all():
+        applied_pins.add(lot.pin)
+
+    pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
+
     return render(request, 'index.html', {
         'application_active': application_active(request),
-        'applications': applications
+        'applications': applications,
+        'sold_count': sold_count,
+        'current_count': current_count,
+        'applied_pins': applied_pins,
         })
+
+def get_lot_count(cartoTable):
+    carto = 'http://datamade.cartodb.com/api/v2/sql'
+    params = {
+        'api_key': settings.CARTODB_API_KEY,
+        'q':  "SELECT count(*) FROM %s" % (cartoTable),
+    }
+    r = requests.get(carto, params=params)
+    if r.status_code is 200:
+        resp = json.loads(r.text)
+        count = resp['rows']
+        total = count[0]['count']
+            
+    return total
 
 def application_active(request):
     apps = Application.objects.all()

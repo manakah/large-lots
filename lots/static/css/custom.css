@@ -8,6 +8,11 @@ body {
 a, a:hover {
     color: #238b45}
 
+:root {
+  --green-color: #389250;
+  --purple-color: #A1285D;
+}
+
 /*Continue here*/
 a.dropdown-toggle:visited {
     color: #333333;
@@ -153,8 +158,9 @@ table a, .table a { text-decoration: none; }
     opacity: 0.7;
 }
 
-.label-available, .label-current { background-color: #389250; }
-.label-applied { background-color: #A1285D; }
+.label-available, .label-current, .badge-green { background-color: var(--green-color); }
+.label-sold, .badge-purple { background-color: var(--purple-color); }
+.label-applied { background-color: #1C4A28; }
 
 .label-danger { background-color: #BE4630; }
 .label-success { background-color: #389250; }
