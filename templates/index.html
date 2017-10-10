@@ -22,7 +22,7 @@
     </style>
     <style id="map-styles-applied">
         #applied_parcels {
-          polygon-fill: #1C4A28;
+          polygon-fill: #163B20;
           polygon-opacity: 0.7;
           line-color: #112C18;
           line-width: 0.5;
@@ -56,7 +56,8 @@
           <form class='form-inline hidden-print' id='lot-form'>
             <div class="form-group">
               <input class='form-control input' id='search_address' placeholder='Enter your address' type='text' />
-              <input class='btn btn-primary btn-sm' id='search' type='button' value='Search' />
+              <button class='btn btn-primary btn-sm' id='search'><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+              <a href="{% url 'home' %}" class='btn btn-default btn-sm'><i class="fa fa-repeat" aria-hidden="true"></i> Reset</a>
             </div>
             <div class="form-group">
               <input id="sold" data-type='sold' class="toggle-parcels checkbox" type="checkbox" checked=true />
@@ -68,7 +69,7 @@
               </span></label>
 
               <input id="applied" data-type='applied' class="toggle-parcels checkbox" type="checkbox" checked=true />
-              <label for='applied'><span class="label label-applied">Under review</span></label>
+              <label for='applied'><span class="label label-applied">{% if application_active %}Applications received{% else %}Under review{% endif %}</span></label>
             </div>
           </form>
         </p>
@@ -85,6 +86,11 @@
           <ol>
             <li>Enter your address</li>
             <li>View lots near you</li>
+            {% if application_active %}
+              <li>Filter for sold lots, currently available lots, and lots that have received applications</li>
+            {% else %}
+              <li>Filter for sold lots, lots in the most recent program, and lots under review</li>
+            {% endif %}
             <li>Click on a lot for details</li>
           </ol>
         </div>
@@ -150,7 +156,7 @@
             {
                 sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
-                interactivity: 'pin',
+                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]
         }
 
@@ -158,9 +164,7 @@
             if (LargeLots.lastClickedLayer){
               LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
             }
-            
-            console.log(pin_nbr)
-            
+
             var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
             // Query both Carto layers: current and sold.
             sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr=' + pin_nbr + '::VARCHAR')
@@ -181,6 +185,16 @@
         };
 
         LargeLots.createParcelInfo = function(props) {
+            var pilot_lookups = {
+              'EAST GARFIELD PARK': 'East Garfield Park pilot, which ended on August 4, 2014.',
+              'AUSTIN': 'Austin pilot, which ended on January 31, 2015.',
+              'ROSELAND': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
+              'WEST PULLMAN': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
+              'AUBURN GRESHAM': 'Auburn Gresham pilot, which ended on May 15, 2016.'
+            }
+            var greater_englewood = ['NEW CITY', 'WASHINGTON PARK', 'ENGLEWOOD', 'GREATER GRAND CROSSING', 'GRAND BOULEVARD', 'WEST ENGLEWOOD', 'FULLER PARK', 'WOODLAWN', 'SOUTH SHORE']
+            // Four pins in NEAR WEST SIDE and SOUTH SHORE areas do not match any pilots:
+            // 20234230230000, 20234230240000, 16132020060000, 16132020290000  
             var address = LargeLots.formatAddress(props);
             var pin_formatted = LargeLots.formatPin(props.pin_nbr);
             var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
@@ -197,8 +211,18 @@
             if (props.square_feet){
                 info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
             }
-            if (props.status){
-                info += "<tr><td>Status</td><td>" + props.status.toUpperCase() + "</td></tr>";                
+            if (props.status == 'sold') {
+              // Add SOLD status
+              info += "<tr><td>Status</td><td>" + props.status.toUpperCase() + "</td></tr>"; 
+              // Identify pilot name and end date
+              var sold_statement = '';
+              if (greater_englewood.indexOf(props.community) > -1) {
+                sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
+              }
+              else {
+                sold_statement = pilot_lookups[props.community]
+              }
+              info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
             }
             
             info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
