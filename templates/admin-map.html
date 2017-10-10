@@ -27,7 +27,7 @@
 
 <p>
     <span class='label label-available'>Not requested</span>
-    <span class='label label-applied'>Requested</span>
+    <span class='label label-sold'>Requested</span>
 </p>
 
 <div id='map'></div>
@@ -57,11 +57,11 @@
             // Create the boundary layer (one of the Carto sublayers)
             overlayName: " chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
             // Add an extra sublayer
-            sublayer: {
+            extra_sublayers: [{
                 sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
-            }
+            }]
         }        
         LargeLots.initialize(init_params);
       });

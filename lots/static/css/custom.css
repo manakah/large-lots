@@ -8,6 +8,11 @@ body {
 a, a:hover {
     color: #238b45}
 
+:root {
+  --green-color: #389250;
+  --purple-color: #A1285D;
+}
+
 /*Continue here*/
 a.dropdown-toggle:visited {
     color: #333333;
@@ -60,14 +65,26 @@ a.dropdown-toggle:hover {
     font-weight: normal;
 }
 
+.btn-default {
+    background-color: #707070;
+    border-color: #707070;
+    color: #fff;
+}
+
+.btn-default:hover {
+    background-color: #7A7A7A;
+    border-color: #7A7A7A;
+    color: #fff;
+}
+
 .btn-primary {
-    background-color: #333;
-    border-color: #333;
+    background-color: #B3B3B3;
+    border-color: #B3B3B3;
 }
 
 .btn-primary:hover {
-    background-color: #555;
-    border-color: #555;
+    background-color: #CCCCCC;
+    border-color: #CCCCCC;
 }
 
 .btn-danger {
@@ -153,8 +170,9 @@ table a, .table a { text-decoration: none; }
     opacity: 0.7;
 }
 
-.label-available, .label-current { background-color: #389250; }
-.label-applied { background-color: #A1285D; }
+.label-available, .label-current, .badge-green { background-color: var(--green-color); }
+.label-sold, .badge-purple { background-color: var(--purple-color); }
+.label-applied { background-color: #163B20; }
 
 .label-danger { background-color: #BE4630; }
 .label-success { background-color: #389250; }

@@ -16,7 +16,7 @@ var LargeLots = {
       LargeLots.mainWhere = init_params.mainWhere;
       LargeLots.overlayName = init_params.overlayName;
       LargeLots.fields = init_params.fields;
-      LargeLots.sublayer = init_params.sublayer;
+      LargeLots.extra_sublayers = init_params.extra_sublayers;
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('map', {
@@ -97,8 +97,10 @@ var LargeLots = {
           ]
       }
 
-      if (LargeLots.sublayer) {
-        layerOpts.sublayers.push(LargeLots.sublayer)
+      if (LargeLots.extra_sublayers) {
+        $.each(LargeLots.extra_sublayers, function(index, value) {
+          layerOpts.sublayers.push(value)
+        })
       }
 
       cartodb.createLayer(LargeLots.map, layerOpts, { https: true })
@@ -108,9 +110,13 @@ var LargeLots = {
             LargeLots.lotsLayer = layer.getSubLayer(0);
             allLayers.push(LargeLots.lotsLayer);
             
-            if (LargeLots.sublayer) {
+            if (layer.getSubLayer(2)) {
               LargeLots.soldLotsLayer = layer.getSubLayer(2);
               allLayers.push(LargeLots.soldLotsLayer);
+            }
+            if (layer.getSubLayer(3)) {
+              LargeLots.appliedLotsLayer = layer.getSubLayer(3);
+              allLayers.push(LargeLots.appliedLotsLayer);
             }
 
             // Set interactivity for multiple layers
@@ -175,9 +181,16 @@ var LargeLots = {
       else {
           currentSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
       }
+      if(checks.indexOf('applied') >= 0){
+          appliedSQL = 'select * from ' + LargeLots.cartodb_table + ' where pin_nbr in (' + applied_pins + ')';
+      }
+      else {
+          appliedSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
+      }
 
       LargeLots.soldLotsLayer.setSQL(soldSQL);
       LargeLots.lotsLayer.setSQL(currentSQL);
+      LargeLots.appliedLotsLayer.setSQL(appliedSQL);
   },
 
   checkZone: function (ZONING_CLA, value) {

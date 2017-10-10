@@ -12,10 +12,19 @@
       }
     </style>
     <style id="map-styles-sold">
-        #applied_parcels {
+        #sold_parcels {
           polygon-fill: #A1285D;
           polygon-opacity: 0.7;
           line-color: #680D35;
+          line-width: 0.5;
+          line-opacity: 1;
+        }
+    </style>
+    <style id="map-styles-applied">
+        #applied_parcels {
+          polygon-fill: #163B20;
+          polygon-opacity: 0.7;
+          line-color: #112C18;
           line-width: 0.5;
           line-opacity: 1;
         }
@@ -27,22 +36,40 @@
     <p class='lead'>The City of Chicago is selling vacant residential lots for <strong>$1</strong>.</p> <!-- Here's how you get one.</p> -->
     <p class='lead'>As part of the Fall 2016 Expansion, the City will sell nearly 1,000 lots. More information on a future round coming soon! Check back later this fall.</p>
 
-    <hr>
+    {% if application_active %}
+      <p class='lead'>The current program has <span class="badge badge-green">{{current_count}}</span> lots available to buy. In previous programs, the City sold <span class="badge badge-purple">{{sold_count}}</span> lots.</p>
+    {% else %}
+      <p class='lead'>The City offered <span class="badge badge-green">{{current_count}}</span> lots in the most recent program. In previous programs, the City sold <span class="badge badge-purple">{{sold_count}}</span> lots.</p>
+    {% endif %}
+
     <div class="row">  
-      <div class="col-md-12">  
-        <h3>Explore all properties in the Large Lot program</h3>
+      <div class="col-md-12"> 
+        <hr> 
+        <h3>Explore properties in the Large Lot program</h3>
+        {% if application_active %}
+          <p>This map shows the properties sold in previous programs and the properties available in the current program. Visit our <a href="{% url 'apply' %}">application page</a> to learn about buying a lot.</p>
+        {% else %}
+          <p>This map shows the properties sold in previous programs and the properties made available and/or under review in the most recent program. <strong>The City is not accepting applications for any lots shown below.</strong></p>
+        {% endif %}
+
         <p>
           <form class='form-inline hidden-print' id='lot-form'>
             <div class="form-group">
               <input class='form-control input' id='search_address' placeholder='Enter your address' type='text' />
-              <input class='btn btn-primary btn-sm' id='search' type='button' value='Search' />
+              <button class='btn btn-primary btn-sm' id='search'><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+              <a href="{% url 'home' %}" class='btn btn-default btn-sm'><i class="fa fa-repeat" aria-hidden="true"></i> Reset</a>
             </div>
             <div class="form-group">
-              <input id="current" data-type='current' class="toggle-parcels checkbox" type="checkbox" checked=true />
-              <label for='current'><span class="label label-current">Current program</span></label>
+              <input id="sold" data-type='sold' class="toggle-parcels checkbox" type="checkbox" checked=true />
+              <label for='sold'><span class="label label-sold">Sold</span></label>
 
-              <input id="applied" data-type='sold' class="toggle-parcels checkbox" type="checkbox" checked=true />
-              <label for='applied'><span class="label label-applied">Sold</span></label>
+              <input id="current" data-type='current' class="toggle-parcels checkbox" type="checkbox" checked=true />
+              <label for='current'><span class="label label-current">
+                {% if application_active %}Current program{% else %}Most recent program{% endif %}
+              </span></label>
+
+              <input id="applied" data-type='applied' class="toggle-parcels checkbox" type="checkbox" checked=true />
+              <label for='applied'><span class="label label-applied">{% if application_active %}Applications received{% else %}Under review{% endif %}</span></label>
             </div>
           </form>
         </p>
@@ -59,6 +86,11 @@
           <ol>
             <li>Enter your address</li>
             <li>View lots near you</li>
+            {% if application_active %}
+              <li>Filter for sold lots, currently available lots, and lots that have received applications</li>
+            {% else %}
+              <li>Filter for sold lots, lots in the most recent program, and lots under review</li>
+            {% endif %}
             <li>Click on a lot for details</li>
           </ol>
         </div>
@@ -106,6 +138,8 @@
     <script src="{% static 'js/largelots_mapmaker.js' %}"></script>
 
     <script>
+      var applied_pins = "{{applied_pins|safe}}".replace('{', '').replace('}', '');
+
       $(function() {
         var init_params = {
             map_centroid: [41.7872, -87.6345],
@@ -114,18 +148,23 @@
             mainWhere: "",
             overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
-            sublayer: {
+            extra_sublayers: [{
                 sql: "select * from all_sold_lots",
                 cartocss: $('#map-styles-sold').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community, status',
-            }
+            },
+            {
+                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
+                cartocss: $('#map-styles-applied').html().trim(),
+                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
+            }]
         }
 
         LargeLots.getOneParcel = function(pin_nbr){
             if (LargeLots.lastClickedLayer){
               LargeLots.map.removeLayer(LargeLots.lastClickedLayer);
             }
-            
+
             var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
             // Query both Carto layers: current and sold.
             sql.execute('select * from ' + LargeLots.cartodb_table + ' where pin_nbr=' + pin_nbr + '::VARCHAR')
@@ -146,6 +185,16 @@
         };
 
         LargeLots.createParcelInfo = function(props) {
+            var pilot_lookups = {
+              'EAST GARFIELD PARK': 'East Garfield Park pilot, which ended on August 4, 2014.',
+              'AUSTIN': 'Austin pilot, which ended on January 31, 2015.',
+              'ROSELAND': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
+              'WEST PULLMAN': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
+              'AUBURN GRESHAM': 'Auburn Gresham pilot, which ended on May 15, 2016.'
+            }
+            var greater_englewood = ['NEW CITY', 'WASHINGTON PARK', 'ENGLEWOOD', 'GREATER GRAND CROSSING', 'GRAND BOULEVARD', 'WEST ENGLEWOOD', 'FULLER PARK', 'WOODLAWN', 'SOUTH SHORE']
+            // Four pins in NEAR WEST SIDE and SOUTH SHORE areas do not match any pilots:
+            // 20234230230000, 20234230240000, 16132020060000, 16132020290000  
             var address = LargeLots.formatAddress(props);
             var pin_formatted = LargeLots.formatPin(props.pin_nbr);
             var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
@@ -162,8 +211,18 @@
             if (props.square_feet){
                 info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
             }
-            if (props.status){
-                info += "<tr><td>Status</td><td>" + props.status.toUpperCase() + "</td></tr>";                
+            if (props.status == 'sold') {
+              // Add SOLD status
+              info += "<tr><td>Status</td><td>" + props.status.toUpperCase() + "</td></tr>"; 
+              // Identify pilot name and end date
+              var sold_statement = '';
+              if (greater_englewood.indexOf(props.community) > -1) {
+                sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
+              }
+              else {
+                sold_statement = pilot_lookups[props.community]
+              }
+              info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
             }
             
             info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
