@@ -21,7 +21,15 @@ a, a:hover { color: #238b45 }
 .panel.panel-counter {
     box-shadow: none;
     -webkit-box-shadow: none;
-    font-size: 20px;
+}
+
+.panel.panel-counter .panel-heading {
+    margin-bottom: 0;
+}
+
+.panel.panel-counter .panel-body {
+    font-size: 38px;
+    padding: 10px;
 }
 
 #map { width: 100%; height: 500px;}
@@ -135,7 +143,7 @@ a.dropdown-toggle:hover {
 
 .label-available, .label-current, .badge-green { background-color: var(--green-color); }
 .label-sold, .badge-purple { background-color: var(--purple-color); }
-.badge-yellow, .label-applied { background-color: #E0D500; }
+.badge-orange, .label-applied { background-color: #bf502c; }
 .label-danger { background-color: #BE4630; }
 .label-success { background-color: #389250; }
 
