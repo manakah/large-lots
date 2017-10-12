@@ -1,19 +1,48 @@
-#map { width: 100%; height: 500px;}
-#map-admin { width: 100%; height: 600px;}
-
 body {
   font-size: 18px;
 }
 
-a, a:hover {
-    color: #238b45}
+a, a:hover { color: #238b45 }
+
+.lead { font-size: 21px; }
 
 :root {
   --green-color: #389250;
   --purple-color: #A1285D;
 }
 
-/*Continue here*/
+
+/* Index */
+.panel-counter .panel-heading { 
+    background-color: var(--purple-color);
+    color: #fff;
+}
+
+.panel.panel-counter {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    font-size: 20px;
+}
+
+#map { width: 100%; height: 500px;}
+
+#lot-form input[type=checkbox] { 
+    margin: 6px 4px;
+}
+
+.checkbox-inline { padding-left: 6px; }
+
+@media screen and (min-width: 768px) {
+    #search_address { width: 400px; }
+}
+
+@media screen and (max-width: 768px) {
+    #search_address { margin-bottom: 10px; }
+    .checkbox-inline { padding-left: 0; }
+}
+
+
+/* Nav and footer */
 a.dropdown-toggle:visited {
     color: #333333;
     text-decoration: none;
@@ -50,15 +79,12 @@ a.dropdown-toggle:hover {
 
 .pull-left img { margin-right: 20px; }
 
-#lot-form input[type=checkbox] { margin-left: 20px; }
-
-#search_address { width: 400px; }
-
 .nav-pills > li.active > a, .nav-pills > li.active,
 .nav-pills > li.active:hover > a, .nav-pills > li.active:hover {
     background-color: #238B45;
 }
 
+/* Buttons, badges, labels */
 .btn {
     text-transform: none;
     font-size: 15px;
@@ -107,6 +133,21 @@ a.dropdown-toggle:hover {
     border-color: #46b764;
 }
 
+.label-available, .label-current, .badge-green { background-color: var(--green-color); }
+.label-sold, .badge-purple { background-color: var(--purple-color); }
+.badge-yellow, .label-applied { background-color: #E0D500; }
+.label-danger { background-color: #BE4630; }
+.label-success { background-color: #389250; }
+
+.label-link label {
+    color: #fff;
+}
+
+.label-link {
+    text-decoration: none !important;
+}
+
+/* Styles for application */
 #print-page:hover { background-color: #eee; }
 
 #print-page { color: #555; }
@@ -120,17 +161,7 @@ a.dropdown-toggle:hover {
     color: #fff;
 }
 
-#received th {
-    cursor: pointer;
-}
-
-table a, .table a { text-decoration: none; }
-
-.dataTables_wrapper { margin-top: 1.5em; }
-
-.modal-footer { margin-top: 0; }
-
-/* leaflet legend styles */
+/* Leaflet legend styles */
 .leaflet-google-layer{
     z-index: 0 !important;
 }
@@ -170,21 +201,6 @@ table a, .table a { text-decoration: none; }
     opacity: 0.7;
 }
 
-.label-available, .label-current, .badge-green { background-color: var(--green-color); }
-.label-sold, .badge-purple { background-color: var(--purple-color); }
-.label-applied { background-color: #163B20; }
-
-.label-danger { background-color: #BE4630; }
-.label-success { background-color: #389250; }
-
-.label-link label {
-    color: #fff;
-}
-
-.label-link {
-    text-decoration: none !important;
-}
-
 /* Form Styling */
 .red { color: red; }
 .open { color: #389250;}
@@ -222,7 +238,9 @@ td input[type="radio"] {
     width: 100%;
 }
 
-/*Styles for admin.html and DataTable */
+/* Admin page and DataTable */
+#map-admin { width: 100%; height: 600px;}
+
 table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, table#deniedTable {
   border-bottom: 0;
 }
@@ -234,6 +252,16 @@ table#receivedTable thead th, table#receivedTable, table#deniedTable thead th, t
 #receivedTable_length, #deniedTable_length {
     float: right;
 }
+
+#received th {
+    cursor: pointer;
+}
+
+table a, .table a { text-decoration: none; }
+
+.dataTables_wrapper { margin-top: 1.5em; }
+
+.modal-footer { margin-top: 0; }
 
 .emphasis {
     font-style: italic;
@@ -266,7 +294,7 @@ select.update, input.update {
     font-size: 16px;
 }
 
-/* Style for review_status_log.html */
+/* Styles for review_status_log.html */
 .review-header { color: #9D9C9C; }
 
 ul.nav-wizard li {
@@ -408,7 +436,6 @@ select.bulk-deny {
 }
 
 /* Styles for Tally */
-
 .table-info {
     background-color: #e6e6e6;
 }
