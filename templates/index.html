@@ -80,13 +80,13 @@
 
               <label class='checkbox-inline'>
                 <input id="current" data-type='current' class="toggle-parcels checkbox" type="checkbox" checked=true />
-                <span class="label label-current">{% if application_active %}Current Program{% else %}Most recent program{% endif %}</span>
+                <span class="label label-current">{% if application_active %}Current Program{% else %}Available{% endif %}</span>
               </label>
 
               <label class='checkbox-inline'>
                 <input id="applied" data-type='applied' class="toggle-parcels checkbox" type="checkbox" checked=true />
                 <span class="label label-applied">
-                  {% if application_active %}<span class='hidden-xs'>Applications</span> Received {% else %}<span class='hidden-xs'>Under</span> Review{% endif %}
+                  {% if application_active %}<span class='hidden-xs'>Applications</span> Received {% else %}<span>Sale Pending</span>{% endif %}
                 </span>
               </label>
 
