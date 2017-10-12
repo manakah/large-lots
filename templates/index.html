@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% block title %}The City of Chicago is selling vacant residential lots for $1. Here's how you get one{% endblock %}
+{% block title %}The City of Chicago sells vacant residential lots for $1 through the Large Lot Program.{% endblock %}
 {% block extra_css %}
     <style id="map-styles">
       #parcels {
@@ -22,9 +22,9 @@
     </style>
     <style id="map-styles-applied">
         #applied_parcels {
-          polygon-fill: #163B20;
+          polygon-fill: #E0D500;
           polygon-opacity: 0.7;
-          line-color: #112C18;
+          line-color: #7A7400;
           line-width: 0.5;
           line-opacity: 1;
         }
@@ -33,25 +33,25 @@
 {% block content %}
   <div class='col-md-12'>
     <br />
-    <p class='lead'>The City of Chicago is selling vacant residential lots for <strong>$1</strong>.</p> <!-- Here's how you get one.</p> -->
-    <p class='lead'>As part of the Fall 2016 Expansion, the City will sell nearly 1,000 lots. More information on a future round coming soon! Check back later this fall.</p>
+    <p class='lead'>The City of Chicago sells vacant residential lots for <strong>$1</strong> through the Large Lot Program.</p>
 
+    <div class='row'>
+      <div class='col-md-12 text-center well'>
+        <h2 class='lead'>Prior sales total <br><span class="badge badge-purple">544</span> lots</h2>
+      </div>
+    </div>
+    
     {% if application_active %}
-      <p class='lead'>The current program has <span class="badge badge-green">{{current_count}}</span> lots available to buy. In previous programs, the City sold <span class="badge badge-purple">{{sold_count}}</span> lots.</p>
+      <p class='lead'>The current program has <span class="badge badge-green">{{current_count}}</span> lots available to buy. Visit our <a href="{% url 'apply' %}">application page</a> to learn about buying a lot.</p>
     {% else %}
-      <p class='lead'>The City offered <span class="badge badge-green">{{current_count}}</span> lots in the most recent program. In previous programs, the City sold <span class="badge badge-purple">{{sold_count}}</span> lots.</p>
+      <p class='lead'>Currently the City is in the process of selling nearly <span class="badge badge-yellow">1,000</span> lots.</p>
+      <p class='lead'><strong>The City is not accepting Large Lot applications at this time.</strong> More information on a future round coming soon! Check back later this fall. In the meantime, explore the map below.</p>
     {% endif %}
 
     <div class="row">  
       <div class="col-md-12"> 
         <hr> 
         <h3>Explore properties in the Large Lot program</h3>
-        {% if application_active %}
-          <p>This map shows the properties sold in previous programs and the properties available in the current program. Visit our <a href="{% url 'apply' %}">application page</a> to learn about buying a lot.</p>
-        {% else %}
-          <p>This map shows the properties sold in previous programs and the properties made available and/or under review in the most recent program. <strong>The City is not accepting applications for any lots shown below.</strong></p>
-        {% endif %}
-
         <p>
           <form class='form-inline hidden-print' id='lot-form'>
             <div class="form-group">

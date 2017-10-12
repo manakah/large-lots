@@ -59,6 +59,7 @@ a.dropdown-toggle:hover {
     background-color: #238B45;
 }
 
+/* Buttons, badges, labels */
 .btn {
     text-transform: none;
     font-size: 15px;
@@ -105,6 +106,20 @@ a.dropdown-toggle:hover {
 .btn-success:hover {
     background-color: #46b764;
     border-color: #46b764;
+}
+
+.label-available, .label-current, .badge-green { background-color: var(--green-color); }
+.label-sold, .badge-purple { background-color: var(--purple-color); }
+.badge-yellow, .label-applied { background-color: #E0D500; }
+.label-danger { background-color: #BE4630; }
+.label-success { background-color: #389250; }
+
+.label-link label {
+    color: #fff;
+}
+
+.label-link {
+    text-decoration: none !important;
 }
 
 #print-page:hover { background-color: #eee; }
@@ -168,21 +183,6 @@ table a, .table a { text-decoration: none; }
     float: left;
     margin-right: 8px;
     opacity: 0.7;
-}
-
-.label-available, .label-current, .badge-green { background-color: var(--green-color); }
-.label-sold, .badge-purple { background-color: var(--purple-color); }
-.label-applied { background-color: #163B20; }
-
-.label-danger { background-color: #BE4630; }
-.label-success { background-color: #389250; }
-
-.label-link label {
-    color: #fff;
-}
-
-.label-link {
-    text-decoration: none !important;
 }
 
 /* Form Styling */
