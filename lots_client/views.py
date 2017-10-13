@@ -41,8 +41,9 @@ def home(request):
     current_count = get_lot_count(settings.CURRENT_CARTODB)
 
     applied_pins = set()
-    for lot in Lot.objects.all():
-        applied_pins.add(lot.pin)
+
+    for status in ApplicationStatus.objects.filter(denied=False):
+        applied_pins.add(status.lot_id)
 
     pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
 
