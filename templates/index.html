@@ -80,7 +80,7 @@
 
               <label class='checkbox-inline'>
                 <input id="current" data-type='current' class="toggle-parcels checkbox" type="checkbox" checked=true />
-                <span class="label label-current">{% if application_active %}Current Program{% else %}Available{% endif %}</span>
+                <span class="label label-current">Available</span>
               </label>
 
               <label class='checkbox-inline'>
@@ -107,9 +107,9 @@
             <li>Enter your address</li>
             <li>View lots near you</li>
             {% if application_active %}
-              <li>Filter for sold lots, currently available lots, and lots that have received applications</li>
+              <li>Filter for <span class="badge badge-purple">sold</span> lots, currently <span class="badge badge-green">available</span> lots, and lots that have <span class="badge badge-orange">received applications</span></li>
             {% else %}
-              <li>Filter for sold lots, lots in the most recent program, and lots under review</li>
+              <li>Filter for <span class="badge badge-purple">sold</span> lots, lots <span class="badge badge-green">available</span> in the most recent program, and lots with a <span class="badge badge-orange">sale pending</span></li>
             {% endif %}
             <li>Click on a lot for details</li>
           </ol>
