@@ -161,7 +161,7 @@ class Command(BaseCommand):
 
         if options['lotto_email']:
             time = options['lotto_email']
-            offset = int(options['lotto_offset']) - 1 
+            offset = int(options['lotto_offset']) - 1
 
             if time == 'morning':
                 comparator = '<='
