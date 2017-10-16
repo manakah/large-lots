@@ -49,15 +49,15 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send denial emails to applicants in Garfield and Ward 27')
 
-        parser.add_argument('blank_deed_denial',
+        parser.add_argument('--blank_deed_denial',
                             action='store_true',
                             help='Send denial emails to applicants who did not resubmit blank deeds')
 
-        parser.add_argument('update_email',
+        parser.add_argument('--update_email',
                             action='store_true',
                             help='Send emails to insure applicants that "everything is okay"')
 
-        parser.add_argument('wintrust_email',
+        parser.add_argument('--wintrust_email',
                             action='store_true',
                             help='Send emails about a special event')
 
@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 context = {'app': application}
                 self.send_email(
                     'eds_email', 
-                    'LargeLots application  Economic Disclosure Statement (EDS)', 
+                    'LargeLots application - Economic Disclosure Statement (EDS)', 
                     email_address, 
                     context
                 )
@@ -147,7 +147,7 @@ class Command(BaseCommand):
                            'lot': lot}
                 self.send_email(
                     'lotto_winner_email', 
-                    'LargeLots application  Lottery winner', 
+                    'LargeLots application - Lottery winner', 
                     application.email, 
                     context
                 )
@@ -161,14 +161,14 @@ class Command(BaseCommand):
 
         if options['lotto_email']:
             time = options['lotto_email']
-            offset = int(options['lotto_offset'])  
+            offset = int(options['lotto_offset']) - 1 
 
             if time == 'morning':
                 comparator = '<='
             if time == 'afternoon':
                 comparator = '>' 
 
-            # This query grabs the lot pin, which lies at a specified midway point, e.g.,
+            # This query grabs the lot pin, which lies at a specified mid-way point, e.g.,
             # if we want to notify the applicants who applied to the first 85 lots (in ascending order),
             # then the offset will be 84.  
             with connection.cursor() as cursor:
@@ -210,7 +210,7 @@ class Command(BaseCommand):
                            'lot': lot}
                 self.send_email(
                     'lottery_notification_{}'.format(time), 
-                    'LargeLots application  Lottery', 
+                    'LargeLots application - Lottery', 
                     email_address, 
                     context
                 )
@@ -225,7 +225,7 @@ class Command(BaseCommand):
         if options['eds_email']:
             limit = options['eds_email']
 
-            # Select only applicants whose nondenied applications
+            # Select only applicants whose non-denied applications
             # are all on step 7 in order to avoid a situation where
             # an applicant has active applications at other steps,
             # as these will get stuck if the applicant submits an
@@ -268,7 +268,7 @@ class Command(BaseCommand):
                 context = {'app': application}
                 self.send_email(
                     'eds_email', 
-                    'LargeLots application  Economic Disclosure Statement (EDS)', 
+                    'LargeLots application - Economic Disclosure Statement (EDS)', 
                     email_address, 
                     context
                 )
@@ -310,7 +310,7 @@ class Command(BaseCommand):
                     second_ward = ''
 
                 if application.deed_image == '':
-                    print(application.first_name, application.last_name, "  Application ID", application.id)
+                    print(application.first_name, application.last_name, " - Application ID", application.id)
                     print('Wards:', wards)
 
                     context = {
@@ -327,7 +327,7 @@ class Command(BaseCommand):
             for app in application_statuses:
                 if app.current_step:
                     if app.current_step.step != 7 and app.denied == False and app.lot.address.ward == '27' and app.lot.address.community == 'HUMBOLDT PARK':
-                        print(app.application.first_name, app.application.last_name, "  Application ID", app.application.id, "  Status", app.id)
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
                         context = {
@@ -344,7 +344,7 @@ class Command(BaseCommand):
             for app in application_statuses:
                 if app.current_step:
                     if app.current_step.step != 7:
-                        print(app.application.first_name, app.application.last_name, "  Application ID", app.application.id, "  Status", app.id)
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
                         context = {
@@ -361,7 +361,7 @@ class Command(BaseCommand):
             for app in application_statuses:
                 if app.current_step:
                     if app.current_step.step == 2 and app.denied == False and app.application.deed_image == '':
-                        print(app.application.first_name, app.application.last_name, "  Application ID", app.application.id, "  Status", app.id)
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id, " - Status", app.id)
                         print(datetime.now())
 
                         user = User.objects.get(id=5)
@@ -384,7 +384,7 @@ class Command(BaseCommand):
             print("Emails sent to:")
             for app in application_statuses:
                 if app.id in [710, 1156, 1171, 1996, 2274, 2567, 2893, 2912, 3198, 3591, 3734, 3208, 502]:
-                    print(app.application.first_name, app.application.last_name, "  Application ID", app.application.id)
+                    print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                     print(datetime.now())
 
                     context = {
@@ -402,7 +402,7 @@ class Command(BaseCommand):
                 if app.current_step:
                     if app.current_step.step in [4, 6] and app.denied == False:
 
-                        print(app.application.first_name, app.application.last_name, "  Application ID", app.application.id)
+                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
                         print(datetime.now())
 
                         context = {
@@ -413,7 +413,7 @@ class Command(BaseCommand):
                         self.send_email('wintrust_email', 'Special event for Large Lots applicants', app.application.email, context)
 
     def applicant_detail_str(self, application):
-        return "{0} {1}  Application ID {2}".format(application.first_name,
+        return "{0} {1} - Application ID {2}".format(application.first_name,
                                                      application.last_name,
                                                      application.id)
 
