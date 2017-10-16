@@ -1,0 +1,24 @@
+{% load lots_filters %}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+        
+Dear {{ app.first_name }},
+
+Thank you for applying to the Large Lots program. The City has reviewed your application for the following property:
+
+{{ lot.address.street }}
+Pin #: {{ lot.pin }}
+            
+Unfortunately, your application has been denied because DPD is no longer proceeding with the sale of this lot through the Large Lot Program. You can learn more about our evaluation process by visiting our frequently asked questions (FAQ) page: <a target='_blank' href='https://www.largelots.org/faq/'>https://www.largelots.org/faq/</a>.
+
+Again, thank you for your application. You can stay informed on the Large Lots program through <a target='_blank' href='https://www.largelots.org/'>largelots.org</a> or <a target='_blank' href="https://www.cityofchicago.org/city/en/depts/dcd.html">cityofchicago.org/DPD</a>.
+
+Feel free to contact me by email, if you have any questions.
+
+Jeanne Chandler, Department of Planning and Development
+Email: Jeanne.Chandler@cityofchicago.org
+
+Sincerely,
+
+Jeanne Chandler

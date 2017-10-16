@@ -16,6 +16,10 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--city_council_denial',
+                            action='store_true',
+                            help='Send denial emails to applicants denied by City Council')
+
         parser.add_argument('--eds_final_email',
                             action='store_true',
                             help='Send email to all applicants on Step 7.')
@@ -59,6 +63,26 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['city_council_denial']:
+            application_statuses = ApplicationStatus.objects.filter(lot_id__in=['25223200170000','25223200190000','20211210110000','20211120350000','20211210030000','20211130370000','20211130160000','20211120060000','20211110160000','20211130040000','20211130180000','20211120380000','20082150270000','20032190350000','20032230250000','20032230270000','20032230380000','20032240510000','25291050490000','20034050130000']).filter(denied=False)
+
+            print("Emails sent to:")
+            for app in application_statuses:             
+                context = {
+                    'app': app.application,
+                    'lot': app.lot
+                }
+                
+                applicant = self.applicant_detail_str(app.application)
+                print('Notified {}'.format(applicant))
+
+                self.send_email(
+                    'city_council_denial_email', 
+                    'LargeLots application - Denial', 
+                    app.application.email, 
+                    context
+                )
+
         if options['eds_final_email']:
             # Send final notice email to all applicants on Step 7.
             with connection.cursor() as cursor:
