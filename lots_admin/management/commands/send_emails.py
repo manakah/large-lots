@@ -16,6 +16,10 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--closing_time',
+                            action='store_true',
+                            help='Send closing notifications to applicants')
+
         parser.add_argument('--city_council_denial',
                             action='store_true',
                             help='Send denial emails to applicants denied by City Council')
@@ -63,6 +67,43 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['closing_time']:
+           with connection.cursor() as cursor:
+                query = '''
+                    SELECT email, array_agg(status.lot_id) AS pins 
+                    FROM lots_admin_application AS app
+                    JOIN lots_admin_applicationstatus AS status
+                    ON status.application_id = app.id
+                    JOIN lots_admin_applicationstep AS step
+                    ON status.current_step_id = step.id 
+                    WHERE denied = False and step = 8
+                    GROUP BY email
+                '''
+
+                cursor.execute(query)
+
+                applicant_list = [(email, pins) for email, pins in cursor]
+
+                print("Emails sent to:")
+                for email, pins in applicant_list:
+                    application = Application.objects.filter(email=email).first()
+                    lots = [Lot.objects.get(pin=pin) for pin in pins]
+                    
+                    context = {
+                        'app': application,
+                        'lots': lots
+                    }
+
+                    self.send_email(
+                        'closing_time_email', 
+                        'Closing Time for Large Lots', 
+                        email, 
+                        context
+                    )
+
+                    print('{0} - Lots: {1}'.format(email, pins))
+
+
         if options['city_council_denial']:
             application_statuses = ApplicationStatus.objects.filter(lot_id__in=['25223200170000','25223200190000','20211210110000','20211120350000','20211210030000','20211130370000','20211130160000','20211120060000','20211110160000','20211130040000','20211130180000','20211120380000','20082150270000','20032190350000','20032230250000','20032230270000','20032230380000','20032240510000','25291050490000','20034050130000']).filter(denied=False)
 
