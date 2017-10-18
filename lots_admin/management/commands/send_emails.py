@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--closing_time',
                             action='store_true',
-                            help='Send denial emails to applicants denied by City Council')
+                            help='Send closing notifications to applicants')
 
         parser.add_argument('--city_council_denial',
                             action='store_true',
