@@ -70,10 +70,11 @@ class Command(BaseCommand):
         if options['closing_time']:
            with connection.cursor() as cursor:
                 query = '''
-                    SELECT email, array_agg(status.lot_id) as pins FROM lots_admin_application AS app
-                    LEFT JOIN lots_admin_applicationstatus AS status
+                    SELECT email, array_agg(status.lot_id) AS pins 
+                    FROM lots_admin_application AS app
+                    JOIN lots_admin_applicationstatus AS status
                     ON status.application_id = app.id
-                    LEFT JOIN lots_admin_applicationstep AS step
+                    JOIN lots_admin_applicationstep AS step
                     ON status.current_step_id = step.id 
                     WHERE denied = False and step = 8
                     GROUP BY email
