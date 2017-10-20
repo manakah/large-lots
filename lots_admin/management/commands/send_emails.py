@@ -69,6 +69,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['closing_time']:
            with connection.cursor() as cursor:
+                # TODO: add filter to account for people who shared email addresses
+                # TODO: move applicants who get emails to Step 11
                 query = '''
                     SELECT email, array_agg(status.lot_id) AS pins 
                     FROM lots_admin_application AS app
