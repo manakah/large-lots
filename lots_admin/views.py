@@ -929,7 +929,6 @@ def status_tally(request):
 def next_step(description_key, status, step_int, application):
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
         application.current_step = step
-        # asdlkfjasdlkj
         application.save()
 
 def send_email(request, application_status):
