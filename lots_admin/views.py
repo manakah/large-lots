@@ -194,7 +194,7 @@ def lots_admin(request, step):
         on_steps23456 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5 | step6)
         app_count = len(ApplicationStatus.objects.all())
 
-    counter_range = range(2, 12)
+    counter_range = range(2, 11)
 
     paginator = Paginator(application_status_list, 20)
 
@@ -788,11 +788,15 @@ def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
     status = ApplicationStep.objects.all()
+     # future_list provides a collection of steps, which confirm "future" actions, i.e., an application on Step 2 needs to be reviewed by LargeLots staff
+     # These stand in opposition to "past" actions (steps 8, 9, 10, 11), i.e., an applicant on Step 9 has been approved by Plan Commission and City Council
+    future_list = [2, 3, 4, 5, 6, 7]
 
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
-        'status': status
+        'status': status,
+        'future_list': future_list,
         })
 
 @login_required(login_url='/lots-login/')
@@ -825,34 +829,27 @@ def bulk_submit(request):
                     review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
                     review.save()
             # Note: moving from step 7 (EDS_waiting) to step 8 (EDS_submission) happens automatically.
-            elif selected_step == 'step8':
-                 # Move application to step 9.
-                l = 'debts', 'valid', 9, a
-                next_step(*l)
-
-                # Create a review.
-                review = Review(reviewer=user, email_sent=False, application=a, step_completed=8)
-                review.save()
+            # Unlike steps 2-7, the following steps confirm "past" actions, i.e., an applicant on Step 9 has been approved by Plan Commission and City Council.
             elif selected_step == 'step9':
-                # Move application to step 10.
-                l = 'commission', 'valid', 10, a
+                 # Move application to step 9.
+                l = 'city_council', 'valid', 9, a
                 next_step(*l)
 
                 # Create a review.
                 review = Review(reviewer=user, email_sent=False, application=a, step_completed=9)
                 review.save()
+
             elif selected_step == 'step10':
-                # Move application to step 11.
-                l = 'city_council', 'valid', 11, a
+                # Move application to step 10.
+                l = 'debts', 'valid', 10, a
                 next_step(*l)
 
                 # Create a review.
                 review = Review(reviewer=user, email_sent=False, application=a, step_completed=10)
                 review.save()
             elif selected_step == 'step11':
-                print("herereeee!")
-                 # Move application to step 12.
-                l = 'sold', 'valid', 12, a
+                 # Move application to step 11.
+                l = 'sold', 'valid', 11, a
                 next_step(*l)
 
                 # Create a review.
@@ -904,7 +901,7 @@ def bulk_deny_submit(request):
 @login_required(login_url='/lots-login/')
 def status_tally(request):
     total = ApplicationStatus.objects.all()
-    # Order by ward.
+
     step2 = ApplicationStatus.objects.filter(current_step__step=2)
     step3 = ApplicationStatus.objects.filter(current_step__step=3)
     step4 = ApplicationStatus.objects.filter(current_step__step=4)
@@ -914,8 +911,7 @@ def status_tally(request):
     step8 = ApplicationStatus.objects.filter(current_step__step=8)
     step9 = ApplicationStatus.objects.filter(current_step__step=9)
     step10 = ApplicationStatus.objects.filter(current_step__step=10)
-    step11 = ApplicationStatus.objects.filter(current_step__step=11)
-    sold = ApplicationStatus.objects.filter(current_step__step=12)
+    sold = ApplicationStatus.objects.filter(current_step__step=11)
     denied = ApplicationStatus.objects.filter(denied=True)
 
     return render(request, 'status-tally.html', {
@@ -929,7 +925,6 @@ def status_tally(request):
         'step8': step8,
         'step9': step9,
         'step10': step10,
-        'step11': step11,
         'sold': sold,
         'denied': denied
         })

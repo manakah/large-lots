@@ -14,7 +14,7 @@
             {% for i in counter_range %}
             <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
             {% endfor %}
-            <a href="{% url 'lots_admin' '12' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
+            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
             <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
             <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
@@ -47,10 +47,9 @@
                 <select name='step' class="form-control update">
                     <option>-----------------</option>
                     <option value="step5">Complete step 5: Alderman letter of support</option>
-                    <option value="step8">Complete step 8: Approval of EDS - Applicant submitted EDS and principal profile</option>
-                    <option value="step9">Complete step 9: Certify as free and clear of debts</option>
-                    <option value="step10">Complete step 10: Approval by Plan Commission</option>
-                    <option value="step11">Complete step 11: Approval by City Council</option>
+                    <option value="step9">Move to step 9: Applicant approved by Plan Commission and City Council</option>
+                    <option value="step10">Move to step 10: Applicant certified as free and clear of debts to the city</option>
+                    <option value="step11">Move to step 11: Sold</option>
                     <option value="deny">Deny application</option>
                 </select>
                 <button type="submit" class="btn btn-success update"><i class="fa fa-check" aria-hidden="true"></i> Update</button>
@@ -154,7 +153,6 @@
                 <a href="{% url 'deed' applicant.status_id %}">Deed</a>
             </td>
             <td>
-                <!-- {{ applicant.address }}</br> -->
                 {{ applicant.street }}</br>
                 {{ applicant.pin|make_display_pin }}
             </td>
@@ -199,7 +197,7 @@
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                     </div>
                 <!-- Steps 6-11 -->
-                {% elif applicant.step == 8 or applicant.step == 9 or applicant.step == 10 or applicant.step == 11 %}
+                {% elif applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
                     <div class='col-sm-10' id="letter-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         {% if on_steps23456|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
@@ -216,7 +214,7 @@
                         </div>
                     {% endif %}
                 <!-- Step 12: Sold -->
-                {% elif applicant.step == 12 %}
+                {% elif applicant.step == 11 %}
                     Sold</br>
                     <span class="emphasis">Official closing event to be held</span>
                 {% endif %}

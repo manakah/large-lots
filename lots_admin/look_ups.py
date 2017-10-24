@@ -22,6 +22,7 @@ DENIAL_REASONS = {
 }
 
 APPLICATION_STATUS = {
+  # Future actions
   'deed': 'Deed check',
   'location': 'Location check',
   'multi': 'Multiple applicant check',
@@ -29,8 +30,8 @@ APPLICATION_STATUS = {
   'letter': 'Alderman letter of support',
   'EDS_waiting': 'Wait for applicant to submit EDS and principal profile',
   'EDS_submission': 'Approval of EDS - Applicant submitted EDS and principal profile',
-  'debts': 'Certify as free and clear of debts to the city',
-  'commission': 'Approval by Plan Commission',
-  'city_council': 'Approval by City Council',
+  # Past actions
+  'city_council': 'Approved by Plan Commission and City Council',
+  'debts': 'Certified as free and clear of debts to the city',
   'sold': 'Sold'
 }
