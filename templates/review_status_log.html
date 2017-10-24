@@ -28,10 +28,12 @@
           {% else %}
             <td>
               {% for s in status %}
-                {% if s.public_status == 'valid' %}
-                  {% if s.step == r.step_completed %}
-                    Complete step {{ r.step_completed }}: {{ s.description }}
-                  {% endif %}
+                {% if s.public_status == 'valid' and s.step == r.step_completed%}
+                    {% if r.step_completed in future_list %}
+                      Complete step {{ r.step_completed }}: {{ s.description }}
+                    {% else %}
+                      Move to step {{ r.step_completed }}: {{ s.description }}
+                    {% endif %}
                 {% endif %}
               {% endfor %}
             </td>

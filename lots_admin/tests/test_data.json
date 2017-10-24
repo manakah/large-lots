@@ -295,6 +295,24 @@
         }
     },
     {
+        "model": "lots_admin.applicationstep",
+        "pk": 4,
+        "fields": {
+            "description": "Approval of EDS - Applicant submitted EDS and principal profile",
+            "public_status": "valid",
+            "step": 8
+        }
+    },
+    {
+        "model": "lots_admin.applicationstep",
+        "pk": 5,
+        "fields": {
+            "description": "Approved by Plan Commission and City Council",
+            "public_status": "valid",
+            "step": 9
+        }
+    },
+    {
         "model": "lots_admin.applicationstatus",
         "pk": 1,
         "fields": {
@@ -391,6 +409,17 @@
             "lot": "56565",
             "current_step": 3,
             "lottery": true
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 10,
+        "fields": {
+            "denied": false,
+            "application": 8,
+            "lot": "78787",
+            "current_step": 4,
+            "lottery": false
         }
     }
 ]
