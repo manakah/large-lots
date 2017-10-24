@@ -29,7 +29,7 @@
             <td>
               {% for s in status %}
                 {% if s.public_status == 'valid' and s.step == r.step_completed%}
-                    {% if r.step_completed in past_list %}
+                    {% if r.step_completed in future_list %}
                       Complete step {{ r.step_completed }}: {{ s.description }}
                     {% else %}
                       Move to step {{ r.step_completed }}: {{ s.description }}

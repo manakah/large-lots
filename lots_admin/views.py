@@ -793,7 +793,7 @@ def review_status_log(request, application_id):
         'application_status': application_status,
         'reviews': reviews,
         'status': status,
-        'past_list': [2, 3, 4, 5, 6, 7, 8],
+        'future_list': [2, 3, 4, 5, 6, 7],
         })
 
 @login_required(login_url='/lots-login/')
