@@ -8,7 +8,7 @@ from smtplib import SMTPException
 import time
 from datetime import datetime
 
-from lots_admin.models import Application, ApplicationStatus, Review, DenialReason, User, Lot
+from lots_admin.models import Application, ApplicationStatus, ApplicationStep, Review, DenialReason, User, Lot
 from lots_admin.look_ups import DENIAL_REASONS
 
 class Command(BaseCommand):
@@ -69,10 +69,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['closing_time']:
            with connection.cursor() as cursor:
-                # TODO: add filter to account for people who shared email addresses
-                # TODO: move applicants who get emails to Step 11
                 query = '''
-                    SELECT email, array_agg(status.lot_id) AS pins 
+                    SELECT email, array_agg(status.lot_id) AS pins, array_agg(status.id) AS status_ids
                     FROM lots_admin_application AS app
                     JOIN lots_admin_applicationstatus AS status
                     ON status.application_id = app.id
@@ -84,11 +82,13 @@ class Command(BaseCommand):
 
                 cursor.execute(query)
 
-                applicant_list = [(email, pins) for email, pins in cursor]
+                applicant_list = [(email, pins, status_ids) for email, pins, status_ids in cursor]
 
                 print("Emails sent to:")
-                for email, pins in applicant_list:
-                    application = Application.objects.filter(email=email).first()
+                for email, pins, status_ids in applicant_list:
+                    # Isolate one applicant - to pass into "context"
+                    application = Application.objects.filter(email=email).filter(applicationstatus__id__in=status_ids).first()
+
                     lots = [Lot.objects.get(pin=pin) for pin in pins]
                     
                     context = {
@@ -102,6 +102,13 @@ class Command(BaseCommand):
                         email, 
                         context
                     )
+
+                    # Move applicants to Step 9
+                    application_statuses = ApplicationStatus.objects.filter(id__in=status_ids)
+                    step9 = ApplicationStep.objects.get(step=9)
+                    for a in application_statuses:
+                        a.current_step = step9
+                        a.save()
 
                     print('{0} - Lots: {1}'.format(email, pins))
 
