@@ -788,12 +788,15 @@ def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
     status = ApplicationStep.objects.all()
+     # future_list provides a collection of steps, which confirm "future" actions, i.e., an application on Step 2 needs to be reviewed by LargeLots staff
+     # These stand in opposition to "past" actions (steps 8, 9, 10, 11), i.e., an applicant on Step 9 has been approved by Plan Commission and City Council
+    future_list = [2, 3, 4, 5, 6, 7]
 
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
         'status': status,
-        'future_list': [2, 3, 4, 5, 6, 7],
+        'future_list': future_list,
         })
 
 @login_required(login_url='/lots-login/')
