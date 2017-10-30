@@ -20,6 +20,9 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send closing invitations to applicants')
 
+        parser.add_argument('--date',
+                            help='Date in format YYYY-MM-DD for emails, etc.')
+
         parser.add_argument('--closing_time',
                             action='store_true',
                             help='Send closing notifications to applicants')
@@ -73,6 +76,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['closing_invitations']:
             n = int(options['closing_invitations'])
+            date = datetime.strptime(options['date'], '%Y-%m-%d')
 
             with connection.cursor() as cursor:
                 query = '''
@@ -102,12 +106,7 @@ class Command(BaseCommand):
 
                 applicant_list = [(email, pins, status_ids) for email, pins, status_ids in cursor]
 
-                event_dates = {
-                    'am': datetime(2017, 11, 13, 9, 0),
-                    'pm': datetime(2017, 11, 13, 13, 0),
-                }
-
-                date_fmt = '%Y-%d-%m %H:%M'
+                date_fmt = '%Y-%m-%d %H:%M'
 
                 log_fmt = '{date} {applicant} ({email}, {phone}) invited to ' + \
                     'Closing {event} for lots #{pins}'
@@ -123,21 +122,21 @@ class Command(BaseCommand):
                                               .filter(email=email)\
                                               .filter(applicationstatus__id__in=status_ids)
 
-                    # Update all because we only want to send one invitation
-                    # per applicant (who may have multiple applications)
-
-                    for app in applications:
-                        app.closing_invite_sent = True
-                        app.save()
-
                     application = applications.first()
 
                     lots = [Lot.objects.get(pin=pin) for pin in pins]
 
+                    date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
+
+                    # Invite half the applicants to the morning event, and
+                    # half to the afternoon event
+
                     if idx <= n / 2:
-                        event = event_dates['am']
+                        date_parts += [9, 0]
+                        event = datetime(*date_parts)
                     else:
-                        event = event_dates['pm']
+                        date_parts += [13, 0]
+                        event = datetime(*date_parts)
 
                     context = {
                         'app': application,
@@ -151,6 +150,13 @@ class Command(BaseCommand):
                         email,
                         context,
                     )
+
+                    # Update all because we only want to send one invitation
+                    # per applicant (who may have multiple applications)
+
+                    for app in applications:
+                        app.closing_invite_sent = True
+                        app.save()
 
                     print(log_fmt.format(
                         date=datetime.now().strftime(date_fmt),

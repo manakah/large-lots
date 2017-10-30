@@ -76,7 +76,7 @@ def test_lotto_email_afternoon(django_db_setup):
 @pytest.mark.django_db
 def test_closing_invitations(django_db_setup, capsys):
     with patch.object(Command, 'send_email') as mock_send:
-        call_command('send_emails', closing_invitations=3)
+        call_command('send_emails', closing_invitations=3, date='2017-11-13')
 
     # Test applications are updated
     invited = Application.objects.filter(closing_invite_sent=True)
@@ -85,7 +85,10 @@ def test_closing_invitations(django_db_setup, capsys):
     # Command will invite half the given number of applicants, n, rounding the
     # first group DOWN if n / 2 is not an integer. Given an n of 3, test 1
     # is invited to the morning event and 2 are invited to the afternoon event.
+
     out, err = capsys.readouterr()
     lines = out.splitlines()
+
+    assert all(['2017-11-13' in line for line in lines])
     assert len([line for line in lines if '09:00' in line]) == 1
     assert len([line for line in lines if '13:00' in line]) == 2
