@@ -232,6 +232,27 @@
         }
     },
     {
+        "model": "lots_admin.application",
+        "pk": 9,
+        "fields": {
+            "first_name": "Babe",
+            "last_name": "Ruth",
+            "organization": "",
+            "owned_pin": "987654",
+            "owned_address": 2,
+            "deed_image": "img/lalala.png",
+            "deed_timestamp": null,
+            "contact_address": 2,
+            "phone": "234-432-9999",
+            "email": "swingaway@yahoo.com",
+            "how_heard": "the annals of history",
+            "tracking_id": "41F84FF1-3197-418C-B3AB-D5408EFE0675",
+            "received_date": "2017-06-17T15:14:31.705",
+            "pilot": "3",
+            "eds_sent": false
+        }
+    },
+    {
         "model": "lots_admin.lot",
         "pk": "34343",
         "fields": {
@@ -310,6 +331,15 @@
             "description": "Approved by Plan Commission and City Council",
             "public_status": "valid",
             "step": 9
+        }
+    },
+    {
+        "model": "lots_admin.applicationstep",
+        "pk": 6,
+        "fields": {
+            "description": "Certified as free and clear of all debts",
+            "public_status": "valid",
+            "step": 10
         }
     },
     {
@@ -420,6 +450,50 @@
             "lot": "78787",
             "current_step": 4,
             "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 11,
+        "fields": {
+            "denied": false,
+            "application": 9,
+            "lot": "56565",
+            "current_step": 6,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 12,
+        "fields": {
+            "denied": false,
+            "application": 9,
+            "lot": "13131",
+            "current_step": 6,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 13,
+        "fields": {
+            "denied": false,
+            "application": 8,
+            "lot": "56565",
+            "current_step": 6,
+            "lottery": false
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 14,
+        "fields": {
+            "denied": false,
+            "application": 4,
+            "lot": "78787",
+            "current_step": 6,
+            "lottery": true
         }
     }
 ]
