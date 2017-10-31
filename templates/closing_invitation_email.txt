@@ -1,0 +1,40 @@
+{% load lots_filters %}
+
+
+** $1 LARGE LOTS
+------------------------------------------------------------
+{{ today|date:'F j, Y' }}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+
+
+Dear {{ app.first_name}},
+
+Your Large Lot Closing Date and time has been scheduled for <strong>{{ event|date:'g:i A l, F jS' }}</strong>. The Closing is held en masse, so please anticipate it lasting several hours.
+
+The Closing will be held in City Hall at <strong>121 N. LaSalle Street, 11th Floor, Room 1103</strong>.
+
+The City will be selling the following lots to you via Quit Claim Deed:
+
+{% for lot in lots %}
+Lot address: {{ lot.address.street }}
+Lot PIN: #{{ lot.pin|make_display_pin }}
+{% endfor %}
+
+Below are the items you will need to bring to the Closing:
+
+1. <strong>A State-Issued Picture ID</strong>
+
+2. <strong>FOR EACH LOT - A Money Order</strong> made payable to <strong>COOK COUNTY RECORDER OF DEEDS</strong> in the amount of <strong>$56.00</strong>. The PIN and Address for the property you are purchasing needs to be in the memo along with your telephone number. If you are purchasing more than one property, <strong>you need a separate money order for each property.</strong> The money order covers the recording costs.
+
+3. <strong>FOR EACH LOT - A Personal Check</strong> made payable to the <strong>CITY OF CHICAGO</strong> in the amount of <strong>$1.00</strong>. If you are purchasing more than one property, <strong>you need a separate check for each property.</strong> The check covers the purchase price of the property.
+
+4. <strong>A Pen</strong>
+
+5. <strong>FOR EACH LOT - A Self Addressed, 9x12 Sized Envelope.</strong> We will mail your recorded deed back to you using this envelope. You do <u>not</u> need to provide postage.
+
+Looking forward to seeing you at the Closing!
+
+Sincerely,
+Jeanne Chandler

@@ -16,6 +16,12 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--closing_invitations',
+                            help='Send closing invitations to applicants')
+
+        parser.add_argument('--date',
+                            help='Date in format YYYY-MM-DD for emails, etc.')
+
         parser.add_argument('--closing_time',
                             action='store_true',
                             help='Send closing notifications to applicants')
@@ -67,8 +73,103 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['closing_invitations']:
+            n = int(options['closing_invitations'])
+            date = datetime.strptime(options['date'], '%Y-%m-%d')
+
+            with connection.cursor() as cursor:
+                query = '''
+                    SELECT
+                      email,
+                      ARRAY_AGG(lot_id) AS pins,
+                      ARRAY_AGG(id) AS status_ids
+                    FROM (
+                      SELECT
+                        email,
+                        status.lot_id,
+                        status.id
+                      FROM lots_admin_application AS app
+                      JOIN lots_admin_applicationstatus AS status
+                      ON app.id = status.application_id
+                      JOIN lots_admin_applicationstep AS step
+                      ON status.current_step_id = step.id
+                      WHERE step = 10
+                        AND closing_invite_sent = False
+                      ORDER BY last_name, first_name
+                    ) AS applicants
+                    GROUP BY email
+                    LIMIT {n}
+                '''.format(n=n)
+
+                cursor.execute(query)
+
+                applicant_list = [(email, pins, status_ids) for email, pins, status_ids in cursor]
+
+                date_fmt = '%Y-%m-%d %H:%M'
+
+                log_fmt = '{date} {applicant} ({email}, {phone}) invited to ' + \
+                    'Closing {event} for lots #{pins}'
+
+                for idx, applicant in enumerate(applicant_list, start=1):
+                    email, pins, status_ids = applicant
+
+                    # Status ID filter prevents us from grabbing an Application
+                    # with a shared email address that does _not_ belong to the
+                    # applicant we mean to notify
+
+                    applications = Application.objects\
+                                              .filter(email=email)\
+                                              .filter(applicationstatus__id__in=status_ids)
+
+                    application = applications.first()
+
+                    lots = [Lot.objects.get(pin=pin) for pin in pins]
+
+                    date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
+
+                    # Invite half the applicants to the morning event, and
+                    # half to the afternoon event, using len of applicant list
+                    # rather than initial n to handle case where we get fewer
+                    # than n applicants
+
+                    if idx <= len(applicant_list) / 2:
+                        date_parts += [9, 0]
+                        event = datetime(*date_parts)
+                    else:
+                        date_parts += [13, 0]
+                        event = datetime(*date_parts)
+
+                    context = {
+                        'app': application,
+                        'lots': lots,
+                        'event': event,
+                    }
+
+                    self.send_email(
+                        'closing_invitation_email',
+                        'Large Lot Closing Date and Time',
+                        email,
+                        context,
+                    )
+
+                    # Update all because we only want to send one invitation
+                    # per applicant (who may have multiple applications)
+
+                    for app in applications:
+                        app.closing_invite_sent = True
+                        app.save()
+
+                    print(log_fmt.format(
+                        date=datetime.now().strftime(date_fmt),
+                        applicant=' '.join([application.first_name, application.last_name]),
+                        email=application.email,
+                        phone=application.phone,
+                        event=event.strftime(date_fmt),
+                        pins=', #'.join(str(pin) for pin in pins),
+                    ))
+
         if options['closing_time']:
-           with connection.cursor() as cursor:
+            with connection.cursor() as cursor:
                 query = '''
                     SELECT email, array_agg(status.lot_id) AS pins, array_agg(status.id) AS status_ids
                     FROM lots_admin_application AS app
