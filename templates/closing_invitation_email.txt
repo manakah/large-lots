@@ -11,7 +11,7 @@
 
 Dear {{ app.first_name}},
 
-Your Large Lot Closing Date and time has been scheduled for <strong>{{ event|date:'l, F js at g:i A' }}</strong>. The Closing is held en masse, so please anticipate it lasting several hours.
+Your Large Lot Closing Date and time has been scheduled for <strong>{{ event|date:'g:i A l, F jS' }}</strong>. The Closing is held en masse, so please anticipate it lasting several hours.
 
 The Closing will be held in City Hall at <strong>121 N. LaSalle Street, 11th Floor, Room 1103</strong>.
 

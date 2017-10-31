@@ -17,7 +17,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--closing_invitations',
-                            action='store_true',
                             help='Send closing invitations to applicants')
 
         parser.add_argument('--date',
