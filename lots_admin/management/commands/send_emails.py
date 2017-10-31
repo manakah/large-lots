@@ -128,9 +128,11 @@ class Command(BaseCommand):
                     date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
 
                     # Invite half the applicants to the morning event, and
-                    # half to the afternoon event
+                    # half to the afternoon event, using len of applicant list
+                    # rather than initial n to handle case where we get fewer
+                    # than n applicants
 
-                    if idx <= n / 2:
+                    if idx <= len(applicant_list) / 2:
                         date_parts += [9, 0]
                         event = datetime(*date_parts)
                     else:
