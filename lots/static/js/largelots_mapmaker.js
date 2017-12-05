@@ -176,13 +176,13 @@ var LargeLots = {
           soldSQL = 'select * from all_sold_lots where false';
       }
       if(checks.indexOf('current') >= 0){
-          currentSQL = 'select * from ' + LargeLots.cartodb_table;
+          currentSQL = 'select * from ' + LargeLots.cartodb_table + LargeLots.mainWhere;
       }
       else {
           currentSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
       }
       if(checks.indexOf('applied') >= 0){
-          appliedSQL = 'select * from ' + LargeLots.cartodb_table + ' where pin_nbr in (' + applied_pins + ')';
+          appliedSQL = 'select * from ' + LargeLots.cartodb_table + ' where pin_nbr in (' + pins_under_review + ')';
       }
       else {
           appliedSQL = 'select * from ' + LargeLots.cartodb_table + ' where false';
