@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load lots_filters %}
+{% load staticfiles %}
+{% load bootstrap_pagination %}
+{% block extra_css %}
+<link href="{% static 'css/dataTables.bootstrap.css' %}" rel="stylesheet">
+{% endblock %}
+{% block title %}Principal Profile Form{% endblock %}
+{% block content %}
+
+<form action="/principal-profile-form/" method="post">
+    <div class="form-group">
+        {% csrf_token %}
+        {% for field in form %}
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            <div class="input-group">{{ field }}</div>
+        {% endfor %}
+    </div>
+    <input type="submit" value="Submit" class="btn btn-primary btn-lg" />
+</form>
+
+{% endblock %}
