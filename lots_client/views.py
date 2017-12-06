@@ -40,10 +40,12 @@ def home(request):
     sold_count = get_lot_count('all_sold_lots')
     current_count = get_lot_count(settings.CURRENT_CARTODB)
 
+    # Find all pins with active applications
     pins_under_review = set()
     for status in ApplicationStatus.objects.filter(denied=False).exclude(current_step__step=11):
         pins_under_review.add(status.lot_id)
 
+    # Find all pins sold in the most recent LargeLots cycle
     pins_sold = set()
     for status in ApplicationStatus.objects.filter(denied=False).filter(current_step__step=11):
         pins_sold.add(status.lot_id)

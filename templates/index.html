@@ -162,7 +162,12 @@
       var pins_under_review = "{{pins_under_review|safe}}".replace('{', '').replace('}', '');
       var pins_sold = "{{pins_sold|safe}}".replace('{', '').replace('}', '');
 
+      console.log("review", pins_under_review)
+      console.log("sold", pins_sold)
+
       $(function() {
+        // The main SQL clause finds pins available in the most recent LargeLots cycle.
+        // The extra layers find: pins sold in previous cycles + pins sold in most recent cycle and pins under review.
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
@@ -170,22 +175,31 @@
             mainWhere: " where pin_nbr not in (" + pins_sold + ") and pin_nbr not in (" + pins_under_review + ")",
             overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
-            extra_sublayers: [{
-                sql: "select * from all_sold_lots",
-                cartocss: $('#map-styles-sold').html().trim(),
-                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community, status',
-            },
+            extra_sublayers: [
             {
-                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + ")",
+                sql: "select * from all_sold_lots",
+                // sql: "(select pin, pin_nbr, street_name, street_direction, street_type, ward::int from all_sold_lots) UNION ALL (select pin, pin_nbr, street_name, street_direction, street_type, ward::int from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))",
                 cartocss: $('#map-styles-sold').html().trim(),
-                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
+                // interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community, status',
+                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community',
             },
+
+
+            // {
+            //     sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + ")",
+            //     cartocss: $('#map-styles-sold').html().trim(),
+            //     interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
+            // },
             {
                 sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_under_review + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]
         }
+
+        console.log("(select pin, pin_nbr, street_name, street_direction, street_type, ward::int from all_sold_lots) UNION ALL (select pin, pin_nbr, street_name, street_direction, street_type, ward::int from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))")
+
+        // console.log("SELECT sold.*, expansion.* FROM all_sold_lots AS sold, large_lots_2016_fall_expansion AS expansion WHERE ST_Intersects(sold.the_geom, expansion.the_geom) OR expansion.pin_nbr in (" + pins_sold + ")")
 
         LargeLots.getOneParcel = function(pin_nbr){
             if (LargeLots.lastClickedLayer){
