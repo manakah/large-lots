@@ -422,8 +422,16 @@ def upload_confirm(request, tracking_id):
     })
 
 def principal_profile_form(request):
+
+    application = Application.objects.first()
+
     form = PrincipalProfileForm()
-    return render(request, 'principal_profile.html', {'form': form,})
+
+    return render(request, 'principal_profile.html', {
+        'form': form,
+        'application': application,
+        'lots': application.lot_set.all(),
+    })
 
 def wintrust_invitation(request):
     with open('lots/static/images/Invitation_LargeLot_Workshop.pdf', 'rb') as pdf:

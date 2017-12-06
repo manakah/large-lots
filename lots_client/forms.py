@@ -179,5 +179,8 @@ class PrincipalProfileForm(forms.ModelForm):
         super(PrincipalProfileForm, self).__init__(*args, **kwargs)
 
         for field_name, field_obj in self.fields.items():
-            field_obj.widget.attrs['class'] = 'form-control'
+            field_obj.widget.attrs.update({
+                'class': 'form-control',
+            })
+
 
