@@ -32,7 +32,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
-from lots_client.forms import ApplicationForm, DeedUploadForm
+from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
 
 def home(request):
@@ -421,6 +421,10 @@ def upload_confirm(request, tracking_id):
         'lots': lots,
     })
 
+def principal_profile_form(request):
+    form = PrincipalProfileForm()
+    return render(request, 'principal_profile.html', {'form': form,})
+
 def wintrust_invitation(request):
     with open('lots/static/images/Invitation_LargeLot_Workshop.pdf', 'rb') as pdf:
         response = HttpResponse(pdf.read(),content_type='application/pdf')
@@ -432,15 +436,6 @@ def wintrust_announcement(request):
         response = HttpResponse(pdf.read(),content_type='application/pdf')
         response['Content-Disposition'] = 'filename=some_file.pdf'
         return response
-
-def principal_profile_form(request):
-    filename = 'lots/static/documents/PrincipalProfileForm.pdf'
-    data = open(filename, "rb").read()
-    response = HttpResponse(data, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=PrincipalProfileForm.pdf'
-    response['Content-Length'] = os.path.getsize(filename)
-
-    return response
 
 @csrf_exempt
 def eds_submission(request):

@@ -97,3 +97,14 @@ class ApplicationStatus(models.Model):
 
     def __str__(self):
         return str(self.application) + " " + str(self.lot)
+
+class PrincipalProfile(models.Model):
+    application = models.ForeignKey('Application', editable=False)
+    date_of_birth = models.DateField()
+    social_security_number = models.CharField(max_length=11)
+    drivers_license_number = models.CharField(max_length=20)
+    license_plate_number = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return '{} Principal Profile'.format(str(self.application))

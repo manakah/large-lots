@@ -11,6 +11,8 @@ from pdfid.pdfid import PDFiD
 from django.conf import settings
 from django import forms
 
+from lots_admin.models import PrincipalProfile
+
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -163,3 +165,19 @@ class DeedUploadForm(forms.Form):
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
         return self.cleaned_data['deed_image']
+
+
+class PrincipalProfileForm(forms.ModelForm):
+    class Meta:
+        model = PrincipalProfile
+        fields = ['date_of_birth',
+                  'social_security_number',
+                  'drivers_license_number',
+                  'license_plate_number',]
+
+    def __init__(self, *args, **kwargs):
+        super(PrincipalProfileForm, self).__init__(*args, **kwargs)
+
+        for field_name, field_obj in self.fields.items():
+            field_obj.widget.attrs['class'] = 'form-control'
+
