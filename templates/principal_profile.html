@@ -63,10 +63,11 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="form-group row" id="additional-form-{{ forloop.counter0 }}">
+                <div id="additional-form-{{ forloop.counter0 }}">
+                <div class="form-group row">
                     <h2>
-                        Additional information – Person {{ forloop.counter0 }}
-                        <button class="btn btn-warning btn-sm pull-right" id="delete-{{ forloop.counter0 }}">
+                        Additional information – Person <span id="count">{{ forloop.counter0 }}</span>
+                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
                             <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
                         </button>
                     </h2>
@@ -75,7 +76,7 @@
                     <label class="col-form-label" for="{{ form.first_name.auto_id }}">
                         <strong>{{ form.first_name.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control">
+                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
                     {% for error in form.first_name.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -84,7 +85,7 @@
                     <label class="col-form-label" for="{{ form.last_name.auto_id }}">
                         <strong>{{ form.last_name.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control">
+                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}">
                     {% for error in form.last_name.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -93,7 +94,7 @@
                     <label class="col-form-label" for="{{ form.home_address.auto_id }}">
                         <strong>{{ form.home_address.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control">
+                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
                     {% for error in form.home_address.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -114,7 +115,7 @@
                     <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
                         <strong>{{ form.social_security_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control">
+                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
                     {% for error in form.social_security_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -123,7 +124,7 @@
                     <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
                         <strong>{{ form.drivers_license_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control">
+                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
                     {% for error in form.drivers_license_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -132,11 +133,14 @@
                     <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
                         <strong>{{ form.license_plate_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control">
+                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
                     {% for error in form.license_plate_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
                 </div>
+                {% if not forloop.first %}
+                </div> {# Close the container div for subsequent forms. #}
+                {% endif %}
             {% endfor %}
 
             <div id="extra-form-container">
@@ -161,7 +165,7 @@
         <div id="additional-form-__prefix__">
             <div class="form-group row">
                 <h2>
-                    Additional information – Person __prefix__
+                    Additional information – Person <span id="count">__prefix__</span>
                     <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="__prefix__">
                         <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
                     </button>
@@ -172,7 +176,7 @@
                     <label class="col-form-label" for="{{ form.first_name.auto_id }}">
                         <strong>{{ form.first_name.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control">
+                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
                     {% for error in form.first_name.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -181,7 +185,7 @@
                     <label class="col-form-label" for="{{ form.last_name.auto_id }}">
                         <strong>{{ form.last_name.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control">
+                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
                     {% for error in form.last_name.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -190,7 +194,7 @@
                     <label class="col-form-label" for="{{ form.home_address.auto_id }}">
                         <strong>{{ form.home_address.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control">
+                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
                     {% for error in form.home_address.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -210,7 +214,7 @@
                     <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
                         <strong>{{ form.social_security_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control">
+                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
                     {% for error in form.social_security_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -219,7 +223,7 @@
                     <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
                         <strong>{{ form.drivers_license_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control">
+                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
                     {% for error in form.drivers_license_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -228,7 +232,7 @@
                     <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
                         <strong>{{ form.license_plate_number.label }}</strong>
                     </label>
-                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control">
+                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
                     {% for error in form.license_plate_number.errors %}
                         <span class="help-block">{{ error }}</span>
                     {% endfor %}
@@ -259,25 +263,72 @@
     });
 
     function add_form() {
-        // Grab the number forms from our FormSet.
-        idx = $('#id_form-TOTAL_FORMS').val();
+        // Grab the number forms from our formset.
+        var idx = $('#id_form-TOTAL_FORMS').val();
 
-        // FormSet forms are zero-indexed, e.g., use the current total as the
+        // Formset forms are zero-indexed, e.g., use the current total as the
         // index on the new form.
         $('#extra-form-container').append(form.replace(/__prefix__/g, idx));
 
         // Increment the total.
         $('#id_form-TOTAL_FORMS').val(parseInt(idx) + 1);
-    }
+    };
 
     function delete_form(form_index) {
         // Remove the form.
-        $('#additional-form-' + form_index).remove();
+        // $('#additional-form-' + form_index).remove();
+        $('#additional-form-' + form_index).fadeOut(500, function(){
+            $(this).remove();
+            reindex_forms();
+        });
 
         // Decrement TOTAL_FORMS.
-        idx = $('#id_form-TOTAL_FORMS').val();
+        var idx = $('#id_form-TOTAL_FORMS').val();
+        console.log(idx);
         $('#id_form-TOTAL_FORMS').val(parseInt(idx) - 1);
-    }
+        console.log($('#id_form-TOTAL_FORMS').val());
+    };
+
+    // Forms should have a continuous index. If a user adds three forms, then
+    // deletes the first form she added, reindex the remaining forms, starting
+    // at one.
+    function reindex_forms() {
+        var idx = 1;
+
+        var additional_forms = $('[id^="additional-form-"]').filter(function() {
+            // Omit the template form.
+            return this.id.indexOf('prefix') < 0;
+        })
+
+        additional_forms.each(function() {
+            // Grab the initial index of the form.
+            var initial_idx = $(this).attr('id').slice(-1);
+
+            // Update the container ID.
+            $(this).attr('id', $(this).attr('id').replace(initial_idx, idx));
+
+            $(this).find('#count').text(idx);
+
+            // Update the input IDs and names.
+            $(this).find('input').each(function() {
+                $(this).attr('id', $(this).attr('id').replace(initial_idx, idx));
+                $(this).attr('name', $(this).attr('name').replace(initial_idx, idx));
+            });
+
+            // Update the input labels.
+            $(this).find('label').each(function() {
+                $(this).attr('for', $(this).attr('for').replace(initial_idx, idx));
+            })
+
+            // Update the delete button.
+            $(this).find('button').each(function() {
+                $(this).attr('id', this.id.replace(initial_idx, idx));
+                $(this).attr('value', $(this).attr('value').replace(initial_idx, idx));
+            });
+
+            idx ++;
+        });
+    };
 
 </script>
 

@@ -439,10 +439,7 @@ def principal_profile_form(request):
     formset = PrincipalProfileFormSet(initial=[initial_data])
 
     if request.method == 'POST':
-        data = request.POST.dict()
-        data.pop('csrfmiddlewaretoken')
-
-        formset = PrincipalProfileFormSet(data)
+        formset = PrincipalProfileFormSet(request.POST)
         print(formset.data)
         if formset.is_valid():
             pass
