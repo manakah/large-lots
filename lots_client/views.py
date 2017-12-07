@@ -29,9 +29,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import formset_factory
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
+from lots_admin.models import Lot, Application, Address, ApplicationStep,\
+    ApplicationStatus, PrincipalProfile
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
 
@@ -425,10 +427,31 @@ def principal_profile_form(request):
 
     application = Application.objects.first()
 
-    form = PrincipalProfileForm()
+    PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
+
+    # Prepopulate applicant's name and address
+    initial_data = {
+        'first_name': application.first_name,
+        'last_name': application.last_name,
+        'home_address': application.contact_address.street,
+    }
+
+    formset = PrincipalProfileFormSet(initial=[initial_data])
+
+    if request.method == 'POST':
+        data = request.POST.dict()
+        data.pop('csrfmiddlewaretoken')
+
+        formset = PrincipalProfileFormSet(data)
+        print(formset.data)
+        if formset.is_valid():
+            pass
+#            profile = PrincipalProfile(**data)
+#            profile.application = application
+#            profile.save()
 
     return render(request, 'principal_profile.html', {
-        'form': form,
+        'formset': formset,
         'application': application,
         'lots': application.lot_set.all(),
     })

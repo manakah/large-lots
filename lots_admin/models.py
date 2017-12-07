@@ -99,7 +99,8 @@ class ApplicationStatus(models.Model):
         return str(self.application) + " " + str(self.lot)
 
 class PrincipalProfile(models.Model):
-    application = models.ForeignKey('Application', editable=False)
+    application = models.ForeignKey('Application')
+    related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
     date_of_birth = models.DateField()
     social_security_number = models.CharField(max_length=11)
     drivers_license_number = models.CharField(max_length=20)
@@ -108,3 +109,15 @@ class PrincipalProfile(models.Model):
 
     def __str__(self):
         return '{} Principal Profile'.format(str(self.application))
+
+class RelatedPerson(models.Model):
+    application = models.ForeignKey('Application')
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+    address = models.ForeignKey(Address, related_name='home_address')
+
+    def __str__(self):
+        return '{0} {1} related to Application for {2}'.format(self.first_name,
+                                                               self.last_name,
+                                                               str(self.application))
+

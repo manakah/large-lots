@@ -167,20 +167,14 @@ class DeedUploadForm(forms.Form):
         return self.cleaned_data['deed_image']
 
 
-class PrincipalProfileForm(forms.ModelForm):
-    class Meta:
-        model = PrincipalProfile
-        fields = ['date_of_birth',
-                  'social_security_number',
-                  'drivers_license_number',
-                  'license_plate_number',]
-
-    def __init__(self, *args, **kwargs):
-        super(PrincipalProfileForm, self).__init__(*args, **kwargs)
-
-        for field_name, field_obj in self.fields.items():
-            field_obj.widget.attrs.update({
-                'class': 'form-control',
-            })
-
-
+class PrincipalProfileForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    home_address = forms.CharField()
+    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
+        years=[year for year in range(2017, 1900, -1)],
+        attrs={'class': 'form-control'})
+    )
+    social_security_number = forms.CharField()
+    drivers_license_number = forms.CharField()
+    license_plate_number = forms.CharField()
