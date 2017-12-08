@@ -170,10 +170,10 @@ var LargeLots = {
       var sql = 'select * from ' + LargeLots.cartodb_table + ' where ';
       var clauses = []
       if(checks.indexOf('sold') >= 0){
-          soldSQL = 'select * from all_sold_lots';
+          soldSQL = "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))";
       }
       else {
-          soldSQL = 'select * from all_sold_lots where false';
+          soldSQL = '(select * from all_sold_lots where false)';
       }
       if(checks.indexOf('current') >= 0){
           currentSQL = 'select * from ' + LargeLots.cartodb_table + LargeLots.mainWhere;
