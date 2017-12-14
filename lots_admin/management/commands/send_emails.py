@@ -119,6 +119,7 @@ class Command(BaseCommand):
 
             # Set up denial globals
             no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
+            admin_user = User.objects.get(id=5)
 
             # Define some reusable functionality.
 
@@ -168,7 +169,7 @@ class Command(BaseCommand):
                         for app_status in application.applicationstatus_set\
                                                      .filter(current_step_id__step=7):
 
-                            self.deny(app_status, no_eds)
+                            self.deny(app_status, no_eds, admin_user)
 
                         assemble_and_send_email(application, lots)
 
@@ -184,7 +185,7 @@ class Command(BaseCommand):
                         for app_status in app.applicationstatus_set\
                                              .filter(current_step_id__step=7):
 
-                            self.deny(app_status, no_eds)
+                            self.deny(app_status, no_eds, admin_user)
 
                     application = applications.first()
 
@@ -714,15 +715,14 @@ class Command(BaseCommand):
         time.sleep(5)
 
 
-    def deny(self, app_status, denial_reason):
+    def deny(self, app_status, denial_reason, admin_user):
         '''Deny the given application and create a corresponding review
         object.
 
         :app_status - ApplicationStatus object
         :denial_reason - DenialReason object
+        :admin_user - User object (usually, an admin)
         '''
-        admin_user = User.objects.get(id=5)
-
         app_status.denied = True
         app_status.current_step = None
         app_status.save()
