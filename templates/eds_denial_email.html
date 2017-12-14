@@ -1,0 +1,46 @@
+{% load lots_filters %}
+
+<div style="font-family: Calibri, Arial, sans-serif; font-size: 14px;">
+    <div class="row">
+        <div class="col-md-12">
+            <a id='logo' href="http://largelots.org">
+            <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+            </a>
+            <p>{{ today|date:'F j, Y' }}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {{ app.first_name}} {{ app.last_name }}<br />
+            {{ app.owned_address }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Dear {{ app.first_name }},</p>
+
+            <p>Your Large Lot Application is being denied because you did not provide EDS and PPF information within the required time frame.</p>
+
+            <p>The City will not be moving forward with the sale of the following lots to you:</p>
+
+            <ul>
+            {% for lot in lots %}
+                <li>
+                    {{ lot.address }}<br />
+                    {{ lot.pin | make_display_pin }}
+                </li>
+            {% endfor %}
+            </ul>
+
+            <p>You may be able to apply again in future rounds of the Large Lot Program. Check our website, www.largelots.org, periodically for information on our next application round.</p>
+
+            <p>We look forward to working with you in the future.</p>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+              <p>Best,</p>
+              <p>Jeanne Chandler</p>
+          </div>
+        </div>
+    </div>
+</div>
