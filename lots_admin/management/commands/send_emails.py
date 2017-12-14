@@ -20,6 +20,10 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send denial emails to applicants who did not submit EDS')
 
+        parser.add_argument('--separate_emails',
+                            help='In the case of shared email addresses, send ' + \
+                                'emails for each application separately')
+
         parser.add_argument('--closing_invitations',
                             help='Send closing invitations to applicants')
 
@@ -78,7 +82,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['eds_denial']:
-            # TO-DO: Handle two emails to seldridge@bync.org
+
+            if options['separate_emails']:
+                separate_emails = options['separate_emails'].split(',')
+            else:
+                separate_emails = []
 
             # Get email and application IDs where there are active applications
             # on step 7.
@@ -103,39 +111,37 @@ class Command(BaseCommand):
             log_fmt = '{date} {applicant} ({email}) denied due to ' + \
                     'lack of EDS for lots #{pins}'
 
-            # Set up automated denials.
+            # Set up denial globals
             admin_user = User.objects.get(id=5)
             no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
 
-            for email, app_ids in applicants:
-                # Get application objects where the applicant is on step 7.
-                # (Some applicants have more than one application.)
-                applications = Application.objects.filter(id__in=list(app_ids))
+            # Define some reusable functionality
+            def step_7_lots_list(application_obj):
+                '''Return list of lots for given applicant for which there
+                is an active application on step 7.
+                '''
+                return list(application_obj.lot_set\
+                                           .filter(application__applicationstatus__current_step_id__step=7)\
+                                           .filter(application__applicationstatus__denied=False)\
+                                           .distinct())
 
-                lots = []
+            def deny(app_status):
+                '''Deny the given application and create a corresponding review
+                object.
+                '''
+                app_status.denied = True
+                app_status.current_step = None
+                app_status.save()
 
-                for app in applications:
-                    # Add the lots being denied to the lots array.
-                    lots += list(app.lot_set\
-                                    .filter(application__applicationstatus__current_step_id__step=7)\
-                                    .filter(application__applicationstatus__denied=False)\
-                                    .distinct())
+                review = Review(reviewer=admin_user,
+                                denial_reason=no_eds,
+                                application=app_status,
+                                email_sent=True)
 
-                    # Deny the appropriate applications.
-                    for app_status in app.applicationstatus_set\
-                                         .filter(current_step_id__step=7):
+                review.save()
 
-                        app_status.denied = True
-                        app_status.current_step = None
-                        app_status.save()
-
-                        review = Review(reviewer=admin_user,
-                                        denial_reason=no_eds,
-                                        application=app_status,
-                                        email_sent=True)
-
-                        review.save()
-
+            def assemble_and_send_email(application, lots):
+                '''Assemble email context and send email.'''
                 context = {
                     'app': application,
                     'lots': lots
@@ -144,10 +150,11 @@ class Command(BaseCommand):
                 self.send_email(
                     'eds_email',
                     'LargeLots application - Denial',
-                    email,
+                    application.email,
                     context
                 )
 
+            def log(application, lots):
                 print(log_fmt.format(
                     date=datetime.now().strftime('%Y-%m-%d %H:%M'),
                     applicant=' '.join([application.first_name, application.last_name]),
@@ -155,6 +162,45 @@ class Command(BaseCommand):
                     phone=application.phone,
                     pins=', #'.join(str(lot.pin) for lot in lots)
                 ))
+
+            for email, app_ids in applicants:
+                # Get application objects where the applicant is on step 7.
+                # (Some applicants have more than one application.)
+                applications = Application.objects.filter(id__in=list(app_ids))
+
+                if email in separate_emails:
+                    # In the case of a shared email address, send denial
+                    # emails for each individual application.
+                    for application in applications:
+                        lots = step_7_lots_list(application)
+
+                        for app_status in application.applicationstatus_set\
+                                                     .filter(current_step_id__step=7):
+                            deny(app_status)
+
+                        assemble_and_send_email(application, lots)
+
+                        log(application, lots)
+
+                    continue
+
+                else:
+                    # Aggregate information from applications and send one email.
+                    lots = []
+
+                    for app in applications:
+                        lots += step_7_lots_list(app)
+
+                        for app_status in app.applicationstatus_set\
+                                             .filter(current_step_id__step=7):
+
+                            deny(app_status)
+
+                application = applications.first()
+
+                assemble_and_send_email(application, lots)
+
+                log(application, lots)
 
         if options['closing_invitations']:
             n = int(options['closing_invitations'])

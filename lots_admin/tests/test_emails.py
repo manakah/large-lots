@@ -95,14 +95,34 @@ def test_closing_invitations(django_db_setup, capsys):
 
 @pytest.mark.django_db
 def test_eds_denials(django_db_setup, capsys):
-    applicants = Application.objects.filter(applicationstatus__current_step_id__step=7)\
-                                    .filter(applicationstatus__denied=False)\
-                                    .distinct()
+    applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
+                                      .filter(applicationstatus__denied=False)\
+                                      .distinct()
 
-    denied_applicants = [app.id for app in applicants]
+    # Store active applications on step 7
+    applications_to_deny = [app.id for app in applications]
+
+    # Assert there are, in fact, applications we need to deny
+    assert len(applications_to_deny)
 
     with patch.object(Command, 'send_email') as mock_send:
-        call_command('send_emails', eds_denial=True)
+        call_command('send_emails', eds_denial=True, separate_emails='weezerules@yahoo.com')
 
-    # Assert denied applicants are in the log messages
-    # Assert they've all been denied in the db
+    log, _ = capsys.readouterr()
+
+    for app_id in applications_to_deny:
+        app = Application.objects.get(id=app_id)
+
+        if app.email == 'weezerules@yahoo.com':
+            # Assert two emails sent
+            assert log.count(app.email) == 2
+        else:
+            # Assert one email sent
+            assert log.count(app.email) == 1
+
+        # Assert no applications remain on step 7
+        assert all([status.current_step != 7 for status in app.applicationstatus_set.all()])
+
+        # If there current step is None, assert application was denied
+        assert all([status.denied for status in app.applicationstatus_set.all() if not status.current_step])
+
