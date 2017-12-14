@@ -140,7 +140,7 @@ class Command(BaseCommand):
                 }
 
                 self.send_email(
-                    'eds_email',
+                    'eds_denial_email',
                     'LargeLots application - Denial',
                     application.email,
                     context
