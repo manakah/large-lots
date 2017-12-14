@@ -47,7 +47,7 @@
         <div class="panel panel-default panel-counter">
           <div class="panel-heading lead">Total lots sold</div>
           <div class="panel-body">
-            <strong><span class="counter">544</span></span></strong>
+            <strong><span class="counter">{{sold_count}}</span></span></strong>
           </div>
         </div>
       </div>
@@ -159,23 +159,27 @@
     <script src="{% static 'js/lib/leaflet-google.js' %}" ></script>
     <script src="{% static 'js/largelots_mapmaker.js' %}"></script>
     <script>
-      var applied_pins = "{{applied_pins|safe}}".replace('{', '').replace('}', '');
+      var pins_under_review = "{{pins_under_review|safe}}".replace('{', '').replace('}', '');
+      var pins_sold = "{{pins_sold|safe}}".replace('{', '').replace('}', '');
 
       $(function() {
+        // The main SQL clause finds pins available in the most recent LargeLots cycle.
+        // The extra layers find: pins sold in previous cycles + pins sold in most recent cycle and pins under review.
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
             cartodb_table: 'large_lots_2016_fall_expansion',
-            mainWhere: "",
+            mainWhere: " where pin_nbr not in (" + pins_sold + ") and pin_nbr not in (" + pins_under_review + ")",
             overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
-            extra_sublayers: [{
-                sql: "select * from all_sold_lots",
+            extra_sublayers: [
+            {
+                sql: "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select  cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))",
                 cartocss: $('#map-styles-sold').html().trim(),
-                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community, status',
+                interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community',
             },
             {
-                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + applied_pins + ")",
+                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_under_review + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]
@@ -232,13 +236,16 @@
             if (props.square_feet){
                 info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
             }
-            
+
             // Add colorful status labels
-            if (props.status == 'sold') {
+            if ((props.status == 'sold') || (pins_sold.indexOf(props.pin_nbr) >= 0)) {
               info += "<tr><td>Status</td><td><span class='badge badge-purple'>Sold</span></td></tr>"; 
               // Identify pilot name and end date
               var sold_statement = '';
-              if (greater_englewood.indexOf(props.community) > -1) {
+              if (pins_sold.indexOf(props.pin_nbr) >= 0) {
+                sold_statement = 'Fall 2016 Expansion, which ended on January 31, 2017'
+              }
+              else if (greater_englewood.indexOf(props.community) >= 0) {
                 sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
               }
               else {
@@ -247,7 +254,7 @@
               info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
             }
             else {
-              if (applied_pins.indexOf(props.pin_nbr) > -1 ) {
+              if (pins_under_review.indexOf(props.pin_nbr) >= 0) {
                 if ('{{application_active}}' == 'True') {
                   status = 'Application received'
                 }

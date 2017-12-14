@@ -37,22 +37,27 @@ from lots_client.forms import ApplicationForm, DeedUploadForm
 
 def home(request):
     applications = Application.objects.all()
-    sold_count = get_lot_count('all_sold_lots')
     current_count = get_lot_count(settings.CURRENT_CARTODB)
 
-    applied_pins = set()
+    # Find all pins with active applications
+    pins_under_review = set()
+    for status in ApplicationStatus.objects.filter(denied=False).exclude(current_step__step=11):
+        pins_under_review.add(status.lot_id)
 
-    for status in ApplicationStatus.objects.filter(denied=False):
-        applied_pins.add(status.lot_id)
+    # Find all pins sold in the most recent LargeLots cycle
+    pins_sold = set()
+    for status in ApplicationStatus.objects.filter(denied=False).filter(current_step__step=11):
+        pins_sold.add(status.lot_id)
 
-    pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
-
+    sold_count = get_lot_count('all_sold_lots') + len(pins_sold)
+    
     return render(request, 'index.html', {
         'application_active': application_active(request),
         'applications': applications,
         'sold_count': sold_count,
         'current_count': current_count,
-        'applied_pins': applied_pins,
+        'pins_under_review': pins_under_review,
+        'pins_sold': pins_sold,
         })
 
 def get_lot_count(cartoTable):
