@@ -16,6 +16,10 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
+        parser.add_argument('--eds_denial',
+                            action='store_true',
+                            help='Send denial emails to applicants who did not submit EDS')
+
         parser.add_argument('--closing_invitations',
                             help='Send closing invitations to applicants')
 
@@ -73,6 +77,85 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
+        if options['eds_denial']:
+            # TO-DO: Handle two emails to seldridge@bync.org
+
+            # Get email and application IDs where there are active applications
+            # on step 7.
+            query = '''
+                SELECT
+                  email,
+                  ARRAY_AGG(DISTINCT app.id)
+                FROM lots_admin_application AS app
+                JOIN lots_admin_applicationstatus AS status
+                ON app.id = status.application_id
+                JOIN lots_admin_applicationstep AS step
+                ON status.current_step_id = step.id
+                WHERE denied = False
+                AND step = 7
+                GROUP BY email
+            '''
+
+            with connection.cursor() as cursor:
+                cursor.execute(query)
+                applicants = [(email, app_ids) for email, app_ids in cursor]
+
+            log_fmt = '{date} {applicant} ({email}) denied due to ' + \
+                    'lack of EDS for lots #{pins}'
+
+            # Set up automated denials.
+            admin_user = User.objects.get(id=5)
+            no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
+
+            for email, app_ids in applicants:
+                # Get application objects where the applicant is on step 7.
+                # (Some applicants have more than one application.)
+                applications = Application.objects.filter(id__in=list(app_ids))
+
+                lots = []
+
+                for app in applications:
+                    # Add the lots being denied to the lots array.
+                    lots += list(app.lot_set\
+                                    .filter(application__applicationstatus__current_step_id__step=7)\
+                                    .filter(application__applicationstatus__denied=False)\
+                                    .distinct())
+
+                    # Deny the appropriate applications.
+                    for app_status in app.applicationstatus_set\
+                                         .filter(current_step_id__step=7):
+
+                        app_status.denied = True
+                        app_status.current_step = None
+                        app_status.save()
+
+                        review = Review(reviewer=admin_user,
+                                        denial_reason=no_eds,
+                                        application=app_status,
+                                        email_sent=True)
+
+                        review.save()
+
+                context = {
+                    'app': application,
+                    'lots': lots
+                }
+
+                self.send_email(
+                    'eds_email',
+                    'LargeLots application - Denial',
+                    email,
+                    context
+                )
+
+                print(log_fmt.format(
+                    date=datetime.now().strftime('%Y-%m-%d %H:%M'),
+                    applicant=' '.join([application.first_name, application.last_name]),
+                    email=application.email,
+                    phone=application.phone,
+                    pins=', #'.join(str(lot.pin) for lot in lots)
+                ))
+
         if options['closing_invitations']:
             n = int(options['closing_invitations'])
             date = datetime.strptime(options['date'], '%Y-%m-%d')

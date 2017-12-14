@@ -1,0 +1,29 @@
+{% load lots_filters %}
+
+
+** $1 LARGE LOTS
+------------------------------------------------------------
+{{ today|date:'F j, Y' }}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+
+
+Dear {{ app.first_name}},
+
+Your Large Lot Application is being denied because you did not provide EDS and PPF information within the required time frame.
+
+The City will not be moving forward with the sale of the following lots to you:
+
+{% for lot in lots %}
+    {{ lot.address }}
+    {{ lot.pin | make_display_pin }}
+{% endfor %}
+
+You may be able to apply again in future rounds of the Large Lot Program. Check our website, www.largelots.org, periodically for information on our next application round.
+
+We look forward to working with you in the future.
+
+Best,
+
+Jeanne Chandler

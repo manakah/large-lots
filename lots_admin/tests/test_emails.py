@@ -92,3 +92,17 @@ def test_closing_invitations(django_db_setup, capsys):
     assert all(['2017-11-13' in line for line in lines])
     assert len([line for line in lines if '09:00' in line]) == 1
     assert len([line for line in lines if '13:00' in line]) == 2
+
+@pytest.mark.django_db
+def test_eds_denials(django_db_setup, capsys):
+    applicants = Application.objects.filter(applicationstatus__current_step_id__step=7)\
+                                    .filter(applicationstatus__denied=False)\
+                                    .distinct()
+
+    denied_applicants = [app.id for app in applicants]
+
+    with patch.object(Command, 'send_email') as mock_send:
+        call_command('send_emails', eds_denial=True)
+
+    # Assert denied applicants are in the log messages
+    # Assert they've all been denied in the db
