@@ -236,13 +236,16 @@
             if (props.square_feet){
                 info += "<tr><td>Sq ft</td><td>" + LargeLots.addCommas(Math.floor(props.square_feet)) + "</td></tr>";
             }
-            
+
             // Add colorful status labels
-            if (props.status == 'sold') {
+            if ((props.status == 'sold') || (pins_sold.indexOf(props.pin_nbr) > 0)) {
               info += "<tr><td>Status</td><td><span class='badge badge-purple'>Sold</span></td></tr>"; 
               // Identify pilot name and end date
               var sold_statement = '';
-              if (greater_englewood.indexOf(props.community) > -1) {
+              if (pins_sold.indexOf(props.pin_nbr) > 0) {
+                sold_statement = 'Fall 2016 Expansion, which ended on January 31, 2017'
+              }
+              else if (greater_englewood.indexOf(props.community) > -1) {
                 sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
               }
               else {

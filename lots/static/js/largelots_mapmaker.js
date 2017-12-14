@@ -110,14 +110,16 @@ var LargeLots = {
             LargeLots.lotsLayer = layer.getSubLayer(0);
             allLayers.push(LargeLots.lotsLayer);
             
-            if (layer.getSubLayer(2)) {
-              LargeLots.soldLotsLayer = layer.getSubLayer(2);
-              allLayers.push(LargeLots.soldLotsLayer);
-            }
-            if (layer.getSubLayer(3)) {
-              LargeLots.appliedLotsLayer = layer.getSubLayer(3);
-              allLayers.push(LargeLots.appliedLotsLayer);
-            }
+            if (LargeLots.extra_sublayers) {
+              if (layer.getSubLayer(2)) {
+                LargeLots.soldLotsLayer = layer.getSubLayer(2);
+                allLayers.push(LargeLots.soldLotsLayer);
+              }
+              if (layer.getSubLayer(3)) {
+                LargeLots.appliedLotsLayer = layer.getSubLayer(3);
+                allLayers.push(LargeLots.appliedLotsLayer);
+              }
+            };
 
             // Set interactivity for multiple layers
             $.each(allLayers, function(index, value) {
