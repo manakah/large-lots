@@ -440,9 +440,9 @@ def principal_profile_form(request):
 
     if request.method == 'POST':
         formset = PrincipalProfileFormSet(request.POST)
-        print(formset.data)
         if formset.is_valid():
-            pass
+            import pdb
+            pdb.set_trace()
 #            profile = PrincipalProfile(**data)
 #            profile.application = application
 #            profile.save()
