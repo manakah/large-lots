@@ -12,7 +12,9 @@ from lots_admin.models import Application, ApplicationStatus, ApplicationStep, R
 from lots_admin.look_ups import DENIAL_REASONS
 
 class Command(BaseCommand):
-    help = 'Send bulk emails to Large Lots applicants'
+    help = 'Send bulk emails to Large Lots applicants. By default, all applications ' + \
+        'associated with an email address will be aggregated, and one email will ' + \
+        'be sent. See --separate_emails for handling shared email addresses.'
 
 
     def add_arguments(self, parser):
@@ -21,8 +23,12 @@ class Command(BaseCommand):
                             help='Send denial emails to applicants who did not submit EDS')
 
         parser.add_argument('--separate_emails',
-                            help='In the case of shared email addresses, send ' + \
-                                'emails for each application separately')
+                            help='Comma-separated list of email addresses. ' + \
+                                'In contrast to the default behavior of one aggregate ' + \
+                                'email, separate emails will be sent for each ' + \
+                                'application associated with the provided email ' + \
+                                'addresses. This is useful when one email address ' + \
+                                'is in use by more than one applicant.')
 
         parser.add_argument('--closing_invitations',
                             help='Send closing invitations to applicants')
@@ -112,10 +118,10 @@ class Command(BaseCommand):
                     'lack of EDS for lots #{pins}'
 
             # Set up denial globals
-            admin_user = User.objects.get(id=5)
             no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
 
-            # Define some reusable functionality
+            # Define some reusable functionality.
+
             def step_7_lots_list(application_obj):
                 '''Return list of lots for given applicant for which there
                 is an active application on step 7.
@@ -124,21 +130,6 @@ class Command(BaseCommand):
                                            .filter(application__applicationstatus__current_step_id__step=7)\
                                            .filter(application__applicationstatus__denied=False)\
                                            .distinct())
-
-            def deny(app_status):
-                '''Deny the given application and create a corresponding review
-                object.
-                '''
-                app_status.denied = True
-                app_status.current_step = None
-                app_status.save()
-
-                review = Review(reviewer=admin_user,
-                                denial_reason=no_eds,
-                                application=app_status,
-                                email_sent=True)
-
-                review.save()
 
             def assemble_and_send_email(application, lots):
                 '''Assemble email context and send email.'''
@@ -176,7 +167,8 @@ class Command(BaseCommand):
 
                         for app_status in application.applicationstatus_set\
                                                      .filter(current_step_id__step=7):
-                            deny(app_status)
+
+                            self.deny(app_status, no_eds)
 
                         assemble_and_send_email(application, lots)
 
@@ -192,7 +184,7 @@ class Command(BaseCommand):
                         for app_status in app.applicationstatus_set\
                                              .filter(current_step_id__step=7):
 
-                            deny(app_status)
+                            self.deny(app_status, no_eds)
 
                     application = applications.first()
 
@@ -720,6 +712,27 @@ class Command(BaseCommand):
             print("Not able to send email.")
 
         time.sleep(5)
+
+
+    def deny(self, app_status, denial_reason):
+        '''Deny the given application and create a corresponding review
+        object.
+
+        :app_status - ApplicationStatus object
+        :denial_reason - DenialReason object
+        '''
+        admin_user = User.objects.get(id=5)
+
+        app_status.denied = True
+        app_status.current_step = None
+        app_status.save()
+
+        review = Review(reviewer=admin_user,
+                        denial_reason=denial_reason,
+                        application=app_status,
+                        email_sent=True)
+
+        review.save()
 
 
 
