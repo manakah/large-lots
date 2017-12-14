@@ -182,8 +182,6 @@ class Command(BaseCommand):
 
                         log(application, lots)
 
-                    continue
-
                 else:
                     # Aggregate information from applications and send one email.
                     lots = []
@@ -196,11 +194,11 @@ class Command(BaseCommand):
 
                             deny(app_status)
 
-                application = applications.first()
+                    application = applications.first()
 
-                assemble_and_send_email(application, lots)
+                    assemble_and_send_email(application, lots)
 
-                log(application, lots)
+                    log(application, lots)
 
         if options['closing_invitations']:
             n = int(options['closing_invitations'])
