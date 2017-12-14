@@ -37,7 +37,6 @@ from lots_client.forms import ApplicationForm, DeedUploadForm
 
 def home(request):
     applications = Application.objects.all()
-    sold_count = get_lot_count('all_sold_lots')
     current_count = get_lot_count(settings.CURRENT_CARTODB)
 
     # Find all pins with active applications
@@ -50,6 +49,8 @@ def home(request):
     for status in ApplicationStatus.objects.filter(denied=False).filter(current_step__step=11):
         pins_sold.add(status.lot_id)
 
+    sold_count = get_lot_count('all_sold_lots') + len(pins_sold)
+    
     return render(request, 'index.html', {
         'application_active': application_active(request),
         'applications': applications,
