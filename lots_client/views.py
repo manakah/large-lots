@@ -134,7 +134,7 @@ def parse_address(address):
 
     return (street_number, street_dir, street_name, street_type, unit_number)
 
-def get_lot_address(address, pin=None):
+def get_lot_address(address, pin):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
 
     add_info = {
@@ -460,7 +460,7 @@ def principal_profile_form(request):
                 )
 
                 if idx:
-                    address = get_lot_address(submitted_data['home_address'])
+                    address = get_lot_address(submitted_data['home_address'], None)
 
                     related_person = RelatedPerson(
                         application=application,
@@ -472,8 +472,6 @@ def principal_profile_form(request):
                     related_person.save()
 
                     profile.related_person = related_person
-
-                profile.save()
 
     return render(request, 'principal_profile.html', {
         'formset': formset,
