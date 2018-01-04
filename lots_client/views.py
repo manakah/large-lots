@@ -473,6 +473,8 @@ def principal_profile_form(request):
 
                     profile.related_person = related_person
 
+                profile.save()
+
     return render(request, 'principal_profile.html', {
         'formset': formset,
         'application': application,
