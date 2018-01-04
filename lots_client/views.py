@@ -33,7 +33,7 @@ from django.forms import formset_factory
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep,\
-    ApplicationStatus, PrincipalProfile
+    ApplicationStatus, PrincipalProfile, RelatedPerson
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
 
@@ -134,10 +134,9 @@ def parse_address(address):
 
     return (street_number, street_dir, street_name, street_type, unit_number)
 
-def get_lot_address(address, pin):
+def get_lot_address(address, pin=None):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
-    ward = get_ward(pin)
-    community = get_community(pin)
+
     add_info = {
         'street': address,
         'street_number': street_number,
@@ -147,9 +146,17 @@ def get_lot_address(address, pin):
         'city': 'Chicago',
         'state': 'IL',
         'zip_code': '',
-        'ward': ward,
-        'community': community,
     }
+
+    if pin:
+        ward = get_ward(pin)
+        community = get_community(pin)
+
+        add_info.update({
+            'ward': ward,
+            'community': community,
+        })
+
     add_obj, created = Address.objects.get_or_create(**add_info)
     return add_obj
 
@@ -441,11 +448,32 @@ def principal_profile_form(request):
     if request.method == 'POST':
         formset = PrincipalProfileFormSet(request.POST)
         if formset.is_valid():
-            import pdb
-            pdb.set_trace()
-#            profile = PrincipalProfile(**data)
-#            profile.application = application
-#            profile.save()
+            for idx, form in enumerate(formset.forms):
+                submitted_data = form.cleaned_data
+
+                profile = PrincipalProfile(
+                    application=application,
+                    date_of_birth=submitted_data['date_of_birth'],
+                    social_security_number=submitted_data['social_security_number'],
+                    drivers_license_number=submitted_data['drivers_license_number'],
+                    license_plate_number=submitted_data['license_plate_number'],
+                )
+
+                if idx:
+                    address = get_lot_address(submitted_data['home_address'])
+
+                    related_person = RelatedPerson(
+                        application=application,
+                        first_name=submitted_data['first_name'],
+                        last_name=submitted_data['last_name'],
+                        address=address,
+                    )
+
+                    related_person.save()
+
+                    profile.related_person = related_person
+
+                profile.save()
 
     return render(request, 'principal_profile.html', {
         'formset': formset,
