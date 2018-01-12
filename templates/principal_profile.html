@@ -29,6 +29,32 @@
 
         <hr>
 
+
+        {% if existing_profiles %}
+
+        <div class="alert alert-success">
+            <p><i class="fa fa-fw fa-info-circle" aria-hidden="true"></i> You've already submitted information for:</p>
+
+            <ul>
+            {% for profile in existing_profiles %}
+                <strong>
+                <li>
+                    {% if forloop.first %}
+                        {{ profile.application.first_name }} {{ profile.application.last_name }}
+                    {% else %}
+                        {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
+                    {% endif %}
+                </li>
+                </strong>
+            {% endfor %}
+            </ul>
+            <br />
+            <p>Use the form below to submit additional information if needed.</p>
+        </div>
+
+        {% endif %}
+
+
         <h2>Lot{% if lots|length > 1 %}s{% endif %} applied for</h2>
         {% for lot in lots %}
         <p>
@@ -39,7 +65,7 @@
 
         <h2>Your information</h2>
 
-        <form action="/principal-profile-form/" method="post">
+        <form action="/principal-profile-form/{{ application.tracking_id }}/" method="post">
             <div class="col-md-9">
                 {% csrf_token %}
                 {{ formset.management_form }}
@@ -49,7 +75,7 @@
                 {# than dynamically generated via Javascript. #}
 
                 {% for form in formset %}
-                    {% if forloop.first %} {# Prepopulated from Applicant information #}
+                    {% if forloop.first and not existing_profiles %} {# Prepopulated from Applicant information #}
                     <div class="form-group row">
                         <strong>Name</strong><br />
                         {{ form.first_name.value }} {{ form.last_name.value }}

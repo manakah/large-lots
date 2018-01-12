@@ -31,7 +31,8 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
+from lots_admin.models import Application, Lot, ApplicationStep, Review, \
+    ApplicationStatus, DenialReason, PrincipalProfile
 
 def lots_login(request):
     if request.method == 'POST':
@@ -61,6 +62,13 @@ def lots_admin_map(request):
     return render(request, 'admin-map.html', {
         'applied_count': applied_count,
         'applied_pins': pins_str
+        })
+
+@login_required(login_url='/lots-login/')
+def lots_admin_principal_profile(request):
+
+    return render(request, 'admin-principal-profile.html', {
+            'principal_profiles': PrincipalProfile.objects.all(),
         })
 
 @login_required(login_url='/lots-login/')

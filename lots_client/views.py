@@ -485,6 +485,7 @@ def principal_profile_form(request, tracking_id=None):
         'formset': formset,
         'application': application,
         'lots': application.lot_set.all(),
+        'existing_profiles': application.principalprofile_set.all(),
     })
 
 def wintrust_invitation(request):
