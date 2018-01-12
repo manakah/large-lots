@@ -31,8 +31,8 @@ urlpatterns = [
     url(r'^wintrust-invitation/$', wintrust_invitation, name='wintrust_invitation'),
     url(r'^wintrust-announcement/$', wintrust_announcement, name='wintrust_announcement'),
     url(r'^eds-submission/$', eds_submission, name='eds_submission'),
+    url(r'^principal-profile-form/(?P<tracking_id>\S+)/$', principal_profile_form, name='principal_profile_form'),
     url(r'^principal-profile-form/$', principal_profile_form, name='principal_profile_form'),
-
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
     url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/$', csv_dump, name='csv_dump'),

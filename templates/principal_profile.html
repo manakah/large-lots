@@ -12,234 +12,245 @@
 
     <h1>Principal Profile Form</h1>
 
-    <p>The Principal Profile Form is used to verify that you do not owe any money to the City. <strong>All information requested is mandatory.</strong> Failure to complete this form and return it by the deadline will result in your removal from the Large Lot Program.</p>
+    {% if application %}
 
-    <h2>Instructions</h2>
+        <p>The Principal Profile Form is used to verify that you do not owe any money to the City. <strong>All information requested is mandatory.</strong> Failure to complete this form and return it by the deadline will result in your removal from the Large Lot Program.</p>
 
-    <ul>
-        <li>If you are an individual applying for a lot, submit only your own information.</li>
-        <li>If you are purchasing a lot with a spouse or partner, submit your information, as well as your spouse or partner's information.</li>
-        <li>If you represent a non-profit or for-profit organization, submit information for each member of your board, officers, and executive director.</li>
-        <li>If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, put “NA” in that field.</li>
+        <h2>Instructions</h2>
 
-        <li>If you do not have a car, put “NA” in the field requesting the License Plate Number. If you are a co-signer on a car loan, you are liable for the tickets associated with that vehicle and must provide its license plate number.</li>
-    </ul>
+        <ul>
+            <li>If you are an individual applying for a lot, submit only your own information.</li>
+            <li>If you are purchasing a lot with a spouse or partner, submit your information, as well as your spouse or partner's information.</li>
+            <li>If you represent a non-profit or for-profit organization, submit information for each member of your board, officers, and executive director.</li>
+            <li>If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, put “NA” in that field.</li>
 
-    <hr>
+            <li>If you do not have a car, put “NA” in the field requesting the License Plate Number. If you are a co-signer on a car loan, you are liable for the tickets associated with that vehicle and must provide its license plate number.</li>
+        </ul>
 
-    <h2>Lot{% if lots|length > 1 %}s{% endif %} applied for</h2>
-    {% for lot in lots %}
-    <p>
-        <strong>Address:</strong> {{ lot.address.street }}<br />
-        <strong>PIN:</strong> {{ lot.pin }}
-    </p>
-    {% endfor %}
+        <hr>
 
-    <h2>Your information</h2>
+        <h2>Lot{% if lots|length > 1 %}s{% endif %} applied for</h2>
+        {% for lot in lots %}
+        <p>
+            <strong>Address:</strong> {{ lot.address.street }}<br />
+            <strong>PIN:</strong> {{ lot.pin }}
+        </p>
+        {% endfor %}
 
-    <form action="/principal-profile-form/" method="post">
-        <div class="col-md-9">
-            {% csrf_token %}
-            {{ formset.management_form }}
+        <h2>Your information</h2>
 
-            {# If we are rendering back forms from a formset, say if one or more #}
-            {# forms is not valid, they are all rendered in this forloop, rather #}
-            {# than dynamically generated via Javascript. #}
+        <form action="/principal-profile-form/" method="post">
+            <div class="col-md-9">
+                {% csrf_token %}
+                {{ formset.management_form }}
 
-            {% for form in formset %}
-                {% if forloop.first %} {# Prepopulated from Applicant information #}
-                <div class="form-group row">
-                    <strong>Name</strong><br />
-                    {{ form.first_name.value }} {{ form.last_name.value }}
-                    <div class="hidden">
-                        {{ form.first_name }} {{ form.last_name }}
+                {# If we are rendering back forms from a formset, say if one or more #}
+                {# forms is not valid, they are all rendered in this forloop, rather #}
+                {# than dynamically generated via Javascript. #}
+
+                {% for form in formset %}
+                    {% if forloop.first %} {# Prepopulated from Applicant information #}
+                    <div class="form-group row">
+                        <strong>Name</strong><br />
+                        {{ form.first_name.value }} {{ form.last_name.value }}
+                        <div class="hidden">
+                            {{ form.first_name }} {{ form.last_name }}
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <strong>{{ form.home_address.label }}</strong><br />
-                    {{ form.home_address.value }}
-                    <div class="hidden">
-                        {{ form.home_address }}
+                    <div class="form-group row">
+                        <strong>{{ form.home_address.label }}</strong><br />
+                        {{ form.home_address.value }}
+                        <div class="hidden">
+                            {{ form.home_address }}
+                        </div>
                     </div>
+                    {% else %}
+                    <div id="additional-form-{{ forloop.counter0 }}">
+                    <div class="form-group row">
+                        <h2>
+                            Additional information – Person <span id="count">{{ forloop.counter0 }}</span>
+                            <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
+                                <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
+                            </button>
+                        </h2>
+                    </div>
+                    <div class="form-group row{% if form.first_name.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.first_name.auto_id }}">
+                            <strong>{{ form.first_name.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                        {% for error in form.first_name.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.last_name.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.last_name.auto_id }}">
+                            <strong>{{ form.last_name.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}">
+                        {% for error in form.last_name.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.home_address.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.home_address.auto_id }}">
+                            <strong>{{ form.home_address.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
+                        {% for error in form.home_address.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="form-group row{% if form.date_of_birth.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
+                            <strong>{{ form.date_of_birth.label }}</strong>
+                        </label>
+                        <div class="form-inline">
+                            {{ form.date_of_birth }}
+                        </div>
+                        {% for error in form.date_of_birth.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.social_security_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
+                            <strong>{{ form.social_security_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
+                        {% for error in form.social_security_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
+                            <strong>{{ form.drivers_license_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
+                        {% for error in form.drivers_license_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
+                            <strong>{{ form.license_plate_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
+                        {% for error in form.license_plate_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if not forloop.first %}
+                    </div> {# Close the container div for subsequent forms. #}
+                    {% endif %}
+                {% endfor %}
+
+                <div id="extra-form-container">
                 </div>
-                {% else %}
-                <div id="additional-form-{{ forloop.counter0 }}">
+
+                <div class="form-group row">
+                    <button type="button" class="btn btn-lg" id="add-button">
+                        <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> Add another person's information
+                    </button>
+
+                    <button type="submit" class="btn btn-success btn-lg pull-right">
+                        <i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- If we need to add additional forms, clone this instance of
+            formset.empty_form and give it the appropriate index with Javascript. -->
+
+        <div id="form-template" class="hidden">
+            <div id="additional-form-__prefix__">
                 <div class="form-group row">
                     <h2>
-                        Additional information – Person <span id="count">{{ forloop.counter0 }}</span>
-                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
+                        Additional information – Person <span id="count">__prefix__</span>
+                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="__prefix__">
                             <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
                         </button>
                     </h2>
                 </div>
-                <div class="form-group row{% if form.first_name.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.first_name.auto_id }}">
-                        <strong>{{ form.first_name.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
-                    {% for error in form.first_name.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.last_name.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.last_name.auto_id }}">
-                        <strong>{{ form.last_name.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}">
-                    {% for error in form.last_name.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.home_address.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.home_address.auto_id }}">
-                        <strong>{{ form.home_address.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
-                    {% for error in form.home_address.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                <div class="form-group row{% if form.date_of_birth.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
-                        <strong>{{ form.date_of_birth.label }}</strong>
-                    </label>
-                    <div class="form-inline">
-                        {{ form.date_of_birth }}
+                {% with formset.empty_form as form %}
+                    <div class="form-group row{% if form.first_name.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.first_name.auto_id }}">
+                            <strong>{{ form.first_name.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                        {% for error in form.first_name.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
                     </div>
-                    {% for error in form.date_of_birth.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
+                    <div class="form-group row{% if form.last_name.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.last_name.auto_id }}">
+                            <strong>{{ form.last_name.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                        {% for error in form.last_name.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.home_address.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.home_address.auto_id }}">
+                            <strong>{{ form.home_address.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
+                        {% for error in form.home_address.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.date_of_birth.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
+                            <strong>{{ form.date_of_birth.label }}</strong>
+                        </label>
+                        <div class="form-inline">
+                            {{ form.date_of_birth }}
+                        </div>
+                        {% for error in form.date_of_birth.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.social_security_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
+                            <strong>{{ form.social_security_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
+                        {% for error in form.social_security_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
+                            <strong>{{ form.drivers_license_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
+                        {% for error in form.drivers_license_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
+                        <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
+                            <strong>{{ form.license_plate_number.label }}</strong>
+                        </label>
+                        <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
+                        {% for error in form.license_plate_number.errors %}
+                            <span class="help-block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="form-group row{% if form.social_security_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
-                        <strong>{{ form.social_security_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
-                    {% for error in form.social_security_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
-                        <strong>{{ form.drivers_license_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
-                    {% for error in form.drivers_license_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
-                        <strong>{{ form.license_plate_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
-                    {% for error in form.license_plate_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                {% if not forloop.first %}
-                </div> {# Close the container div for subsequent forms. #}
-                {% endif %}
-            {% endfor %}
-
-            <div id="extra-form-container">
-            </div>
-
-            <div class="form-group row">
-                <button type="button" class="btn btn-lg" id="add-button">
-                    <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> Add another person's information
-                </button>
-
-                <button type="submit" class="btn btn-success btn-lg pull-right">
-                    <i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Submit
-                </button>
-            </div>
+            {% endwith %}
         </div>
-    </form>
 
-    <!-- If we need to add additional forms, clone this instance of
-        formset.empty_form and give it the appropriate index with Javascript. -->
+    {% else %}
 
-    <div id="form-template" class="hidden">
-        <div id="additional-form-__prefix__">
-            <div class="form-group row">
-                <h2>
-                    Additional information – Person <span id="count">__prefix__</span>
-                    <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="__prefix__">
-                        <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
-                    </button>
-                </h2>
-            </div>
-            {% with formset.empty_form as form %}
-                <div class="form-group row{% if form.first_name.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.first_name.auto_id }}">
-                        <strong>{{ form.first_name.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
-                    {% for error in form.first_name.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.last_name.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.last_name.auto_id }}">
-                        <strong>{{ form.last_name.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
-                    {% for error in form.last_name.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.home_address.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.home_address.auto_id }}">
-                        <strong>{{ form.home_address.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
-                    {% for error in form.home_address.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.date_of_birth.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
-                        <strong>{{ form.date_of_birth.label }}</strong>
-                    </label>
-                    <div class="form-inline">
-                        {{ form.date_of_birth }}
-                    </div>
-                    {% for error in form.date_of_birth.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.social_security_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
-                        <strong>{{ form.social_security_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
-                    {% for error in form.social_security_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
-                        <strong>{{ form.drivers_license_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
-                    {% for error in form.drivers_license_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
-                    <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
-                        <strong>{{ form.license_plate_number.label }}</strong>
-                    </label>
-                    <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
-                    {% for error in form.license_plate_number.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endwith %}
-    </div>
+        <h2>Oops!</h2>
+
+        <p>Your application couldn't be found. Please use the link you received
+        in your email to access the Principal Profile Form.</p>
+
+    {% endif %}
 
 </div>
 

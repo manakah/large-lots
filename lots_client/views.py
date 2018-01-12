@@ -430,9 +430,15 @@ def upload_confirm(request, tracking_id):
         'lots': lots,
     })
 
-def principal_profile_form(request):
+def principal_profile_form(request, tracking_id=None):
 
-    application = Application.objects.first()
+    try:
+        application = Application.objects.get(tracking_id=tracking_id)
+
+    except ObjectDoesNotExist:
+        return render(request, 'principal_profile.html', {
+            'application': None,
+        })
 
     PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
 
