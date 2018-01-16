@@ -5,19 +5,67 @@
 {% block extra_css %}
 <link href="{% static 'css/dataTables.bootstrap.css' %}" rel="stylesheet">
 {% endblock %}
-{% block title %}Application list{% endblock %}
+{% block title %}Principal profile list{% endblock %}
 {% block content %}
+
+<div class="row">
+    <div class='col-md-8'>
+        <h3>
+            Large Lots received {{ principal_profiles|length }} principal profiles
+        </h3>
+
+        <!--
+        Should we implement this for PPF?
+        <form type="get" action="." style="margin: 0">
+            <input class="form-control update" id="search_box" type="text" name="search_box"  placeholder="Search for a name or ward..." >
+            <button class="btn btn-success update" id="search_submit" type="submit" style="border-width: 0px;"><i class="fa fa-search" aria-hidden="true"></i> Submit</button>
+        </form>
+        -->
+    </div>
+</div>
 
 <table id="principal-profiles-received" class="table table-striped tablesorter">
     <thead>
         <th class="no-wrap">
-            foo <!-- see admin.html for data tables example -->
+            Application ID
+        </th>
+        <th class="no-wrap">
+            Date received
+        </th>
+        <th class="no-wrap">
+            Name/Organization
+        </th>
+        <th class="no-wrap">
+            Lot requested
+        </th>
+        <th class="no-wrap">
+            Ward
         </th>
     </thead>
     <tbody>
     {% for profile in principal_profiles %}
         <tr>
-            <td>{{ profile.application.first_name }}</td>
+            <td>
+                {{ profile.application.id }}
+            </td>
+            <td>
+                {{ profile.created_at|date:'Y-m-d g:i a' }}
+            </td>
+            <td>
+                {% if profile.related_person %}
+                    {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
+                    }
+                {% else %}
+                    {{ profile.application.first_name }} {{ profile.application.last_name }}
+                {% endif %}
+            </td>
+            <td>
+                {{ profile.application.lot_set }}<br />
+                {# {{ profile.application.pin|make_display_pin }} #}
+            </td>
+            <td>
+                {{ profile.application.ward }}
+            </td>
         </tr>
     {% endfor %}
     </tbody>

@@ -29,41 +29,67 @@
 
         <hr>
 
+        <h3>You're applying for <strong class="label label-success">{{ lots|length }}</strong> lot{% if lots|length > 1 %}s{% endif %}.</h3>
+
+        <div class="row">
+            <div class="col col-md-9">
+                <table class="table table-striped col col-md-6">
+                    <thead>
+                        <th class="col-md-7">
+                            Address
+                        </th>
+                        <th class="col-md-5">
+                            PIN
+                        </th>
+                    </thead>
+                {% for lot in lots %}
+                    <tr>
+                        <td>{{ lot.address.street }}</td>
+                        <td>{{ lot.pin }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </div>
 
         {% if existing_profiles %}
 
-        <div class="alert alert-success">
-            <p><i class="fa fa-fw fa-info-circle" aria-hidden="true"></i> You've already submitted information for:</p>
+        <h3>You've submitted <strong class="label label-success">{{ existing_profiles|length }}</strong> principal profile{% if existing_profiles|length > 1 %}s{% endif %}.</h3>
 
-            <ul>
-            {% for profile in existing_profiles %}
-                <strong>
-                <li>
-                    {% if forloop.first %}
-                        {{ profile.application.first_name }} {{ profile.application.last_name }}
-                    {% else %}
-                        {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
-                    {% endif %}
-                </li>
-                </strong>
-            {% endfor %}
-            </ul>
-            <br />
-            <p>Use the form below to submit additional information if needed.</p>
+        <div class="row">
+            <div class="col col-md-9">
+                <table class="table table-striped col col-md-6">
+                    <thead>
+                        <th class="col-md-7">
+                            Name
+                        </th>
+                        <th class="col-md-5">
+                            Date submitted
+                        </th>
+                    </thead>
+                {% for profile in existing_profiles %}
+                    <tr>
+                        <td>
+                        {% if forloop.first %}
+                            {{ profile.application.first_name }} {{ profile.application.last_name }}
+                        {% else %}
+                            {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
+                        {% endif %}
+                        </td>
+                        <td>{{ profile.created_at }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
         </div>
 
-        {% endif %}
+        <p>Need to submit another? Use the form below!</p>
 
-
-        <h2>Lot{% if lots|length > 1 %}s{% endif %} applied for</h2>
-        {% for lot in lots %}
-        <p>
-            <strong>Address:</strong> {{ lot.address.street }}<br />
-            <strong>PIN:</strong> {{ lot.pin }}
-        </p>
-        {% endfor %}
+        {% else %}
 
         <h2>Your information</h2>
+
+        {% endif %}
 
         <form action="/principal-profile-form/{{ application.tracking_id }}/" method="post">
             <div class="col-md-9">
@@ -94,10 +120,12 @@
                     <div id="additional-form-{{ forloop.counter0 }}">
                     <div class="form-group row">
                         <h2>
-                            Additional information – Person <span id="count">{{ forloop.counter0 }}</span>
+                            Principal Profile
+                            {% if not forloop.first %}
                             <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
                                 <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
                             </button>
+                            {% endif %}
                         </h2>
                     </div>
                     <div class="form-group row{% if form.first_name.errors %} has-error{% endif %}">
@@ -193,7 +221,7 @@
             <div id="additional-form-__prefix__">
                 <div class="form-group row">
                     <h2>
-                        Additional information – Person <span id="count">__prefix__</span>
+                        Principal Profile
                         <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="__prefix__">
                             <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
                         </button>
@@ -288,6 +316,16 @@
 
     var form = $('#form-template').html();
 
+    console.log($('#id_form-TOTAL_FORMS').val());
+
+    // Sometimes TOTAL_FORMS is cached, and we don't want that. Manually
+    // set it to 1 (the original form) plus the number of additional forms
+    // rendered when the page loads.
+    n_additional_forms = $('#extra-form-container').children().length;
+    $('#id_form-TOTAL_FORMS').val(1 + n_additional_forms);
+
+    console.log($('#id_form-TOTAL_FORMS').val());
+
     $('#add-button').click(function() {
         add_form();
     });
@@ -321,16 +359,14 @@
 
         // Decrement TOTAL_FORMS.
         var idx = $('#id_form-TOTAL_FORMS').val();
-        console.log(idx);
         $('#id_form-TOTAL_FORMS').val(parseInt(idx) - 1);
-        console.log($('#id_form-TOTAL_FORMS').val());
     };
 
     // Forms should have a continuous index. If a user adds three forms, then
     // deletes the first form she added, reindex the remaining forms, starting
     // at one.
     function reindex_forms() {
-        var idx = 1;
+        var idx = 0;
 
         var additional_forms = $('[id^="additional-form-"]').filter(function() {
             // Omit the template form.
@@ -359,8 +395,12 @@
 
             // Update the delete button.
             $(this).find('button').each(function() {
-                $(this).attr('id', this.id.replace(initial_idx, idx));
-                $(this).attr('value', $(this).attr('value').replace(initial_idx, idx));
+                try {
+                    $(this).attr('id', this.id.replace(initial_idx, idx));
+                    $(this).attr('value', $(this).attr('value').replace(initial_idx, idx));
+                } catch (err) {
+                    $.noop();
+                }
             });
 
             idx ++;

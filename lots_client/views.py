@@ -432,6 +432,9 @@ def upload_confirm(request, tracking_id):
 
 def principal_profile_form(request, tracking_id=None):
 
+    if not tracking_id:  # FOR DEV ONLY
+        tracking_id = Application.objects.all()[12].tracking_id
+
     try:
         application = Application.objects.get(tracking_id=tracking_id)
 
@@ -440,19 +443,25 @@ def principal_profile_form(request, tracking_id=None):
             'application': None,
         })
 
+    existing_profiles = application.principalprofile_set.all()
+
     PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
 
-    # Prepopulate applicant's name and address
-    initial_data = {
-        'first_name': application.first_name,
-        'last_name': application.last_name,
-        'home_address': application.contact_address.street,
-    }
+    if existing_profiles:
+        initial_data = {}
+    else:
+        # Prepopulate applicant's name and address.
+        initial_data = {
+            'first_name': application.first_name,
+            'last_name': application.last_name,
+            'home_address': application.contact_address.street,
+        }
 
     formset = PrincipalProfileFormSet(initial=[initial_data])
 
     if request.method == 'POST':
         formset = PrincipalProfileFormSet(request.POST)
+
         if formset.is_valid():
             for idx, form in enumerate(formset.forms):
                 submitted_data = form.cleaned_data
@@ -465,7 +474,11 @@ def principal_profile_form(request, tracking_id=None):
                     license_plate_number=submitted_data['license_plate_number'],
                 )
 
-                if idx:
+                # If it's the second form, or if the applicant has already
+                # successfully submitted their information, it's a related
+                # person, and needs to be created and saved as such.
+
+                if idx or existing_profiles:
                     address = get_lot_address(submitted_data['home_address'], None)
 
                     related_person = RelatedPerson(
@@ -476,16 +489,22 @@ def principal_profile_form(request, tracking_id=None):
                     )
 
                     related_person.save()
-
-                    profile.related_person = related_person
+                    profile.related_person_id = related_person.id
 
                 profile.save()
+
+                # Update existing_profiles to reflect the newly submitted one.
+                existing_profiles = application.principalprofile_set.all()
+
+                # Render back an empty form, rather than repopulating it with
+                # successfully submitted information.
+                formset = PrincipalProfileFormSet(initial=[{}])
 
     return render(request, 'principal_profile.html', {
         'formset': formset,
         'application': application,
         'lots': application.lot_set.all(),
-        'existing_profiles': application.principalprofile_set.all(),
+        'existing_profiles': existing_profiles,
     })
 
 def wintrust_invitation(request):
