@@ -12,6 +12,7 @@
     <div class='col-md-8'>
         <h3>
             Large Lots received {{ principal_profiles|length }} principal profiles
+            <small><a href="{% url 'ppf_dump' selected_pilot %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
         </h3>
 
         <!--
@@ -36,9 +37,6 @@
             Name/Organization
         </th>
         <th class="no-wrap">
-            Lot requested
-        </th>
-        <th class="no-wrap">
             Ward
         </th>
     </thead>
@@ -52,19 +50,10 @@
                 {{ profile.created_at|date:'Y-m-d g:i a' }}
             </td>
             <td>
-                {% if profile.related_person %}
-                    {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
-                    }
-                {% else %}
-                    {{ profile.application.first_name }} {{ profile.application.last_name }}
-                {% endif %}
+                {{ profile.display_name }}
             </td>
             <td>
-                {{ profile.application.lot_set }}<br />
-                {# {{ profile.application.pin|make_display_pin }} #}
-            </td>
-            <td>
-                {{ profile.application.ward }}
+                {{ profile.ward }}
             </td>
         </tr>
     {% endfor %}

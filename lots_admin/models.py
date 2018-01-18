@@ -108,7 +108,20 @@ class PrincipalProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} Principal Profile'.format(str(self.application))
+        return '{} Principal Profile'.format(str(self.display_name))
+
+    @property
+    def display_name(self):
+        if self.related_person:
+            person = self.related_person
+        else:
+            person = self.application
+
+        return ' '.join([person.first_name, person.last_name])
+
+    @property
+    def ward(self):
+        return self.application.lot_set.first().address.ward
 
 class RelatedPerson(models.Model):
     application = models.ForeignKey('Application')

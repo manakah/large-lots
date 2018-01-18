@@ -316,15 +316,11 @@
 
     var form = $('#form-template').html();
 
-    console.log($('#id_form-TOTAL_FORMS').val());
-
     // Sometimes TOTAL_FORMS is cached, and we don't want that. Manually
     // set it to 1 (the original form) plus the number of additional forms
     // rendered when the page loads.
     n_additional_forms = $('#extra-form-container').children().length;
     $('#id_form-TOTAL_FORMS').val(1 + n_additional_forms);
-
-    console.log($('#id_form-TOTAL_FORMS').val());
 
     $('#add-button').click(function() {
         add_form();

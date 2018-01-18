@@ -66,9 +66,9 @@ def lots_admin_map(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profile(request):
-
     return render(request, 'admin-principal-profile.html', {
             'principal_profiles': PrincipalProfile.objects.all(),
+            'selected_pilot': settings.CURRENT_PILOT,
         })
 
 @login_required(login_url='/lots-login/')
@@ -226,6 +226,55 @@ def lots_admin(request, step):
         'order_by': order_by,
         'toggle_order': toggle_order
         })
+
+@login_required(login_url='/lots-login')
+def ppf_dump(request, pilot):
+    # format response
+    response = HttpResponse(content_type='text/csv')
+    now = datetime.now().isoformat()
+    response['Content-Disposition'] = 'attachment; filename=Large_Lots_Principal_Profiles_%s_%s.csv' % (pilot, now)
+
+    # filter objects
+    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)
+
+    # define header
+    header = [
+        'ID',
+        'Date received',
+        'Primary applicant',
+        'First name',
+        'Last name',
+        'Date of birth',
+        'Social Security number',
+        'Driver\'s license number',
+        'License plate number',
+    ]
+
+    rows = []
+
+    for profile in profiles:
+        if profile.related_person:
+            person = profile.related_person
+        else:
+            person = profile.application
+
+        rows.append([
+            profile.application.id,
+            profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
+            not profile.related_person,
+            person.first_name,
+            person.last_name,
+            profile.date_of_birth,
+            profile.social_security_number,
+            profile.drivers_license_number,
+            profile.license_plate_number,
+        ])
+
+    writer = csv.writer(response)
+    writer.writerow(header)
+    writer.writerows(rows)
+    return response
+
 
 @login_required(login_url='/lots-login/')
 def csv_dump(request, pilot, status):
