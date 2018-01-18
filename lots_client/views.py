@@ -430,6 +430,27 @@ def upload_confirm(request, tracking_id):
         'lots': lots,
     })
 
+def wintrust_invitation(request):
+    with open('lots/static/images/Invitation_LargeLot_Workshop.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(),content_type='application/pdf')
+        response['Content-Disposition'] = 'filename=some_file.pdf'
+        return response
+
+def wintrust_announcement(request):
+    with open('lots/static/images/Everyday_Loan_LargeLot.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(),content_type='application/pdf')
+        response['Content-Disposition'] = 'filename=some_file.pdf'
+        return response
+
+def advance_if_ppf_and_eds_submitted(application):
+    if application.eds_received and application.ppf_received:
+        related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
+
+        for application_status in related_application_statuses:
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
+            application_status.current_step = step
+            application_status.save()
+
 def principal_profile_form(request, tracking_id=None):
 
     if not tracking_id:  # FOR DEV ONLY
@@ -493,6 +514,8 @@ def principal_profile_form(request, tracking_id=None):
 
                 profile.save()
 
+                advance_if_ppf_and_eds_submitted(application)
+
                 # Update existing_profiles to reflect the newly submitted one.
                 existing_profiles = application.principalprofile_set.all()
 
@@ -507,36 +530,22 @@ def principal_profile_form(request, tracking_id=None):
         'existing_profiles': existing_profiles,
     })
 
-def wintrust_invitation(request):
-    with open('lots/static/images/Invitation_LargeLot_Workshop.pdf', 'rb') as pdf:
-        response = HttpResponse(pdf.read(),content_type='application/pdf')
-        response['Content-Disposition'] = 'filename=some_file.pdf'
-        return response
-
-def wintrust_announcement(request):
-    with open('lots/static/images/Everyday_Loan_LargeLot.pdf', 'rb') as pdf:
-        response = HttpResponse(pdf.read(),content_type='application/pdf')
-        response['Content-Disposition'] = 'filename=some_file.pdf'
-        return response
-
 @csrf_exempt
 def eds_submission(request):
     if request.method == 'POST':
         tracking_id = request.POST.get('tracking_id', None)
         if tracking_id:
             tracking_id = request.POST['tracking_id']
-            try: 
+            try:
                 application = Application.objects.get(tracking_id=tracking_id)
-                related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
 
-                for application_status in related_application_statuses:
-                    step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
-                    application_status.current_step = step
-                    application_status.save()
+            except ObjectDoesNotExist:
+                return HttpResponse('Application does not exist', status=400)
+
+            else:
+                advance_if_ppf_and_eds_submitted(application)
                 return HttpResponse('Successful EDS submission for {}'.format(application.email), status=200)
 
-            except ObjectDoesNotExist: 
-                return HttpResponse('Application does not exist', status=400)
         else:
             return HttpResponse('Did not find tracking_id in request: {}'.format(request), status=400)
     else:

@@ -45,6 +45,8 @@ class Application(models.Model):
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
     eds_sent = models.BooleanField(default=False)
+    eds_received = models.BooleanField(default=False)
+    ppf_received = models.BooleanField(default=False)
     closing_invite_sent = models.BooleanField(default=False)
 
     def __str__(self):
