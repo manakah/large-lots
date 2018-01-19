@@ -514,6 +514,9 @@ def principal_profile_form(request, tracking_id=None):
 
                 profile.save()
 
+                application.ppf_received = True
+                application.save()
+
                 advance_if_ppf_and_eds_submitted(application)
 
                 # Update existing_profiles to reflect the newly submitted one.
@@ -543,6 +546,9 @@ def eds_submission(request):
                 return HttpResponse('Application does not exist', status=400)
 
             else:
+                application.eds_received = True
+                application.save()
+
                 advance_if_ppf_and_eds_submitted(application)
                 return HttpResponse('Successful EDS submission for {}'.format(application.email), status=200)
 
