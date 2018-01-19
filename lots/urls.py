@@ -12,7 +12,7 @@ from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lotteries, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, \
-    deed, double_submit, lots_admin_principal_profile, ppf_dump
+    deed, double_submit
 
 from django.contrib import admin
 admin.autodiscover()
@@ -35,9 +35,8 @@ urlpatterns = [
     url(r'^principal-profile-form/$', principal_profile_form, name='principal_profile_form'),
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
-    url(r'^lots-admin-principal-profile/$', lots_admin_principal_profile, name='lots_admin_principal_profile'),
-    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/$', csv_dump, name='csv_dump'),
-    url(r'^ppf-dump/(?P<pilot>\S+)/$', ppf_dump, name='ppf_dump'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)$', csv_dump, name='csv_dump'),
     url(r'^lots-login/$', lots_login, name='lots_login'),
     url(r'^logout/$', lots_logout, name='logout'),
 

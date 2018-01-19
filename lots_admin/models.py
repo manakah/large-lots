@@ -113,17 +113,19 @@ class PrincipalProfile(models.Model):
         return '{} Principal Profile'.format(str(self.display_name))
 
     @property
-    def display_name(self):
+    def entity(self):
         if self.related_person:
-            person = self.related_person
+            return self.related_person
         else:
-            person = self.application
-
-        return ' '.join([person.first_name, person.last_name])
+            return self.application
 
     @property
-    def ward(self):
-        return self.application.lot_set.first().address.ward
+    def address(self):
+        try:
+            return self.entity.owned_address.street
+
+        except AttributeError:
+            return self.entity.address.street
 
 class RelatedPerson(models.Model):
     application = models.ForeignKey('Application')
