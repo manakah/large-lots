@@ -105,12 +105,15 @@ class PrincipalProfile(models.Model):
     related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
     date_of_birth = models.DateField()
     social_security_number = models.CharField(max_length=11)
+    drivers_license_state = models.CharField(max_length=2, default='IL')
     drivers_license_number = models.CharField(max_length=20)
+    license_plate_state = models.CharField(max_length=2, default='IL')
     license_plate_number = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return '{} Principal Profile'.format(str(self.display_name))
+        return '{0} {1} Principal Profile'.format(self.entity.first_name,
+                                                  self.entity.last_name)
 
     @property
     def entity(self):

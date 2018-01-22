@@ -132,7 +132,7 @@
                         <label class="col-form-label" for="{{ form.first_name.auto_id }}">
                             <strong>{{ form.first_name.label }}</strong>
                         </label>
-                        <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                        <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Joe">
                         {% for error in form.first_name.errors %}
                             <span class="help-block">{{ error }}</span>
                         {% endfor %}
@@ -141,7 +141,7 @@
                         <label class="col-form-label" for="{{ form.last_name.auto_id }}">
                             <strong>{{ form.last_name.label }}</strong>
                         </label>
-                        <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}">
+                        <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}" placeholder="Cool">
                         {% for error in form.last_name.errors %}
                             <span class="help-block">{{ error }}</span>
                         {% endfor %}
@@ -171,28 +171,40 @@
                         <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
                             <strong>{{ form.social_security_number.label }}</strong>
                         </label>
-                        <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
+                        <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}" placeholder="123-45-6789">
                         {% for error in form.social_security_number.errors %}
                             <span class="help-block">{{ error }}</span>
                         {% endfor %}
                     </div>
-                    <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                        <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
-                            <strong>{{ form.drivers_license_number.label }}</strong>
-                        </label>
-                        <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
-                        {% for error in form.drivers_license_number.errors %}
-                            <span class="help-block">{{ error }}</span>
-                        {% endfor %}
+                    <div class="row">
+                        <div class="input-group state-number{% if form.drivers_license_number.errors or form.drivers_license_state.errors %} has-error{% endif %}">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>Driver's license</strong>
+                            </label><br />
+                            {{ form.drivers_license_state }}
+                            <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number">
+                            {% for error in form.drivers_license_state.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                            {% for error in form.drivers_license_number.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                        </div><br />
                     </div>
-                    <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
-                        <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
-                            <strong>{{ form.license_plate_number.label }}</strong>
-                        </label>
-                        <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
-                        {% for error in form.license_plate_number.errors %}
-                            <span class="help-block">{{ error }}</span>
-                        {% endfor %}
+                    <div class="row">
+                        <div class="input-group state-number{% if form.license_plate_number.errors or license_plate_state.errors %} has-error{% endif %}">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>License plate</strong>
+                            </label><br />
+                            {{ form.license_plate_state }}
+                            <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number">
+                            {% for error in form.license_plate_state.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                            {% for error in form.license_plate_number.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                        </div><br />
                     </div>
                     {% if not forloop.first %}
                     </div> {# Close the container div for subsequent forms. #}
@@ -275,23 +287,35 @@
                             <span class="help-block">{{ error }}</span>
                         {% endfor %}
                     </div>
-                    <div class="form-group row{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                        <label class="col-form-label" for="{{ form.drivers_license_number.auto_id }}">
-                            <strong>{{ form.drivers_license_number.label }}</strong>
-                        </label>
-                        <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}">
-                        {% for error in form.drivers_license_number.errors %}
-                            <span class="help-block">{{ error }}</span>
-                        {% endfor %}
+                    <div class="row">
+                        <div class="input-group state-number{% if form.drivers_license_number.errors or form.drivers_license_state.errors %} has-error{% endif %}">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>Driver's license</strong>
+                            </label><br />
+                            {{ form.drivers_license_state }}
+                            <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number">
+                            {% for error in form.drivers_license_state.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                            {% for error in form.drivers_license_number.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                        </div><br />
                     </div>
-                    <div class="form-group row{% if form.license_plate_number.errors %} has-error{% endif %}">
-                        <label class="col-form-label" for="{{ form.license_plate_number.auto_id }}">
-                            <strong>{{ form.license_plate_number.label }}</strong>
-                        </label>
-                        <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}">
-                        {% for error in form.license_plate_number.errors %}
-                            <span class="help-block">{{ error }}</span>
-                        {% endfor %}
+                    <div class="row">
+                        <div class="input-group state-number{% if form.license_plate_number.errors or license_plate_state.errors %} has-error{% endif %}">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>License plate</strong>
+                            </label><br />
+                            {{ form.license_plate_state }}
+                            <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number">
+                            {% for error in form.license_plate_state.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                            {% for error in form.license_plate_number.errors %}
+                                <span class="help-block">{{ error }}</span>
+                            {% endfor %}
+                        </div><br />
                     </div>
                 </div>
             {% endwith %}

@@ -491,7 +491,9 @@ def principal_profile_form(request, tracking_id=None):
                     application=application,
                     date_of_birth=submitted_data['date_of_birth'],
                     social_security_number=submitted_data['social_security_number'],
+                    drivers_license_state=submitted_data['drivers_license_state'],
                     drivers_license_number=submitted_data['drivers_license_number'],
+                    license_plate_state=submitted_data['license_plate_state'],
                     license_plate_number=submitted_data['license_plate_number'],
                 )
 
