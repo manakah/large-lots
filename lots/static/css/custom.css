@@ -449,7 +449,7 @@ select.bulk-deny {
 
 /* Styles for PPF */
 .state-number {
-  width: 100%;
+    width: 100%;
 }
 
 @media only screen and (min-width : 768px) {
@@ -465,4 +465,8 @@ select.bulk-deny {
     select[id*="date_of_birth"] {
         width: 32.9%!important;
     }
+}
+
+.btn.disabled {
+    pointer-events: auto;
 }

@@ -103,13 +103,15 @@ class ApplicationStatus(models.Model):
 class PrincipalProfile(models.Model):
     application = models.ForeignKey('Application')
     related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
-    date_of_birth = models.DateField()
-    social_security_number = models.CharField(max_length=11)
-    drivers_license_state = models.CharField(max_length=2, default='IL')
-    drivers_license_number = models.CharField(max_length=20)
-    license_plate_state = models.CharField(max_length=2, default='IL')
-    license_plate_number = models.CharField(max_length=20)
+    date_of_birth = models.DateField(null=True)
+    social_security_number = models.CharField(max_length=11, null=True)
+    drivers_license_state = models.CharField(max_length=2, null=True)
+    drivers_license_number = models.CharField(max_length=20, null=True)
+    license_plate_state = models.CharField(max_length=2, null=True)
+    license_plate_number = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    exported_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return '{0} {1} Principal Profile'.format(self.entity.first_name,

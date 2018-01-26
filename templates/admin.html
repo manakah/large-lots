@@ -12,10 +12,10 @@
     <div class="col-md-12">
         <div class="right-nav">
             {% for i in step_range %}
-                <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
+                <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
             {% endfor %}
-            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
-            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
+            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
+            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
             <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
@@ -31,18 +31,20 @@
             <h4>
                 Principal Profiles have been received for {{ ppf_count }} applications
                 <small>
-                    <a href="{% url 'csv_dump' selected_pilot step 'ppf' %}">
-                        <i class='fa fa-fw fa-file-excel-o'></i> Export as CSV
-                    </a> |
-                    <a href="#">
-                        <i class='fa fa-fw fa-trash-o'></i> Delete from database
+                    <a href="{% url 'lots_admin_principal_profiles' %}" target="_blank">
+                        <i class='fa fa-fw fa-external-link '></i> Go to export
                     </a>
                 </small>
             </h4>
         {% endif %}
 
-        <form type="get" action="{% url 'lots_admin' step %}?{% query_transform request %}" style="margin: 0">
+        <form type="get" action="{% url 'lots_admin' step %}" style="margin: 0">
             <input class="form-control update" id="search_box" type="text" name="search_box"  placeholder="Search for a name or ward..." >
+            {% for name, value in request.GET.items %}
+                {% if name != 'search_box' %}
+                    <input type="hidden" name="{{ name }}" value="{{ value }}">
+                {% endif %}
+            {% endfor %}
             <button class="btn btn-success update" id="search_submit" type="submit" style="border-width: 0px;"><i class="fa fa-search" aria-hidden="true"></i> Submit</button>
         </form>
 
@@ -51,18 +53,18 @@
         {% if step == 7 %}
             <small>
                 Filter by: &nbsp;
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='true' %}"{% ifequal request.GET.ppf 'true' %} style="color:red"{% endifequal %}>
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='true' %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
                     PPF submitted
-                </a> |
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='false' %}"{% ifequal request.GET.ppf 'false' %} style="color:red"{% endifequal %}>
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='false' %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
                     PPF not submitted
-                </a> |
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='true' %}"{% ifequal request.GET.eds 'true' %} style="color:red"{% endifequal %}>
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='true' %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
                     EDS submitted
-                </a> |
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='false' %}"{% ifequal request.GET.eds 'false' %} style="color:red"{% endifequal %}>
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='false' %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
                     EDS not submitted
-                </a> |
+                </a>&nbsp;
                 <a href="{% url 'lots_admin' '7' %}">
                     <i class="fa fa-fw fa-times" aria-hidden="true"></i>
                     Clear filters

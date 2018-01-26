@@ -65,6 +65,33 @@ def lots_admin_map(request):
         })
 
 @login_required(login_url='/lots-login/')
+def lots_admin_principal_profiles(request):
+    applications = Application.objects.filter(principalprofile__isnull=False).distinct()
+
+    sql = '''
+        SELECT
+          SUM(CASE WHEN (deleted_at is null) THEN 1 ELSE 0 END) AS available,
+          SUM(CASE WHEN (exported_at is null) THEN 1 ELSE 0 END) AS not_exported,
+          MAX(exported_at) AS last_export,
+          MAX(deleted_at) AS last_delete
+        FROM lots_admin_principalprofile
+    '''
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        ppf_meta, = (row for row in cursor)
+        available, not_exported, last_export, last_delete = ppf_meta
+
+    return render(request, 'admin-principal-profiles.html', {
+            'selected_pilot': settings.CURRENT_PILOT,
+            'application_count': len(applications),
+            'available_count': available,
+            'not_exported_count': not_exported,
+            'last_export': last_export,
+            'last_delete': last_delete,
+        })
+
+@login_required(login_url='/lots-login/')
 def lots_admin(request, step):
     query = request.GET.get('search_box', None)
     page = request.GET.get('page', None)
@@ -303,7 +330,8 @@ def dump_principal_profiles(request, pilot):
     now = datetime.now().isoformat()
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Principal_Profiles_%s_%s.csv' % (pilot, now)
 
-    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)
+    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)\
+                                       .filter(date_of_birth__isnull=False)
 
     header = [
         'ID',
@@ -314,7 +342,9 @@ def dump_principal_profiles(request, pilot):
         'Home address',
         'Date of birth',
         'Social Security number',
+        'Driver\'s license state',
         'Driver\'s license number',
+        'License plate state',
         'License plate number',
     ]
 
@@ -330,9 +360,13 @@ def dump_principal_profiles(request, pilot):
             profile.address,
             profile.date_of_birth,
             profile.social_security_number,
+            profile.drivers_license_state,
             profile.drivers_license_number,
+            profile.license_plate_state,
             profile.license_plate_number,
         ])
+        profile.exported_at = datetime.now().isoformat()
+        profile.save()
 
     writer = csv.writer(response)
     writer.writerow(header)
@@ -348,6 +382,30 @@ def csv_dump(request, pilot, status, content='application'):
         response = dump_principal_profiles(request, pilot)
 
     return response
+
+@login_required(login_url='/lots-login/')
+def delete_principal_profiles(request, pilot):
+    principal_profiles = PrincipalProfile.objects\
+                                         .filter(application__pilot=pilot)\
+                                         .filter(deleted_at__isnull=True)
+
+    n_deleted = len(principal_profiles)
+
+    for ppf in principal_profiles:
+
+        for field in ('date_of_birth',
+                      'social_security_number',
+                      'drivers_license_state',
+                      'drivers_license_number',
+                      'license_plate_state',
+                      'license_plate_number'):
+
+            setattr(ppf, field, None)
+
+        ppf.deleted_at = datetime.now().isoformat()
+        ppf.save()
+
+    return HttpResponseRedirect('/principal-profiles/')
 
 @login_required(login_url='/lots-login/')
 def pdfviewer(request):

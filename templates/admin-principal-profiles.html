@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Principal Profiles{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-9">
+        <h3>
+            Principal Profiles have been received for <strong>{{ application_count }}</strong> applications.
+        </h3>
+
+        <p class="lead">
+            {% if available_count %}
+              <strong>{{ available_count }}</strong> Principal Profile{% if available_count > 1%}s are{% else %} is{% endif %} currently available for export.
+            {% else %}
+              There aren't any Principle Profiles currently available for export.
+            {% endif %}
+        </p>
+
+        <div id="options">
+        {% if available_count %}
+            <p>
+                <a href="{% url 'csv_dump' selected_pilot None 'ppf' %}" class="btn btn-lg btn-success" id="download">
+                    <i class='fa fa-fw fa-file-excel-o'></i> Export <strong>{{ available_count }}</strong> Principal Profile{% if available_count > 1%}s{% endif %} as CSV
+                </a>
+
+                <a href="#" class="btn btn-lg btn-warning{% if not_exported_count %} disabled" data-toggle="tooltip" title="You must export all PPFs before you can delete them!"{% else %}" data-toggle="modal" data-target="#warning-modal" {% endif %} id="delete">
+                    <i class='fa fa-fw fa-file-excel-o'></i> Delete Principal Profile{% if available_count > 1%}s{% endif %} from database
+                </a>
+            </p>
+        {% endif %}
+        </div>
+
+        <p class="info-text">
+            {% if last_export %}
+                Last export: {{ last_export|date:'Y-m-d g:i a' }}<br />
+            {% endif %}
+
+            {% if last_delete %}
+                Last delete: {{ last_delete|date:'Y-m-d g:i a' }}
+            {% endif %}
+        </p>
+
+        <div id="warning-modal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="modal-title">
+                    <i class="fa fa-fw fa-warning" aria-hidden="true"></i>
+                    Are you sure you want to delete?
+                </h3>
+              </div>
+              <div class="modal-body">
+                <p>Deleting Principal Profiles will permanently remove them from the Large Lots database. <strong>You will not be able to download them again. PPFs cannot be recovered once deleted.</strong></p>
+              </div>
+              <div class="modal-footer">
+                <a href="{% url 'delete_principal_profiles' selected_pilot %}" class="btn btn-success" id="confirm-delete">
+                    <strong>Yes</strong>, delete them
+                </a>
+                <button type="button" class="btn btn-warning" data-dismiss="modal">
+                    <strong>No</strong>, I'm not ready to delete yet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+</div>
+
+<br />
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    $(document).ready(function(){
+        // when export is clicked, enable the delete button
+        $('#download').mouseup(function() {
+            delete_button = $('#delete');
+            delete_button.removeClass('disabled');
+            delete_button.removeAttr('title');
+            delete_button.attr('data-toggle', 'modal');
+            delete_button.attr('data-target', '#warning-modal');
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    });
+</script>
+
+{% endblock %}
