@@ -331,7 +331,7 @@ def dump_principal_profiles(request, pilot):
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Principal_Profiles_%s_%s.csv' % (pilot, now)
 
     profiles = PrincipalProfile.objects.filter(application__pilot=pilot)\
-                                       .filter(date_of_birth__isnull=False)
+                                       .filter(deleted_at__isnull=True)
 
     header = [
         'ID',
