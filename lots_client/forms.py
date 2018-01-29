@@ -180,16 +180,20 @@ class PrincipalProfileForm(forms.Form):
     social_security_number = forms.CharField(max_length=11)
     drivers_license_state = forms.ChoiceField(
         label="Driver's license state",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'}),
     )
     drivers_license_number = forms.CharField(
         label="Driver's license number",
-        max_length=20
+        max_length=20,
+        required=False
     )
     license_plate_state = forms.ChoiceField(
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'}),
     )
-    license_plate_number = forms.CharField(max_length=10)
+    license_plate_number = forms.CharField(
+        max_length=10,
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -199,9 +203,27 @@ class PrincipalProfileForm(forms.Form):
 
     @property
     def _state_choices(self):
-        choices = [(None, 'State')]
+        choices = [(None, 'State'), ['N/A', 'NA']]
         choices += [(state.abbr, state.name) for state in STATES]
         return choices
+
+    def _clean_number(self, field):
+        number = self.cleaned_data[field]
+
+        state_field = field.replace('number', 'state')
+        state_data = self.cleaned_data.get(state_field)
+
+        if state_data != 'N/A' and not number:
+            message = 'This field is required.'
+            raise forms.ValidationError(message)
+
+        return self.cleaned_data[field]
+
+    def clean_license_plate_number(self):
+        return self._clean_number('license_plate_number')
+
+    def clean_drivers_license_number(self):
+        return self._clean_number('drivers_license_number')
 
     def clean_social_security_number(self):
         ssn = self.cleaned_data['social_security_number']

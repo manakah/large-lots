@@ -452,7 +452,7 @@ select.bulk-deny {
     /* Expand `inline-form` element to the full width of its parent,
     where we don't have access to individual month/day/year fields */
     select[id*="date_of_birth"] {
-        width: 31%!important;
+        width: 30.5%!important;
     }
 
     select[id*="date_of_birth"]:not(:last-of-type) {

@@ -208,7 +208,7 @@
                                 {% endfor %}
                             </div>
                             <div class="col-md-8{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                                <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number">
+                                <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.drivers_license_state.data 'N/A' %} disabled{% endifequal %}>
                                 {% for error in form.drivers_license_number.errors %}
                                     <span class="help-block">{{ error }}</span>
                                 {% endfor %}
@@ -216,7 +216,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, put “NA” in the Driver's License Number field.</span>
+                                <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, select “NA” from the State dropdown.</span>
                             </div>
                         </div>
                         <div class="row">
@@ -234,7 +234,7 @@
                                 {% endfor %}
                             </div>
                             <div class="col-md-8{% if form.license_plate_number.errors %} has-error{% endif %}">
-                                <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number">
+                                <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.license_plate_state.data 'N/A' %} disabled{% endifequal %}>
                                 {% for error in form.license_plate_number.errors %}
                                     <span class="help-block">{{ error }}</span>
                                 {% endfor %}
@@ -242,7 +242,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <span class="help-block">If you do not have a car, put “NA” in License Plate Number field. If you are a co-signer on a car loan, you must provide the license plate number of the car.</span>
+                                <span class="help-block">If you are a co-signer on a car loan, you must provide the license plate number of the car. If you do not have a car, select “NA” from the State dropdown.</span>
                             </div>
                         </div>
                     </div>
@@ -336,7 +336,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, put “NA” in the Driver's License Number field.</span>
+                            <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, select “NA” from the State dropdown.</span>
                         </div>
                     </div>
                     <div class="row">
@@ -356,7 +356,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <span class="help-block">If you do not have a car, put “NA” in License Plate Number field. If you are a co-signer on a car loan, you must provide the license plate number of the car.</span>
+                            <span class="help-block">If you are a co-signer on a car loan, you must provide the license plate number of the car. If you do not have a car, select “NA” from the State dropdown.</span>
                         </div>
                     </div>
                 </div>
@@ -465,6 +465,17 @@
             idx ++;
         });
     };
+
+    $('select[id*="state"]').change(function(e) {
+        var selected_option = $(this).find('option:selected');
+        var adjacent_input = $(this).parent().next().find('input');
+
+        if ( $(selected_option).val() == 'N/A' ) {
+            $(this).parent().next().find('input').prop('disabled', true);
+        } else {
+            adjacent_input.prop('disabled', false);
+        }
+    });
 
 </script>
 
