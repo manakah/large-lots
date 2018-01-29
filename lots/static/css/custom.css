@@ -447,26 +447,20 @@ select.bulk-deny {
     background-color: #e6e6e6;
 }
 
-/* Styles for PPF */
-.state-number {
-    width: 100%;
-}
-
+/* Styles for Principal Profile Form */
 @media only screen and (min-width : 768px) {
-    .state-number > select {
-      width: 33%!important;
-      margin-right: 0.5%;
-    }
-
-    .state-number > input {
-      width: 66%!important;
-    }
-
+    /* Expand `inline-form` element to the full width of its parent,
+    where we don't have access to individual month/day/year fields */
     select[id*="date_of_birth"] {
-        width: 32.9%!important;
+        width: 31%!important;
+    }
+
+    select[id*="date_of_birth"]:not(:last-of-type) {
+        margin-right: 3.5%;
     }
 }
 
+/* Styles for PPF export */
 .btn.disabled {
     pointer-events: auto;
 }
