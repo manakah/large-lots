@@ -453,9 +453,6 @@ def advance_if_ppf_and_eds_submitted(application):
 
 def principal_profile_form(request, tracking_id=None):
 
-    if not tracking_id:  # FOR DEV ONLY
-        tracking_id = Application.objects.all()[13].tracking_id
-
     try:
         application = Application.objects.get(tracking_id=tracking_id)
 
