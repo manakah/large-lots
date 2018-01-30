@@ -477,6 +477,8 @@ def principal_profile_form(request, tracking_id=None):
 
     formset = PrincipalProfileFormSet(initial=[initial_data])
 
+    success = False
+
     if request.method == 'POST':
         formset = PrincipalProfileFormSet(request.POST)
 
@@ -525,11 +527,14 @@ def principal_profile_form(request, tracking_id=None):
                 # successfully submitted information.
                 formset = PrincipalProfileFormSet(initial=[{}])
 
+                success = True
+
     return render(request, 'principal_profile.html', {
         'formset': formset,
         'application': application,
         'lots': application.lot_set.all(),
         'existing_profiles': existing_profiles,
+        'success': success,
     })
 
 @csrf_exempt

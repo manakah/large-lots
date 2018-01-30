@@ -203,7 +203,7 @@ class PrincipalProfileForm(forms.Form):
 
     @property
     def _state_choices(self):
-        choices = [(None, 'State'), ['N/A', 'NA']]
+        choices = [(None, 'State'), ['NA', 'NA']]
         choices += [(state.abbr, state.name) for state in STATES]
         return choices
 
@@ -213,7 +213,7 @@ class PrincipalProfileForm(forms.Form):
         state_field = field.replace('number', 'state')
         state_data = self.cleaned_data.get(state_field)
 
-        if state_data != 'N/A' and not number:
+        if state_data != 'NA' and not number:
             message = 'This field is required.'
             raise forms.ValidationError(message)
 

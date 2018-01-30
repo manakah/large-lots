@@ -10,11 +10,19 @@
 
 <div class="col-md-12">
 
+    {% if success %}
+
+        <div class="alert alert-info">
+          <strong>Success!</strong> Your Principal Profile has been submitted.
+        </div>
+
+    {% endif %}
+
     <h1>Principal Profile Form</h1>
 
     {% if application %}
 
-        <p>The Principal Profile Form is used to verify that you do not owe any money to the City. <strong>All information requested is mandatory.</strong> Failure to complete this form and return it by the deadline will result in your removal from the Large Lot Program.</p>
+        <p class="lead">The Principal Profile Form is used to verify that you do not owe any money to the City. <strong>All information requested is mandatory.</strong> Failure to complete this form by the deadline will result in your removal from the Large Lot Program.</p>
 
         <h2>Instructions</h2>
 
@@ -56,32 +64,28 @@
 
                 <h3>You've submitted <strong class="label label-success">{{ existing_profiles|length }}</strong> principal profile{% if existing_profiles|length > 1 %}s{% endif %}.</h3>
 
-                <div class="row">
-                    <div class="col col-md-9">
-                        <table class="table table-striped col col-md-6">
-                            <thead>
-                                <th class="col-md-7">
-                                    Name
-                                </th>
-                                <th class="col-md-5">
-                                    Date submitted
-                                </th>
-                            </thead>
-                        {% for profile in existing_profiles %}
-                            <tr>
-                                <td>
-                                {% if forloop.first %}
-                                    {{ profile.application.first_name }} {{ profile.application.last_name }}
-                                {% else %}
-                                    {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
-                                {% endif %}
-                                </td>
-                                <td>{{ profile.created_at }}</td>
-                            </tr>
-                        {% endfor %}
-                        </table>
-                    </div>
-                </div>
+                <table class="table table-striped col col-md-6">
+                    <thead>
+                        <th class="col-md-7">
+                            Name
+                        </th>
+                        <th class="col-md-5">
+                            Date submitted
+                        </th>
+                    </thead>
+                {% for profile in existing_profiles %}
+                    <tr>
+                        <td>
+                        {% if forloop.first %}
+                            {{ profile.application.first_name }} {{ profile.application.last_name }}
+                        {% else %}
+                            {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
+                        {% endif %}
+                        </td>
+                        <td>{{ profile.created_at }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
 
                 <p>Need to submit another? Use the form below!</p>
 
@@ -142,7 +146,7 @@
                                     <label class="col-form-label" for="{{ form.first_name.auto_id }}">
                                         <strong>{{ form.first_name.label }}</strong>
                                     </label>
-                                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Joe">
+                                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Charlie">
                                     {% for error in form.first_name.errors %}
                                         <span class="help-block">{{ error }}</span>
                                     {% endfor %}
@@ -151,7 +155,7 @@
                                     <label class="col-form-label" for="{{ form.last_name.auto_id }}">
                                         <strong>{{ form.last_name.label }}</strong>
                                     </label>
-                                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}" placeholder="Cool">
+                                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}" placeholder="Brown">
                                     {% for error in form.last_name.errors %}
                                         <span class="help-block">{{ error }}</span>
                                     {% endfor %}
@@ -162,7 +166,7 @@
                                     <label class="col-form-label" for="{{ form.home_address.auto_id }}">
                                         <strong>{{ form.home_address.label }}</strong>
                                     </label>
-                                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
+                                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}" placeholder="123 S Main">
                                     {% for error in form.home_address.errors %}
                                         <span class="help-block">{{ error }}</span>
                                     {% endfor %}
@@ -208,7 +212,7 @@
                                 {% endfor %}
                             </div>
                             <div class="col-md-8{% if form.drivers_license_number.errors %} has-error{% endif %}">
-                                <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.drivers_license_state.data 'N/A' %} disabled{% endifequal %}>
+                                <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.drivers_license_state.data 'NA' %} disabled{% endifequal %}>
                                 {% for error in form.drivers_license_number.errors %}
                                     <span class="help-block">{{ error }}</span>
                                 {% endfor %}
@@ -234,7 +238,7 @@
                                 {% endfor %}
                             </div>
                             <div class="col-md-8{% if form.license_plate_number.errors %} has-error{% endif %}">
-                                <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.license_plate_state.data 'N/A' %} disabled{% endifequal %}>
+                                <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.license_plate_state.data 'NA' %} disabled{% endifequal %}>
                                 {% for error in form.license_plate_number.errors %}
                                     <span class="help-block">{{ error }}</span>
                                 {% endfor %}
@@ -284,13 +288,13 @@
                             <label class="col-form-label" for="{{ form.first_name.auto_id }}">
                                 <strong>{{ form.first_name.label }}</strong>
                             </label>
-                            <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                            <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Charlie">
                         </div>
                         <div class="col-md-6">
                             <label class="col-form-label" for="{{ form.last_name.auto_id }}">
                                 <strong>{{ form.last_name.label }}</strong>
                             </label>
-                            <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}">
+                            <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Brown">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -298,7 +302,7 @@
                             <label class="col-form-label" for="{{ form.home_address.auto_id }}">
                                 <strong>{{ form.home_address.label }}</strong>
                             </label>
-                            <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}">
+                            <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}" placeholder="123 S Main">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -316,7 +320,7 @@
                             <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
                                 <strong>{{ form.social_security_number.label }}</strong>
                             </label>
-                            <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}">
+                            <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}" placeholder="123-45-6789">
                         </div>
                     </div>
                     <div class="row">
@@ -466,12 +470,16 @@
         });
     };
 
+    // Enable/disable the driver's license / license place number, contigent
+    // on whether "NA" is selected from the state menu.
     $('select[id*="state"]').change(function(e) {
         var selected_option = $(this).find('option:selected');
         var adjacent_input = $(this).parent().next().find('input');
 
-        if ( $(selected_option).val() == 'N/A' ) {
+        if ( $(selected_option).val() == 'NA' ) {
             $(this).parent().next().find('input').prop('disabled', true);
+            adjacent_input.parent().removeClass('has-error');
+            adjacent_input.parent().find('span.help-block').hide();
         } else {
             adjacent_input.prop('disabled', false);
         }
