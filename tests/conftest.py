@@ -54,7 +54,7 @@ def lot(db, address):
 
 @pytest.fixture
 @pytest.mark.django_db
-def application(db, lot, address, app_steps):
+def application(db, address):
     # Create application
     application_info = {
         'first_name': 'Seymour',
@@ -75,24 +75,43 @@ def application(db, lot, address, app_steps):
     }
 
     application = Application.objects.create(**application_info)
+    application.save()
 
-    # Create an application status
-    desc = 'Approval of EDS - Applicant submitted EDS and principal profile'
-    wait_for_eds = ApplicationStep.objects.get(description=desc)
+    return application
 
+@pytest.fixture
+@pytest.mark.django_db
+def application_status(db, lot, app_steps):
     application_status_info = {
         'denied': False,
-        'application': application,
         'lot': lot,
-        'current_step': wait_for_eds,
         'lottery': False,
     }
 
     application_status = ApplicationStatus.objects.create(**application_status_info)
 
-    # Add the lot and the application status to the application
-    application.lot_set.add(lot)
-    application.status = application_status
+    return application_status
+
+def add_status(application, application_status, *, step, **kwargs):
+    '''
+    Helper function for assigning an application a status.
+
+    Accepts an instance of application and application status,
+    as well as a step (int). Optionally, pass lottery and
+    lottery_email_sent booleans as extra keyword args.
+    '''
+    app_status = application_status
+    app_step = ApplicationStep.objects.get(step=step)
+
+    app_status.current_step = app_step
+    app_status.application = application
+
+    for key, value in kwargs.items():
+        setattr(app_status, key, value)
+
+    app_status.save()
+
+    application.lot_set.add(app_status.lot)
     application.save()
 
-    return application
+    return application, app_status
