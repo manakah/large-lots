@@ -7,8 +7,9 @@ from django.contrib.auth.models import User
 
 from lots_admin.models import Application, ApplicationStatus
 
+
 @pytest.mark.django_db
-def test_move_to_step_9(django_db_setup, client):
+def test_move_to_step_9(email_db_setup, client):
     '''
     This test checks that the reviewer moved an applicant from step 8 to step 9.
     '''

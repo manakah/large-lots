@@ -9,7 +9,7 @@ from lots_admin.management.commands.send_emails import Command
 
 
 @pytest.mark.django_db
-def test_eds_email(django_db_setup):
+def test_eds_email(email_db_setup):
     '''
     Test that we appropriately select and notify Rivers Cuomo
     and Karen Oh, and update their active applications in the
@@ -28,7 +28,7 @@ def test_eds_email(django_db_setup):
     assert len(eds_sent_applications.filter(first_name='Karen')) == 1
 
 @pytest.mark.django_db
-def test_lotto_email_morning(django_db_setup):
+def test_lotto_email_morning(email_db_setup):
     '''
     This test checks that the correct number of lotto emails go to the appropriate recipients.
     '''
@@ -44,7 +44,7 @@ def test_lotto_email_morning(django_db_setup):
     assert len(lotto_sent_applications.filter(application__first_name='Nathalie')) == 1
 
 @pytest.mark.django_db
-def test_lotto_email_afternoon(django_db_setup):
+def test_lotto_email_afternoon(email_db_setup):
     '''
     This test checks that the correct number of lotto emails go to the appropriate recipients.
     '''
@@ -59,7 +59,7 @@ def test_lotto_email_afternoon(django_db_setup):
     assert len(lotto_sent_applications.filter(application__first_name='Barbara')) == 1
 
 @pytest.mark.django_db
-def test_closing_invitations(django_db_setup, capsys):
+def test_closing_invitations(email_db_setup, capsys):
     with patch.object(Command, 'send_email') as mock_send:
         call_command('send_emails', closing_invitations=3, date='2017-11-13')
 
