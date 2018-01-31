@@ -63,3 +63,5 @@ TEMPLATES = [
         },
     },
 ]
+
+CURRENT_PILOT = "pilot_6_dev"

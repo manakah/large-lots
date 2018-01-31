@@ -10,7 +10,10 @@ from pytest_django.fixtures import db
 
 from lots_admin.look_ups import APPLICATION_STATUS
 from lots_admin.models import Address, Application, Lot, ApplicationStep, \
-    ApplicationStatus
+    ApplicationStatus, User
+
+from .test_config import CURRENT_PILOT
+
 
 @pytest.fixture
 @pytest.mark.django_db
@@ -33,7 +36,14 @@ def app_steps(db):
             'description': APPLICATION_STATUS[short_name],
             'step': idx,
         }
-        ApplicationStep.objects.get_or_create(**spec)
+        ApplicationStep.objects.create(**spec)
+
+@pytest.fixture
+@pytest.mark.django_db
+def auth_client(db, client):
+    User.objects.create_user(username='user', password='password')
+    client.login(username='user', password='password')
+    return client
 
 @pytest.fixture
 @pytest.mark.django_db
@@ -44,7 +54,6 @@ def address(db):
 @pytest.fixture
 @pytest.mark.django_db
 def lot(db, address):
-    # Create lot
     lot_info = {
         'pin': '16244240380000',
         'address': address,
@@ -55,7 +64,6 @@ def lot(db, address):
 @pytest.fixture
 @pytest.mark.django_db
 def application(db, address):
-    # Create application
     application_info = {
         'first_name': 'Seymour',
         'last_name': 'Cats',
@@ -70,7 +78,7 @@ def application(db, address):
         'how_heard': '',
         'tracking_id': uuid.uuid4(),
         'received_date': datetime.datetime.now(),
-        'pilot': 'pilot_6_dev',
+        'pilot': CURRENT_PILOT,
         'eds_sent': True,
     }
 

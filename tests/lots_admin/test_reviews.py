@@ -11,22 +11,16 @@ from ..conftest import add_status
 
 
 @pytest.mark.django_db
-def test_move_to_step_9(client,
-                        application,
-                        application_status):
-
-    # Create user to fulfill @login_required (can't use pytest-django's
-    # admin_user fixture because the password is not hashed, so login
-    # doesn't work)
-    User.objects.create_user(username='user', password='password')
-    client.login(username='user', password='password')
+def test_move_to_step_9(application,
+                        application_status,
+                        auth_client):
 
     # Put our application on step 8
     _, app_status = add_status(application, application_status, step=8)
 
     url = reverse('bulk_submit')
 
-    response = client.post(url, {
+    response = auth_client.post(url, {
         'step': ['step9'],
         'letter-received': [app_status.id]
     })
