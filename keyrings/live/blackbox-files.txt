@@ -1,0 +1,8 @@
+configs/local_settings.py.production
+configs/local_settings.py.staging
+configs/nginx_template.conf.production
+configs/nginx_template.conf.staging
+configs/supervisor_template.conf
+scripts/after_install.sh
+scripts/app_start.sh
+scripts/render_configs.py

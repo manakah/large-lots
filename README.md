@@ -31,7 +31,14 @@ Set the environmental variables in [local_settings.py.example](https://github.co
 
   * ``SENTRY_DSN`` - This is a connection string for [Sentry](http://getsentry.com).
 
-Run the app:
+Make a database and run migrations:
+
+```bash
+createdb largelots
+python manage.py migrate
+```
+
+Now you're ready to run the app:
 
 ```bash
 python manage.py runserver

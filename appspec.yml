@@ -2,21 +2,17 @@ version: 0.0
 os: linux
 files:
   - source: /
-  destination: /home/datamade/large-lots
+    destination: /home/datamade/large-lots-modern-deployment
 hooks:
   BeforeInstall:
-    - location: deploy_scripts/before_install.sh
+    - location: scripts/before_install.sh
       timeout: 300
       runas: root
   ApplicationStart:
-    - location: deploy_scripts/app_start.sh
-      timeout: 300
-      runas: root
-  ApplicationStop:
-    - location: deploy_scripts/app_stop.sh
+    - location: scripts/app_start.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: deploy_scripts/after_install.sh
+    - location: scripts/after_install.sh
       timeout: 1000
       runas: root
