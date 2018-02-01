@@ -22,21 +22,20 @@ script:
 - export DJANGO_SETTINGS_MODULE=lots_admin.tests.test_config && pytest
 
 deploy:
-  provider: codedeploy
-  access_key_id: AKIAJNYGDLOJKHOUWCAA
-  secret_access_key:
-    secure: a9lv+69yYibCSr3vqNwg5FK3v8KVPj08BhWyeDVi4Fnd/sxKZ/kKjFABy+ALJXJyXQyFSup13eLaggyIrHGG+LP3YfND9WKxhFb+8hCEu+YiRmXIEaJJcr2hmHPRPEVzeJmfpOWhIG/DrEYGcQVr+KpSIcINRiXsVTMRjij8UkA=
-  application: large-lots
-  deployment_group: staging
-  on:
-    branch: master
+  - provider: codedeploy
+    access_key_id: AKIAJNYGDLOJKHOUWCAA
+    secret_access_key:
+      secure: a9lv+69yYibCSr3vqNwg5FK3v8KVPj08BhWyeDVi4Fnd/sxKZ/kKjFABy+ALJXJyXQyFSup13eLaggyIrHGG+LP3YfND9WKxhFb+8hCEu+YiRmXIEaJJcr2hmHPRPEVzeJmfpOWhIG/DrEYGcQVr+KpSIcINRiXsVTMRjij8UkA=
+    application: large-lots
+    deployment_group: staging
+    on:
+      branch: master
 
-deploy:
-  provider: codedeploy
-  access_key_id: AKIAJNYGDLOJKHOUWCAA
-  secret_access_key:
-    secure: a9lv+69yYibCSr3vqNwg5FK3v8KVPj08BhWyeDVi4Fnd/sxKZ/kKjFABy+ALJXJyXQyFSup13eLaggyIrHGG+LP3YfND9WKxhFb+8hCEu+YiRmXIEaJJcr2hmHPRPEVzeJmfpOWhIG/DrEYGcQVr+KpSIcINRiXsVTMRjij8UkA=
-  application: large-lots
-  deployment_group: production
-  on:
-    tags: true
+  - provider: codedeploy
+    access_key_id: AKIAJNYGDLOJKHOUWCAA
+    secret_access_key:
+      secure: a9lv+69yYibCSr3vqNwg5FK3v8KVPj08BhWyeDVi4Fnd/sxKZ/kKjFABy+ALJXJyXQyFSup13eLaggyIrHGG+LP3YfND9WKxhFb+8hCEu+YiRmXIEaJJcr2hmHPRPEVzeJmfpOWhIG/DrEYGcQVr+KpSIcINRiXsVTMRjij8UkA=
+    application: large-lots
+    deployment_group: production
+    on:
+      tags: true
