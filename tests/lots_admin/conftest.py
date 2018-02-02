@@ -35,9 +35,10 @@ def principal_profile(application, db):
         'application': application,
         'date_of_birth': '1992-02-16',
         'social_security_number': '123-45-6789',
-        'drivers_license_state': 'IL',
+        'drivers_license_state': 'IN',
         'drivers_license_number': 'foo',
-        'license_plate_state': 'NA',
+        'license_plate_state': 'MO',
+        'license_plate_number': 'bar',
     }
 
     ppf = PrincipalProfile.objects.create(**data)
@@ -68,7 +69,8 @@ def principal_profile_with_related_person(application, related_person, db):
         'social_security_number': '123-45-6789',
         'drivers_license_state': 'IL',
         'drivers_license_number': 'foo',
-        'license_plate_state': 'NA',
+        'license_plate_state': 'IL',
+        'license_plate_number': 'bar',
     }
 
     ppf = PrincipalProfile.objects.create(**data)

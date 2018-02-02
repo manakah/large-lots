@@ -385,9 +385,14 @@ def csv_dump(request, pilot, status, content='application'):
 
 @login_required(login_url='/lots-login/')
 def delete_principal_profiles(request, pilot):
+    # Admins should not be given the option to delete Principal Profile
+    # forms until all of them have been exported. All the same, protectively
+    # filter out profiles without an exported_at date to avoid accidental
+    # information loss (however improbable it may be).
     principal_profiles = PrincipalProfile.objects\
                                          .filter(application__pilot=pilot)\
-                                         .filter(deleted_at__isnull=True)
+                                         .filter(deleted_at__isnull=True)\
+                                         .filter(exported_at__isnull=False)
 
     n_deleted = len(principal_profiles)
 
