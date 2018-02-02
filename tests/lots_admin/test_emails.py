@@ -79,7 +79,7 @@ def test_closing_invitations(email_db_setup, capsys):
     assert len([line for line in lines if '13:00' in line]) == 2
 
 @pytest.mark.django_db
-def test_eds_denials(django_db_setup, capsys):
+def test_eds_denials(email_db_setup, capsys):
     applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
                                       .filter(applicationstatus__denied=False)\
                                       .distinct()
