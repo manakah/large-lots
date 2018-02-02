@@ -83,6 +83,8 @@ class ApplicationForm(forms.Form):
 
         return organization
 
+    # We have validators that check the availability of the PIN, by querying the Carto table.
+    # It seems like we could add a validator for the address that: (1) finds the lot in the Carto table, and (2) compares the lot_1_address and lot_2_address with the address in Carto.
     def _check_pin(self, pin):
         carto = 'http://datamade.cartodb.com/api/v2/sql'
         pin = pin.replace('-', '')
