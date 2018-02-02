@@ -32,6 +32,7 @@ def upload_name(instance, filename):
 class Application(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
+    organization_confirmed = models.BooleanField(default=False)
     organization = models.CharField(max_length=255, null=True)
     owned_pin = models.CharField(max_length=14)
     owned_address = models.ForeignKey(Address, related_name='owned_address')

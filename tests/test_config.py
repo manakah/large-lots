@@ -1,6 +1,12 @@
 import os
+import pytz
+from datetime import datetime
 
 SECRET_KEY = 'running man was a good movie'
+
+CARTODB_API_KEY = ''
+
+CURRENT_CARTODB = ''
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -24,6 +30,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'lots.urls'
+
+APPLICATION_DISPLAY = False
 
 DATABASES = {
    'default': {
@@ -65,3 +73,11 @@ TEMPLATES = [
 ]
 
 CURRENT_PILOT = "pilot_6_dev"
+
+timezone = pytz.timezone('America/Chicago')
+
+CHICAGO_TIME = datetime.now(timezone)
+
+START_DATE = timezone.localize(datetime(2016, 11, 29, 0, 0))
+
+END_DATE = timezone.localize(datetime(2017, 1, 31, 23, 59))

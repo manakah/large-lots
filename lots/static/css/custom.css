@@ -168,6 +168,10 @@ a.dropdown-toggle:hover {
     color: #fff;
 }
 
+div#organization-group .input-group-addon {
+    background-color: #f6f6f6;
+}
+
 /* Leaflet legend styles */
 .leaflet-google-layer{
     z-index: 0 !important;

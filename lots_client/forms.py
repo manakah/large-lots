@@ -45,7 +45,9 @@ class ApplicationForm(forms.Form):
     last_name = forms.CharField(
         error_messages={'required': 'Provide your last name'},
         label="Your last name")
-    organization = forms.CharField(required=False)
+    organization_confirmed = forms.BooleanField(required=False)
+    organization = forms.CharField(required=False,
+        label="Your organization")
     phone = forms.CharField(
         error_messages={'required': 'Provide a contact phone number'},
         label="Your phone number")
@@ -62,6 +64,24 @@ class ApplicationForm(forms.Form):
     terms = forms.BooleanField(
         error_messages={'required': 'Verify that you have read and agree to the terms'},
         label="Application terms")
+
+    '''
+    Possible combinations of user input for organization (text) and organization_confirmed (checkbox):
+    (1) The user does not check the confirm box and does not input an org name - VALID 
+    (2) The user checks the confirm box and inputs an org name - VALID 
+    (3) The user checks the confirm box but does NOT input an org name - INVALID
+
+    (4) The user checks the confirm box, enters an org name, and then unchecks the box: this validates as expected. The confirm box will be False, and the input will be None, since a "disabled" field always returns None.
+    '''
+    def clean_organization(self):
+        organization = self.cleaned_data['organization']
+        organization_confirmed = self.cleaned_data['organization_confirmed']
+
+        if organization_confirmed and not organization:
+            message = 'Check the box and enter an organization name, or leave both blank.'
+            raise forms.ValidationError(message)
+
+        return organization
 
     def _check_pin(self, pin):
         carto = 'http://datamade.cartodb.com/api/v2/sql'

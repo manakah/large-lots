@@ -21,6 +21,7 @@ def test_export_ppf(principal_profile,
                     auth_client):
 
     url = reverse('csv_dump', args=[CURRENT_PILOT, None, 'ppf'])
+
     rv = auth_client.post(url)
 
     reader = csv.DictReader(StringIO(rv.content.decode()))

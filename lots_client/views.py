@@ -215,6 +215,7 @@ def apply(request):
             app_info = {
                 'first_name': form.cleaned_data['first_name'],
                 'last_name': form.cleaned_data['last_name'],
+                'organization_confirmed': form.cleaned_data['organization_confirmed'],
                 'organization': form.cleaned_data.get('organization'),
                 'owned_address': owned_address,
                 'owned_pin': form.cleaned_data['owned_pin'],
@@ -224,7 +225,7 @@ def apply(request):
                 'email': form.cleaned_data.get('email'),
                 'how_heard': form.cleaned_data.get('how_heard'),
                 'tracking_id': str(uuid4()),
-                'pilot': settings.CURRENT_PILOT
+                'pilot': settings.CURRENT_PILOT,
             }
             app = Application(**app_info)
             app.save()
@@ -275,6 +276,7 @@ def apply(request):
             context['deed_image'] = form['deed_image'].value()
             context['first_name'] = form['first_name'].value()
             context['last_name'] = form['last_name'].value()
+            context['organization_confirmed'] = form['organization_confirmed'].value()
             context['organization'] = form['organization'].value()
             context['phone'] = form['phone'].value()
             context['email'] = form['email'].value()
