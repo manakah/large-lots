@@ -19,7 +19,7 @@ before_script:
 - psql -U postgres -c "CREATE DATABASE largelots"
 - python manage.py migrate
 script:
-- export DJANGO_SETTINGS_MODULE=lots_admin.tests.test_config && pytest
+- pytest
 
 deploy:
   - provider: codedeploy
