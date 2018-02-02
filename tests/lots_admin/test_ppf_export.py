@@ -30,15 +30,6 @@ def test_export_ppf(principal_profile,
 
     assert len(exported_profiles) == len(existing_profiles)
 
-    def convert_none(s):
-        '''
-        Driver's license and license plate values can be null. This
-        manifests as None when accessed via a PrincipalProfile instance,
-        and an empty string in the csv output. Standardize so we can
-        compare the two.
-        '''
-        return '' if s is None else s
-
     for export, existing in zip(exported_profiles, existing_profiles):
         assert existing.entity.first_name == export['First name']
         assert existing.entity.last_name == export['Last name']
@@ -46,9 +37,9 @@ def test_export_ppf(principal_profile,
         assert str(existing.date_of_birth) == export['Date of birth']
         assert existing.social_security_number == export['Social Security number']
         assert existing.drivers_license_state == export['Driver\'s license state']
-        assert convert_none(existing.drivers_license_number) == export['Driver\'s license number']
+        assert existing.drivers_license_number == export['Driver\'s license number']
         assert existing.license_plate_state == export['License plate state']
-        assert convert_none(existing.license_plate_number) == export['License plate number']
+        assert existing.license_plate_number == export['License plate number']
 
     assert all(profile.exported_at for profile in existing_profiles)
 

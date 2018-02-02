@@ -79,7 +79,6 @@ def application(db, address):
         'tracking_id': uuid.uuid4(),
         'received_date': datetime.datetime.now(),
         'pilot': CURRENT_PILOT,
-        'eds_sent': True,
     }
 
     application = Application.objects.create(**application_info)

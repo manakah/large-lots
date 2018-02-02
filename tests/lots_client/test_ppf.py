@@ -19,6 +19,9 @@ def test_advance_to_step_8(django_db_setup,
                            eds_received,
                            ppf_received):
 
+    application.eds_sent = True
+    application.save()
+
     setattr(application, 'eds_received', eds_received)
     setattr(application, 'ppf_received', ppf_received)
 
