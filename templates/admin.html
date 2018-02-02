@@ -11,11 +11,11 @@
 <div class="row">
     <div class="col-md-12">
         <div class="right-nav">
-            {% for i in counter_range %}
-            <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a> |
+            {% for i in step_range %}
+                <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
             {% endfor %}
-            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a> |
-            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a> |
+            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
+            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
             <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
@@ -24,14 +24,53 @@
 <div class="row">
     <div class='col-md-8'>
         <h3>
-            Large Lots received {{app_count}} applications
-            <small><a href="{% url 'csv_dump' selected_pilot step %}"><i class='fa fa-file-excel-o'></i> Export as CSV</a></small>
+            Large Lots received {{ app_count }} applications
+            <small><a href="{% url 'csv_dump' selected_pilot step %}"><i class='fa fa-fw fa-file-excel-o'></i> Export as CSV</a></small>
         </h3>
+        {% if step == 7 %}
+            <h4>
+                Principal Profiles have been received for {{ ppf_count }} applications
+                <small>
+                    <a href="{% url 'lots_admin_principal_profiles' %}" target="_blank">
+                        <i class='fa fa-fw fa-external-link '></i> Go to export
+                    </a>
+                </small>
+            </h4>
+        {% endif %}
 
-        <form type="get" action="." style="margin: 0">
+        <form type="get" action="{% url 'lots_admin' step %}" style="margin: 0">
             <input class="form-control update" id="search_box" type="text" name="search_box"  placeholder="Search for a name or ward..." >
+            {% for name, value in request.GET.items %}
+                {% if name != 'search_box' %}
+                    <input type="hidden" name="{{ name }}" value="{{ value }}">
+                {% endif %}
+            {% endfor %}
             <button class="btn btn-success update" id="search_submit" type="submit" style="border-width: 0px;"><i class="fa fa-search" aria-hidden="true"></i> Submit</button>
         </form>
+
+        <br />
+
+        {% if step == 7 %}
+            <small>
+                Filter by: &nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='true' %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
+                    PPF submitted
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='false' %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
+                    PPF not submitted
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='true' %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
+                    EDS submitted
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='false' %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
+                    EDS not submitted
+                </a>&nbsp;
+                <a href="{% url 'lots_admin' '7' %}">
+                    <i class="fa fa-fw fa-times" aria-hidden="true"></i>
+                    Clear filters
+                </a>
+            </small>
+        {% endif %}
     </div>
 </div>
 
@@ -150,7 +189,7 @@
                     Review history
                 </a></br>
                 <a href="{% url 'apply_confirm' applicant.tracking_id %}" target="_blank">Confirmation page</a></br>
-                <a href="{% url 'deed' applicant.status_id %}">Deed</a>
+                <a href="{% url 'deed' applicant.status_id %}">Deed</a><br />
             </td>
             <td>
                 {{ applicant.street }}</br>
@@ -195,6 +234,10 @@
                 {% elif applicant.step == 7 %}
                     <div class='col-sm-10'>
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
+                        <span class="emphasis">
+                            EDS{% if not applicant.eds_received %} not{% endif %} submitted,<br />
+                            PPF{% if not applicant.ppf_received %} not{% endif %} submitted
+                        </span>
                     </div>
                 <!-- Steps 6-11 -->
                 {% elif applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}

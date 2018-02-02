@@ -29,10 +29,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import formset_factory
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from lots_admin.models import Lot, Application, Address, ApplicationStep, ApplicationStatus
-from lots_client.forms import ApplicationForm, DeedUploadForm
+from lots_admin.models import Lot, Application, Address, ApplicationStep,\
+    ApplicationStatus, PrincipalProfile, RelatedPerson
+from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
 
 def home(request):
@@ -134,8 +136,7 @@ def parse_address(address):
 
 def get_lot_address(address, pin):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)
-    ward = get_ward(pin)
-    community = get_community(pin)
+
     add_info = {
         'street': address,
         'street_number': street_number,
@@ -145,9 +146,17 @@ def get_lot_address(address, pin):
         'city': 'Chicago',
         'state': 'IL',
         'zip_code': '',
-        'ward': ward,
-        'community': community,
     }
+
+    if pin:
+        ward = get_ward(pin)
+        community = get_community(pin)
+
+        add_info.update({
+            'ward': ward,
+            'community': community,
+        })
+
     add_obj, created = Address.objects.get_or_create(**add_info)
     return add_obj
 
@@ -433,14 +442,100 @@ def wintrust_announcement(request):
         response['Content-Disposition'] = 'filename=some_file.pdf'
         return response
 
-def principal_profile_form(request):
-    filename = 'lots/static/documents/PrincipalProfileForm.pdf'
-    data = open(filename, "rb").read()
-    response = HttpResponse(data, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=PrincipalProfileForm.pdf'
-    response['Content-Length'] = os.path.getsize(filename)
+def advance_if_ppf_and_eds_submitted(application):
+    if application.eds_received and application.ppf_received:
+        related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
 
-    return response
+        for application_status in related_application_statuses:
+            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
+            application_status.current_step = step
+            application_status.save()
+
+def principal_profile_form(request, tracking_id=None):
+
+    try:
+        application = Application.objects.get(tracking_id=tracking_id)
+
+    except ObjectDoesNotExist:
+        return render(request, 'principal_profile.html', {
+            'application': None,
+        })
+
+    existing_profiles = application.principalprofile_set.all()
+
+    PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
+
+    if existing_profiles:
+        initial_data = {}
+    else:
+        # Prepopulate applicant's name and address.
+        initial_data = {
+            'first_name': application.first_name,
+            'last_name': application.last_name,
+            'home_address': application.contact_address.street,
+        }
+
+    formset = PrincipalProfileFormSet(initial=[initial_data])
+
+    success = False
+
+    if request.method == 'POST':
+        formset = PrincipalProfileFormSet(request.POST)
+
+        if formset.is_valid():
+            for idx, form in enumerate(formset.forms):
+                submitted_data = form.cleaned_data
+
+                profile = PrincipalProfile(
+                    application=application,
+                    date_of_birth=submitted_data['date_of_birth'],
+                    social_security_number=submitted_data['social_security_number'],
+                    drivers_license_state=submitted_data['drivers_license_state'],
+                    drivers_license_number=submitted_data['drivers_license_number'],
+                    license_plate_state=submitted_data['license_plate_state'],
+                    license_plate_number=submitted_data['license_plate_number'],
+                )
+
+                # If it's the second form, or if the applicant has already
+                # successfully submitted their information, it's a related
+                # person, and needs to be created and saved as such.
+
+                if idx or existing_profiles:
+                    address = get_lot_address(submitted_data['home_address'], None)
+
+                    related_person = RelatedPerson(
+                        application=application,
+                        first_name=submitted_data['first_name'],
+                        last_name=submitted_data['last_name'],
+                        address=address,
+                    )
+
+                    related_person.save()
+                    profile.related_person_id = related_person.id
+
+                profile.save()
+
+                application.ppf_received = True
+                application.save()
+
+                advance_if_ppf_and_eds_submitted(application)
+
+                # Update existing_profiles to reflect the newly submitted one.
+                existing_profiles = application.principalprofile_set.all()
+
+                # Render back an empty form, rather than repopulating it with
+                # successfully submitted information.
+                formset = PrincipalProfileFormSet(initial=[{}])
+
+                success = True
+
+    return render(request, 'principal_profile.html', {
+        'formset': formset,
+        'application': application,
+        'lots': application.lot_set.all(),
+        'existing_profiles': existing_profiles,
+        'success': success,
+    })
 
 @csrf_exempt
 def eds_submission(request):
@@ -448,18 +543,19 @@ def eds_submission(request):
         tracking_id = request.POST.get('tracking_id', None)
         if tracking_id:
             tracking_id = request.POST['tracking_id']
-            try: 
+            try:
                 application = Application.objects.get(tracking_id=tracking_id)
-                related_application_statuses = ApplicationStatus.objects.filter(application__email=application.email).filter(application__eds_sent=True).filter(current_step__step=7)
 
-                for application_status in related_application_statuses:
-                    step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_submission'], public_status='valid', step=8)
-                    application_status.current_step = step
-                    application_status.save()
+            except ObjectDoesNotExist:
+                return HttpResponse('Application does not exist', status=400)
+
+            else:
+                application.eds_received = True
+                application.save()
+
+                advance_if_ppf_and_eds_submitted(application)
                 return HttpResponse('Successful EDS submission for {}'.format(application.email), status=200)
 
-            except ObjectDoesNotExist: 
-                return HttpResponse('Application does not exist', status=400)
         else:
             return HttpResponse('Did not find tracking_id in request: {}'.format(request), status=400)
     else:

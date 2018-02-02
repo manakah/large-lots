@@ -11,6 +11,10 @@ from pdfid.pdfid import PDFiD
 from django.conf import settings
 from django import forms
 
+from us.states import STATES
+
+from lots_admin.models import PrincipalProfile
+
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -163,3 +167,73 @@ class DeedUploadForm(forms.Form):
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
         return self.cleaned_data['deed_image']
+
+
+class PrincipalProfileForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    home_address = forms.CharField()
+    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
+        years=[year for year in range(2017, 1900, -1)],
+        attrs={'class': 'form-control'})
+    )
+    social_security_number = forms.CharField(max_length=11)
+    drivers_license_state = forms.ChoiceField(
+        label="Driver's license state",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    drivers_license_number = forms.CharField(
+        label="Driver's license number",
+        max_length=20,
+        required=False
+    )
+    license_plate_state = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    license_plate_number = forms.CharField(
+        max_length=10,
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['drivers_license_state'].choices = self._state_choices
+        self.fields['license_plate_state'].choices = self._state_choices
+
+    @property
+    def _state_choices(self):
+        choices = [(None, 'State'), ['NA', 'NA']]
+        choices += [(state.abbr, state.name) for state in STATES]
+        return choices
+
+    def _clean_number(self, field):
+        number = self.cleaned_data[field]
+
+        state_field = field.replace('number', 'state')
+        state_data = self.cleaned_data.get(state_field)
+
+        if state_data != 'NA' and not number:
+            message = 'This field is required.'
+            raise forms.ValidationError(message)
+
+        return self.cleaned_data[field]
+
+    def clean_license_plate_number(self):
+        return self._clean_number('license_plate_number')
+
+    def clean_drivers_license_number(self):
+        return self._clean_number('drivers_license_number')
+
+    def clean_social_security_number(self):
+        ssn = self.cleaned_data['social_security_number']
+
+        digits = [char for char in ssn if char.isdigit()]
+
+        if not len(digits) == 9:
+            message = "Please enter a 9-digit Social Security number."
+            raise forms.ValidationError(message)
+
+        return '%s-%s-%s' % (''.join(digits[:3]),
+                             ''.join(digits[3:5]),
+                             ''.join(digits[5:]))
