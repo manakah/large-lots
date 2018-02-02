@@ -31,7 +31,8 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from lots_admin.models import Application, Lot, ApplicationStep, Review, ApplicationStatus, DenialReason
+from lots_admin.models import Application, Lot, ApplicationStep, Review, \
+    ApplicationStatus, DenialReason, PrincipalProfile
 
 def lots_login(request):
     if request.method == 'POST':
@@ -64,6 +65,33 @@ def lots_admin_map(request):
         })
 
 @login_required(login_url='/lots-login/')
+def lots_admin_principal_profiles(request):
+    applications = Application.objects.filter(principalprofile__isnull=False).distinct()
+
+    sql = '''
+        SELECT
+          SUM(CASE WHEN (deleted_at is null) THEN 1 ELSE 0 END) AS available,
+          SUM(CASE WHEN (exported_at is null) THEN 1 ELSE 0 END) AS not_exported,
+          MAX(exported_at) AS last_export,
+          MAX(deleted_at) AS last_delete
+        FROM lots_admin_principalprofile
+    '''
+
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        ppf_meta, = (row for row in cursor)
+        available, not_exported, last_export, last_delete = ppf_meta
+
+    return render(request, 'admin-principal-profiles.html', {
+            'selected_pilot': settings.CURRENT_PILOT,
+            'application_count': len(applications),
+            'available_count': available,
+            'not_exported_count': not_exported,
+            'last_export': last_export,
+            'last_delete': last_delete,
+        })
+
+@login_required(login_url='/lots-login/')
 def lots_admin(request, step):
     query = request.GET.get('search_box', None)
     page = request.GET.get('page', None)
@@ -72,136 +100,112 @@ def lots_admin(request, step):
     request.session['page'] = page
     request.session['query'] = query
 
+    sql_fmt = '''
+        SELECT
+          app.id as app_id,
+          app.received_date,
+          app.first_name,
+          app.last_name,
+          app.organization,
+          app.tracking_id,
+          app.ppf_received,
+          app.eds_received,
+          status.id as status_id,
+          status.denied,
+          step.public_status,
+          step.step,
+          step.description as step_description,
+          lot.address_id,
+          lot.pin,
+          address.street,
+          address.ward
+        FROM lots_admin_applicationstatus AS status
+        LEFT JOIN lots_admin_application AS app
+        ON status.application_id = app.id
+        LEFT JOIN lots_admin_applicationstep AS step
+        ON status.current_step_id = step.id
+        LEFT JOIN lots_admin_lot AS lot
+        ON status.lot_id = lot.pin
+        LEFT JOIN lots_admin_address AS address
+        ON lot.address_id = address.id
+        {conditions}
+        {order_by}
+    '''
+
+    if step.isdigit():
+        step = int(step)
+
+        conditions = '''
+            WHERE coalesce(deed_image, '') <> ''
+            AND step = {0}
+        '''.format(step)
+
+        if request.GET.get('eds', None):
+            conditions += 'AND app.eds_received = {} '.format(request.GET['eds'])
+
+        elif request.GET.get('ppf', None):
+            conditions += 'AND app.ppf_received = {} '.format(request.GET['ppf'])
+
+    elif step == 'denied':
+        conditions = '''
+            WHERE coalesce(deed_image, '') <> ''
+            AND status.denied = TRUE
+        '''
+
+    elif step == 'all':
+        conditions = ''
+
+    if query:
+        query_sql = "plainto_tsquery('english', '{0}') @@ to_tsvector(app.first_name || ' ' || app.last_name || ' ' || address.ward)".format(query)
+
+        if step == 'all':
+            conditions = 'WHERE {0}'.format(query_sql)
+        else:
+            conditions += 'AND {0}'.format(query_sql)
+
+    order_by = request.GET.get('order_by', 'last_name')
+    sort_order = request.GET.get('sort_order', 'asc')
+
+    if order_by == 'ward':
+        order_by = 'ward::int'
+
+    sql = sql_fmt.format(conditions=conditions,
+                         order_by='ORDER BY {0} {1}'.format(order_by, sort_order))
+
     with connection.cursor() as cursor:
-        # Order by last name ascending by default.
-        order_by = request.GET.get('order_by', 'last_name')
-        sort_order = request.GET.get('sort_order', 'asc')
-
-        if order_by == 'ward':
-            order_by = 'ward::int'
-
-        toggle_order = 'asc'
-        if sort_order.lower() == 'asc':
-            toggle_order = 'desc'
-
-        # Variables: list of step specific, denied, and all.
-        if step.isdigit():
-            step = int(step)
-
-            sql = '''
-            SELECT
-                lots_admin_applicationstatus.id as status_id,
-                lots_admin_application.id as app_id, lots_admin_application.received_date,
-                lots_admin_application.first_name, lots_admin_application.last_name,
-                lots_admin_application.organization, lots_admin_application.tracking_id,
-                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
-                lots_admin_applicationstep.description as step_description,
-                lots_admin_lot.address_id, lots_admin_lot.pin,
-                lots_admin_address.street, lots_admin_address.ward
-            FROM lots_admin_applicationstatus
-            LEFT JOIN lots_admin_application
-            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            LEFT JOIN lots_admin_applicationstep
-            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            LEFT JOIN lots_admin_lot
-            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            LEFT JOIN lots_admin_address
-            ON lots_admin_lot.address_id=lots_admin_address.id
-            WHERE lots_admin_applicationstep.step={0}
-            AND coalesce(deed_image, '') <> ''
-            '''.format(step, order_by, sort_order)
-
-            if query:
-                sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
-
-            else:
-                sql += " ORDER BY {0} {1}".format(order_by, sort_order)
-
-        elif step == "denied":
-
-            sql = '''
-            SELECT
-                lots_admin_applicationstatus.id as status_id,
-                lots_admin_applicationstatus.denied,
-                lots_admin_application.id as app_id, lots_admin_application.received_date,
-                lots_admin_application.first_name, lots_admin_application.last_name,
-                lots_admin_application.organization, lots_admin_application.tracking_id,
-                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
-                lots_admin_applicationstep.description as step_description,
-                lots_admin_lot.address_id, lots_admin_lot.pin,
-                lots_admin_address.street, lots_admin_address.ward
-            FROM lots_admin_applicationstatus
-            LEFT JOIN lots_admin_application
-            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            LEFT JOIN lots_admin_applicationstep
-            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            LEFT JOIN lots_admin_lot
-            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            LEFT JOIN lots_admin_address
-            ON lots_admin_lot.address_id=lots_admin_address.id
-            WHERE lots_admin_applicationstatus.denied=True
-            AND coalesce(deed_image, '') <> ''
-            '''
-
-            if query:
-                sql += " AND plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
-
-            else:
-                sql += " ORDER BY {0} {1}".format(order_by, sort_order)
-
-        elif step == "all":
-
-            sql = '''
-            SELECT
-                lots_admin_applicationstatus.id as status_id,
-                lots_admin_application.id as app_id, lots_admin_application.received_date,
-                lots_admin_application.first_name, lots_admin_application.last_name,
-                lots_admin_application.organization, lots_admin_application.tracking_id,
-                lots_admin_applicationstep.public_status, lots_admin_applicationstep.step,
-                lots_admin_applicationstep.description as step_description,
-                lots_admin_lot.address_id, lots_admin_lot.pin,
-                lots_admin_address.street, lots_admin_address.ward
-            FROM lots_admin_applicationstatus
-            LEFT JOIN lots_admin_application
-            ON lots_admin_applicationstatus.application_id=lots_admin_application.id
-            LEFT JOIN lots_admin_applicationstep
-            ON lots_admin_applicationstatus.current_step_id=lots_admin_applicationstep.id
-            LEFT JOIN lots_admin_lot
-            ON lots_admin_applicationstatus.lot_id=lots_admin_lot.pin
-            LEFT JOIN lots_admin_address
-            ON lots_admin_lot.address_id=lots_admin_address.id
-            '''
-
-            if query:
-                sql += " WHERE plainto_tsquery('english', '{0}') @@ to_tsvector(lots_admin_application.first_name || ' ' || lots_admin_application.last_name || ' ' || lots_admin_address.ward) ORDER BY {1} {2}".format(query, order_by, sort_order)
-
-            else:
-                sql += " ORDER BY {0} {1}".format(order_by, sort_order)
-
-
         cursor.execute(sql)
-        columns = [c[0] for c in cursor.description]
+
+        columns = [col.name for col in cursor.description]
         result_tuple = namedtuple('ApplicationStatus', columns)
         application_status_list = [result_tuple(*r) for r in cursor]
 
-        step2 = Q(current_step__step=2)
-        step3 = Q(current_step__step=3)
-        step4 = Q(current_step__step=4)
-        step5 = Q(current_step__step=5)
-        step6 = Q(current_step__step=6)
-        before_step4 = ApplicationStatus.objects.filter(step2 | step3)
-        on_steps234 = ApplicationStatus.objects.filter(step2 | step3 | step4)
-        on_steps23456 = ApplicationStatus.objects.filter(step2 | step3 | step4 | step5 | step6)
-        app_count = len(ApplicationStatus.objects.all())
+    steps = {i: Q(current_step__step=i) for i in range(2, 7)}
 
-    counter_range = range(2, 11)
+    before_step4 = ApplicationStatus.objects.filter(steps[2] | steps[3])
+    on_steps234 = ApplicationStatus.objects.filter(steps[2] | steps[3] | steps[4])
+    on_steps23456 = ApplicationStatus.objects.filter(steps[2] | steps[3] | steps[4] | steps[5] | steps[6])
+
+    app_count = len(ApplicationStatus.objects.all())
+    ppf_count = len(Application.objects\
+                               .filter(principalprofile__isnull=False)\
+                               .distinct())
+
+    step_range = range(2, 11)
+
+    if sort_order.lower() == 'asc':
+        toggle_order = 'desc'
+
+    else:
+        toggle_order = 'asc'
 
     paginator = Paginator(application_status_list, 20)
 
     try:
         application_status_list = paginator.page(page)
+
     except PageNotAnInteger:
         application_status_list = paginator.page(1)
+
     except EmptyPage:
         application_status_list = paginator.page(paginator.num_pages)
 
@@ -213,14 +217,15 @@ def lots_admin(request, step):
         'on_steps234': on_steps234,
         'on_steps23456': on_steps23456,
         'app_count': app_count,
+        'ppf_count': ppf_count,
         'step': step,
-        'counter_range': counter_range,
+        'step_range': step_range,
         'order_by': order_by,
         'toggle_order': toggle_order
         })
 
 @login_required(login_url='/lots-login/')
-def csv_dump(request, pilot, status):
+def dump_applications(request, pilot, status):
     response = HttpResponse(content_type='text/csv')
     now = datetime.now().isoformat()
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Applications_%s_%s.csv' % (pilot, now)
@@ -286,7 +291,6 @@ def csv_dump(request, pilot, status):
         except ValueError:
             deed_image = None
 
-
         if application_status.current_step:
             current_step = str(application_status.current_step.step) + ': ' + str(application_status.current_step)
         else:
@@ -319,6 +323,94 @@ def csv_dump(request, pilot, status):
     writer.writerow(header)
     writer.writerows(rows)
     return response
+
+@login_required(login_url='/lots-login/')
+def dump_principal_profiles(request, pilot):
+    response = HttpResponse(content_type='text/csv')
+    now = datetime.now().isoformat()
+    response['Content-Disposition'] = 'attachment; filename=Large_Lots_Principal_Profiles_%s_%s.csv' % (pilot, now)
+
+    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)\
+                                       .filter(deleted_at__isnull=True)
+
+    header = [
+        'ID',
+        'Date received',
+        'Primary applicant',
+        'First name',
+        'Last name',
+        'Home address',
+        'Date of birth',
+        'Social Security number',
+        'Driver\'s license state',
+        'Driver\'s license number',
+        'License plate state',
+        'License plate number',
+    ]
+
+    rows = []
+
+    for profile in profiles:
+        rows.append([
+            profile.application.id,
+            profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
+            not profile.related_person,
+            profile.entity.first_name,
+            profile.entity.last_name,
+            profile.address,
+            profile.date_of_birth,
+            profile.social_security_number,
+            profile.drivers_license_state,
+            profile.drivers_license_number,
+            profile.license_plate_state,
+            profile.license_plate_number,
+        ])
+        profile.exported_at = datetime.now().isoformat()
+        profile.save()
+
+    writer = csv.writer(response)
+    writer.writerow(header)
+    writer.writerows(rows)
+    return response
+
+@login_required(login_url='/lots-login/')
+def csv_dump(request, pilot, status, content='application'):
+    if content == 'application':
+        response = dump_applications(request, pilot, status)
+
+    elif content == 'ppf':
+        response = dump_principal_profiles(request, pilot)
+
+    return response
+
+@login_required(login_url='/lots-login/')
+def delete_principal_profiles(request, pilot):
+    # Admins should not be given the option to delete Principal Profile
+    # forms until all of them have been exported. All the same, protectively
+    # filter out profiles without an exported_at date to avoid accidental
+    # information loss (however improbable it may be).
+    principal_profiles = PrincipalProfile.objects\
+                                         .filter(application__pilot=pilot)\
+                                         .filter(deleted_at__isnull=True)\
+                                         .filter(exported_at__isnull=False)
+
+    n_deleted = len(principal_profiles)
+
+    for ppf in principal_profiles:
+
+        for field in ('date_of_birth',
+                      'social_security_number',
+                      'drivers_license_state',
+                      'drivers_license_number',
+                      'license_plate_state',
+                      'license_plate_number'):
+
+            setattr(ppf, field, None)
+
+        ppf.deleted_at = datetime.now().isoformat()
+        ppf.save()
+
+    return HttpResponseRedirect('/principal-profiles/')
 
 @login_required(login_url='/lots-login/')
 def pdfviewer(request):

@@ -32,6 +32,7 @@ def upload_name(instance, filename):
 class Application(models.Model):
     first_name = models.CharField(max_length=255, null=True)
     last_name = models.CharField(max_length=255, null=True)
+    organization_confirmed = models.BooleanField(default=False)
     organization = models.CharField(max_length=255, null=True)
     owned_pin = models.CharField(max_length=14)
     owned_address = models.ForeignKey(Address, related_name='owned_address')
@@ -45,6 +46,8 @@ class Application(models.Model):
     received_date = models.DateTimeField(auto_now_add=True)
     pilot = models.CharField(max_length=50, null=True)
     eds_sent = models.BooleanField(default=False)
+    eds_received = models.BooleanField(default=False)
+    ppf_received = models.BooleanField(default=False)
     closing_invite_sent = models.BooleanField(default=False)
 
     def __str__(self):
@@ -97,3 +100,47 @@ class ApplicationStatus(models.Model):
 
     def __str__(self):
         return str(self.application) + " " + str(self.lot)
+
+class PrincipalProfile(models.Model):
+    application = models.ForeignKey('Application')
+    related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
+    date_of_birth = models.DateField(null=True)
+    social_security_number = models.CharField(max_length=11, null=True)
+    drivers_license_state = models.CharField(max_length=2, null=True)
+    drivers_license_number = models.CharField(max_length=20, null=True)
+    license_plate_state = models.CharField(max_length=2, null=True)
+    license_plate_number = models.CharField(max_length=20, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    exported_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return '{0} {1} Principal Profile'.format(self.entity.first_name,
+                                                  self.entity.last_name)
+
+    @property
+    def entity(self):
+        if self.related_person:
+            return self.related_person
+        else:
+            return self.application
+
+    @property
+    def address(self):
+        try:
+            return self.entity.owned_address.street
+
+        except AttributeError:
+            return self.entity.address.street
+
+class RelatedPerson(models.Model):
+    application = models.ForeignKey('Application')
+    first_name = models.CharField(max_length=255, null=True)
+    last_name = models.CharField(max_length=255, null=True)
+    address = models.ForeignKey(Address, related_name='home_address')
+
+    def __str__(self):
+        return '{0} {1} related to Application for {2}'.format(self.first_name,
+                                                               self.last_name,
+                                                               str(self.application))
+

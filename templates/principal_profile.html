@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% load lots_filters %}
+{% load staticfiles %}
+{% load bootstrap_pagination %}
+{% block extra_css %}
+<link href="{% static 'css/dataTables.bootstrap.css' %}" rel="stylesheet">
+{% endblock %}
+{% block title %}Principal Profile Form{% endblock %}
+{% block content %}
+
+<div class="col-md-12">
+
+    {% if success %}
+
+        <div class="alert alert-success">
+            <strong>Success!</strong> Your Principal Profile has been submitted. Need to submit another? Use the form below.
+        </div>
+
+    {% endif %}
+
+    <h1>Principal Profile Form</h1>
+
+    {% if application %}
+
+        <p class="lead">The Principal Profile Form is used to verify that you do not owe any money to the City. <strong>All information requested is mandatory.</strong> Failure to complete this form by the deadline will result in your removal from the Large Lot Program.</p>
+
+        <h2>Instructions</h2>
+
+        <ul>
+            <li>If you are an <strong>individual</strong> applying for a lot, submit only your own information.</li>
+            <li>If you are purchasing a lot <strong>with a spouse or partner</strong>, submit your information, as well as your spouse or partner's information.</li>
+            <li>If you represent <strong>a non-profit or for-profit organization</strong>, submit information for each member of your board, officers, and executive director.</li>
+        </ul>
+
+        <hr>
+
+        <h3>You're applying for <strong class="label label-success">{{ lots|length }}</strong> lot{% if lots|length > 1 %}s{% endif %}.</h3>
+
+        <div class="row">
+            <div class="col col-md-9">
+                <table class="table table-striped col col-md-6">
+                    <thead>
+                        <th class="col-md-7">
+                            Address
+                        </th>
+                        <th class="col-md-5">
+                            PIN
+                        </th>
+                    </thead>
+                {% for lot in lots %}
+                    <tr>
+                        <td>{{ lot.address.street }}</td>
+                        <td>{{ lot.pin }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-9">
+
+        {% if existing_profiles %}
+
+                <h3>You've submitted <strong class="label label-success">{{ existing_profiles|length }}</strong> principal profile{% if existing_profiles|length > 1 %}s{% endif %}.</h3>
+
+                <table class="table table-striped col col-md-6">
+                    <thead>
+                        <th class="col-md-7">
+                            Name
+                        </th>
+                        <th class="col-md-5">
+                            Date submitted
+                        </th>
+                    </thead>
+                {% for profile in existing_profiles %}
+                    <tr>
+                        <td>
+                        {% if forloop.first %}
+                            {{ profile.application.first_name }} {{ profile.application.last_name }}
+                        {% else %}
+                            {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
+                        {% endif %}
+                        </td>
+                        <td>{{ profile.created_at }}</td>
+                    </tr>
+                {% endfor %}
+                </table>
+
+                <p>Need to submit another? Use the form below!</p>
+
+        {% else %}
+
+                <h2>Your information</h2>
+
+        {% endif %}
+
+            </div>
+        </div>
+
+        <form action="/principal-profile-form/{{ application.tracking_id }}/" method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                {# If we are rendering back forms from a formset, say if one or more #}
+                {# forms is not valid, they are all rendered in this forloop, rather #}
+                {# than dynamically generated via Javascript. #}
+
+                {% for form in formset %}
+                <div class="form-group row">
+                    <div class="col-md-9" id="{% if forloop.first %}principal-profile-form{% else %}additional-form{% endif %}-{{ forloop.counter0 }}">
+                        {% if forloop.first and not existing_profiles %} {# Prepopulated from Applicant information #}
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <strong>Name</strong><br />
+                                    {{ form.first_name.value }} {{ form.last_name.value }}
+                                    <div class="hidden">
+                                        {{ form.first_name }} {{ form.last_name }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <strong>{{ form.home_address.label }}</strong><br />
+                                    {{ form.home_address.value }}
+                                    <div class="hidden">
+                                        {{ form.home_address }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <h2>
+                                        Principal Profile
+                                        {% if not forloop.first %}
+                                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
+                                            <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
+                                        </button>
+                                        {% endif %}
+                                    </h2>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6{% if form.first_name.errors %} has-error{% endif %}">
+                                    <label class="col-form-label" for="{{ form.first_name.auto_id }}">
+                                        <strong>{{ form.first_name.label }}</strong>
+                                    </label>
+                                    <input type="text" id="{{ form.first_name.auto_id }}" name="form-{{ forloop.counter0 }}-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Charlie">
+                                    {% for error in form.first_name.errors %}
+                                        <span class="help-block">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-6 {% if form.last_name.errors %} has-error{% endif %}">
+                                    <label class="col-form-label" for="{{ form.last_name.auto_id }}">
+                                        <strong>{{ form.last_name.label }}</strong>
+                                    </label>
+                                    <input type="text" id="{{ form.last_name.auto_id }}" name="form-{{ forloop.counter0 }}-last_name" class="form-control" value="{{ form.last_name.data|default_if_none:'' }}" placeholder="Brown">
+                                    {% for error in form.last_name.errors %}
+                                        <span class="help-block">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-group row{% if form.home_address.errors %} has-error{% endif %}">
+                                <div class="col-md-12">
+                                    <label class="col-form-label" for="{{ form.home_address.auto_id }}">
+                                        <strong>{{ form.home_address.label }}</strong>
+                                    </label>
+                                    <input type="text" id="{{ form.home_address.auto_id }}" name="form-{{ forloop.counter0 }}-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}" placeholder="123 S Main">
+                                    {% for error in form.home_address.errors %}
+                                        <span class="help-block">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        <div class="form-group row{% if form.date_of_birth.errors %} has-error{% endif %}">
+                            <div class="col-md-12">
+                                <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
+                                    <strong>{{ form.date_of_birth.label }}</strong>
+                                </label>
+                                <div class="form-inline">
+                                    {{ form.date_of_birth }}
+                                </div>
+                                {% for error in form.date_of_birth.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="form-group row{% if form.social_security_number.errors %} has-error{% endif %}">
+                            <div class="col-md-12">
+                                <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
+                                    <strong>{{ form.social_security_number.label }}</strong>
+                                </label>
+                                <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-{{ forloop.counter0 }}-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}" placeholder="123-45-6789">
+                                {% for error in form.social_security_number.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="col-form-label" for="license_plate">
+                                    <strong>Driver's license</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4{% if form.drivers_license_state.errors %} has-error{% endif %}">
+                                {{ form.drivers_license_state }}
+                                {% for error in form.drivers_license_state.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-8{% if form.drivers_license_number.errors %} has-error{% endif %}">
+                                <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-{{ forloop.counter0 }}-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.drivers_license_state.data 'NA' %} disabled{% endifequal %}>
+                                {% for error in form.drivers_license_number.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, select “NA” from the State dropdown.</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="col-form-label" for="license_plate">
+                                    <strong>License plate</strong>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4{% if form.license_plate_state.errors %} has-error{% endif %}">
+                                {{ form.license_plate_state }}
+                                {% for error in form.license_plate_state.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-8{% if form.license_plate_number.errors %} has-error{% endif %}">
+                                <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-{{ forloop.counter0 }}-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number"{% ifequal form.license_plate_state.data 'NA' %} disabled{% endifequal %}>
+                                {% for error in form.license_plate_number.errors %}
+                                    <span class="help-block">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <span class="help-block">If you are a co-signer on a car loan, you must provide the license plate number of the car. If you do not have a car, select “NA” from the State dropdown.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div id="extra-form-container">
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-9">
+                        <button type="button" class="btn btn-lg" id="add-button">
+                            <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> Add another person's information
+                        </button>
+
+                        <button type="submit" class="btn btn-success btn-lg pull-right">
+                            <i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- If we need to add additional forms, clone this instance of
+            formset.empty_form and give it the appropriate index with Javascript. -->
+
+        <div id="form-template" class="hidden">
+            <div class="form-group row">
+                <div id="additional-form-__prefix__" class="col-md-9">
+                    <h2>
+                        Principal Profile
+                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="__prefix__">
+                            <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
+                        </button>
+                    </h2>
+                {% with formset.empty_form as form %}
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label class="col-form-label" for="{{ form.first_name.auto_id }}">
+                                <strong>{{ form.first_name.label }}</strong>
+                            </label>
+                            <input type="text" id="{{ form.first_name.auto_id }}" name="form-__prefix__-first_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Charlie">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="col-form-label" for="{{ form.last_name.auto_id }}">
+                                <strong>{{ form.last_name.label }}</strong>
+                            </label>
+                            <input type="text" id="{{ form.last_name.auto_id }}" name="form-__prefix__-last_name" class="form-control" value="{{ form.first_name.data|default_if_none:'' }}" placeholder="Brown">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label class="col-form-label" for="{{ form.home_address.auto_id }}">
+                                <strong>{{ form.home_address.label }}</strong>
+                            </label>
+                            <input type="text" id="{{ form.home_address.auto_id }}" name="form-__prefix__-home_address" class="form-control" value="{{ form.home_address.data|default_if_none:'' }}" placeholder="123 S Main">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label class="col-form-label" for="{{ form.date_of_birth.auto_id }}">
+                                <strong>{{ form.date_of_birth.label }}</strong>
+                            </label>
+                            <div class="form-inline">
+                                {{ form.date_of_birth }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label class="col-form-label" for="{{ form.social_security_number.auto_id }}">
+                                <strong>{{ form.social_security_number.label }}</strong>
+                            </label>
+                            <input type="text" id="{{ form.social_security_number.auto_id }}" name="form-__prefix__-social_security_number" class="form-control" value="{{ form.social_security_number.data|default_if_none:'' }}" placeholder="123-45-6789">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>Driver's license</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form.drivers_license_state }}
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="{{ form.drivers_license_number.auto_id }}" name="form-__prefix__-drivers_license_number" class="form-control" value="{{ form.drivers_license_number.data|default_if_none:'' }}" placeholder="Number">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span class="help-block">If you do not have a driver’s license, please provide information regarding your state ID. If you have neither a driver’s license nor a state ID, select “NA” from the State dropdown.</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label class="col-form-label" for="license_plate">
+                                <strong>License plate</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form.license_plate_state }}
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" id="{{ form.license_plate_number.auto_id }}" name="form-__prefix__-license_plate_number" class="form-control" value="{{ form.license_plate_number.data|default_if_none:'' }}" placeholder="Number">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span class="help-block">If you are a co-signer on a car loan, you must provide the license plate number of the car. If you do not have a car, select “NA” from the State dropdown.</span>
+                        </div>
+                    </div>
+                </div>
+            {% endwith %}
+        </div>
+
+    {% else %}
+
+        <h2>Oops!</h2>
+
+        <p>Your application couldn't be found. Please use the link you received
+        in your email to access the Principal Profile Form.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script type="text/javascript">
+
+    var form = $('#form-template').html();
+
+    // Sometimes TOTAL_FORMS is cached, and we don't want that. Manually
+    // set it to 1 (the original form) plus the number of additional forms
+    // rendered when the page loads.
+    var additional_forms = $('[id^="additional-form"]').not('[id*="prefix"]');
+
+    $('#id_form-TOTAL_FORMS').val(1 + additional_forms.length);
+    $('#id_form-INITIAL_FORMS').val(1 + additional_forms.length);
+
+    $('#add-button').click(function() {
+        add_form();
+    });
+
+    // Use document.on because we are adding additional delete buttons,
+    // and we need this event to fire for all of them.
+    // See: https://stackoverflow.com/questions/12055462/handle-click-event-for-appended-elements-in-jquery
+    $(document).on('click', '.delete-button', function() {
+        delete_form(this.value);
+    });
+
+    function add_form() {
+        // Grab the number forms from our formset.
+        var idx = $('#id_form-TOTAL_FORMS').val();
+
+        // Formset forms are zero-indexed, e.g., use the current total as the
+        // index on the new form.
+        $('#extra-form-container').append(form.replace(/__prefix__/g, idx));
+
+        // Increment the total.
+        $('#id_form-TOTAL_FORMS').val(parseInt(idx) + 1);
+    };
+
+    function delete_form(form_index) {
+        // Remove the form.
+        // $('#additional-form-' + form_index).remove();
+        $('#additional-form-' + form_index).fadeOut(500, function(){
+            $(this).remove();
+            reindex_forms();
+        });
+
+        // Decrement TOTAL_FORMS.
+        var idx = $('#id_form-TOTAL_FORMS').val();
+        $('#id_form-TOTAL_FORMS').val(parseInt(idx) - 1);
+    };
+
+    // Forms should have a continuous index. If a user adds three forms, then
+    // deletes the first form she added, reindex the remaining forms, starting
+    // at one.
+    function reindex_forms() {
+        var idx = 0;
+
+        additional_forms.each(function() {
+            // Grab the initial index of the form.
+            var initial_idx = $(this).attr('id').slice(-1);
+
+            // Update the container ID.
+            $(this).attr('id', $(this).attr('id').replace(initial_idx, idx));
+
+            $(this).find('#count').text(idx);
+
+            // Update the input IDs and names.
+            $(this).find('input').each(function() {
+                $(this).attr('id', $(this).attr('id').replace(initial_idx, idx));
+                $(this).attr('name', $(this).attr('name').replace(initial_idx, idx));
+            });
+
+            // Update the input labels.
+            $(this).find('label').each(function() {
+                $(this).attr('for', $(this).attr('for').replace(initial_idx, idx));
+            })
+
+            // Update the delete button, if there is one.
+            $(this).find('button').each(function() {
+                try {
+                    $(this).attr('id', this.id.replace(initial_idx, idx));
+                    $(this).attr('value', $(this).attr('value').replace(initial_idx, idx));
+                } catch (err) {
+                    $.noop();
+                }
+            });
+
+            idx ++;
+        });
+    };
+
+    // Enable/disable the driver's license / license place number, contigent
+    // on whether "NA" is selected from the state menu.
+    $('select[id*="state"]').change(function(e) {
+        var selected_option = $(this).find('option:selected');
+        var adjacent_input = $(this).parent().next().find('input');
+
+        if ( $(selected_option).val() == 'NA' ) {
+            $(this).parent().next().find('input').prop('disabled', true);
+            adjacent_input.parent().removeClass('has-error');
+            adjacent_input.parent().find('span.help-block').hide();
+        } else {
+            adjacent_input.prop('disabled', false);
+        }
+    });
+
+</script>
+
+{% endblock %}

@@ -12,11 +12,11 @@ from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lotteries, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, \
-    deed, double_submit
+    deed, double_submit, lots_admin_principal_profiles, delete_principal_profiles
 
 from django.contrib import admin
 admin.autodiscover()
-
+ 
 urlpatterns = [
     # Examples:
     url(r'^$', home, name='home'),
@@ -31,11 +31,14 @@ urlpatterns = [
     url(r'^wintrust-invitation/$', wintrust_invitation, name='wintrust_invitation'),
     url(r'^wintrust-announcement/$', wintrust_announcement, name='wintrust_announcement'),
     url(r'^eds-submission/$', eds_submission, name='eds_submission'),
+    url(r'^principal-profile-form/(?P<tracking_id>\S+)/$', principal_profile_form, name='principal_profile_form'),
     url(r'^principal-profile-form/$', principal_profile_form, name='principal_profile_form'),
-
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
     url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
-    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/$', csv_dump, name='csv_dump'),
+    url(r'^principal-profiles/$', lots_admin_principal_profiles, name='lots_admin_principal_profiles'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)$', csv_dump, name='csv_dump'),
+    url(r'^ppf-delete/(?P<pilot>\S+)/$', delete_principal_profiles, name='delete_principal_profiles'),
     url(r'^lots-login/$', lots_login, name='lots_login'),
     url(r'^logout/$', lots_logout, name='logout'),
 

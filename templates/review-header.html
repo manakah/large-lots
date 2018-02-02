@@ -1,4 +1,10 @@
-<p class="review-header">Applicant <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong> owns <strong>{{ app.application.owned_address }}</strong> and requests the lot on <strong>{{ app.lot.address}}</strong></p>
+<p class="review-header">
+  Applicant <strong>{{ app.application.first_name }} {{ app.application.last_name }}</strong> owns <strong>{{ app.application.owned_address }}</strong> and requests the lot on <strong>{{ app.lot.address}}</strong>
+</p>
+
+<p class="review-header">
+  This applicant <strong>has{% if not app.application.eds_received %} not{% endif %}</strong> submitted an Economic Disclosure Statement. This applicant <strong>has{% if not app.application.ppf_received %} not{% endif %}</strong> submitted a Principal Profile Form.
+</p>
 
 <ul class='nav nav-wizard'>
   <li>Step 1</li>

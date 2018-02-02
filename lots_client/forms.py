@@ -11,6 +11,10 @@ from pdfid.pdfid import PDFiD
 from django.conf import settings
 from django import forms
 
+from us.states import STATES
+
+from lots_admin.models import PrincipalProfile
+
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
@@ -41,7 +45,9 @@ class ApplicationForm(forms.Form):
     last_name = forms.CharField(
         error_messages={'required': 'Provide your last name'},
         label="Your last name")
-    organization = forms.CharField(required=False)
+    organization_confirmed = forms.BooleanField(required=False)
+    organization = forms.CharField(required=False,
+        label="Your organization")
     phone = forms.CharField(
         error_messages={'required': 'Provide a contact phone number'},
         label="Your phone number")
@@ -58,6 +64,24 @@ class ApplicationForm(forms.Form):
     terms = forms.BooleanField(
         error_messages={'required': 'Verify that you have read and agree to the terms'},
         label="Application terms")
+
+    '''
+    Possible combinations of user input for organization (text) and organization_confirmed (checkbox):
+    (1) The user does not check the confirm box and does not input an org name - VALID 
+    (2) The user checks the confirm box and inputs an org name - VALID 
+    (3) The user checks the confirm box but does NOT input an org name - INVALID
+
+    (4) The user checks the confirm box, enters an org name, and then unchecks the box: this validates as expected. The confirm box will be False, and the input will be None, since a "disabled" field always returns None.
+    '''
+    def clean_organization(self):
+        organization = self.cleaned_data['organization']
+        organization_confirmed = self.cleaned_data['organization_confirmed']
+
+        if organization_confirmed and not organization:
+            message = 'Check the box and enter an organization name, or leave both blank.'
+            raise forms.ValidationError(message)
+
+        return organization
 
     def _check_pin(self, pin):
         carto = 'http://datamade.cartodb.com/api/v2/sql'
@@ -163,3 +187,73 @@ class DeedUploadForm(forms.Form):
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
         return self.cleaned_data['deed_image']
+
+
+class PrincipalProfileForm(forms.Form):
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    home_address = forms.CharField()
+    date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
+        years=[year for year in range(2017, 1900, -1)],
+        attrs={'class': 'form-control'})
+    )
+    social_security_number = forms.CharField(max_length=11)
+    drivers_license_state = forms.ChoiceField(
+        label="Driver's license state",
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    drivers_license_number = forms.CharField(
+        label="Driver's license number",
+        max_length=20,
+        required=False
+    )
+    license_plate_state = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    license_plate_number = forms.CharField(
+        max_length=10,
+        required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['drivers_license_state'].choices = self._state_choices
+        self.fields['license_plate_state'].choices = self._state_choices
+
+    @property
+    def _state_choices(self):
+        choices = [(None, 'State'), ['NA', 'NA']]
+        choices += [(state.abbr, state.name) for state in STATES]
+        return choices
+
+    def _clean_number(self, field):
+        number = self.cleaned_data[field]
+
+        state_field = field.replace('number', 'state')
+        state_data = self.cleaned_data.get(state_field)
+
+        if state_data != 'NA' and not number:
+            message = 'This field is required.'
+            raise forms.ValidationError(message)
+
+        return self.cleaned_data[field]
+
+    def clean_license_plate_number(self):
+        return self._clean_number('license_plate_number')
+
+    def clean_drivers_license_number(self):
+        return self._clean_number('drivers_license_number')
+
+    def clean_social_security_number(self):
+        ssn = self.cleaned_data['social_security_number']
+
+        digits = [char for char in ssn if char.isdigit()]
+
+        if not len(digits) == 9:
+            message = "Please enter a 9-digit Social Security number."
+            raise forms.ValidationError(message)
+
+        return '%s-%s-%s' % (''.join(digits[:3]),
+                             ''.join(digits[3:5]),
+                             ''.join(digits[5:]))
