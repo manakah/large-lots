@@ -17,16 +17,16 @@ from lots_admin.models import PrincipalProfile
 
 
 class ApplicationForm(forms.Form):
-    lot_1_address = forms.CharField(
-        error_messages={'required': 'Provide the lot’s street address'},
-        label="Lot 1 Street address")
     lot_1_pin = forms.CharField(
         error_messages={
             'required': 'Provide the lot’s Parcel Identification Number'
         },label="Lot 1 PIN")
+    lot_1_address = forms.CharField(
+        error_messages={'required': 'Provide the lot’s street address'},
+        label="Lot 1 Street address")
     lot_1_use = forms.CharField(required=False)
-    lot_2_address = forms.CharField(required=False)
     lot_2_pin = forms.CharField(required=False)
+    lot_2_address = forms.CharField(required=False)
     lot_2_use = forms.CharField(required=False)
     owned_address = forms.CharField(
         error_messages={
@@ -83,16 +83,66 @@ class ApplicationForm(forms.Form):
 
         return organization
 
-    # We have validators that check the availability of the PIN, by querying the Carto table.
-    # It seems like we could add a validator for the address that: (1) finds the lot in the Carto table, and (2) compares the lot_1_address and lot_2_address with the address in Carto.
-    def _check_pin(self, pin):
+    # Query Carto
+    def call_carto(self, query_args, pin):
         carto = 'http://datamade.cartodb.com/api/v2/sql'
         pin = pin.replace('-', '')
         params = {
             'api_key': settings.CARTODB_API_KEY,
-            'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
+            'q': "SELECT {query_args} FROM {carto_table} WHERE pin_nbr='{pin_nbr}'" \
+                .format(query_args=query_args,
+                        carto_table=settings.CURRENT_CARTODB,
+                        pin_nbr=pin),
         }
+
         r = requests.get(carto, params=params)
+
+        return r
+
+    # Properly format an address, given an object as input.
+    def format_address(self, address_obj):
+        low_address = address_obj['low_address']
+        street_direction = address_obj['street_direction']
+        street_name = address_obj['street_name']
+        street_type = address_obj['street_type']
+
+        return "{low_address} {street_direction} {street_name} {street_type}".format(low_address=low_address, 
+                                                                                    street_direction=street_direction, 
+                                                                                    street_name=street_name,
+                                                                                    street_type=street_type)
+
+    # Calls helper functions: acquires an address with matching the PIN from Carto, and formats the address. 
+    def generate_address_from_pin(self, pin):
+        r = self.call_carto("low_address, street_direction, street_name, street_type", pin)
+        
+        if r.status_code == 200:
+            if r.json()['total_rows'] == 1:
+                return self.format_address(r.json()['rows'][0])
+            else:
+                message = '%s is not available for purchase. \
+                    Please select one from the map above' % pin
+                raise forms.ValidationError(message)
+
+    
+    def clean_lot_1_address(self):
+        pin = self.cleaned_data['lot_1_pin']
+        address = self.generate_address_from_pin(pin)
+        if address:
+            return address
+
+        return self.cleaned_data['lot_1_address']
+
+    def _check_pin(self, pin):
+        # carto = 'http://datamade.cartodb.com/api/v2/sql'
+        # pin = pin.replace('-', '')
+        # params = {
+        #     'api_key': settings.CARTODB_API_KEY,
+        #     'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
+        # }
+        # r = requests.get(carto, params=params)
+
+        r = self.call_carto("pin_nbr", pin)
+
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
                 return pin
