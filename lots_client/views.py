@@ -299,7 +299,7 @@ def apply(request):
                 if label and error:
                     context['error_messages'][label] = form.errors[field][0]
             return render(request, 'apply.html', context, {
-                'applied_pins': pins_str,
+                'applied_pins': pins_str
                 })
     else:
         if application_active(request):

@@ -86,8 +86,6 @@ class ApplicationForm(forms.Form):
     def _check_pin(self, pin):
         r = call_carto("pin_nbr", pin)
 
-        print(r)
-
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
                 return pin
@@ -124,9 +122,6 @@ class ApplicationForm(forms.Form):
         if self.cleaned_data['lot_2_pin']:
             return self._clean_pin('lot_2_pin')
         return self.cleaned_data['lot_2_pin']
-
-    def clean_lot_1_address(self):
-        print(self.cleaned_data['lot_1_address'], "!!!")
 
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
