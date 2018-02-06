@@ -14,7 +14,7 @@ from django import forms
 from us.states import STATES
 
 from lots_admin.models import PrincipalProfile
-
+from .utils import call_carto, format_address
 
 class ApplicationForm(forms.Form):
     lot_1_pin = forms.CharField(
@@ -83,49 +83,25 @@ class ApplicationForm(forms.Form):
 
         return organization
 
-    # Query Carto
-    def call_carto(self, query_args, pin):
-        carto = 'http://datamade.cartodb.com/api/v2/sql'
-        pin = pin.replace('-', '')
-        params = {
-            'api_key': settings.CARTODB_API_KEY,
-            'q': "SELECT {query_args} FROM {carto_table} WHERE pin_nbr='{pin_nbr}'" \
-                .format(query_args=query_args,
-                        carto_table=settings.CURRENT_CARTODB,
-                        pin_nbr=pin),
-        }
-
-        r = requests.get(carto, params=params)
-
-        return r
-
-    # Properly format an address, given an object as input.
-    def format_address(self, address_obj):
-        low_address = address_obj['low_address']
-        street_direction = address_obj['street_direction']
-        street_name = address_obj['street_name']
-        street_type = address_obj['street_type']
-
-        return "{low_address} {street_direction} {street_name} {street_type}".format(low_address=low_address, 
-                                                                                    street_direction=street_direction, 
-                                                                                    street_name=street_name,
-                                                                                    street_type=street_type)
-
-    # Calls helper functions: acquires an address with matching the PIN from Carto, and formats the address. 
     def generate_address_from_pin(self, pin):
-        r = self.call_carto("low_address, street_direction, street_name, street_type", pin)
+        r = call_carto("low_address, street_direction, street_name, street_type", pin)
         
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
-                return self.format_address(r.json()['rows'][0])
+                return format_address(r.json()['rows'][0])
             else:
                 message = '%s is not available for purchase. \
                     Please select one from the map above' % pin
                 raise forms.ValidationError(message)
 
-    
     def clean_lot_1_address(self):
-        pin = self.cleaned_data['lot_1_pin']
+        # To clean the address: (1) the applicant needs to enter a pin, and (2) the pin should be valid. 
+        if 'lot_1_pin' in self.cleaned_data:
+            pin = self.cleaned_data['lot_1_pin']
+        else:
+            message = 'Please enter a valid pin for the address'
+            raise forms.ValidationError(message)
+
         address = self.generate_address_from_pin(pin)
         if address:
             return address
@@ -141,7 +117,7 @@ class ApplicationForm(forms.Form):
         # }
         # r = requests.get(carto, params=params)
 
-        r = self.call_carto("pin_nbr", pin)
+        r = call_carto("pin_nbr", pin)
 
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
