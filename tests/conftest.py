@@ -48,7 +48,7 @@ def auth_client(db, client):
 @pytest.fixture
 @pytest.mark.django_db
 def address(db):
-    address = Address.objects.create(street='5000 S ELIZABETH ST', ward=2)
+    address = Address.objects.create(street='5000 S ELIZABETH ST', zip_code='60609', ward=2)
 
     return address
 

@@ -28,6 +28,8 @@ def test_organization_field(django_db_setup,
     deed_mock = mock.MagicMock(spec=File)
     deed_mock.name = 'fake_deed.jpg'
 
+    print(address)
+    
     app_data = {
         'first_name': 'Seymour',
         'last_name': 'Gerbils',
