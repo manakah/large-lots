@@ -139,6 +139,45 @@
         LargeLots.initialize(init_params);
       });
 
+      function autocompleteAddress(lot_id) {
+        $("#" + lot_id + "_pin").autocomplete({
+            // Set the source to an AJAX callback, which queries Carto for a pin.
+            source: function (request, response) {
+                clean_pin = request.term.replace(/-/g, '');
+
+                jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
+                    q: 'select pin from ' + '{{cartodb_table}}' + ' where pin_nbr like ' + "'" + clean_pin + "%'" + '::VARCHAR',
+                }, function (data) {
+                    var valid_pins = []
+                    
+                    if (data.rows) {
+                      $.each(data.rows, function(index, value) {
+                        valid_pins.push(value['pin'])
+                      });
+                      response(valid_pins);
+                    } 
+                });
+            },
+            minLength: 9,
+            select: function( event, ui ) {
+              clean_pin = ui.item.value.replace(/-/g, '');
+              // The user selects a valid pin from autocomplete dropdown. 
+              // Then, we query Carto to retrieve a valid address and add it to the address field.
+              jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
+                  q: 'select low_address, street_direction, street_name, street_type from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
+              }, function (data) { 
+                  low_address = data.rows[0]['low_address']
+                  street_direction = data.rows[0]['street_direction']
+                  street_name = data.rows[0]['street_name']
+                  street_type = data.rows[0]['street_type'] 
+                  full_address = [low_address, street_direction, street_name, street_type].join(' ')
+
+                  $("#" + lot_id + "_address").val(full_address);
+              });
+            }
+        });
+      };
+
       var autocomplete = new google.maps.places.Autocomplete(document.getElementById('search_address'));
 
       $("#search").on("click", LargeLots.addressSearch);
@@ -190,37 +229,13 @@
         $('#id_organization').prop('disabled', !this.checked);
       });
 
-      $("#id_lot_1_pin").autocomplete({
-          // Set the source to an AJAX callback, which queries Carto for a pin.
-          source: function (request, response) {
-              clean_pin = request.term.replace(/-/g, '');
+      autocompleteAddress("id_lot_1");
+      autocompleteAddress("id_lot_2");
 
-              jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
-                  q: 'select * from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
-              }, function (data) {
-                  if (data.rows[0]) {
-                    console.log([data.rows[0]['pin']])
-                    response([data.rows[0]['pin']]);
-                  } 
-              });
-          },
-          minLength: 14,
-          select: function( event, ui ) {
-            clean_pin = ui.item.value.replace(/-/g, '');
-            // The user selects a valid pin from autocomplete dropdown. 
-            // Then, query Carto to retrieve a valid address, and add it to the address field.
-            jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
-                  q: 'select * from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
-            }, function (data) { 
-                low_address = data.rows[0]['low_address']
-                street_direction = data.rows[0]['street_direction']
-                street_name = data.rows[0]['street_name']
-                street_type = data.rows[0]['street_type'] 
-                full_address = [low_address, street_direction, street_name, street_type].join(' ')
-
-                $('#id_lot_1_address').val(full_address);
-            });
-          }
+      // Remove disabled attribute, so django form can process field input.
+      $('#application').submit(function(){
+          $('#id_lot_1_address').removeAttr('disabled');
+          $('#id_lot_2_address').removeAttr('disabled');
       });
 
     </script>

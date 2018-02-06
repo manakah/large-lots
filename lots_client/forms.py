@@ -14,7 +14,7 @@ from django import forms
 from us.states import STATES
 
 from lots_admin.models import PrincipalProfile
-from .utils import call_carto, format_address
+from .utils import call_carto
 
 class ApplicationForm(forms.Form):
     lot_1_pin = forms.CharField(
@@ -22,7 +22,7 @@ class ApplicationForm(forms.Form):
             'required': 'Provide the lot’s Parcel Identification Number'
         },label="Lot 1 PIN")
     lot_1_address = forms.CharField(
-        error_messages={'required': 'Provide the lot’s street address'},
+        error_messages={'required': 'Please provide an address: use the map above, or manually enter a PIN and CLICK on the correct number that appears in the drop down.'},
         label="Lot 1 Street address")
     lot_1_use = forms.CharField(required=False)
     lot_2_pin = forms.CharField(required=False)
@@ -83,41 +83,10 @@ class ApplicationForm(forms.Form):
 
         return organization
 
-    def generate_address_from_pin(self, pin):
-        r = call_carto("low_address, street_direction, street_name, street_type", pin)
-        
-        if r.status_code == 200:
-            if r.json()['total_rows'] == 1:
-                return format_address(r.json()['rows'][0])
-            else:
-                message = '%s is not available for purchase. \
-                    Please select one from the map above' % pin
-                raise forms.ValidationError(message)
-
-    def clean_lot_1_address(self):
-        # To clean the address: (1) the applicant needs to enter a pin, and (2) the pin should be valid. 
-        if 'lot_1_pin' in self.cleaned_data:
-            pin = self.cleaned_data['lot_1_pin']
-        else:
-            message = 'Please enter a valid pin for the address'
-            raise forms.ValidationError(message)
-
-        address = self.generate_address_from_pin(pin)
-        if address:
-            return address
-
-        return self.cleaned_data['lot_1_address']
-
     def _check_pin(self, pin):
-        # carto = 'http://datamade.cartodb.com/api/v2/sql'
-        # pin = pin.replace('-', '')
-        # params = {
-        #     'api_key': settings.CARTODB_API_KEY,
-        #     'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
-        # }
-        # r = requests.get(carto, params=params)
-
         r = call_carto("pin_nbr", pin)
+
+        print(r)
 
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
@@ -155,6 +124,9 @@ class ApplicationForm(forms.Form):
         if self.cleaned_data['lot_2_pin']:
             return self._clean_pin('lot_2_pin')
         return self.cleaned_data['lot_2_pin']
+
+    def clean_lot_1_address(self):
+        print(self.cleaned_data['lot_1_address'], "!!!")
 
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']

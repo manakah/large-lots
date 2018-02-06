@@ -1,3 +1,5 @@
+import requests
+
 from django.conf import settings
 
 # Query Carto - useful for application form validators
@@ -15,15 +17,3 @@ def call_carto(query_args, pin):
     r = requests.get(carto, params=params)
 
     return r
-
-# Properly format an address, given an object as input - useful for application form validators
-def format_address(address_obj):
-    low_address = address_obj['low_address']
-    street_direction = address_obj['street_direction']
-    street_name = address_obj['street_name']
-    street_type = address_obj['street_type']
-
-    return "{low_address} {street_direction} {street_name} {street_type}".format(low_address=low_address, 
-                                                                                street_direction=street_direction, 
-                                                                                street_name=street_name,
-                                                                                street_type=street_type)

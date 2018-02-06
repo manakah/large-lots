@@ -173,9 +173,11 @@ def apply(request):
         form = ApplicationForm(request.POST, request.FILES)
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
+
         if form.is_valid():
             l1_address = get_lot_address(form.cleaned_data['lot_1_address'],
                                          form.cleaned_data['lot_1_pin'])
+
             lot1_info = {
                 'pin': form.cleaned_data['lot_1_pin'],
                 'address': l1_address,
@@ -290,6 +292,7 @@ def apply(request):
             fields = [f for f in form.fields]
             context['error_messages'] = OrderedDict()
             context['applications'] = applications
+            context['cartodb_table'] = settings.CURRENT_CARTODB
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
@@ -297,7 +300,6 @@ def apply(request):
                     context['error_messages'][label] = form.errors[field][0]
             return render(request, 'apply.html', context, {
                 'applied_pins': pins_str,
-                'cartodb_table': settings.CURRENT_CARTODB,
                 })
     else:
         if application_active(request):
