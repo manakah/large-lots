@@ -14,6 +14,6 @@ def call_carto(query_args, pin):
                     pin_nbr=pin),
     }
 
-    r = requests.get(carto, params=params)
+    response = requests.get(carto, params=params)
 
-    return r
+    return response

@@ -17,16 +17,16 @@ from lots_admin.models import PrincipalProfile
 from .utils import call_carto
 
 class ApplicationForm(forms.Form):
+    lot_1_address = forms.CharField(
+        error_messages={'required': 'Please provide an address: use the map above, or manually enter a PIN and CLICK on the correct number that appears in the drop down.'},
+        label="Lot 1 Street address")
     lot_1_pin = forms.CharField(
         error_messages={
             'required': 'Provide the lot’s Parcel Identification Number'
         },label="Lot 1 PIN")
-    lot_1_address = forms.CharField(
-        error_messages={'required': 'Please provide an address: use the map above, or manually enter a PIN and CLICK on the correct number that appears in the drop down.'},
-        label="Lot 1 Street address")
     lot_1_use = forms.CharField(required=False)
-    lot_2_pin = forms.CharField(required=False)
     lot_2_address = forms.CharField(required=False)
+    lot_2_pin = forms.CharField(required=False)
     lot_2_use = forms.CharField(required=False)
     owned_address = forms.CharField(
         error_messages={
@@ -88,7 +88,7 @@ class ApplicationForm(forms.Form):
 
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
-                return pin
+                return pin.replace('-', '')
             else:
                 message = '%s is not available for purchase. \
                     Please select one from the map above' % pin
@@ -123,6 +123,9 @@ class ApplicationForm(forms.Form):
             return self._clean_pin('lot_2_pin')
         return self.cleaned_data['lot_2_pin']
 
+    def clean_owned_address(self):
+        return self.cleaned_data['owned_address'].upper()
+
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
         pin = pin.replace("-", "").replace(" ", "")
@@ -131,6 +134,16 @@ class ApplicationForm(forms.Form):
             raise forms.ValidationError('Please provide a valid PIN')
         else:
             return pin
+
+    def clean_contact_street(self):
+        return self.cleaned_data['contact_street'].upper()
+
+    def clean_contact_city(self):
+        return self.cleaned_data['contact_city'].upper()
+
+    def clean_contact_state(self):
+        return self.cleaned_data['contact_state'].upper()
+
 
     def clean_deed_image(self):
 

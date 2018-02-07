@@ -143,7 +143,7 @@ def get_lot_address(address, pin):
         'street_dir': street_dir,
         'street_name': street_name,
         'street_type': street_type,
-        'city': 'Chicago',
+        'city': 'CHICAGO',
         'state': 'IL',
         'zip_code': '',
     }
