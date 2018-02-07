@@ -119,7 +119,7 @@ var LargeLots = {
                 LargeLots.appliedLotsLayer = layer.getSubLayer(3);
                 allLayers.push(LargeLots.appliedLotsLayer);
               }
-            };
+            }
 
             // Set interactivity for multiple layers
             $.each(allLayers, function(index, value) {
@@ -150,7 +150,7 @@ var LargeLots = {
       if($("#search_address").length != 0) {
         $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
         LargeLots.addressSearch();
-      };
+      }
 
       $('.toggle-parcels').on('click', function(e){
           if($(e.target).is(':checked')){
@@ -331,8 +331,8 @@ var LargeLots = {
   },
 
   formatPin: function(pin) {
-    var pin  = String(pin);
-    return pin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5');
+    var pin_str  = String(pin);
+    return pin_str.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5');
   },
 
   //converts a slug or query string in to readable text
