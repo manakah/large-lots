@@ -22,6 +22,9 @@ before_script:
 script:
 - pytest
 - jshint .
+notifications:
+  webhooks: 
+    - https://semabot.datamade.us/travis/
 
 deploy:
   - provider: codedeploy
