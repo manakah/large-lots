@@ -21,7 +21,8 @@ before_script:
 - python manage.py migrate
 script:
 - pytest
-- jshint .
+- jshint --extract=always templates/*
+- jshint lots/static/js/*
 notifications:
   webhooks: 
     - https://semabot.datamade.us/travis/

@@ -734,7 +734,7 @@ def multiple_applicant_check(request, application_id):
         'owned_pin': owned_pin,
         'lot_pin': lot_pin,
         'applicants_list': applicants_list,
-        'other_owned_pins': other_owned_pins,
+        'other_owned_pins': json.dumps(other_owned_pins),
         'warning': warning,
         })
 
