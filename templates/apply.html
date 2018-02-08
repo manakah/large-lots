@@ -152,7 +152,9 @@
             full_address = [low_address, street_direction, street_name, street_type].join(' ')
 
             $("#" + lot_id + "_address").val(full_address);
-            $("#" + lot_id + "_address").parent().addClass('has-success');
+            if (!$(".group_" + lot_id).hasClass('has-error')) {
+              $(".group_" + lot_id).addClass('has-success');
+            }
         });
       }
 
@@ -216,6 +218,7 @@
           $('#id_lot_' + lot + '_address').val('');
           $('#id_lot_' + lot + '_pin').val('');
           $('#id_lot_' + lot + '_use').val('');
+          $(".group_id_lot_" + lot).removeClass('has-success');
       })
 
       $("#find_my_pin").on("click", function(e){

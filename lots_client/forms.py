@@ -18,7 +18,7 @@ from .utils import call_carto
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
-        error_messages={'required': 'Please provide an address: use the map above, or manually enter a PIN and CLICK on the correct number that appears in the drop down.'},
+        error_messages={'required': 'Please provide an address: use the map above, manually enter a PIN and click on the correct one that appears in the dropdown, or paste the lot PIN, if you know it.'},
         label="Lot 1 Street address")
     lot_1_pin = forms.CharField(
         error_messages={
