@@ -32,7 +32,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Application, Lot, ApplicationStep, Review, \
-    ApplicationStatus, DenialReason, PrincipalProfile
+    ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 
 def lots_login(request):
     if request.method == 'POST':
@@ -284,7 +284,16 @@ def dump_applications(request, pilot, status):
         ward = application_status.lot.address.ward
         community = application_status.lot.address.community
         image_url = 'https://pic.datamade.us/%s.jpg' % application_status.lot.pin.replace('-', '')
-        lot_use = application_status.lot.planned_use
+
+        try:
+            lot_use = LotUse.objects\
+                            .filter(application=application_status.application,
+                                    lot=application_status.lot)\
+                            .first()\
+                            .planned_use
+
+        except AttributeError:
+            lot_use = None
 
         try:
             deed_image = application_status.application.deed_image.url

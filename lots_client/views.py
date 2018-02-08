@@ -235,9 +235,10 @@ def apply(request):
                 if lot:
                     planned_use = form.cleaned_data['lot_{}_use'.format(idx)]
 
-                    LotUse.objects.create(lot=lot,
-                                          planned_use=planned_use,
-                                          application=app)
+                    if planned_use:
+                        LotUse.objects.create(lot=lot,
+                                              planned_use=planned_use,
+                                              application=app)
 
                     app.lot_set.add(lot)
 
