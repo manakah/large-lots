@@ -3,7 +3,7 @@
 {% block title %}Apply{% endblock %}
 {% block extra_css %}
     <link href="{% static 'css/jquery-ui.min.css' %}" rel="stylesheet">
-    
+
     <style id="map-styles">
       #parcels {
         polygon-fill: #41ab5d;
@@ -141,6 +141,21 @@
         LargeLots.initialize(init_params);
       });
 
+      function populateAddressFromPIN(clean_pin, lot_id) {
+        jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
+            q: 'select low_address, street_direction, street_name, street_type from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
+        }, function (data) { 
+            low_address = data.rows[0]['low_address']
+            street_direction = data.rows[0]['street_direction']
+            street_name = data.rows[0]['street_name']
+            street_type = data.rows[0]['street_type'] 
+            full_address = [low_address, street_direction, street_name, street_type].join(' ')
+
+            $("#" + lot_id + "_address").val(full_address);
+            $("#" + lot_id + "_address").parent().addClass('has-success');
+        });
+      }
+
       function autocompleteAddress(lot_id) {
         $("#" + lot_id + "_pin").autocomplete({
             // Set the source to an AJAX callback, which queries Carto for a pin.
@@ -151,13 +166,18 @@
                     q: 'select pin from ' + '{{cartodb_table}}' + ' where pin_nbr like ' + "'" + clean_pin + "%'" + '::VARCHAR',
                 }, function (data) {
                     var valid_pins = []
-                    
+                  
                     if (data.rows) {
-                      $.each(data.rows, function(index, value) {
-                        valid_pins.push(value['pin'])
-                      });
-                      response(valid_pins);
+                      if ((data.rows.length === 1) && (clean_pin.length === 14)) {
+                        populateAddressFromPIN(clean_pin, lot_id);
+                      } else {
+                        $.each(data.rows, function(index, value) {
+                          valid_pins.push(value['pin'])
+                        });
+                        response(valid_pins);
+                      }
                     } 
+
                 });
             },
             minLength: 9,
@@ -165,17 +185,7 @@
               clean_pin = ui.item.value.replace(/-/g, '');
               // The user selects a valid pin from autocomplete dropdown. 
               // Then, we query Carto to retrieve a valid address and add it to the address field.
-              jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
-                  q: 'select low_address, street_direction, street_name, street_type from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
-              }, function (data) { 
-                  low_address = data.rows[0]['low_address']
-                  street_direction = data.rows[0]['street_direction']
-                  street_name = data.rows[0]['street_name']
-                  street_type = data.rows[0]['street_type'] 
-                  full_address = [low_address, street_direction, street_name, street_type].join(' ')
-
-                  $("#" + lot_id + "_address").val(full_address);
-              });
+              populateAddressFromPIN(clean_pin, lot_id);
             }
         });
       }
