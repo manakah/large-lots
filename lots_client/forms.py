@@ -88,7 +88,7 @@ class ApplicationForm(forms.Form):
 
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
-                return pin.replace('-', '')
+                return pin
             else:
                 message = '%s is not available for purchase. \
                     Please select one from the map above' % pin
@@ -102,7 +102,8 @@ class ApplicationForm(forms.Form):
         if len(pattern.sub('', pin)) != 14:
             raise forms.ValidationError('Please provide a valid PIN')
         else:
-            return self._check_pin(pin)
+            clean_pin = pin.replace('-', '')
+            return self._check_pin(clean_pin)
 
     def _clean_phone(self, key):
         phone = self.cleaned_data[key]
