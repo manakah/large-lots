@@ -289,23 +289,30 @@
                   <span class="help-block">{{ error }}</span>
               {% endfor %}
             </div>
-              {% if form.email.errors %}
-              <div class="form-group has-error">
-              {% else %}
-              <div class="form-group">
-              {% endif %}
-              <label for="id_email"><i class="fa fa-envelope"></i> Email</label><span class="red">*</span>
+
+            <div class="row">
+              <div class="col-sm-12">
+                <label for="id_email"><i class="fa fa-envelope"></i> Email</label><span class="red">*</span>
+                <p class="help-block">The City will contact you by email throughout the application process! Please provide a functioning email address that you check regularly.</p>
+              </div>
+            </div>
+            {% if form.email.errors %}
+            <div class="form-group has-error">
+            {% else %}
+            <div class="form-group">
+            {% endif %}
+              <p class="help-block"></p>
               <input type="email" value="{{email}}" class="form-control" id="id_email" name="email" placeholder="name@email.com">
               {% for error in form.email.errors %}
                   <span class="help-block">{{ error }}</span>
               {% endfor %}
-
             </div>
-              {% if form.contact_street.errors or form.contact_city.errors or form.contact_state.errors or form.contact_zip_code.errors %}
-              <div class="form-group has-error">
-              {% else %}
-              <div class="form-group">
-              {% endif %}
+
+            {% if form.contact_street.errors or form.contact_city.errors or form.contact_state.errors or form.contact_zip_code.errors %}
+            <div class="form-group has-error">
+            {% else %}
+            <div class="form-group">
+            {% endif %}
               <label for="id_contact_street">
                   <i class="fa fa-home"></i>
                   Address<span class="red">*</span>
