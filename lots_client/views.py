@@ -33,7 +33,7 @@ from django.forms import formset_factory
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep,\
-    ApplicationStatus, PrincipalProfile, RelatedPerson
+    ApplicationStatus, PrincipalProfile, RelatedPerson, LotUse
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
 
@@ -160,6 +160,18 @@ def get_lot_address(address, pin):
     add_obj, created = Address.objects.get_or_create(**add_info)
     return add_obj
 
+def get_or_create_lot(address, pin):
+    try:
+        lot = Lot.objects.get(pin=pin)
+
+    except Lot.DoesNotExist:
+        address = get_lot_address(address, pin)
+        lot_info = {'pin': pin, 'address': address}
+        lot = Lot.objects.create(**lot_info)
+
+    finally:
+        return lot
+
 def apply(request):
     applications = Application.objects.all()
 
@@ -174,39 +186,22 @@ def apply(request):
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
         if form.is_valid():
-            l1_address = get_lot_address(form.cleaned_data['lot_1_address'],
-                                         form.cleaned_data['lot_1_pin'])
-            lot1_info = {
-                'pin': form.cleaned_data['lot_1_pin'],
-                'address': l1_address,
-                'planned_use': form.cleaned_data.get('lot_1_use')
-            }
-            try:
-                lot1 = Lot.objects.get(pin=lot1_info['pin'])
-            except Lot.DoesNotExist:
-                lot1 = Lot(**lot1_info)
-                lot1.save()
-            lot2 = None
+            lot1 = get_or_create_lot(form.cleaned_data['lot_1_address'],
+                                     form.cleaned_data['lot_1_pin'])
+
             if form.cleaned_data.get('lot_2_pin'):
-                print(form.cleaned_data['lot_2_pin'])
-                l2_address = get_lot_address(form.cleaned_data['lot_2_address'],
-                                             form.cleaned_data['lot_2_pin'])
-                lot2_info = {
-                    'pin': form.cleaned_data['lot_2_pin'],
-                    'address': l2_address,
-                    'planned_use': form.cleaned_data.get('lot_2_use')
-                }
-                try:
-                    lot2 = Lot.objects.get(pin=lot2_info['pin'])
-                except Lot.DoesNotExist:
-                    lot2 = Lot(**lot2_info)
-                    lot2.save()
+                lot2 = get_or_create_lot(form.cleaned_data['lot_2_address'],
+                                         form.cleaned_data['lot_2_pin'])
+            else:
+                lot2 = None
+
             c_address_info = {
                 'street': form.cleaned_data['contact_street'],
                 'city': form.cleaned_data['contact_city'],
                 'state': form.cleaned_data['contact_state'],
                 'zip_code': form.cleaned_data['contact_zip_code']
             }
+
             c_address, created = Address.objects.get_or_create(**c_address_info)
 
             owned_address = get_lot_address(form.cleaned_data['owned_address'],
@@ -227,21 +222,33 @@ def apply(request):
                 'tracking_id': str(uuid4()),
                 'pilot': settings.CURRENT_PILOT,
             }
-            app = Application(**app_info)
-            app.save()
-            app.lot_set.add(lot1)
-            if lot2:
-                app.lot_set.add(lot2)
-            app.save()
 
-            # Create ApplicationStep and ApplicationStatus objects.
-            app_step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='approved', step=2)
+            app = Application.objects.create(**app_info)
 
-            app_status1 = ApplicationStatus(application=app, lot=lot1, current_step=app_step)
-            app_status1.save()
-            if lot2:
-                app_status2 = ApplicationStatus(application=app, lot=lot2, current_step=app_step)
-                app_status2.save()
+            app_step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'],
+                                                                public_status='approved',
+                                                                step=2)
+
+            # Create LotUse and ApplicationStatus objects, and add lots
+            # to Application.lot_set.
+            for idx, lot in enumerate([lot1, lot2], start=1):
+                if lot:
+                    planned_use = form.cleaned_data['lot_{}_use'.format(idx)]
+
+                    if planned_use:
+                        LotUse.objects.create(lot=lot,
+                                              planned_use=planned_use,
+                                              application=app)
+
+                    app.lot_set.add(lot)
+
+                    app_status = ApplicationStatus.objects.create(lot=lot,
+                                                                  application=app,
+                                                                  current_step=app_step)
+
+                    app_status.save()
+
+            app.save()
 
             html_template = get_template('apply_html_email.html')
             text_template = get_template('apply_text_email.txt')

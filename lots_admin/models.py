@@ -60,10 +60,14 @@ class Lot(models.Model):
     pin = models.CharField(max_length=14, primary_key=True)
     address = models.ForeignKey(Address)
     application = models.ManyToManyField(Application)
-    planned_use = models.TextField(default=None, null=True)
 
     def __str__(self):
         return self.pin
+
+class LotUse(models.Model):
+    application = models.ForeignKey(Application)
+    lot = models.ForeignKey(Lot)
+    planned_use = models.CharField(max_length=255)
 
 class ApplicationStep(models.Model):
     description = models.CharField(max_length=255)
