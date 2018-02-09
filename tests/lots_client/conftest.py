@@ -1,3 +1,4 @@
+from django.core.files import File
 import pytest
 
 from ..conftest import add_status
@@ -12,3 +13,38 @@ def django_db_setup(application, application_status):
     so create that here using our modular fixtures.
     '''
     add_status(application, application_status, step=7)
+
+@pytest.fixture
+def mock_file(mocker):
+    mock_file = mocker.MagicMock(spec=File)
+    mock_file.name = 'fake_deed.jpg'
+    return mock_file
+
+@pytest.fixture
+def application_blob(address, mock_file, mocker):
+    '''
+    Patch the pesky deed validator on the ApplicationForm and return
+    a dictionary of fake application data for use in tests
+    '''
+    mocker.patch('lots_client.views.ApplicationForm.clean_deed_image',
+                 return_value=mock_file.name)
+
+    return {
+        'first_name': 'Seymour',
+        'last_name': 'Gerbils',
+        'contact_address': '5555',
+        'contact_street': 'S HERMITAGE AVE',
+        'contact_city': 'Chicago',
+        'contact_state': 'IL',
+        'contact_zip_code': '12345',
+        'email': 'seymour@datamade.us',
+        'phone': '111-111-1111',
+        'owned_pin': '16133300190000',
+        'owned_address': address,
+        'lot_1_address': address,
+        'lot_1_pin': '16133300210000',
+        'lot_1_use': 'Giant hampster wheel',
+        'how_heard': '',
+        'deed_image': mock_file,
+        'terms': True,
+    }

@@ -31,6 +31,8 @@ Set the environmental variables in [local_settings.py.example](https://github.co
 
   * ``SENTRY_DSN`` - This is a connection string for [Sentry](http://getsentry.com).
 
+Note that the example local settings sets `START_DATE` and `END_DATE` to now and two weeks from now, respectively, so you'll default to an "active" application period for local development. In production, these should correspond to the start and end dates of the current round's application period.
+
 Make a database and run migrations:
 
 ```bash

@@ -270,7 +270,6 @@
         "pk": "34343",
         "fields": {
             "address": 2,
-            "planned_use": null,
             "application": [1, 3, 4, 5]
         }
     },
@@ -279,7 +278,6 @@
         "pk": "13131",
         "fields": {
             "address": 1,
-            "planned_use": null,
             "application": [2, 6, 9]
         }
     },
@@ -288,7 +286,6 @@
         "pk": "56565",
         "fields": {
             "address": 3,
-            "planned_use": null,
             "application": [7, 8, 9]
         }
     },
@@ -297,7 +294,6 @@
         "pk": "78787",
         "fields": {
             "address": 4,
-            "planned_use": null,
             "application": [4, 7, 8]
         }
     },
