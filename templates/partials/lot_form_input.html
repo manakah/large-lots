@@ -1,0 +1,65 @@
+{% load lots_filters %}
+
+<div class="col-sm-6">
+  <div class="row">
+    <div class="col-sm-12">
+      <h3>Lot #{{lot_number}}</h3>
+      {% with field_name='lot_'|add:lot_number|add:'_pin' %}
+        {% with field=form|get_form_field:field_name %}     
+          {% if field.errors %}
+          <div class="form-group has-error group_id_lot_{{lot_number}}">
+          {% else %}
+          <div class="form-group group_id_lot_{{lot_number}}">
+          {% endif %}
+            <label for="lot_{{lot_number}}_pin">PIN<span class="red">*</span></label>
+            <small class="help-block lot_instructions">Click on the correct PIN that appears in the dropdown, or paste the lot PIN, if you know it.</small>
+            <input type="text" value="{{lot_pin}}" class="form-control" id="id_lot_{{lot_number}}_pin" name="lot_{{lot_number}}_pin" placeholder="##-##-###-###-####">
+            {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        {% endwith %}
+      {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  {% with field_name='lot_'|add:lot_number|add:'_address' %}
+    {% with field=form|get_form_field:field_name %} 
+      {% if field.errors %}
+      <div class="form-group has-error group_id_lot_{{lot_number}}">
+      {% else %}
+      <div class="form-group group_id_lot_{{lot_number}}">
+      {% endif %}
+        <label for="lot_{{lot_number}}_pin">House number and street<span class="red">*</span></label>
+        <span class="help-block lot_instructions"><small>This field will autopopulate after you select or enter a valid PIN.</small></span>
+        <div class="input-group">
+          <input type="text" value="{{ lot_address }}" class="form-control" id="id_lot_{{lot_number}}_address" name="lot_{{lot_number}}_address" placeholder="Ex. 118 N Clark St" disabled/>
+          <div class="input-group-addon">Chicago, IL</div>
+        </div>
+        {% for error in field.errors %}
+            <span class="help-block">{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% endwith %}
+  {% endwith %}
+
+  {% with field_name='lot_'|add:lot_number|add:'_use' %}
+    {% with field=form|get_form_field:field_name %} 
+      {% if field.errors %}
+      <div class="form-group has-error">
+      {% else %}
+      <div class="form-group">
+      {% endif %}
+      <label for="lot_{{lot_number}}_use">How do you plan on using this lot?</label>
+      <input type="text" value="{{lot_use}}" class="form-control" id="id_lot_{{lot_number}}_use" name="lot_{{lot_number}}_use" placeholder="Community garden, side lot or yard, etc.">
+      {% for error in field.errors %}
+          <span class="help-block">{{ error }}</span>
+      {% endfor %}
+      </div>
+    {% endwith %}
+  {% endwith %}
+
+  <button class="clear-lot-selection btn btn-default" data-lot="{{lot_number}}">
+      <i class="fa fa-times"></i> Clear
+  </button>
+</div>

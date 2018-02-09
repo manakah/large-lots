@@ -415,7 +415,7 @@
 
         // Increment the total.
         $('#id_form-TOTAL_FORMS').val(parseInt(idx) + 1);
-    };
+    }
 
     function delete_form(form_index) {
         // Remove the form.
@@ -428,7 +428,7 @@
         // Decrement TOTAL_FORMS.
         var idx = $('#id_form-TOTAL_FORMS').val();
         $('#id_form-TOTAL_FORMS').val(parseInt(idx) - 1);
-    };
+    }
 
     // Forms should have a continuous index. If a user adds three forms, then
     // deletes the first form she added, reindex the remaining forms, starting
@@ -468,7 +468,7 @@
 
             idx ++;
         });
-    };
+    }
 
     // Enable/disable the driver's license / license place number, contigent
     // on whether "NA" is selected from the state menu.
