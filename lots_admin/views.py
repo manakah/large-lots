@@ -3,6 +3,7 @@ import csv
 import json
 import re
 from collections import namedtuple
+from smtplib import SMTPException
 
 from operator import __or__ as OR
 from functools import reduce
@@ -31,7 +32,7 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from .utils import create_email_msg
+from .utils import create_email_msg, send_denial_email
 from lots_admin.models import Application, Lot, ApplicationStep, Review, \
     ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 
@@ -448,21 +449,26 @@ def deny_submit(request, application_id):
     application_status.current_step = None
     application_status.save()
 
-    send_email(request, application_status)
+    try:
+        send_denial_email(request, application_status)
+    except SMTPException as stmp_e:
+        request.session['failed_msg'] = [application_status.id]
 
-    page = request.session['page']
-    query = request.session['query']
-    path = '?'
+        return HttpResponseRedirect(reverse('email_error'))
+    finally:
+        page = request.session['page']
+        query = request.session['query']
+        path = '?'
 
-    if page:
-        path += 'page={}&'.format(page)
-    if query:
-        path += 'search_box={}'.format(query)
+        if page:
+            path += 'page={}&'.format(page)
+        if query:
+            path += 'search_box={}'.format(query)
 
-    clean_path = path.rstrip('?').rstrip('&')
+        clean_path = path.rstrip('?').rstrip('&')
 
-    return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
-    # return HttpResponseRedirect(reverse('lots_admin', args=["all"]))
+        return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+
 
 @login_required(login_url='/lots-login/')
 def double_submit(request, application_id):

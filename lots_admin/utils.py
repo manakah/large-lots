@@ -1,6 +1,11 @@
+from datetime import datetime
+
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
+
+from lots_admin.look_ups import DENIAL_REASONS
+from lots_admin.models import Review
 
 def create_email_msg(template_name, email_subject, email_to_address, context):
     html_template = get_template('emails/{}.html'.format(template_name))
@@ -18,13 +23,19 @@ def create_email_msg(template_name, email_subject, email_to_address, context):
 
     return msg
 
-    # try:
-    #     msg.send()
-    # except SMTPException as stmp_e:
-    #     print(stmp_e)
-    #     print("Not able to send email due to smtp exception.")
-    # except Exception as e:
-    #     print(e)
-    #     print("Not able to send email.")
+def send_denial_email(request, application_status):
+    context = {'app': application_status.application, 
+               'lot': application_status.lot,
+               'review': Review.objects.filter(application=application_status).latest('id'),
+               'today': datetime.now().date(),
+               'DENIAL_REASONS': DENIAL_REASONS
+               }
 
-    # time.sleep(5)
+    msg = create_email_msg(
+        'denial_email', 
+        'Notification from LargeLots', 
+        application_status.application.email, 
+        context
+    )
+
+    msg.send()
