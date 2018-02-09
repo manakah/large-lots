@@ -142,7 +142,8 @@
       });
 
       function populateAddressFromPIN(clean_pin, lot_id) {
-        jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
+        jQuery.get("https://datamade.cartodb.com/api/v2/sql", {
+            api_key: '{{cartodb_api}}',
             q: 'select low_address, street_direction, street_name, street_type from {{cartodb_table}} where pin_nbr = ' + clean_pin + '::VARCHAR',
         }, function (data) { 
             low_address = data.rows[0]['low_address']
@@ -164,8 +165,10 @@
             source: function (request, response) {
                 clean_pin = request.term.replace(/-/g, '');
 
-                jQuery.get("http://datamade.cartodb.com/api/v2/sql", {
+                jQuery.get("https://datamade.cartodb.com/api/v2/sql", {
+                    api_key: '{{cartodb_api}}',
                     q: 'select pin from ' + '{{cartodb_table}}' + ' where pin_nbr like ' + "'" + clean_pin + "%'" + '::VARCHAR',
+
                 }, function (data) {
                     var valid_pins = []
                   

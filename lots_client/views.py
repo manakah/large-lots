@@ -63,7 +63,7 @@ def home(request):
         })
 
 def get_lot_count(cartoTable):
-    carto = 'http://datamade.cartodb.com/api/v2/sql'
+    carto = 'https://datamade.cartodb.com/api/v2/sql'
     params = {
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT count(*) FROM %s" % (cartoTable),
@@ -92,7 +92,7 @@ def application_active(request):
         return False
 
 def get_ward(pin):
-    carto = 'http://datamade.cartodb.com/api/v2/sql'
+    carto = 'https://datamade.cartodb.com/api/v2/sql'
     params = {
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT ward FROM %s WHERE pin_nbr = '%s'" % \
@@ -108,7 +108,7 @@ def get_ward(pin):
     return ward_nbr
 
 def get_community(pin):
-    carto = 'http://datamade.cartodb.com/api/v2/sql'
+    carto = 'https://datamade.cartodb.com/api/v2/sql'
     params = {
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT community FROM %s WHERE pin_nbr = '%s'" % \
@@ -299,6 +299,7 @@ def apply(request):
             context['error_messages'] = OrderedDict()
             context['applications'] = applications
             context['cartodb_table'] = settings.CURRENT_CARTODB
+            context['cartodb_api'] = settings.CARTODB_API_KEY
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
@@ -317,6 +318,7 @@ def apply(request):
         'applications': applications,
         'applied_pins': pins_str,
         'cartodb_table': settings.CURRENT_CARTODB,
+        'cartodb_api': settings.CARTODB_API_KEY
     })
 
 def apply_confirm(request, tracking_id):
