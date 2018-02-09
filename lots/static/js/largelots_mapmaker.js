@@ -119,7 +119,7 @@ var LargeLots = {
                 LargeLots.appliedLotsLayer = layer.getSubLayer(3);
                 allLayers.push(LargeLots.appliedLotsLayer);
               }
-            };
+            }
 
             // Set interactivity for multiple layers
             $.each(allLayers, function(index, value) {
@@ -150,7 +150,7 @@ var LargeLots = {
       if($("#search_address").length != 0) {
         $("#search_address").val(LargeLots.convertToPlainString($.address.parameter('address')));
         LargeLots.addressSearch();
-      };
+      }
 
       $('.toggle-parcels').on('click', function(e){
           if($(e.target).is(':checked')){
@@ -249,17 +249,23 @@ var LargeLots = {
 
       $("#lot_apply").on("click", function(){
         if ($("#id_lot_1_pin").val() == "") {
-          $("#id_lot_1_address").val($(this).data('address'));
-          $("#id_lot_1_pin").val($(this).data('pin'));
+          LargeLots.autopopulatePINAddress("1", this);
         }
         else if ($("#id_lot_1_pin").val() != $(this).data('pin')){
-          $("#id_lot_2_address").val($(this).data('address'));
-          $("#id_lot_2_pin").val($(this).data('pin'));
+          LargeLots.autopopulatePINAddress("2", this);
         }
 
         $(this).html("<i class='fa fa-check'></i> Selected");
         $("#selected_lots").ScrollTo({offsetTop: "70px", 'axis':'y'});
       });
+  },
+
+  autopopulatePINAddress: function (lotNumber, buttonClicked) {
+    $("#id_lot_" + lotNumber + "_address").val($(buttonClicked).data('address'));
+    $("#id_lot_" + lotNumber + "_pin").val($(buttonClicked).data('pin'));
+    if (!$(".group_id_lot_" + lotNumber).hasClass('has-error')) {
+      $(".group_id_lot_" + lotNumber).addClass('has-success');
+    }
   },
 
   createParcelInfo: function(props) {
@@ -331,8 +337,8 @@ var LargeLots = {
   },
 
   formatPin: function(pin) {
-    var pin  = String(pin);
-    return pin.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5');
+    var pin_str  = String(pin);
+    return pin_str.replace(/(\d{2})(\d{2})(\d{3})(\d{3})(\d{4})/, '$1-$2-$3-$4-$5');
   },
 
   //converts a slug or query string in to readable text

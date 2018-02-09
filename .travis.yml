@@ -9,6 +9,7 @@ cache: pip
 install:
 - pip install --upgrade pip
 - pip install --upgrade -r requirements.txt
+- npm install -g jshint
 sudo: required
 dist: trusty
 group: deprecated-2017Q4
@@ -20,6 +21,11 @@ before_script:
 - python manage.py migrate
 script:
 - pytest
+- jshint --extract=always templates/*
+- jshint lots/static/js/*
+notifications:
+  webhooks: 
+    - https://semabot.datamade.us/travis/
 
 deploy:
   - provider: codedeploy

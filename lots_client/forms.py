@@ -14,11 +14,11 @@ from django import forms
 from us.states import STATES
 
 from lots_admin.models import PrincipalProfile
-
+from .utils import call_carto
 
 class ApplicationForm(forms.Form):
     lot_1_address = forms.CharField(
-        error_messages={'required': 'Provide the lot’s street address'},
+        error_messages={'required': 'Please provide an address: use the map above, manually enter a PIN and click on the correct one that appears in the dropdown, or paste the lot PIN, if you know it.'},
         label="Lot 1 Street address")
     lot_1_pin = forms.CharField(
         error_messages={
@@ -84,13 +84,8 @@ class ApplicationForm(forms.Form):
         return organization
 
     def _check_pin(self, pin):
-        carto = 'http://datamade.cartodb.com/api/v2/sql'
-        pin = pin.replace('-', '')
-        params = {
-            'api_key': settings.CARTODB_API_KEY,
-            'q': "SELECT pin_nbr FROM %s WHERE pin_nbr = '%s'" % (settings.CURRENT_CARTODB, pin),
-        }
-        r = requests.get(carto, params=params)
+        r = call_carto("pin_nbr", pin)
+
         if r.status_code == 200:
             if r.json()['total_rows'] == 1:
                 return pin
@@ -107,7 +102,8 @@ class ApplicationForm(forms.Form):
         if len(pattern.sub('', pin)) != 14:
             raise forms.ValidationError('Please provide a valid PIN')
         else:
-            return self._check_pin(pin)
+            clean_pin = pin.replace('-', '')
+            return self._check_pin(clean_pin)
 
     def _clean_phone(self, key):
         phone = self.cleaned_data[key]
@@ -128,6 +124,9 @@ class ApplicationForm(forms.Form):
             return self._clean_pin('lot_2_pin')
         return self.cleaned_data['lot_2_pin']
 
+    def clean_owned_address(self):
+        return self.cleaned_data['owned_address'].upper()
+
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
         pin = pin.replace("-", "").replace(" ", "")
@@ -136,6 +135,16 @@ class ApplicationForm(forms.Form):
             raise forms.ValidationError('Please provide a valid PIN')
         else:
             return pin
+
+    def clean_contact_street(self):
+        return self.cleaned_data['contact_street'].upper()
+
+    def clean_contact_city(self):
+        return self.cleaned_data['contact_city'].upper()
+
+    def clean_contact_state(self):
+        return self.cleaned_data['contact_state'].upper()
+
 
     def clean_deed_image(self):
 

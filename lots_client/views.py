@@ -143,7 +143,7 @@ def get_lot_address(address, pin):
         'street_dir': street_dir,
         'street_name': street_name,
         'street_type': street_type,
-        'city': 'Chicago',
+        'city': 'CHICAGO',
         'state': 'IL',
         'zip_code': '',
     }
@@ -185,6 +185,7 @@ def apply(request):
         form = ApplicationForm(request.POST, request.FILES)
         context = {}
         address_parts = ['street_number', 'street_dir', 'street_name', 'street_type']
+
         if form.is_valid():
             lot1 = get_or_create_lot(form.cleaned_data['lot_1_address'],
                                      form.cleaned_data['lot_1_pin'])
@@ -297,6 +298,7 @@ def apply(request):
             fields = [f for f in form.fields]
             context['error_messages'] = OrderedDict()
             context['applications'] = applications
+            context['cartodb_table'] = settings.CURRENT_CARTODB
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
@@ -313,7 +315,8 @@ def apply(request):
     return render(request, 'apply.html', {
         'form': form,
         'applications': applications,
-        'applied_pins': pins_str
+        'applied_pins': pins_str,
+        'cartodb_table': settings.CURRENT_CARTODB,
     })
 
 def apply_confirm(request, tracking_id):

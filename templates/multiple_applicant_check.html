@@ -102,9 +102,10 @@
   <script src="{% static 'js/lib/leaflet.label.js' %}" type="text/javascript"></script>
   <script src="{% static 'js/largelots_locationcheck.js' %}"></script>
   <script>
+    otherOwnedPinsRaw = '{{ other_owned_pins|safe }}';
+    var otherOwnedPins = JSON.parse(otherOwnedPinsRaw);
     var ownedPin = '{{ owned_pin }}';
     var lotPin = '{{ lot_pin }}';
-    var otherOwnedPins = {{ other_owned_pins|safe }};
 
     $(function() {
       LargeLots.initialize();

@@ -22,108 +22,23 @@
           Your selected lots:
         </div>
         <div class="panel-body">
-          <p>Use the map above to search for and select the lot(s) you want to apply for or, enter the lot address and PIN if you know it already. You may apply for <strong>up to two lots</strong>.</p>
+          <p>Use the map above to search for and select the lot(s) you want to apply for, or enter the lot PIN if you already know it. You may apply for <strong>up to two lots</strong>.</p>
 
           <p><span class="red">*</span>Required</p>
 
           <div class="row" id="lot-display">
-            <div class="col-sm-6">
-              <div class="row">
-                <div class="col-sm-12">
-                  <h3>Lot #1</h3>
-                  {% if form.lot_1_address.errors %}
-                  <div class="form-group has-error">
-                  {% else %}
-                  <div class="form-group">
-                  {% endif %}
-                    <label for="lot_1_pin">House number and street<span class="red">*</span></label>
-                    <div class="input-group">
-                      <input type="text" value="{{ lot_1_address }}" class="form-control" id="id_lot_1_address" name="lot_1_address" placeholder="Ex. 118 N Clark St" />
-                      <div class="input-group-addon">Chicago, IL</div>
-                    </div>
-                    {% for error in form.lot_1_address.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                  </div>
-                </div>
-              </div>
-              {% if form.lot_1_pin.errors %}
-              <div class="form-group has-error">
-              {% else %}
-              <div class="form-group">
-              {% endif %}
-                <label for="lot_1_pin">PIN<span class="red">*</span></label>
-                <input type="text" value="{{lot_1_pin}}" class="form-control" id="id_lot_1_pin" name="lot_1_pin" placeholder="##-##-###-###-####">
-                {% for error in form.lot_1_pin.errors %}
-                    <span class="help-block">{{ error }}</span>
-                {% endfor %}
-              </div>
-              {% if form.lot_1_use.errors %}
-              <div class="form-group has-error">
-              {% else %}
-              <div class="form-group">
-              {% endif %}
-              <label for="lot_1_use">How do you plan on using this lot?</label>
-              <input type="text" value="{{lot_1_use}}" class="form-control" id="id_lot_1_use" name="lot_1_use" placeholder="Community garden, side lot or yard, etc.">
-              {% for error in form.lot_1_use.errors %}
-                  <span class="help-block">{{ error }}</span>
-              {% endfor %}
-              </div>
-              <button class="clear-lot-selection btn btn-default" data-lot="1">
-                  <i class="fa fa-times"></i> Clear
-              </button>
-            </div>
-            <div class="col-sm-6">
-              <div class="row">
-                <div class="col-sm-12">
-                  <h3>Lot #2 <small>(optional)</small></h3>
-                  {% if form.lot_2_address.errors %}
-                  <div class="form-group has-error">
-                  {% else %}
-                  <div class="form-group">
-                  {% endif %}
-                    <label for="lot_2_pin">House number and street</label>
-                    <div class="input-group">
-                      <input type="text" value="{{lot_2_address}}" class="form-control" id="id_lot_2_address" name="lot_2_address" placeholder="Ex. 118 N Clark St" />
-                      <span class="input-group-addon">Chicago, IL</span>
-                      {% for error in form.lot_2_address.errors %}
-                          <span class="help-block">{{ error }}</span>
-                      {% endfor %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-                {% if form.lot_2_pin.errors %}
-                <div class="form-group has-error">
-                {% else %}
-                <div class="form-group">
-                {% endif %}
-                <label for="lot_2_pin">PIN</label>
-                <input type="text" value="{{lot_2_pin}}" class="form-control" id="id_lot_2_pin" name="lot_2_pin" placeholder="##-##-###-###-####">
-                {% for error in form.lot_2_pin.errors %}
-                    <span class="help-block">{{ error }}</span>
-                {% endfor %}
-              </div>
-              {% if form.lot_2_use.errors %}
-              <div class="form-group has-error">
-              {% else %}
-              <div class="form-group">
-              {% endif %}
-              <label for="lot_2_use">How do you plan on using this lot?</label>
-              <input type="text" value="{{lot_2_use}}" class="form-control" id="id_lot_2_use" name="lot_2_use" placeholder="Community garden, side lot or yard, etc.">
-              {% for error in form.lot_2_use.errors %}
-                  <span class="help-block">{{ error }}</span>
-              {% endfor %}
-              </div>
-              <button class="clear-lot-selection btn btn-default" data-lot="2">
-                  <i class="fa fa-times"></i> Clear
-              </button>
-            </div>
+            {% with lot_number='1' lot_pin=lot_1_pin lot_address=lot_1_address lot_use=lot_1_use %}
+              {% include 'partials/lot_form_input.html' %}
+            {% endwith %}
 
+            {% with lot_number='2' lot_pin=lot_2_pin lot_address=lot_2_address lot_use=lot_2_use %}
+              {% include 'partials/lot_form_input.html' %}
+            {% endwith %}
           </div>
         </div>
       </div>
     </div>
+  </div>
 
   <div id="application">
 
