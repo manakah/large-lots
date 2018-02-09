@@ -48,10 +48,6 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send email to all applicants on Step 7.')
 
-        parser.add_argument('--lotto_winner_email',
-                            action='store_true',
-                            help='Send email to winners of the lottery.')
-
         parser.add_argument('--lotto_email',
                             help='Send email with notification of lottery. Use one of two arguments: morning or afternoon.')
 
@@ -395,40 +391,7 @@ class Command(BaseCommand):
 
                 applicant = self.applicant_detail_str(application)
                 print('Notified {}'.format(applicant))
-
-
-        if options['lotto_winner_email']:
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT status.id, status.lot_id
-                    FROM lots_admin_applicationstatus as status
-                    JOIN lots_admin_applicationstep as step 
-                    ON status.current_step_id=step.id 
-                    WHERE step=7 and lottery=True
-                '''
-
-                cursor.execute(query)
-                applicants = [(status_id, lot_id) for status_id, lot_id in cursor]
-
-            for status_id, lot_id in applicants:
-                status = ApplicationStatus.objects.get(id=status_id)
-                application = Application.objects.get(id=status.application_id)
-                lot = Lot.objects.get(pin=lot_id)              
-                context = {'app': application, 
-                           'lot': lot}
-                self.send_email(
-                    'lotto_winner_email', 
-                    'LargeLots application - Lottery winner', 
-                    application.email, 
-                    context
-                )
-
-                status.lottery_email_sent = True
-                status.save()
-
-                applicant = self.applicant_detail_str(application)
-                print('Notified {}'.format(applicant)) 
-
+                
 
         if options['lotto_email']:
             time = options['lotto_email']
