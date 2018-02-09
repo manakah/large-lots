@@ -7,9 +7,9 @@
       {% with field_name='lot_'|add:lot_number|add:'_pin' %}
         {% with field=form|get_form_field:field_name %}     
           {% if field.errors %}
-          <div class="form-group has-error">
+          <div class="form-group has-error group_id_lot_{{lot_number}}">
           {% else %}
-          <div class="form-group">
+          <div class="form-group group_id_lot_{{lot_number}}">
           {% endif %}
             <label for="lot_{{lot_number}}_pin">PIN<span class="red">*</span></label>
             <small class="help-block lot_instructions">Click on the correct PIN that appears in the dropdown, or paste the lot PIN, if you know it.</small>

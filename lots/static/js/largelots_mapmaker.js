@@ -249,17 +249,23 @@ var LargeLots = {
 
       $("#lot_apply").on("click", function(){
         if ($("#id_lot_1_pin").val() == "") {
-          $("#id_lot_1_address").val($(this).data('address'));
-          $("#id_lot_1_pin").val($(this).data('pin'));
+          LargeLots.autopopulatePINAddress("1", this);
         }
         else if ($("#id_lot_1_pin").val() != $(this).data('pin')){
-          $("#id_lot_2_address").val($(this).data('address'));
-          $("#id_lot_2_pin").val($(this).data('pin'));
+          LargeLots.autopopulatePINAddress("2", this);
         }
 
         $(this).html("<i class='fa fa-check'></i> Selected");
         $("#selected_lots").ScrollTo({offsetTop: "70px", 'axis':'y'});
       });
+  },
+
+  autopopulatePINAddress: function (lotNumber, buttonClicked) {
+    $("#id_lot_" + lotNumber + "_address").val($(buttonClicked).data('address'));
+    $("#id_lot_" + lotNumber + "_pin").val($(buttonClicked).data('pin'));
+    if (!$(".group_id_lot_" + lotNumber).hasClass('has-error')) {
+      $(".group_id_lot_" + lotNumber).addClass('has-success');
+    }
   },
 
   createParcelInfo: function(props) {
