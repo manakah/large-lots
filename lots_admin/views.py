@@ -31,6 +31,7 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
+from .utils import create_email_msg
 from lots_admin.models import Application, Lot, ApplicationStep, Review, \
     ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 
@@ -846,19 +847,35 @@ def lottery(request, lot_pin):
 def lottery_submit(request, lot_pin):
     if request.method == 'POST':
         user = request.user
-        winner = [value for name, value in request.POST.items()
-                if name.startswith('winner')]
-        winner_id = int(winner[0])
+        winner_id = int(request.POST['winner-select'])
         winning_app = ApplicationStatus.objects.get(id=winner_id)
 
         # Move lottery winner to Step 7.
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_waiting'], public_status='valid', step=7)
         winning_app.current_step = step
         winning_app.save()
-
         # Create a review.
-        review = Review(reviewer=user, email_sent=False, application=winning_app, step_completed=6)
+        review = Review(reviewer=user, email_sent=True, application=winning_app, step_completed=6)
         review.save()
+        # Send winner an email.
+        context = {'app': winning_app.application, 
+                   'lot': winning_app.lot}
+
+        msg = create_email_msg(
+            'lotto_winner_email', 
+            'LargeLots application - Lottery winner', 
+            winning_app.application.email, 
+            context
+        )
+
+        failed_msg = []
+
+        try:
+            msg.send()
+            winning_app.lottery_email_sent = True
+            winning_app.save()
+        except SMTPException as stmp_e:
+            failed_msg.append(winning_app.id)
 
         # Deny lottery losers: find all applications on Step 5.
         losing_apps = ApplicationStatus.objects.filter(current_step__step=6).filter(lot=lot_pin)
@@ -871,7 +888,31 @@ def lottery_submit(request, lot_pin):
             a.current_step = None
             a.save()
 
-            send_email(request, a)
+            # Send loser an email.
+            context = {'app': a.application, 
+                       'lot': a.lot,
+                       'review': review,
+                       'today': datetime.now().date(),
+                       'DENIAL_REASONS': DENIAL_REASONS
+                       }
+
+            msg = create_email_msg(
+                'denial_email', 
+                'LargeLots application - Lottery results', 
+                a.application.email, 
+                context
+            )
+
+            try:
+                msg.send()
+                a.lottery_email_sent = True
+                a.save()
+            except SMTPException as stmp_e:
+                failed_msg.append(a)
+
+        if failed_msg:
+            request.session['failed_msg'] = failed_msg
+            return HttpResponseRedirect(reverse('email_error'))
 
         return HttpResponseRedirect(reverse('lotteries'))
 
@@ -1035,32 +1076,34 @@ def next_step(description_key, status, step_int, application):
         application.current_step = step
         application.save()
 
-def send_email(request, application_status):
-    app = application_status.application
-    lot = application_status.lot
-    review = Review.objects.filter(application=application_status).latest('id')
-    today = datetime.now().date()
+# def send_email(request, application_status):
 
-    context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host(), 'today': today})
-    html = "deny_html_email.html"
-    txt = "deny_text_email.txt"
-    html_template = get_template(html)
-    text_template = get_template(txt)
-    html_content = html_template.render(context)
-    text_content = text_template.render(context)
-    subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
+#     create_email_msg()
+#     app = application_status.application
+#     lot = application_status.lot
+#     review = Review.objects.filter(application=application_status).latest('id')
+#     today = datetime.now().date()
 
-    from_email = settings.EMAIL_HOST_USER
-    to_email = [from_email]
+#     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host(), 'today': today})
+#     html = "deny_html_email.html"
+#     txt = "deny_text_email.txt"
+#     html_template = get_template(html)
+#     text_template = get_template(txt)
+#     html_content = html_template.render(context)
+#     text_content = text_template.render(context)
+#     subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
 
-    # if provided, send confirmation email to applicant
-    if app.email:
-        to_email.append(app.email)
+#     from_email = settings.EMAIL_HOST_USER
+#     to_email = [from_email]
 
-    # send email confirmation to info@largelots.org
-    msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
-    msg.attach_alternative(html_content, 'text/html')
-    msg.send()
+#     # if provided, send confirmation email to applicant
+#     if app.email:
+#         to_email.append(app.email)
+
+#     # send email confirmation to info@largelots.org
+#     msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+#     msg.attach_alternative(html_content, 'text/html')
+#     msg.send()
 
 @login_required(login_url='/lots-login/')
 def deed(request, application_id):
@@ -1070,3 +1113,12 @@ def deed(request, application_id):
         'application_status': application_status,
         })
 
+@login_required(login_url='/lots-login/')
+def email_error(request):
+    failed_msg = request.session['failed_msg']
+
+    applicant_statuses = ApplicationStatus.objects.filter(id__in=failed_msg)
+
+    return render(request, 'email_error.html', {
+        'applicant_statuses': applicant_statuses,
+    })

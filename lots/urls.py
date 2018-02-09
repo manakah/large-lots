@@ -12,7 +12,8 @@ from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lotteries, lottery, lottery_submit, \
     review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, \
-    deed, double_submit, lots_admin_principal_profiles, delete_principal_profiles
+    deed, double_submit, lots_admin_principal_profiles, delete_principal_profiles, \
+    email_error
 
 from django.contrib import admin
 admin.autodiscover()
@@ -71,4 +72,4 @@ urlpatterns = [
     url(r'^bulk-deny-submit/$', bulk_deny_submit, name='bulk_deny_submit'),
     url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
-]
+    url(r'^email-error/$', email_error, name='email_error'),]

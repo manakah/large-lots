@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% load staticfiles %}
+{% load lots_filters %}
+{% block title %}Deny applications{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-md-12">
+    <h3>Unable to send emails</h3>
+    <p>Something happened, and we could not send emails to the following applicants:</p>
+
+    <table class="table table-striped">
+      <thead>
+        <th>ApplicationStatus ID</th>
+        <th>Applicant</th>
+        <th>Email</th>
+        <th>Lot</th>
+      </thead>
+      {% for a in applicant_statuses %}
+      <tbody>
+        <tr>
+          <td>{{ a.id }}</td>
+          <td>{{ a.application.first_name }} {{ a.application.last_name }}</td>
+          <td>{{ a.application.email }}</td>
+          <td>{{ a.lot.pin | make_display_pin }} <br> {{ a.lot.address }}</td>
+        </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<!-- What should Jeanne and her team do if they reach this step page? They could: (1) contact DataMade, (2) be instructed to manually send as email, and/or (3) include a "resend" button in the table. -->
+
+{% endblock %}

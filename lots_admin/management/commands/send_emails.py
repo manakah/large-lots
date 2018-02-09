@@ -391,7 +391,7 @@ class Command(BaseCommand):
 
                 applicant = self.applicant_detail_str(application)
                 print('Notified {}'.format(applicant))
-                
+
 
         if options['lotto_email']:
             time = options['lotto_email']
@@ -610,7 +610,7 @@ class Command(BaseCommand):
                             'DENIAL_REASONS': DENIAL_REASONS,
                         }
 
-                        self.send_email('deny_html_email', 'Large Lots Application', application_status.application.email, context)
+                        self.send_email('emails/deny_html_email', 'Large Lots Application', application_status.application.email, context)
 
         if options['update_email']:
             application_statuses = ApplicationStatus.objects.all()
