@@ -6,7 +6,7 @@
 <div class="row">
   <div class="col-md-12">
     <h3>Unable to send emails</h3>
-    <p>Something happened, and we could not send emails to the following applicants:</p>
+    <p>Something happened, and we could not send emails to the following applicants. Please contact DataMade for assistance.</p>
 
     <table class="table table-striped">
       <thead>
@@ -15,16 +15,16 @@
         <th>Email</th>
         <th>Lot</th>
       </thead>
-      {% for a in applicant_statuses %}
       <tbody>
+      {% for a in applicant_statuses %}
         <tr>
           <td>{{ a.id }}</td>
           <td>{{ a.application.first_name }} {{ a.application.last_name }}</td>
           <td>{{ a.application.email }}</td>
           <td>{{ a.lot.pin | make_display_pin }} <br> {{ a.lot.address }}</td>
         </tr>
-      </tbody>
       {% endfor %}
+      </tbody>
     </table>
   </div>
 </div>
