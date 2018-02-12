@@ -123,3 +123,32 @@ def add_status(application, application_status, *, step, **kwargs):
     application.save()
 
     return application, app_status
+
+@pytest.fixture
+@pytest.mark.django_db
+def application_thing(db, address):
+    class ApplicationFactory():
+        def build(self):
+            application_info = {
+                'first_name': 'Seymour',
+                'last_name': 'Cats',
+                'organization': '',
+                'owned_pin': '16133300170000',
+                'owned_address': address,
+                'deed_image': 'a-deed-image.png',
+                'deed_timestamp': datetime.datetime.now(),
+                'contact_address': address,
+                'phone': '555-555-5555',
+                'email': 'testing+{}@datamade.us'.format(uuid.uuid4()),
+                'how_heard': '',
+                'tracking_id': uuid.uuid4(),
+                'received_date': datetime.datetime.now(),
+                'pilot': CURRENT_PILOT,
+            }
+
+            application = Application.objects.create(**application_info)
+            application.save()
+
+            return application
+
+    return ApplicationFactory()

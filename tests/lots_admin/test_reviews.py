@@ -31,3 +31,28 @@ def test_move_to_step_9(application,
     app_status.refresh_from_db()
 
     assert app_status.current_step.step == 9
+
+def test_lottery_submit(application,
+                        application_status,
+                        application_thing,
+                        auth_client):
+    # Create two distinct applications to compete in lottery.
+    application_butterflies = application_thing.build()
+
+    application_butterflies.last_name = 'Butterflies'
+    application_butterflies.save()
+
+    application_cats = application_thing.build()
+
+    print(application_butterflies)
+    print(application_cats)
+
+    # _, app_status_cats = add_status(application_cats, application_status, step=6, lottery=True)
+    # _, app_status_butterflies = add_status(application_butterflies, application_status, step=6, lottery=True)
+
+
+
+
+
+
+
