@@ -790,7 +790,6 @@ def multiple_location_check_submit(request, application_id):
             a.save()
 
             try:
-                raise SMTPException
                 send_denial_email(request, a)
             except SMTPException as stmp_e:
                 failed_msg.append(a.id)
@@ -1029,6 +1028,7 @@ def bulk_deny_submit(request):
 
     dictionary = dict(zip(app_ids, denial_reasons))
     apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
+    failed_msg = []
 
     for a in apps_to_deny:
         dict_reason = dictionary[a.id]
@@ -1040,7 +1040,14 @@ def bulk_deny_submit(request):
         a.current_step = None
         a.save()
 
-        send_email(request, a)
+        try:
+            send_denial_email(request, a)
+        except SMTPException as stmp_e:
+            failed_msg.append(a.id)
+    # If any emails raised an error, redirect to the email-error page.
+    if failed_msg:
+        request.session['failed_msg'] = failed_msg
+        return HttpResponseRedirect(reverse('email_error'))
 
     return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
@@ -1079,35 +1086,6 @@ def next_step(description_key, status, step_int, application):
         step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
         application.current_step = step
         application.save()
-
-# def send_email(request, application_status):
-
-#     create_email_msg()
-#     app = application_status.application
-#     lot = application_status.lot
-#     review = Review.objects.filter(application=application_status).latest('id')
-#     today = datetime.now().date()
-
-#     context = Context({'app': app, 'review': review, 'lot': lot, 'DENIAL_REASONS': DENIAL_REASONS, 'host': request.get_host(), 'today': today})
-#     html = "deny_html_email.html"
-#     txt = "deny_text_email.txt"
-#     html_template = get_template(html)
-#     text_template = get_template(txt)
-#     html_content = html_template.render(context)
-#     text_content = text_template.render(context)
-#     subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
-
-#     from_email = settings.EMAIL_HOST_USER
-#     to_email = [from_email]
-
-#     # if provided, send confirmation email to applicant
-#     if app.email:
-#         to_email.append(app.email)
-
-#     # send email confirmation to info@largelots.org
-#     msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
-#     msg.attach_alternative(html_content, 'text/html')
-#     msg.send()
 
 @login_required(login_url='/lots-login/')
 def deed(request, application_id):
