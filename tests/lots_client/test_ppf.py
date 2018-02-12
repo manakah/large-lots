@@ -44,7 +44,7 @@ def test_view_requires_tracking_id(django_db_setup,
     assert 'Oops!' in str(rv.content)
 
     app = application.build()
-    rv = client.get('/principal-profile-form/{}/'.format(application.tracking_id))
+    rv = client.get('/principal-profile-form/{}/'.format(app.tracking_id))
 
     assert 'Instructions' in str(rv.content)
 
@@ -52,12 +52,14 @@ def test_view_requires_tracking_id(django_db_setup,
 def test_ppf_submission(django_db_setup,
                         client,
                         application):
+    app = application.build()
+
     data = {
         'form-TOTAL_FORMS': 2,
         'form-INITIAL_FORMS': 0,
-        'form-0-first_name': application.first_name,
-        'form-0-last_name': application.last_name,
-        'form-0-home_address': application.owned_address.street,
+        'form-0-first_name': app.first_name,
+        'form-0-last_name': app.last_name,
+        'form-0-home_address': app.owned_address.street,
         'form-0-date_of_birth': '1992-02-16',
         'form-0-social_security_number': '123-45-6789',
         'form-0-drivers_license_state': 'IL',
@@ -74,7 +76,6 @@ def test_ppf_submission(django_db_setup,
         'form-1-license_plate_number': 'baz',
     }
 
-    app = application.build()
     rv = client.post(
         '/principal-profile-form/{}/'.format(app.tracking_id),
         data=data,

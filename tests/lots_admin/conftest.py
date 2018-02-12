@@ -32,7 +32,7 @@ def email_db_setup(django_db_setup, transactional_db):
 @pytest.mark.django_db
 def principal_profile(application, db):
     data = {
-        'application': application,
+        'application': application.build(),
         'date_of_birth': '1992-02-16',
         'social_security_number': '123-45-6789',
         'drivers_license_state': 'IN',
@@ -49,7 +49,7 @@ def principal_profile(application, db):
 @pytest.mark.django_db
 def related_person(application, address, db):
     data = {
-        'application': application,
+        'application': application.build(),
         'first_name': 'Austin',
         'last_name': 'Powers',
         'address': address,
@@ -63,7 +63,7 @@ def related_person(application, address, db):
 @pytest.mark.django_db
 def principal_profile_with_related_person(application, related_person, db):
     data = {
-        'application': application,
+        'application': application.build(),
         'related_person': related_person,
         'date_of_birth': '1992-02-16',
         'social_security_number': '123-45-6789',

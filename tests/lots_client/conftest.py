@@ -1,7 +1,6 @@
 from django.core.files import File
 import pytest
 
-from ..conftest import add_status
 from lots_admin.models import ApplicationStep
 
 
