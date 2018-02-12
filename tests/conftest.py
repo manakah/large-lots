@@ -22,8 +22,8 @@ def app_steps(db):
         'deed',
         'location',
         'multi',
-        'lottery',
         'letter',
+        'lottery',
         'EDS_waiting',
         'EDS_submission',
         'city_council',
@@ -31,7 +31,7 @@ def app_steps(db):
         'sold',
     ]
 
-    for idx, short_name in enumerate(order, start=1):
+    for idx, short_name in enumerate(order, start=2):
         spec = {
             'description': APPLICATION_STATUS[short_name],
             'step': idx,
@@ -128,7 +128,7 @@ def add_status(application, application_status, *, step, **kwargs):
 @pytest.mark.django_db
 def application_thing(db, address):
     class ApplicationFactory():
-        def build(self):
+        def build(self, **kwargs):
             application_info = {
                 'first_name': 'Seymour',
                 'last_name': 'Cats',
@@ -146,9 +146,40 @@ def application_thing(db, address):
                 'pilot': CURRENT_PILOT,
             }
 
+            for attribute, value in kwargs.items():
+                application_info[attribute] = value
+
             application = Application.objects.create(**application_info)
             application.save()
 
             return application
 
     return ApplicationFactory()
+
+@pytest.fixture
+@pytest.mark.django_db
+def application_status_thing(db, lot, app_steps):
+    class ApplicationStatusFactory():
+        def build(self, application, step, **kwargs):
+            application_status_info = {
+                'denied': False,
+                'lot': lot,
+                'lottery': False,
+            }
+
+            for attribute, value in kwargs.items():
+                application_status_info[attribute] = value
+
+            app_status = ApplicationStatus.objects.create(**application_status_info)
+            app_step = ApplicationStep.objects.get(step=step)
+
+            app_status.current_step = app_step
+            app_status.application = application
+            app_status.save()
+
+            application.lot_set.add(app_status.lot)
+            application.save()
+
+            return application, app_status
+
+    return ApplicationStatusFactory()

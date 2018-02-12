@@ -32,23 +32,31 @@ def test_move_to_step_9(application,
 
     assert app_status.current_step.step == 9
 
-def test_lottery_submit(application,
-                        application_status,
-                        application_thing,
+def test_lottery_submit(application_thing,
+                        application_status_thing,
                         auth_client):
     # Create two distinct applications to compete in lottery.
-    application_butterflies = application_thing.build()
-
-    application_butterflies.last_name = 'Butterflies'
-    application_butterflies.save()
-
     application_cats = application_thing.build()
+    application_butterflies = application_thing.build(last_name="Butterflies")
+    _, app_status_cats = application_status_thing.build(application_cats, step=6, lottery=True)
+    _, app_status_butterflies = application_status_thing.build(application_butterflies, step=6, lottery=True)
 
-    print(application_butterflies)
-    print(application_cats)
+    # Find the PIN that both applicants requested, and post to lottery_sbumit with a winner. 
+    lot = app_status_cats.lot.pin
+    url = reverse('lottery_submit', args=[lot])
 
-    # _, app_status_cats = add_status(application_cats, application_status, step=6, lottery=True)
-    # _, app_status_butterflies = add_status(application_butterflies, application_status, step=6, lottery=True)
+    auth_client.post(url, {
+        'winner-select': app_status_butterflies.id
+        })
+
+    app_status_cats.refresh_from_db()
+    app_status_butterflies.refresh_from_db()
+
+    assert app_status_cats.denied == True
+    assert app_status_cats.current_step == None
+
+    assert app_status_butterflies.denied == False
+    assert app_status_butterflies.current_step.step == 7
 
 
 
