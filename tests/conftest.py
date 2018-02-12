@@ -65,68 +65,6 @@ def lot(db, address):
 @pytest.fixture
 @pytest.mark.django_db
 def application(db, address):
-    application_info = {
-        'first_name': 'Seymour',
-        'last_name': 'Cats',
-        'organization': '',
-        'owned_pin': '16133300170000',
-        'owned_address': address,
-        'deed_image': 'a-deed-image.png',
-        'deed_timestamp': datetime.datetime.now(),
-        'contact_address': address,
-        'phone': '555-555-5555',
-        'email': 'testing+{}@datamade.us'.format(uuid.uuid4()),
-        'how_heard': '',
-        'tracking_id': uuid.uuid4(),
-        'received_date': datetime.datetime.now(),
-        'pilot': CURRENT_PILOT,
-    }
-
-    application = Application.objects.create(**application_info)
-    application.save()
-
-    return application
-
-@pytest.fixture
-@pytest.mark.django_db
-def application_status(db, lot, app_steps):
-    application_status_info = {
-        'denied': False,
-        'lot': lot,
-        'lottery': False,
-    }
-
-    application_status = ApplicationStatus.objects.create(**application_status_info)
-
-    return application_status
-
-def add_status(application, application_status, *, step, **kwargs):
-    '''
-    Helper function for assigning an application a status.
-
-    Accepts an instance of application and application status,
-    as well as a step (int). Optionally, pass lottery and
-    lottery_email_sent booleans as extra keyword args.
-    '''
-    app_status = application_status
-    app_step = ApplicationStep.objects.get(step=step)
-
-    app_status.current_step = app_step
-    app_status.application = application
-
-    for key, value in kwargs.items():
-        setattr(app_status, key, value)
-
-    app_status.save()
-
-    application.lot_set.add(app_status.lot)
-    application.save()
-
-    return application, app_status
-
-@pytest.fixture
-@pytest.mark.django_db
-def application_thing(db, address):
     class ApplicationFactory():
         def build(self, **kwargs):
             application_info = {
@@ -158,7 +96,7 @@ def application_thing(db, address):
 
 @pytest.fixture
 @pytest.mark.django_db
-def application_status_thing(db, lot, app_steps):
+def application_status(db, lot, app_steps):
     class ApplicationStatusFactory():
         def build(self, application, step, **kwargs):
             application_status_info = {

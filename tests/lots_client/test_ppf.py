@@ -15,10 +15,10 @@ from lots_client.views import advance_if_ppf_and_eds_submitted
     (True, True)
 ])
 def test_advance_to_step_8(django_db_setup,
-                           application,
                            eds_received,
                            ppf_received):
-
+    
+    application = Application.objects.get(applicationstatus__current_step__step=7)
     application.eds_sent = True
     application.save()
 
@@ -43,6 +43,7 @@ def test_view_requires_tracking_id(django_db_setup,
 
     assert 'Oops!' in str(rv.content)
 
+    app = application.build()
     rv = client.get('/principal-profile-form/{}/'.format(application.tracking_id))
 
     assert 'Instructions' in str(rv.content)
@@ -73,19 +74,20 @@ def test_ppf_submission(django_db_setup,
         'form-1-license_plate_number': 'baz',
     }
 
+    app = application.build()
     rv = client.post(
-        '/principal-profile-form/{}/'.format(application.tracking_id),
+        '/principal-profile-form/{}/'.format(app.tracking_id),
         data=data,
     )
 
     assert rv.status_code == 200
     assert 'Success!' in str(rv.content)
 
-    application.refresh_from_db()
+    app.refresh_from_db()
 
-    related_people = application.relatedperson_set.all()
+    related_people = app.relatedperson_set.all()
 
-    assert application.ppf_received == True
-    assert len(application.principalprofile_set.all()) == 2
+    assert app.ppf_received == True
+    assert len(app.principalprofile_set.all()) == 2
     assert len(related_people) == 1
     assert 'Petmore Dogs' in str(related_people.first())
