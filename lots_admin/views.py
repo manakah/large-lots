@@ -32,7 +32,7 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from .utils import create_email_msg, send_denial_email
+from .utils import create_email_msg, send_denial_email, create_redirect_path
 from lots_admin.models import Application, Lot, ApplicationStep, Review, \
     ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 
@@ -549,20 +549,6 @@ def deed_check_submit(request, application_id):
             application_status.denied = True
             application_status.save()
 
-            # REMOVE THIS STEP. It may be causing issues.
-            # If applicant applied for another lot, then also deny that ApplicationStatus.
-            # other_app = ApplicationStatus.objects.filter(application__id=application_status.application.id).exclude(id=application_status.id)
-
-            # if other_app:
-            #     app = other_app[0]
-
-            #     review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=app, step_completed=2)
-            #     review.save()
-
-            #     app.denied = True
-            #     app.current_step = None
-            #     app.save()
-
             return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
 
 @login_required(login_url='/lots-login/')
@@ -631,7 +617,6 @@ def location_check(request, application_id):
         'before_step4': before_step4,
         })
 
-# @login_required(login_url='/lots-login/')
 def get_parcel_geometry(request):
     pin = request.GET.get('pin')
 
@@ -664,17 +649,7 @@ def location_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block')
-        # Get values for Redirect
-        page = request.session['page']
-        query = request.session['query']
-        path = '?'
-
-        if page:
-            path += 'page={}&'.format(page)
-        if query:
-            path += 'search_box={}'.format(query)
-
-        clean_path = path.rstrip('?').rstrip('&')
+        redirect_path = create_redirect_path(request)
 
        # Check if application has already been denied.
         if application_status.current_step == None:
@@ -698,14 +673,14 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
             else:
                 # Move to Step 5: Adlerman letter.
                 step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
         else:
             # Deny application, since applicant does not live on same block as lot.
             reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
@@ -798,19 +773,9 @@ def multiple_location_check_submit(request, application_id):
             request.session['failed_msg'] = failed_msg
             return HttpResponseRedirect(reverse('email_error'))
 
-        # Get values to redirect to appropriate admin page.
-        page = request.session['page']
-        query = request.session['query']
-        path = '?'
+        redirect_path = create_redirect_path(request)
 
-        if page:
-            path += 'page={}&'.format(page)
-        if query:
-            path += 'search_box={}'.format(query)
-
-        clean_path = path.rstrip('?').rstrip('&')
-
-        return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+        return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
 
 @login_required(login_url='/lots-login/')
 def lotteries(request):

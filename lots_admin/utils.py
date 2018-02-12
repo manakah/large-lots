@@ -39,3 +39,17 @@ def send_denial_email(request, application_status):
     )
 
     msg.send()
+
+def create_redirect_path(request):
+    page = request.session['page']
+    query = request.session['query']
+    path = '?'
+
+    if page:
+        path += 'page={}&'.format(page)
+    if query:
+        path += 'search_box={}'.format(query)
+
+    redirect_path = path.rstrip('?').rstrip('&')
+
+    return redirect_path
