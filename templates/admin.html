@@ -32,7 +32,7 @@
                 Principal Profiles have been received for {{ ppf_count }} applications
                 <small>
                     <a href="{% url 'lots_admin_principal_profiles' %}" target="_blank">
-                        <i class='fa fa-fw fa-external-link '></i> Go to export
+                        <i class="fa fa-fw fa-external-link"></i> Go to export
                     </a>
                 </small>
             </h4>
@@ -223,7 +223,7 @@
                         <div class="form-group col-sm-2">
                             <div class="checkbox">
                               <label>
-                                <input name="selected-for-bulk-submit" value="{{applicant.status_id}}" type="checkbox"/>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
                               </label>
                             </div>
                         </div>
@@ -246,7 +246,7 @@
                             {% csrf_token %}
                             <div class="checkbox">
                               <label>
-                                <input name="selected-for-bulk-submit" value="{{applicant.status_id}}" type="checkbox"/>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
                               </label>
                             </div>
                         </div>
@@ -263,7 +263,7 @@
                             {% csrf_token %}
                             <div class="checkbox">
                               <label>
-                                <input name="selected-for-bulk-submit" value="{{applicant.status_id}}" type="checkbox"/>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
                               </label>
                             </div>
                         </div>
