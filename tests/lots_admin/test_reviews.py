@@ -15,7 +15,7 @@ def test_move_to_step_9(application,
 
     # Put our application on step 8
     app = application.build()
-    _, app_status = application_status.build(app, step=8)
+    app_status = application_status.build(app, step=8)
 
     url = reverse('bulk_submit')
 
@@ -37,8 +37,8 @@ def test_lottery_submit(application,
     # Create two distinct applications to compete in lottery.
     app_cats = application.build()
     app_butterflies = application.build(last_name="Butterflies")
-    _, app_status_cats = application_status.build(app_cats, step=6, lottery=True)
-    _, app_status_butterflies = application_status.build(app_butterflies, step=6, lottery=True)
+    app_status_cats = application_status.build(app_cats, step=6, lottery=True)
+    app_status_butterflies = application_status.build(app_butterflies, step=6, lottery=True)
 
     # Find the PIN that both applicants requested, and post to lottery_sbumit with a winner. 
     lot = app_status_cats.lot.pin

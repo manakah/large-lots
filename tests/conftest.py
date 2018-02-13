@@ -122,6 +122,8 @@ def application_status(db, lot, app_steps):
             application.lot_set.add(app_status.lot)
             application.save()
 
-            return application, app_status
+            application.refresh_from_db()
+
+            return app_status
 
     return ApplicationStatusFactory()
