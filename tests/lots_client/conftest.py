@@ -1,7 +1,6 @@
 from django.core.files import File
 import pytest
 
-from ..conftest import add_status
 from lots_admin.models import ApplicationStep
 
 
@@ -12,7 +11,8 @@ def django_db_setup(application, application_status):
     For the existing tests, we only require one application on step 7,
     so create that here using our modular fixtures.
     '''
-    add_status(application, application_status, step=7)
+    app = application.build()
+    application_status.build(app, step=7)
 
 @pytest.fixture
 def mock_file(mocker):

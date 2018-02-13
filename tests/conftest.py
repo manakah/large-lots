@@ -22,8 +22,8 @@ def app_steps(db):
         'deed',
         'location',
         'multi',
-        'lottery',
         'letter',
+        'lottery',
         'EDS_waiting',
         'EDS_submission',
         'city_council',
@@ -31,7 +31,7 @@ def app_steps(db):
         'sold',
     ]
 
-    for idx, short_name in enumerate(order, start=1):
+    for idx, short_name in enumerate(order, start=2):
         spec = {
             'description': APPLICATION_STATUS[short_name],
             'step': idx,
@@ -65,61 +65,65 @@ def lot(db, address):
 @pytest.fixture
 @pytest.mark.django_db
 def application(db, address):
-    application_info = {
-        'first_name': 'Seymour',
-        'last_name': 'Cats',
-        'organization': '',
-        'owned_pin': '16133300170000',
-        'owned_address': address,
-        'deed_image': 'a-deed-image.png',
-        'deed_timestamp': datetime.datetime.now(),
-        'contact_address': address,
-        'phone': '555-555-5555',
-        'email': 'testing+{}@datamade.us'.format(uuid.uuid4()),
-        'how_heard': '',
-        'tracking_id': uuid.uuid4(),
-        'received_date': datetime.datetime.now(),
-        'pilot': CURRENT_PILOT,
-    }
+    class ApplicationFactory():
+        def build(self, **kwargs):
+            application_info = {
+                'first_name': 'Seymour',
+                'last_name': 'Cats',
+                'organization': '',
+                'owned_pin': '16133300170000',
+                'owned_address': address,
+                'deed_image': 'a-deed-image.png',
+                'deed_timestamp': datetime.datetime.now(),
+                'contact_address': address,
+                'phone': '555-555-5555',
+                'email': 'testing+{}@datamade.us'.format(uuid.uuid4()),
+                'how_heard': '',
+                'tracking_id': uuid.uuid4(),
+                'received_date': datetime.datetime.now(),
+                'pilot': CURRENT_PILOT,
+            }
 
-    application = Application.objects.create(**application_info)
-    application.save()
+            application_info.update(kwargs)
 
-    return application
+            application = Application.objects.create(**application_info)
+            application.save()
+
+            return application
+
+    return ApplicationFactory()
 
 @pytest.fixture
 @pytest.mark.django_db
 def application_status(db, lot, app_steps):
-    application_status_info = {
-        'denied': False,
-        'lot': lot,
-        'lottery': False,
-    }
+    class ApplicationStatusFactory():
+        '''
+        This class adds creates an ApplicationStatus with related Application.
+        
+        The build function accepts an instance of an Application, a specified step, and 
+        other model fields as needed: lottery, lottery_email_sent, denied, etc.
+        '''
+        def build(self, application, step, **kwargs):
+            application_status_info = {
+                'denied': False,
+                'lot': lot,
+                'lottery': False,
+            }
+            
+            application_status_info.update(kwargs)
 
-    application_status = ApplicationStatus.objects.create(**application_status_info)
+            app_status = ApplicationStatus.objects.create(**application_status_info)
+            app_step = ApplicationStep.objects.get(step=step)
 
-    return application_status
+            app_status.current_step = app_step
+            app_status.application = application
+            app_status.save()
 
-def add_status(application, application_status, *, step, **kwargs):
-    '''
-    Helper function for assigning an application a status.
+            application.lot_set.add(app_status.lot)
+            application.save()
 
-    Accepts an instance of application and application status,
-    as well as a step (int). Optionally, pass lottery and
-    lottery_email_sent booleans as extra keyword args.
-    '''
-    app_status = application_status
-    app_step = ApplicationStep.objects.get(step=step)
+            application.refresh_from_db()
 
-    app_status.current_step = app_step
-    app_status.application = application
+            return app_status
 
-    for key, value in kwargs.items():
-        setattr(app_status, key, value)
-
-    app_status.save()
-
-    application.lot_set.add(app_status.lot)
-    application.save()
-
-    return application, app_status
+    return ApplicationStatusFactory()

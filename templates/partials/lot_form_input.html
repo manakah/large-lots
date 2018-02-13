@@ -5,7 +5,7 @@
     <div class="col-sm-12">
       <h3>Lot #{{lot_number}}</h3>
       {% with field_name='lot_'|add:lot_number|add:'_pin' %}
-        {% with field=form|get_form_field:field_name %}     
+        {% with field=form|get_value:field_name %}     
           {% if field.errors %}
           <div class="form-group has-error group_id_lot_{{lot_number}}">
           {% else %}
@@ -24,7 +24,7 @@
   </div>
 
   {% with field_name='lot_'|add:lot_number|add:'_address' %}
-    {% with field=form|get_form_field:field_name %} 
+    {% with field=form|get_value:field_name %} 
       {% if field.errors %}
       <div class="form-group has-error group_id_lot_{{lot_number}}">
       {% else %}
@@ -44,7 +44,7 @@
   {% endwith %}
 
   {% with field_name='lot_'|add:lot_number|add:'_use' %}
-    {% with field=form|get_form_field:field_name %} 
+    {% with field=form|get_value:field_name %} 
       {% if field.errors %}
       <div class="form-group has-error">
       {% else %}
