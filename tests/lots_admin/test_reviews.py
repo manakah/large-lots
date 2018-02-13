@@ -58,10 +58,3 @@ def test_lottery_submit(application,
 
     assert app_status_butterflies.denied == False
     assert app_status_butterflies.current_step.step == 7
-
-
-
-
-
-
-
