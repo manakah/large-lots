@@ -18,23 +18,11 @@ from .test_config import CURRENT_PILOT
 @pytest.fixture
 @pytest.mark.django_db
 def app_steps(db):
-    order = [
-        'deed',
-        'location',
-        'multi',
-        'letter',
-        'lottery',
-        'EDS_waiting',
-        'EDS_submission',
-        'city_council',
-        'debts',
-        'sold',
-    ]
-
-    for idx, short_name in enumerate(order, start=2):
+    for idx, description in enumerate(APPLICATION_STATUS.values(), start=2):
         spec = {
-            'description': APPLICATION_STATUS[short_name],
+            'description': description,
             'step': idx,
+            'public_status': 'valid',
         }
         ApplicationStep.objects.create(**spec)
 
@@ -99,30 +87,27 @@ def application_status(db, lot, app_steps):
     class ApplicationStatusFactory():
         '''
         This class adds creates an ApplicationStatus with related Application.
-        
+
         The build function accepts an instance of an Application, a specified step, and 
         other model fields as needed: lottery, lottery_email_sent, denied, etc.
         '''
         def build(self, application, step, **kwargs):
+            app_step = ApplicationStep.objects.get(step=step)
+
             application_status_info = {
                 'denied': False,
                 'lot': lot,
                 'lottery': False,
+                'application_id': application.id,
+                'current_step_id': app_step.id,
             }
-            
+
             application_status_info.update(kwargs)
 
             app_status = ApplicationStatus.objects.create(**application_status_info)
-            app_step = ApplicationStep.objects.get(step=step)
-
-            app_status.current_step = app_step
-            app_status.application = application
-            app_status.save()
 
             application.lot_set.add(app_status.lot)
             application.save()
-
-            application.refresh_from_db()
 
             return app_status
 

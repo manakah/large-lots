@@ -927,7 +927,7 @@ def bulk_submit(request):
 
                 if selected_step == 'step5':
                     # Check whether applicant goes to lottery.
-                    if app_status.lottery == True:
+                    if app_status.lottery:
                         advance_to_step('lottery', app_status)
                     else:
                         advance_to_step('EDS_waiting', app_status)
@@ -937,7 +937,7 @@ def bulk_submit(request):
                 # Note: moving from step 7 (EDS_waiting) to step 8 (EDS_submission)
                 # happens automatically, except when the applicant submits an EDS
                 # through the City's system rather than our own.
-                elif selected_step == 'step8':
+                elif selected_step == 'step7':
                     app = app_status.application
                     app.eds_received = True
                     app.save()
@@ -957,14 +957,13 @@ def bulk_submit(request):
                     review_blob['step_completed'] = 10
 
                 elif selected_step == 'step11':
-                    advance_to_step('sold')
+                    advance_to_step('sold', app_status)
                     review_blob['step_completed'] = 11
 
                 else:  # Some invalid step was selected. Back to start!
                     return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
-                review = Review(**review_blob)
-                review.save()
+                Review.objects.create(**review_blob)
 
             return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 

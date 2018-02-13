@@ -29,8 +29,8 @@ APPLICATION_STATUS = OrderedDict([
   ('deed', 'Deed check'),
   ('location', 'Location check'),
   ('multi', 'Multiple applicant check'),
-  ('lottery', 'Lottery'),
   ('letter', 'Alderman letter of support'),
+  ('lottery', 'Lottery'),
   ('EDS_waiting', 'Wait for applicant to submit EDS and principal profile'),
   ('EDS_submission', 'Approval of EDS - Applicant submitted EDS and principal profile'),
   # Past actions
