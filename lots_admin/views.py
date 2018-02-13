@@ -32,7 +32,8 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from .utils import create_email_msg, send_denial_email, create_redirect_path
+from .utils import create_email_msg, send_denial_email, create_redirect_path, \
+    step_from_status
 from lots_admin.models import Application, Lot, ApplicationStep, Review, \
     ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 
@@ -109,6 +110,7 @@ def lots_admin(request, step):
           app.first_name,
           app.last_name,
           app.organization,
+          app.organization_confirmed,
           app.tracking_id,
           app.ppf_received,
           app.eds_received,
@@ -888,82 +890,83 @@ def review_EDS(request, application_id):
 def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
-    status = ApplicationStep.objects.all()
-     # future_list provides a collection of steps, which confirm "future" actions, i.e., an application on Step 2 needs to be reviewed by LargeLots staff
-     # These stand in opposition to "past" actions (steps 8, 9, 10, 11), i.e., an applicant on Step 9 has been approved by Plan Commission and City Council
+    steps = ApplicationStep.objects.all()
+
     future_list = [2, 3, 4, 5, 6, 7]
 
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
-        'status': status,
+        'steps': steps,
         'future_list': future_list,
         })
 
 @login_required(login_url='/lots-login/')
 def bulk_submit(request):
     if request.method == 'POST':
-        user = request.user
-        selected_step = request.POST.getlist('step')[0]
-        step_arg = re.sub('step', '', selected_step)
-        selected_apps = request.POST.getlist('letter-received')
+        selected_step, = request.POST.getlist('step')
+        selected_apps = request.POST.getlist('selected-for-bulk-submit')
         selected_app_ids = [int(i) for i in selected_apps]
-        applications = ApplicationStatus.objects.filter(id__in=selected_app_ids)
 
-        for a in applications:
-            if selected_step == 'step5':
-                # Check if applicant goes to lottery.
-                if a.lottery == True:
-                    # Move applicantion to step 6: lottery.
-                    l = 'lottery', 'valid', 6, a
-                    next_step(*l)
+        if selected_step == 'deny':
+            # Save application ids in session, and redirect to bulk deny view.
+            request.session['application_ids'] = selected_app_ids
+            return HttpResponseRedirect('/bulk-deny')
 
-                    # Create a review.
-                    review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
-                    review.save()
-                else:
-                    # Move application to step 7.
-                    l = 'EDS_waiting', 'valid', 7, a
-                    next_step(*l)
+        else:
+            user = request.user
+            application_statuses = ApplicationStatus.objects\
+                                                    .filter(id__in=selected_app_ids)
 
-                    # Create a review.
-                    review = Review(reviewer=user, email_sent=False, application=a, step_completed=5)
-                    review.save()
-            # Note: moving from step 7 (EDS_waiting) to step 8 (EDS_submission) happens automatically.
-            # Unlike steps 2-7, the following steps confirm "past" actions, i.e., an applicant on Step 9 has been approved by Plan Commission and City Council.
-            elif selected_step == 'step9':
-                 # Move application to step 9.
-                l = 'city_council', 'valid', 9, a
-                next_step(*l)
+            for app_status in application_statuses:
+                review_blob = {
+                    'reviewer': user,
+                    'email_sent': False,
+                    'application': app_status,
+                }
 
-                # Create a review.
-                review = Review(reviewer=user, email_sent=False, application=a, step_completed=9)
+                if selected_step == 'step5':
+                    # Check whether applicant goes to lottery.
+                    if app_status.lottery == True:
+                        advance_to_step('lottery', app_status)
+                    else:
+                        advance_to_step('EDS_waiting', app_status)
+
+                    review_blob['step_completed'] = 5
+
+                # Note: moving from step 7 (EDS_waiting) to step 8 (EDS_submission)
+                # happens automatically, except when the applicant submits an EDS
+                # through the City's system rather than our own.
+                elif selected_step == 'step8':
+                    app = app_status.application
+                    app.eds_received = True
+                    app.save()
+
+                    advance_to_step('EDS_submission', app_status)
+                    review_blob['step_completed'] = 7
+
+                # In contrast to steps 2-7, the following steps confirm "past"
+                # actions, i.e., an applicant on Step 9 has been approved by Plan
+                # Commission and City Council, and has thus "completed" that step.
+                elif selected_step == 'step9':
+                    advance_to_step('city_council', app_status)
+                    review_blob['step_completed'] = 9
+
+                elif selected_step == 'step10':
+                    advance_to_step('debts', app_status)
+                    review_blob['step_completed'] = 10
+
+                elif selected_step == 'step11':
+                    advance_to_step('sold')
+                    review_blob['step_completed'] = 11
+
+                else:  # Some invalid step was selected. Back to start!
+                    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+
+                review = Review(**review_blob)
                 review.save()
 
-            elif selected_step == 'step10':
-                # Move application to step 10.
-                l = 'debts', 'valid', 10, a
-                next_step(*l)
-
-                # Create a review.
-                review = Review(reviewer=user, email_sent=False, application=a, step_completed=10)
-                review.save()
-            elif selected_step == 'step11':
-                 # Move application to step 11.
-                l = 'sold', 'valid', 11, a
-                next_step(*l)
-
-                # Create a review.
-                review = Review(reviewer=user, email_sent=False, application=a, step_completed=11)
-                review.save()
-            elif selected_step == 'deny':
-                # Redirect to bulk deny view. Save application ids in session.
-                request.session['application_ids'] = selected_app_ids
-                return HttpResponseRedirect('/bulk-deny')
-            else:
-                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
-
-        return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+            return HttpResponseRedirect(reverse('lots_admin', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def bulk_deny(request):
@@ -1038,10 +1041,17 @@ def status_tally(request):
         'denied': denied
         })
 
-def next_step(description_key, status, step_int, application):
-        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
-        application.current_step = step
-        application.save()
+def advance_to_step(description_key, app_status):
+    spec = {
+        'description': APPLICATION_STATUS[description_key],
+        'public_status': 'valid',
+        'step': step_from_status(description_key),
+    }
+
+    step, _ = ApplicationStep.objects.get_or_create(**spec)
+
+    app_status.current_step = step
+    app_status.save()
 
 @login_required(login_url='/lots-login/')
 def deed(request, application_id):

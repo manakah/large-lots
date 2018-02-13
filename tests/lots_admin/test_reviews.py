@@ -21,7 +21,7 @@ def test_move_to_step_9(application,
 
     response = auth_client.post(url, {
         'step': ['step9'],
-        'letter-received': [app_status.id]
+        'selected-for-bulk-submit': [app_status.id]
     })
 
     # The page should redirect after form submission
