@@ -95,7 +95,7 @@ def lots_admin_principal_profiles(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin(request, step):
-    query = request.GET.get('search_box', None)
+    query = request.GET.get('query', None)
     page = request.GET.get('page', None)
 
     # Add session variables for easy return to search results after step 3 and denials.

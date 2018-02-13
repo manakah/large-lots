@@ -39,9 +39,9 @@
         {% endif %}
 
         <form type="get" action="{% url 'lots_admin' step %}" style="margin: 0">
-            <input class="form-control update" id="search_box" type="text" name="search_box"  placeholder="Search for a name or ward..." >
+            <input class="form-control update" id="query" type="text" name="query"  placeholder="Search for a name or ward..." >
             {% for name, value in request.GET.items %}
-                {% if name != 'search_box' %}
+                {% if name != 'query' %}
                     <input type="hidden" name="{{ name }}" value="{{ value }}">
                 {% endif %}
             {% endfor %}
