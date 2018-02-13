@@ -4,6 +4,7 @@ import json
 import re
 from collections import namedtuple
 from smtplib import SMTPException
+import urllib.parse
 
 from operator import __or__ as OR
 from functools import reduce
@@ -430,24 +431,33 @@ def pdfviewer(request):
 @login_required(login_url='/lots-login/')
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    review             = Review.objects.filter(application=application_status).latest('id')
-    warning            = None
+    # review = Review.objects.filter(application=application_status).latest('id')
+    warning = None
 
+    # Prevent LargeLots admin from re-evaluating the same application.
     # Check if application has been denied and has a current step of None.
     if application_status.current_step is None:
         warning = 'Denied'
 
     return render(request, 'deny_application.html', {
         'application_status': application_status,
-        'review': review,
+        # 'review': review,
+        'denial_reason': DENIAL_REASONS[request.GET.get('reason')],
         'warning': warning,
         })
 
 @login_required(login_url='/lots-login/')
 def deny_submit(request, application_id):
+    # Retrieve application
     application_status = ApplicationStatus.objects.get(id=application_id)
+    application_status.denied = True
     application_status.current_step = None
     application_status.save()
+
+    # Create review
+    reason, _ = DenialReason.objects.get_or_create(value=request.POST.get('reason'))
+    review = Review(reviewer=request.user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
+    review.save()
 
     try:
         send_denial_email(request, application_status)
@@ -471,9 +481,7 @@ def double_submit(request, application_id):
 @login_required(login_url='/lots-login/')
 def deed_check(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    first = application_status.application.first_name
-    last = application_status.application.last_name
-    other_applications = Application.objects.filter(first_name=first, last_name=last)
+    warning = None
 
     # Check if application has been denied and has a current step of None.
     if application_status.current_step is None:
@@ -481,18 +489,9 @@ def deed_check(request, application_id):
     # If not, then check if application has step different than the view.
     elif application_status.current_step.step != 2:
         warning = 'Reviewed'
-    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
-    else:
-        warning = None
-        Review.objects.filter(application=application_status, step_completed=2).delete()
-        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
-        application_status.current_step = step
-        application_status.denied = False
-        application_status.save()
 
     return render(request, 'deed_check.html', {
         'application_status': application_status,
-        'other_applications': other_applications,
         'warning': warning,
         })
 
@@ -501,19 +500,23 @@ def deed_check_submit(request, application_id):
     if request.method == 'POST':
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
+
         document = request.POST.get('document')
         name = request.POST.get('name', 'off')
         address = request.POST.get('address', 'off')
         church = request.POST.get('church')
 
-        # Check if application has already been denied.
+        '''
+        The first two conditions prevent a LargeLots admin from re-evaluating an application that:
+        (1) has already been denied;
+        (2) advanced past Step 2. 
+        '''
         if application_status.current_step == None:
             return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
-        # Check if application has moved past step 2.
         elif application_status.current_step.step != 2:
             return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
         # Move to step 3 of review process.
-        elif (name == 'on' and address == 'on' and church == '2' and document == '2'):
+        elif (name == 'on' and address == 'on' and church == 'no' and document == 'yes'):
             step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
             application_status.current_step = step
             application_status.save()
@@ -522,25 +525,20 @@ def deed_check_submit(request, application_id):
             review.save()
 
             return HttpResponseRedirect('/application-review/step-3/%s/' % application_status.id)
-        # Deny application.
+        # Send admin to denial confirmation page.
         else:
-            if (document == '1'):
-                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
-            elif (church == '1'):
-                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['church'])
+            if (document == 'no'):
+                reason = 'document'
+            elif (church == 'yes'):
+                reason = 'church'
             elif (name == 'off' and address == 'on'):
-                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name'])
+                reason = 'name'
             elif (name == 'on' and address == 'off'):
-                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['address'])
+                reason = 'address'
             else:
-                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['nameaddress'])
-            review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
-            review.save()
+                reason = 'nameaddress'
 
-            application_status.denied = True
-            application_status.save()
-
-            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
+            return HttpResponseRedirect('/deny-application/{app_id}/?reason={reason}'.format(app_id=application_status.id, reason=reason))
 
 @login_required(login_url='/lots-login/')
 def deed_duplicate_submit(request, application_id):
