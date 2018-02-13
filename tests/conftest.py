@@ -84,8 +84,7 @@ def application(db, address):
                 'pilot': CURRENT_PILOT,
             }
 
-            for attribute, value in kwargs.items():
-                application_info[attribute] = value
+            application_info.update(kwargs)
 
             application = Application.objects.create(**application_info)
             application.save()
@@ -98,15 +97,20 @@ def application(db, address):
 @pytest.mark.django_db
 def application_status(db, lot, app_steps):
     class ApplicationStatusFactory():
+        '''
+        This class adds creates an ApplicationStatus with related Application.
+        
+        The build function accepts an instance of an Application, a specified step, and 
+        other model fields as needed: lottery, lottery_email_sent, denied, etc.
+        '''
         def build(self, application, step, **kwargs):
             application_status_info = {
                 'denied': False,
                 'lot': lot,
                 'lottery': False,
             }
-
-            for attribute, value in kwargs.items():
-                application_status_info[attribute] = value
+            
+            application_status_info.update(kwargs)
 
             app_status = ApplicationStatus.objects.create(**application_status_info)
             app_step = ApplicationStep.objects.get(step=step)
