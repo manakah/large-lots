@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load staticfiles %}
 {% load lots_filters %}
-{% block title %}Deny applications{% endblock %}
+{% block title %}Email error{% endblock %}
 {% block content %}
 
 <div class="row">
   <div class="col-md-12">
     <h3>Unable to send emails</h3>
-    <p>Something happened, and we could not send emails to the following applicants. Please contact DataMade for assistance.</p>
+    <p>Something happened, and we could not send emails to the following applicants due to SMTP error. Please contact DataMade for assistance.</p>
 
     <table class="table table-striped">
       <thead>
@@ -28,7 +28,5 @@
     </table>
   </div>
 </div>
-
-<!-- What should Jeanne and her team do if they reach this step page? They could: (1) contact DataMade, (2) be instructed to manually send as email, and/or (3) include a "resend" button in the table. -->
 
 {% endblock %}

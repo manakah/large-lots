@@ -1,4 +1,6 @@
 from datetime import datetime
+import urllib.request
+import urllib.parse
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
@@ -43,13 +45,13 @@ def send_denial_email(request, application_status):
 def create_redirect_path(request):
     page = request.session['page']
     query = request.session['query']
-    path = '?'
+    params = ''
 
-    if page:
-        path += 'page={}&'.format(page)
-    if query:
-        path += 'search_box={}'.format(query)
+    if page and query: 
+        params = urllib.parse.urlencode({'page': page, 'search_box': query})
+    elif page:
+        params = urllib.parse.urlencode({'page': page})
+    elif query:
+        params = urllib.parse.urlencode({'search_box': query})
 
-    redirect_path = path.rstrip('?').rstrip('&')
-
-    return redirect_path
+    return '?' + params

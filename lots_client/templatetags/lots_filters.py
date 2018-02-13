@@ -67,6 +67,5 @@ def get_step_all_denied(request):
         return re.search(r'(lots-admin\/)(\d+)(\/)', request).group(2)
 
 @register.filter
-def get_form_field(form, attr):
-    return form[attr]
-    
+def get_value(collection, attr):
+    return collection[str(attr)]

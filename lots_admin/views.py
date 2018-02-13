@@ -452,21 +452,12 @@ def deny_submit(request, application_id):
     try:
         send_denial_email(request, application_status)
     except SMTPException as stmp_e:
-        request.session['failed_msg'] = [application_status.id]
+        request.session['email_error_app_ids'] = [application_status.id]
         return HttpResponseRedirect(reverse('email_error'))
-    
-    page = request.session['page']
-    query = request.session['query']
-    path = '?'
 
-    if page:
-        path += 'page={}&'.format(page)
-    if query:
-        path += 'search_box={}'.format(query)
+    redirect_path = create_redirect_path(request)
 
-    clean_path = path.rstrip('?').rstrip('&')
-
-    return HttpResponseRedirect('/lots-admin/all/%s' % clean_path )
+    return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
 
 
 @login_required(login_url='/lots-login/')
@@ -494,7 +485,7 @@ def deed_check(request, application_id):
     else:
         warning = None
         Review.objects.filter(application=application_status, step_completed=2).delete()
-        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
+        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'], public_status='valid', step=2)
         application_status.current_step = step
         application_status.denied = False
         application_status.save()
@@ -523,7 +514,7 @@ def deed_check_submit(request, application_id):
             return HttpResponseRedirect('/double-submit/%s/' % application_status.id)
         # Move to step 3 of review process.
         elif (name == 'on' and address == 'on' and church == '2' and document == '2'):
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
+            step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['location'], public_status='valid', step=3)
             application_status.current_step = step
             application_status.save()
 
@@ -534,15 +525,15 @@ def deed_check_submit(request, application_id):
         # Deny application.
         else:
             if (document == '1'):
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
+                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['document'])
             elif (church == '1'):
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['church'])
+                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['church'])
             elif (name == 'off' and address == 'on'):
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name'])
+                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['name'])
             elif (name == 'on' and address == 'off'):
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['address'])
+                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['address'])
             else:
-                reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['nameaddress'])
+                reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['nameaddress'])
             review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
             review.save()
 
@@ -557,7 +548,7 @@ def deed_duplicate_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
 
-        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['deedoveruse'])
+        reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['deedoveruse'])
         review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
         review.save()
 
@@ -572,7 +563,7 @@ def applicant_duplicate_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
 
-        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['duplicate'])
+        reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['duplicate'])
         review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
         review.save()
 
@@ -669,21 +660,21 @@ def location_check_submit(request, application_id):
 
             if (len(applicants_list) > 1):
                 # If there are other applicants: move application to Step 4.
-                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['multi'], public_status='valid', step=4)
+                step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['multi'], public_status='valid', step=4)
                 application_status.current_step = step
                 application_status.save()
 
                 return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
             else:
                 # Move to Step 5: Adlerman letter.
-                step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
+                step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 application_status.current_step = step
                 application_status.save()
 
                 return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
         else:
             # Deny application, since applicant does not live on same block as lot.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
+            reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
             rev_status = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=3)
             rev_status.save()
             application_status.denied = True
@@ -744,7 +735,7 @@ def multiple_location_check_submit(request, application_id):
 
         # Applicant(s) with a check should advance to step 5.
         for a in applications:
-            step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
+            step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
             a.current_step = step
             a.save()
             review = Review(reviewer=user, email_sent=False, application=a, step_completed=4)
@@ -754,10 +745,10 @@ def multiple_location_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         lot_pin = application_status.lot.pin
         applicants_to_deny = ApplicationStatus.objects.filter(lot=lot_pin, denied=False).exclude(id__in=application_ids)
-        failed_msg = []
+        email_error_app_ids = []
 
         for a in applicants_to_deny:
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
+            reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['adjacent'])
             review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=4)
             review.save()
             a.denied = True
@@ -767,10 +758,10 @@ def multiple_location_check_submit(request, application_id):
             try:
                 send_denial_email(request, a)
             except SMTPException as stmp_e:
-                failed_msg.append(a.id)
+                email_error_app_ids.append(a.id)
         # If any emails raised an error, redirect to the email-error page.
-        if failed_msg:
-            request.session['failed_msg'] = failed_msg
+        if email_error_app_ids:
+            request.session['email_error_app_ids'] = email_error_app_ids
             return HttpResponseRedirect(reverse('email_error'))
 
         redirect_path = create_redirect_path(request)
@@ -819,7 +810,7 @@ def lottery_submit(request, lot_pin):
         winning_app = ApplicationStatus.objects.get(id=winner_id)
 
         # Move lottery winner to Step 7.
-        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_waiting'], public_status='valid', step=7)
+        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['EDS_waiting'], public_status='valid', step=7)
         winning_app.current_step = step
         winning_app.save()
         # Create a review.
@@ -836,20 +827,20 @@ def lottery_submit(request, lot_pin):
             context
         )
 
-        failed_msg = []
+        email_error_app_ids = []
 
         try:
             msg.send()
             winning_app.lottery_email_sent = True
             winning_app.save()
         except SMTPException as stmp_e:
-            failed_msg.append(winning_app.id)
+            email_error_app_ids.append(winning_app.id)
 
         # Deny lottery losers: find all applications on Step 5.
         losing_apps = ApplicationStatus.objects.filter(current_step__step=6).filter(lot=lot_pin)
         for a in losing_apps:
             # Deny each application.
-            reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS['lottery'])
+            reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['lottery'])
             review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a, step_completed=6)
             review.save()
             a.denied = True
@@ -876,10 +867,10 @@ def lottery_submit(request, lot_pin):
                 a.lottery_email_sent = True
                 a.save()
             except SMTPException as stmp_e:
-                failed_msg.append(a)
+                email_error_app_ids.append(a)
 
-        if failed_msg:
-            request.session['failed_msg'] = failed_msg
+        if email_error_app_ids:
+            request.session['email_error_app_ids'] = email_error_app_ids
             return HttpResponseRedirect(reverse('email_error'))
 
         return HttpResponseRedirect(reverse('lotteries'))
@@ -993,11 +984,11 @@ def bulk_deny_submit(request):
 
     dictionary = dict(zip(app_ids, denial_reasons))
     apps_to_deny = ApplicationStatus.objects.filter(id__in=app_ids).exclude(id__in=no_deny_ids)
-    failed_msg = []
+    email_error_app_ids = []
 
     for a in apps_to_deny:
         dict_reason = dictionary[a.id]
-        reason, created = DenialReason.objects.get_or_create(value=DENIAL_REASONS[dict_reason])
+        reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS[dict_reason])
 
         review = Review(reviewer=user, email_sent=True, denial_reason=reason, application=a)
         review.save()
@@ -1008,10 +999,10 @@ def bulk_deny_submit(request):
         try:
             send_denial_email(request, a)
         except SMTPException as stmp_e:
-            failed_msg.append(a.id)
+            email_error_app_ids.append(a.id)
     # If any emails raised an error, redirect to the email-error page.
-    if failed_msg:
-        request.session['failed_msg'] = failed_msg
+    if email_error_app_ids:
+        request.session['email_error_app_ids'] = email_error_app_ids
         return HttpResponseRedirect(reverse('email_error'))
 
     return HttpResponseRedirect(reverse('lots_admin', args=['all']))
@@ -1048,7 +1039,7 @@ def status_tally(request):
         })
 
 def next_step(description_key, status, step_int, application):
-        step, created = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
+        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS[description_key], public_status=status, step=step_int)
         application.current_step = step
         application.save()
 
@@ -1062,9 +1053,9 @@ def deed(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def email_error(request):
-    failed_msg = request.session['failed_msg']
+    email_error_app_ids = request.session['email_error_app_ids']
 
-    applicant_statuses = ApplicationStatus.objects.filter(id__in=failed_msg)
+    applicant_statuses = ApplicationStatus.objects.filter(id__in=email_error_app_ids)
 
     return render(request, 'email_error.html', {
         'applicant_statuses': applicant_statuses,
