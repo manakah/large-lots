@@ -4,7 +4,6 @@ import json
 import re
 from collections import namedtuple
 from smtplib import SMTPException
-import urllib.parse
 
 from operator import __or__ as OR
 from functools import reduce
