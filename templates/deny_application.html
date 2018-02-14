@@ -40,7 +40,6 @@
     <div class='block'>
       <form role="form" id="denyForm" method="POST" action="{% url 'deny_submit' application_status.id %}">
         {% csrf_token %}
-        <!-- <input class="btn btn-success" type="submit" name="reason" value="{{denial_reason}}"> -->
         <input type="hidden" name="reason" value="{{ denial_reason }}">
         <button id="denyButton" type="submit" value="reason" name="{{denial_reason}}" class="btn btn-success">Yes, I'm sure.</button>
       </form>
