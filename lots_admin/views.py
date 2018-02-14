@@ -431,17 +431,15 @@ def pdfviewer(request):
 @login_required(login_url='/lots-login/')
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
-    # review = Review.objects.filter(application=application_status).latest('id')
     warning = None
 
     # Prevent LargeLots admin from re-evaluating the same application.
-    # Check if application has been denied and has a current step of None.
+    # Check if application has been denied with a current step of None.
     if application_status.current_step is None:
         warning = 'Denied'
 
     return render(request, 'deny_application.html', {
         'application_status': application_status,
-        # 'review': review,
         'denial_reason': DENIAL_REASONS[request.GET.get('reason')],
         'warning': warning,
         })
@@ -580,13 +578,6 @@ def location_check(request, application_id):
     # If not, then check if application has step different than the view.
     elif application_status.current_step.step != 3:
         warning = 'Reviewed'
-    # If not the above, then delete last Review(s) and reset ApplicationStatus, since someone hit "no, go back" on deny page.
-    else:
-        warning = None
-        # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-        Review.objects.filter(application=application_status, step_completed=3).filter(application__denied=True).delete()
-        application_status.denied = False
-        application_status.save()
 
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin
@@ -670,25 +661,16 @@ def location_check_submit(request, application_id):
                 application_status.save()
 
                 return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+        # Send admin to denial confirmation page.
         else:
-            # Deny application, since applicant does not live on same block as lot.
-            reason, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['block'])
-            rev_status = Review(reviewer=user, email_sent=True, denial_reason=reason, application=application_status, step_completed=3)
-            rev_status.save()
-            application_status.denied = True
-            application_status.save()
+            reason = 'block'
 
-            return HttpResponseRedirect('/deny-application/%s/' % application_status.id)
+            return HttpResponseRedirect('/deny-application/{app_id}/?reason={reason}'.format(app_id=application_status.id, reason=reason))
 
 @login_required(login_url='/lots-login/')
 def multiple_applicant_check(request, application_id):
     warning = None
     application_status = ApplicationStatus.objects.get(id=application_id)
-
-     # Delete last ReviewStatus, if someone hits "no, go back" on deny page.
-    Review.objects.filter(application=application_status, step_completed=4).filter(application__denied=True).delete()
-    application_status.denied = False
-    application_status.save()
 
     # Location of the applicant's property.
     owned_pin = application_status.application.owned_pin

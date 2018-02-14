@@ -81,3 +81,5 @@ CHICAGO_TIME = datetime.now(timezone)
 START_DATE = timezone.localize(datetime(2016, 11, 29, 0, 0))
 
 END_DATE = timezone.localize(datetime(2017, 1, 31, 23, 59))
+
+EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'

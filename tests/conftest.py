@@ -12,7 +12,7 @@ from lots_admin.look_ups import APPLICATION_STATUS
 from lots_admin.models import Address, Application, Lot, ApplicationStep, \
     ApplicationStatus, User
 
-from .test_config import CURRENT_PILOT
+from .test_config import CURRENT_PILOT, EMAIL_BACKEND
 
 
 @pytest.fixture
