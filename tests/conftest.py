@@ -14,6 +14,7 @@ from lots_admin.models import Address, Application, Lot, ApplicationStep, \
 
 from .test_config import CURRENT_PILOT
 
+
 @pytest.fixture
 @pytest.mark.django_db
 def app_steps(db):
