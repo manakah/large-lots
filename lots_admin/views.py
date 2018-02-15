@@ -434,7 +434,7 @@ def deny_application(request, application_id):
 
     # Prevent LargeLots admin from re-evaluating the same application.
     # Check if application has been denied with a current step of None.
-    if application_status.current_step is None and application_status.denied is True:
+    if application_status.current_step is None and application_status.denied:
         warning = 'Denied'
 
     return render(request, 'deny_application.html', {
@@ -481,7 +481,7 @@ def deed_check(request, application_id):
     warning = None
 
     # Check if application has been denied and has a current step of None.
-    if application_status.current_step is None and application_status.denied is True:
+    if application_status.current_step is None and application_status.denied:
         warning = 'Denied'
     # If not, then check if application has step different than the view.
     elif application_status.current_step.step != 2:
@@ -573,7 +573,7 @@ def location_check(request, application_id):
     warning = None
 
     # Check if application has been denied and has a current step of None.
-    if application_status.current_step is None and application_status.denied is True:
+    if application_status.current_step is None and application_status.denied:
         warning = 'Denied'
     # If not, then check if application has step different than the view.
     elif application_status.current_step.step != 3:
