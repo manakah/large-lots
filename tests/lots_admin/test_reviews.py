@@ -105,6 +105,6 @@ def test_deed_check_submit(application,
         'church': 'yes'
     })
 
-    # Did the response redirect and add the correct query param?
+    # Check that the response redirects to the correct URL.
     assert response.status_code == 302
-    assert urlparse(response.url).query == 'reason=church'
+    assert response.url == ('/deny-application/{}/?reason=church').format(application_status.id) 
