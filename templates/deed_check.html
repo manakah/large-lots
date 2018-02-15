@@ -6,32 +6,6 @@
 
 {% include "review-header.html" with app=application_status %}
 
-<!-- {# if other_applications|length >= 2 %}
-<br>
-<div class="row">
-  <div class="col-md-12 well">
-    <p>{{ application_status.application.first_name }} {{ application_status.application.last_name }} submitted <strong>multiple applications</strong>. Before proceeding, please check:
-      <ol>
-        <li>that {{ application_status.application.first_name }} did not submit the same deed for <em>more than two lots</em>;</li>
-        <li>that {{ application_status.application.first_name }} did not submit <em>duplicate applications</em>.</li>
-      </ol>
-    </p>
-    <p>You can find all applications for {{ application_status.application.first_name }} on the <strong><a href="{# url 'lots_admin' 'all' %}"> main page</a></strong> by typing "{{ application_status.application.first_name }} {{ application_status.application.last_name }}" in the search bar. If you find problems with the deed or duplicates, then deny this specific application. Note: denying this application will not deny other applications from {{ application_status.application.first_name }}; for this step, you need to individually review each application from {{ application_status.application.first_name }}.</p>
-
-      <form style="display: inline-block" role="form" method="POST" action="{# url 'deed_duplicate_submit' application_status.id %}">
-        {# csrf_token %}
-        <p><button type="submit" class="btn btn-danger">Deny! Used deed in excess.</button></p>
-      </form>
-
-      <form style="display: inline-block" role="form" method="POST" action="{# url 'applicant_duplicate_submit' application_status.id %}">
-        {# csrf_token %}
-        <p><button type="submit" class="btn btn-danger">Deny! Duplicate application.</button></p>
-      </form>
-
-  </div>
-</div>
-{# endif %}
- -->
 {% if warning == 'Denied' %}
 <div class="col-sm-8 col-sm-offset-2">
     <div class="row">
@@ -66,13 +40,13 @@
       <p>Is the submitted document a property deed?</p>
       <div class="radio">
         <label>
-          <input id="deedNo" name="document" type="radio" value="1"/>
+          <input id="deedNo" name="document" type="radio" value="no"/>
           No
         </label>
       </div>
       <div class="radio">
         <label>
-          <input id="deedYes" name="document" type="radio" value="2"/>
+          <input id="deedYes" name="document" type="radio" value="yes"/>
           Yes
         </label>
       </div>
@@ -96,13 +70,13 @@
         <p>Is the deeded property a church?</p>
         <div class="radio">
           <label>
-            <input name="church" type="radio" value="2"/>
+            <input name="church" type="radio" value="no"/>
             No
           </label>
         </div>
         <div class="radio">
           <label>
-            <input name="church" type="radio" value="1"/>
+            <input name="church" type="radio" value="yes"/>
             Yes
           </label>
         </div>
