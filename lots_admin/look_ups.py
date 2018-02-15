@@ -1,3 +1,6 @@
+from collections import OrderedDict
+
+
 DENIAL_REASONS = {
     'deedoveruse': 'Applicant used the same deed for more than two lots',
     'duplicate': 'Applicant submitted the same or similar application more than once',
@@ -21,17 +24,17 @@ DENIAL_REASONS = {
     'none': 'None',
 }
 
-APPLICATION_STATUS = {
+APPLICATION_STATUS = OrderedDict([
   # Future actions
-  'deed': 'Deed check',
-  'location': 'Location check',
-  'multi': 'Multiple applicant check',
-  'lottery': 'Lottery',
-  'letter': 'Alderman letter of support',
-  'EDS_waiting': 'Wait for applicant to submit EDS and principal profile',
-  'EDS_submission': 'Approval of EDS - Applicant submitted EDS and principal profile',
+  ('deed', 'Deed check'),
+  ('location', 'Location check'),
+  ('multi', 'Multiple applicant check'),
+  ('letter', 'Alderman letter of support'),
+  ('lottery', 'Lottery'),
+  ('EDS_waiting', 'Wait for applicant to submit EDS and principal profile'),
+  ('EDS_submission', 'Approval of EDS - Applicant submitted EDS and principal profile'),
   # Past actions
-  'city_council': 'Approved by Plan Commission and City Council',
-  'debts': 'Certified as free and clear of debts to the city',
-  'sold': 'Sold'
-}
+  ('city_council', 'Approved by Plan Commission and City Council'),
+  ('debts', 'Certified as free and clear of debts to the city'),
+  ('sold', 'Sold'),
+])
