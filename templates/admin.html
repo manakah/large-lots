@@ -253,7 +253,7 @@
                         {% endif %}
                     </div>
                 <!-- Steps 8-11 -->
-                {% elif 8 <= applicant.step <= 10 %}
+                {% elif 8 <= applicant.step and applicant.step <= 10 %}
                     <div class='col-sm-10' id="bulk-submit-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         {% if on_steps23456|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5, and 6 are complete on all applications -->

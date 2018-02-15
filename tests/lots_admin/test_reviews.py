@@ -28,7 +28,7 @@ def test_bulk_submit(application,
 
     url = reverse('bulk_submit')
 
-    # Steps 2 through 11 are "future" actions, so an applicant who is moved
+    # Steps 2 through 8 are "future" actions, so an applicant who is moved
     # to step 3 has completed their current step, step 2. By contrast, steps 9
     # through 11 are "past" actions, meaning an applicant who is moved from
     # step 8 to step 9 has completed step 9.

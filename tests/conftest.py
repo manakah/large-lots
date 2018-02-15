@@ -18,11 +18,16 @@ from .test_config import CURRENT_PILOT
 @pytest.fixture
 @pytest.mark.django_db
 def app_steps(db):
+    # Every step has a public status of valid, except step 2, which has a
+    # public status of approved. Make this dict so we can `get` the correct
+    # status for step 2, and fallback to valid for the rest.
+    public_status = {2: 'approved'}
+
     for idx, description in enumerate(APPLICATION_STATUS.values(), start=2):
         spec = {
             'description': description,
             'step': idx,
-            'public_status': 'valid',
+            'public_status': public_status.get(idx, 'valid'),
         }
         ApplicationStep.objects.create(**spec)
 

@@ -27,12 +27,12 @@
             <td>{{ review.denial_reason }}</td>
           {% else %}
             <td>
-              {% for step in steps %}
-                {% if step.public_status == 'valid' and step.step == review.step_completed %}
+              {% for step, description in steps %}
+                {% if step == review.step_completed %}
                     {% if review.step_completed in future_list %}
-                      Complete step {{ review.step_completed }}: {{ step.description }}
+                      Complete step {{ review.step_completed }}: {{ description }}
                     {% else %}
-                      Move to step {{ review.step_completed }}: {{ step.description }}
+                      Move to step {{ review.step_completed }}: {{ description }}
                     {% endif %}
                 {% endif %}
               {% endfor %}
