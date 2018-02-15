@@ -32,7 +32,7 @@
                 Principal Profiles have been received for {{ ppf_count }} applications
                 <small>
                     <a href="{% url 'lots_admin_principal_profiles' %}" target="_blank">
-                        <i class='fa fa-fw fa-external-link '></i> Go to export
+                        <i class="fa fa-fw fa-external-link"></i> Go to export
                     </a>
                 </small>
             </h4>
@@ -86,6 +86,7 @@
                 <select name='step' class="form-control update">
                     <option>-----------------</option>
                     <option value="step5">Complete step 5: Alderman letter of support</option>
+                    <option value="step7">Complete step 7: Wait for applicant to submit EDS and principal profile</option>
                     <option value="step9">Move to step 9: Applicant approved by Plan Commission and City Council</option>
                     <option value="step10">Move to step 10: Applicant certified as free and clear of debts to the city</option>
                     <option value="step11">Move to step 11: Sold</option>
@@ -212,7 +213,7 @@
                     {% endif %}
                 <!-- Step 5: Alderman letter of support -->
                 {% elif applicant.step == 5 %}
-                    <div class='col-sm-10' id="letter-checkbox">
+                    <div class='col-sm-10' id="bulk-submit-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         {% if on_steps2345|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
                     </div>
@@ -222,7 +223,7 @@
                         <div class="form-group col-sm-2">
                             <div class="checkbox">
                               <label>
-                                <input name="letter-received" value="{{applicant.status_id}}" type="checkbox"/>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
                               </label>
                             </div>
                         </div>
@@ -230,32 +231,44 @@
                 <!-- Lottery -->
                 {% elif applicant.step == 6 %}
                     <a href="{% url 'lotteries' %}">Step {{ applicant.step }}: Lottery</a>
-                <!-- Waiting for EDS -->
+                <!-- EDS Waiting -->
                 {% elif applicant.step == 7 %}
-                    <div class='col-sm-10'>
+                    <div class='col-sm-10' id="bulk-submit-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         <span class="emphasis">
                             EDS{% if not applicant.eds_received %} not{% endif %} submitted,<br />
                             PPF{% if not applicant.ppf_received %} not{% endif %} submitted
                         </span>
-                    </div>
-                <!-- Steps 6-11 -->
-                {% elif applicant.step == 8 or applicant.step == 9 or applicant.step == 10 %}
-                    <div class='col-sm-10' id="letter-checkbox">
-                        Step {{ applicant.step }}: {{ applicant.step_description }}</br>
-                        {% if on_steps23456|length == 0 %}<span class='emphasis'>Ready for bulk submit</span>{% endif %}
-                    </div>
-                    </div>
-                    {% if on_steps23456|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5 are complete on all applications -->
-                        {% csrf_token %}
+                        {% if on_steps23456|length == 0 and applicant.ppf_received %} <!-- Allow DPD staff to advance applicants who submit their EDS through the City system, which we cannot track -->
+                            <br /><span class='emphasis'>Ready for bulk submit</span>
+                        </div>
                         <div class="form-group col-sm-2">
+                            {% csrf_token %}
                             <div class="checkbox">
                               <label>
-                                <input name="letter-received" value="{{applicant.status_id}}" type="checkbox"/>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
                               </label>
                             </div>
                         </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
+                <!-- Steps 8-11 -->
+                {% elif 8 <= applicant.step and applicant.step <= 10 %}
+                    <div class='col-sm-10' id="bulk-submit-checkbox">
+                        Step {{ applicant.step }}: {{ applicant.step_description }}</br>
+                        {% if on_steps23456|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5, and 6 are complete on all applications -->
+                            <br /><span class='emphasis'>Ready for bulk submit</span>
+                        </div>
+                        <div class="form-group col-sm-2">
+                            {% csrf_token %}
+                            <div class="checkbox">
+                              <label>
+                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
+                              </label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
                 <!-- Step 12: Sold -->
                 {% elif applicant.step == 11 %}
                     Sold</br>
