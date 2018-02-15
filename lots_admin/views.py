@@ -889,28 +889,11 @@ def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
 
-    short_names = {
-        'deed': 'Deed check',
-        'location': 'Location check',
-        'multi': 'Multiple applicant check',
-        'letter': 'Alderman letter',
-        'lottery': 'Lottery',
-        'EDS_waiting': 'Submit EDS & PPF',
-        'EDS_submission': 'EDS & PPF submitted',
-        'city_council': 'Approved by City Council & Plan Commission',
-        'debts': 'Certified as debt free',
-        'sold': 'Sold',
-    }
-
-    steps = [(step_from_status(k), short_names[k])
-             for k in APPLICATION_STATUS.keys()]
-
     future_list = [2, 3, 4, 5, 6, 7]
 
     return render(request, 'review_status_log.html', {
         'application_status': application_status,
         'reviews': reviews,
-        'steps': steps,
         'future_list': future_list,
         })
 
