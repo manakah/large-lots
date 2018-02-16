@@ -473,11 +473,9 @@ def deny_submit(request, application_id):
     '''
     other_applicants = ApplicationStatus.objects.filter(lot=application_status.lot.pin, denied=False)
     if len(other_applicants) == 1 and other_applicants.first().current_step.step == 4:
-        app = other_applicants.first()
-        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
-        app.current_step = step
-        app.save()
-        review = Review(reviewer=request.user, email_sent=False, application=app, step_completed=4)
+        app_status = other_applicants.first()
+        advance_to_step('letter', app_status)
+        review = Review(reviewer=request.user, email_sent=False, application=app_status, step_completed=4)
         review.save()
 
     redirect_path = create_redirect_path(request)
