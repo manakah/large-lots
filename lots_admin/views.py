@@ -31,6 +31,7 @@ from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
@@ -455,8 +456,7 @@ def deny_submit(request, application_id):
 
     # Create review
     reason, _ = DenialReason.objects.get_or_create(value=request.POST.get('reason'))
-    review = Review(reviewer=request.user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
-    review.save()
+    Review.objects.create(reviewer=request.user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
 
     try:
         send_denial_email(request, application_status)
@@ -471,12 +471,14 @@ def deny_submit(request, application_id):
     (2) The remaining applicant is on Step 4.
     If so, advance that applicant to Step 5.
     '''
-    other_applicants = ApplicationStatus.objects.filter(lot=application_status.lot.pin, denied=False)
-    if len(other_applicants) == 1 and other_applicants.first().current_step.step == 4:
-        app_status = other_applicants.first()
-        advance_to_step('letter', app_status)
-        review = Review(reviewer=request.user, email_sent=False, application=app_status, step_completed=4)
-        review.save()
+    try:
+        last_application_status = ApplicationStatus.objects.get(lot=application_status.lot.pin, denied=False)
+    except (MultipleObjectsReturned, ApplicationStatus.DoesNotExist):
+        pass
+    else:
+        if last_application_status.current_step.step == 4:
+            advance_to_step('letter', last_application_status)
+            Review.objects.create(reviewer=request.user, email_sent=False, application=last_application_status, step_completed=4)
 
     redirect_path = create_redirect_path(request)
 
