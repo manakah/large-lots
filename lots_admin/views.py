@@ -464,6 +464,22 @@ def deny_submit(request, application_id):
         request.session['email_error_app_ids'] = [application_status.id]
         return HttpResponseRedirect(reverse('email_error'))
 
+    '''
+    Multiple applicants (including the one denied here) may have requested this lot.
+    After this denial, the following may be true:
+    (1) One valid applicant for this lot remains;
+    (2) The remaining applicant is on Step 4.
+    If so, advance that applicant to Step 5.
+    '''
+    other_applicants = ApplicationStatus.objects.filter(lot=application_status.lot.pin, denied=False)
+    if len(other_applicants) == 1 and other_applicants.first().current_step.step == 4:
+        app = other_applicants.first()
+        step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
+        app.current_step = step
+        app.save()
+        review = Review(reviewer=request.user, email_sent=False, application=app, step_completed=4)
+        review.save()
+
     redirect_path = create_redirect_path(request)
 
     return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )

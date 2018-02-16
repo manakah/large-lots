@@ -142,3 +142,26 @@ def test_deed_check_submit(application,
     # Check that the response redirects to the correct URL.
     assert response.status_code == 302
     assert response.url == ('/deny-application/{}/?reason=church').format(application_status.id) 
+
+def test_step_4_to_5_automation(application,
+                                application_status,
+                                auth_client):
+    
+    application_to_advance = application.build(last_name='Flamingos')
+    application_to_advance_status = application_status.build(application_to_advance, step=4)
+
+    application_to_deny = application.build(last_name='Manatees')
+    application_to_deny_status = application_status.build(application_to_deny, step=3)
+
+    url = reverse('deny_submit', args=[application_to_deny_status.id])
+
+    response = auth_client.post(url, {
+        'reason': DENIAL_REASONS['block']
+    })
+
+    application_to_advance_status.refresh_from_db()
+    review = Review.objects.filter(application=application_to_advance_status).latest('id')
+    # Test that Seymour Flamingos advanced to Step 5 as a side effect of denying his competitor.
+    assert application_to_advance_status.denied == False
+    assert application_to_advance_status.current_step.step == 5
+    assert review.step_completed == 4
