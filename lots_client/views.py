@@ -476,18 +476,21 @@ def principal_profile_form(request, tracking_id=None):
         })
 
     existing_profiles = application.principalprofile_set.all()
+    organization = application.organization_confirmed
 
     PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
 
     if existing_profiles:
         initial_data = {}
     else:
-        # Prepopulate applicant's name and address.
+        # Prepopulate applicant's name and, if they aren't an org, address.
         initial_data = {
             'first_name': application.first_name,
             'last_name': application.last_name,
-            'home_address': application.contact_address.street,
         }
+
+        if not organization:
+            initial_data['home_address'] = application.contact_address.street
 
     formset = PrincipalProfileFormSet(initial=[initial_data])
 
@@ -500,25 +503,24 @@ def principal_profile_form(request, tracking_id=None):
             for idx, form in enumerate(formset.forms):
                 submitted_data = form.cleaned_data
 
-                # If it's the first form, and no address is provided for the
-                # organization, raise a validation error.
+                ppf_data = {
+                    'application': application,
+                    'date_of_birth': submitted_data['date_of_birth'],
+                    'social_security_number': submitted_data['social_security_number'],
+                    'drivers_license_state': submitted_data['drivers_license_state'],
+                    'drivers_license_number': submitted_data['drivers_license_number'],
+                    'license_plate_state': submitted_data['license_plate_state'],
+                    'license_plate_number': submitted_data['license_plate_number'],
+                }
 
-                if idx == 0 and not existing_profiles:
-                    if not submitted_data['organization_address']:
-                        error = ValidationError('Please provide an address for your organization.')
-                        form.add_error('organization_address', error)
-                        break
+                # If it's the primary applicant for an organization, collect
+                # their home address, because we don't already have it.
 
-                profile = PrincipalProfile(
-                    application=application,
-                    organization_address=submitted_data.get('organization_address'),
-                    date_of_birth=submitted_data['date_of_birth'],
-                    social_security_number=submitted_data['social_security_number'],
-                    drivers_license_state=submitted_data['drivers_license_state'],
-                    drivers_license_number=submitted_data['drivers_license_number'],
-                    license_plate_state=submitted_data['license_plate_state'],
-                    license_plate_number=submitted_data['license_plate_number'],
-                )
+                if organization and idx == 0 and not existing_profiles:
+                    address = get_lot_address(submitted_data['home_address'], None)
+                    ppf_data['org_applicant_address'] = address
+
+                profile = PrincipalProfile(**ppf_data)
 
                 # If it's the second form, or if the applicant has already
                 # successfully submitted their information, it's a related
