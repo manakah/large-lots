@@ -108,6 +108,7 @@ class ApplicationStatus(models.Model):
 class PrincipalProfile(models.Model):
     application = models.ForeignKey('Application')
     related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
+    organization_address = models.CharField(max_length=255, null=True)
     date_of_birth = models.DateField(null=True)
     social_security_number = models.CharField(max_length=11, null=True)
     drivers_license_state = models.CharField(max_length=2, null=True)

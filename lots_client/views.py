@@ -29,7 +29,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms import formset_factory
+from django.forms import formset_factory, ValidationError
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep,\
@@ -500,8 +500,18 @@ def principal_profile_form(request, tracking_id=None):
             for idx, form in enumerate(formset.forms):
                 submitted_data = form.cleaned_data
 
+                # If it's the first form, and no address is provided for the
+                # organization, raise a validation error.
+
+                if idx == 0 and not existing_profiles:
+                    if not submitted_data['organization_address']:
+                        error = ValidationError('Please provide an address for your organization.')
+                        form.add_error('organization_address', error)
+                        break
+
                 profile = PrincipalProfile(
                     application=application,
+                    organization_address=submitted_data.get('organization_address'),
                     date_of_birth=submitted_data['date_of_birth'],
                     social_security_number=submitted_data['social_security_number'],
                     drivers_license_state=submitted_data['drivers_license_state'],

@@ -76,12 +76,7 @@
                 {% for profile in existing_profiles %}
                     <tr>
                         <td>
-                        {% if forloop.first %}
-                            {{ profile.application.first_name }} {{ profile.application.last_name }}
-                        {% else %}
-                            {{ profile.related_person.first_name }} {{ profile.related_person.last_name }}
-                        {% endif %}
-                        </td>
+                        {{ profile.entity.first_name }} {{ profile.entity.last_name }}</td>
                         <td>{{ profile.created_at }}</td>
                     </tr>
                 {% endfor %}
@@ -110,6 +105,25 @@
                 <div class="form-group row">
                     <div class="col-md-9" id="{% if forloop.first %}principal-profile-form{% else %}additional-form{% endif %}-{{ forloop.counter0 }}">
                         {% if forloop.first and not existing_profiles %} {# Prepopulated from Applicant information #}
+                            {% if application.organization_confirmed %}
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <strong>Organization</strong><br />
+                                        {{ application.organization }}
+                                    </div>
+                                </div>
+                                <div class="form-group row{% if form.organization_address.errors %} has-error{% endif %}">
+                                    <div class="col-md-12">
+                                        <label class="col-form-label" for="{{ form.organization_address.auto_id }}">
+                                            <strong>Organization address</strong>
+                                        </label>
+                                        <input type="text" id="{{ form.organization_address.auto_id }}" name="form-{{ forloop.counter0 }}-organization_address" class="form-control" value="{{ form.organization_address.data|default_if_none:'' }}" placeholder="456 W Walnut">
+                                        {% for error in form.organization_address.errors %}
+                                            <span class="help-block">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                             <div class="form-group row">
                                 <div class="col-md-12">
                                     <strong>Name</strong><br />
@@ -141,6 +155,14 @@
                                     </h2>
                                 </div>
                             </div>
+                            {% if application.organization_confirmed %}
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <strong>Organization</strong><br />
+                                        {{ application.organization }}
+                                    </div>
+                                </div>
+                            {% endif %}
                             <div class="form-group row">
                                 <div class="col-md-6{% if form.first_name.errors %} has-error{% endif %}">
                                     <label class="col-form-label" for="{{ form.first_name.auto_id }}">
@@ -258,7 +280,7 @@
 
                 <div class="form-group row">
                     <div class="col-md-9">
-                        <button type="button" class="btn btn-lg" id="add-button">
+                        <button type="button" class="btn btn-lg btn-default" id="add-button">
                             <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> Add another person's information
                         </button>
 
@@ -283,6 +305,14 @@
                         </button>
                     </h2>
                 {% with formset.empty_form as form %}
+                    {% if application.organization_confirmed %}
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <strong>Organization</strong><br />
+                                {{ application.organization }}
+                            </div>
+                        </div>
+                    {% endif %}
                     <div class="form-group row">
                         <div class="col-md-6">
                             <label class="col-form-label" for="{{ form.first_name.auto_id }}">

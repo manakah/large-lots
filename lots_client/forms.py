@@ -202,6 +202,7 @@ class PrincipalProfileForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
     home_address = forms.CharField()
+    organization_address = forms.CharField(required=False)
     date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
         years=[year for year in range(2017, 1900, -1)],
         attrs={'class': 'form-control'})
