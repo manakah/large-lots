@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.conf import settings
 from django.views.generic.base import RedirectView
 from lots_client.views import home, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
     get_pin_from_address, deed_upload, upload_confirm, \
@@ -17,7 +18,7 @@ from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
 
 from django.contrib import admin
 admin.autodiscover()
- 
+
 urlpatterns = [
     # Examples:
     url(r'^$', home, name='home'),
@@ -73,3 +74,9 @@ urlpatterns = [
     url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
     url(r'^email-error/$', email_error, name='email_error'),]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

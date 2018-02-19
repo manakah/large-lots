@@ -234,23 +234,28 @@ def dump_applications(request, pilot, status):
     response = HttpResponse(content_type='text/csv')
     now = datetime.now().isoformat()
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Applications_%s_%s.csv' % (pilot, now)
-
+    # Hit the database less: https://docs.djangoproject.com/en/2.0/ref/models/querysets/#select-related
     if status == 'all':
-        applications = ApplicationStatus.objects.filter(application__pilot=pilot)
+        applications = ApplicationStatus.objects.select_related('application', 'lot').filter(application__pilot=pilot)
     elif status == 'denied':
-        applications = ApplicationStatus.objects.filter(application__pilot=pilot).filter(denied=True)
+        applications = ApplicationStatus.objects.select_related('application', 'lot').filter(application__pilot=pilot).filter(denied=True)
     else:
-        applications = ApplicationStatus.objects.filter(application__pilot=pilot).filter(current_step__step=status)
+        applications = ApplicationStatus.objects.select_related('application', 'lot').filter(application__pilot=pilot).filter(current_step__step=status)
 
     header = [
         'ID',
         'Current application step',
+        'EDS Received',
+        'PPF Received',
         'Date received',
         'First Name',
         'Last Name',
         'Organization',
-        'Owned Address',
-        'Owned Full Address',
+        'Owned Street Number',
+        'Owned Street Dir',
+        'Owned Street Name',
+        'Owned Street Type',
+        'Owned City',
         'Owned PIN',
         'Deed Image URL',
         'Contact Address',
@@ -258,8 +263,11 @@ def dump_applications(request, pilot, status):
         'Email',
         'Received assistance',
         'Lot PIN',
-        'Lot Address',
-        'Lot Full Address',
+        'Lot Street Number',
+        'Lot Street Dir',
+        'Lot Street Name',
+        'Lot Street Type',
+        'Lot City',
         'Ward',
         'Community',
         'Lot Image URL',
@@ -268,23 +276,23 @@ def dump_applications(request, pilot, status):
 
     rows = []
     for application_status in applications:
-        owned_address = '%s %s %s %s' % \
-            (getattr(application_status.application.owned_address, 'street', ''),
-            getattr(application_status.application.owned_address, 'city', ''),
-            getattr(application_status.application.owned_address, 'state', ''),
-            getattr(application_status.application.owned_address, 'zip_code', ''))
+        # Applicant address info
+        owned_street_number = getattr(application_status.application.owned_address, 'street_number', '').upper()
+        owned_street_dir = getattr(application_status.application.owned_address, 'street_dir', '').upper()
+        owned_street_name = getattr(application_status.application.owned_address, 'street_name', '').upper()
+        owned_street_type = getattr(application_status.application.owned_address, 'street_type', '').upper()
+        owned_city = getattr(application_status.application.owned_address, 'city', '').upper()
         contact_address = '%s %s %s %s' % \
             (getattr(application_status.application.contact_address, 'street', ''),
             getattr(application_status.application.contact_address, 'city', ''),
             getattr(application_status.application.contact_address, 'state', ''),
             getattr(application_status.application.contact_address, 'zip_code', ''))
-
-        addr = getattr(application_status.lot.address, 'street', '').upper()
-        addr_full = '%s %s %s %s' % \
-            (getattr(application_status.lot.address, 'street', ''),
-            getattr(application_status.lot.address, 'city', ''),
-            getattr(application_status.lot.address, 'state', ''),
-            getattr(application_status.lot.address, 'zip_code', ''))
+        # Lot requested info
+        lot_street_number = getattr(application_status.lot.address, 'street_number', '').upper()
+        lot_street_dir = getattr(application_status.lot.address, 'street_dir', '').upper()
+        lot_street_name = getattr(application_status.lot.address, 'street_name', '').upper()
+        lot_street_type = getattr(application_status.lot.address, 'street_type', '').upper()
+        lot_city = getattr(application_status.lot.address, 'city', '').upper()
         pin = application_status.lot.pin[:-4]
         ward = application_status.lot.address.ward
         community = application_status.lot.address.community
@@ -313,12 +321,17 @@ def dump_applications(request, pilot, status):
         rows.append([
             application_status.application.id,
             current_step,
+            application_status.application.eds_received,
+            application_status.application.ppf_received,
             application_status.application.received_date.strftime('%Y-%m-%d %H:%m %p'),
             application_status.application.first_name,
             application_status.application.last_name,
             application_status.application.organization,
-            getattr(application_status.application.owned_address, 'street', '').upper(),
-            owned_address,
+            owned_street_number,
+            owned_street_dir,
+            owned_street_name,
+            owned_street_type,
+            owned_city,
             application_status.application.owned_pin,
             deed_image,
             contact_address,
@@ -326,8 +339,11 @@ def dump_applications(request, pilot, status):
             application_status.application.email,
             application_status.application.how_heard,
             pin,
-            addr,
-            addr_full,
+            lot_street_number,
+            lot_street_dir,
+            lot_street_name,
+            lot_street_type,
+            lot_city,
             ward,
             community,
             image_url,
