@@ -476,7 +476,7 @@ def principal_profile_form(request, tracking_id=None):
         })
 
     existing_profiles = application.principalprofile_set.all()
-    organization = application.organization_confirmed
+    organization_confirmed = application.organization_confirmed
 
     PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
 
@@ -489,7 +489,7 @@ def principal_profile_form(request, tracking_id=None):
             'last_name': application.last_name,
         }
 
-        if not organization:
+        if not organization_confirmed:
             initial_data['home_address'] = application.contact_address.street
 
     formset = PrincipalProfileFormSet(initial=[initial_data])
@@ -516,7 +516,7 @@ def principal_profile_form(request, tracking_id=None):
                 # If it's the primary applicant for an organization, collect
                 # their home address, because we don't already have it.
 
-                if organization and idx == 0 and not existing_profiles:
+                if organization_confirmed and idx == 0 and not existing_profiles:
                     address = get_lot_address(submitted_data['home_address'], None)
                     ppf_data['org_applicant_address'] = address
 
