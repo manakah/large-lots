@@ -48,6 +48,7 @@ def test_export_ppf(application,
     existing_profiles = PrincipalProfile.objects\
                                         .filter(deleted_at__isnull=True)
 
+    assert len(existing_profiles) == 3
     assert len(exported_profiles) == len(existing_profiles)
 
     for export, existing in zip(exported_profiles, existing_profiles):
