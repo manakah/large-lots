@@ -34,8 +34,15 @@
     </div>
 
     <br>
+    {% if competing_application_status %}
+    <div class="row">
+      <div class="col-sm-10 well">
+        <i class='fa fa-info-circle'></i> {{ competing_application_status.application.first_name }} {{ competing_application_status.application.last_name }} is the last remaining applicant for this lot. If you deny {{ application_status.application.first_name }} {{ application_status.application.last_name }}, {{ competing_application_status.application.first_name }} {{ competing_application_status.application.last_name }} will advance to Step 5.
+      </div>
+    </div>
+    {% endif %}
 
-    <p>Are you sure? If yes, the applicant will receive an email notification.</p>
+    <p><em>Are you sure?</em> If yes, {{ application_status.application.first_name }} {{ application_status.application.last_name }} will receive an email notification.</p>
     <div class='block'><a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/" class="btn btn-danger">No, go back.</a></div>
     <div class='block'>
       <form role="form" id="denyForm" method="POST" action="{% url 'deny_submit' application_status.id %}">

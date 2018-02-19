@@ -31,6 +31,7 @@ from django.template import Context
 from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
@@ -433,16 +434,27 @@ def pdfviewer(request):
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     warning = None
+    notice = None
 
     # Prevent LargeLots admin from re-evaluating the same application.
     # Check if application has been denied with a current step of None.
     if application_status.current_step is None and application_status.denied:
-        warning = 'Denied'
+        warning = True
+
+    # Determine if another applicant advances to Step 5, as a result of this denial.
+    try:
+        competing_application_status = ApplicationStatus.objects.exclude(id=application_status.id).get(lot=application_status.lot.pin, denied=False)
+    except (MultipleObjectsReturned, ApplicationStatus.DoesNotExist):
+        competing_application_status = None
+    else:
+        if competing_application_status.current_step.step != 4:
+            competing_application_status = None
 
     return render(request, 'deny_application.html', {
         'application_status': application_status,
         'denial_reason': DENIAL_REASONS[request.GET.get('reason')],
         'warning': warning,
+        'competing_application_status': competing_application_status
         })
 
 @login_required(login_url='/lots-login/')
@@ -455,14 +467,29 @@ def deny_submit(request, application_id):
 
     # Create review
     reason, _ = DenialReason.objects.get_or_create(value=request.POST.get('reason'))
-    review = Review(reviewer=request.user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
-    review.save()
+    Review.objects.create(reviewer=request.user, email_sent=True, denial_reason=reason, application=application_status, step_completed=2)
 
     try:
         send_denial_email(request, application_status)
     except SMTPException as stmp_e:
         request.session['email_error_app_ids'] = [application_status.id]
         return HttpResponseRedirect(reverse('email_error'))
+
+    '''
+    Multiple applicants (including the one denied here) may have requested this lot.
+    After this denial, the following may be true:
+    (1) One valid applicant for this lot remains;
+    (2) The remaining applicant is on Step 4.
+    If so, advance that applicant to Step 5.
+    '''
+    try:
+        last_application_status = ApplicationStatus.objects.get(lot=application_status.lot.pin, denied=False)
+    except (MultipleObjectsReturned, ApplicationStatus.DoesNotExist):
+        pass
+    else:
+        if last_application_status.current_step.step == 4:
+            advance_to_step('letter', last_application_status)
+            Review.objects.create(reviewer=request.user, email_sent=False, application=last_application_status, step_completed=4)
 
     redirect_path = create_redirect_path(request)
 
