@@ -434,16 +434,28 @@ def pdfviewer(request):
 def deny_application(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     warning = None
+    notice = None
 
     # Prevent LargeLots admin from re-evaluating the same application.
     # Check if application has been denied with a current step of None.
     if application_status.current_step is None and application_status.denied:
-        warning = 'Denied'
+        warning = True
+
+    # Determine if another applicant advances to Step 5, as a result of this denial.
+    try:
+        competing_application_status = ApplicationStatus.objects.exclude(id=application_status.id).get(lot=application_status.lot.pin, denied=False)
+    except (MultipleObjectsReturned, ApplicationStatus.DoesNotExist):
+        competing_application_status = None
+        pass
+    else:
+        if competing_application_status.current_step.step != 4:
+            competing_application_status = None
 
     return render(request, 'deny_application.html', {
         'application_status': application_status,
         'denial_reason': DENIAL_REASONS[request.GET.get('reason')],
         'warning': warning,
+        'competing_application_status': competing_application_status
         })
 
 @login_required(login_url='/lots-login/')
