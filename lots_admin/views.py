@@ -446,7 +446,6 @@ def deny_application(request, application_id):
         competing_application_status = ApplicationStatus.objects.exclude(id=application_status.id).get(lot=application_status.lot.pin, denied=False)
     except (MultipleObjectsReturned, ApplicationStatus.DoesNotExist):
         competing_application_status = None
-        pass
     else:
         if competing_application_status.current_step.step != 4:
             competing_application_status = None
