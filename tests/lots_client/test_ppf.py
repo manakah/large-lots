@@ -64,7 +64,7 @@ def test_individual_ppf_submission(django_db_setup,
         app = application.build(organization_confirmed=True,
                                 organization='The Peacock Company')
 
-        data = ppf_blob.build(app, home_address='456 Feather Lane')
+        data = ppf_blob.build(app, home_address_street='456 Feather Lane')
 
     rv = client.post(
         '/principal-profile-form/{}/'.format(app.tracking_id),
