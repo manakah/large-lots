@@ -164,9 +164,9 @@
                                     <h2>
                                         Principal Profile
                                         {% if not forloop.first %}
-                                        <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
-                                            <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
-                                        </button>
+                                            <button type="button" class="btn btn-warning btn-sm pull-right delete-button" value="{{ forloop.counter0 }}">
+                                                <i class="fa fa-fw fa-trash" aria-hidden="true"></i> Delete
+                                            </button>
                                         {% endif %}
                                     </h2>
                                 </div>
@@ -176,6 +176,12 @@
                                     <div class="col-md-12">
                                         <strong>Organization</strong><br />
                                         {{ application.organization }}
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        <strong>Organization address</strong><br />
+                                        {{ application.contact_address.street }}
                                     </div>
                                 </div>
                             {% endif %}
