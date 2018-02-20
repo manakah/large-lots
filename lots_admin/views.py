@@ -349,7 +349,8 @@ def dump_principal_profiles(request, pilot):
             return (application.organization, application.contact_address.street)
         return (None, None)
 
-    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)\
+    profiles = PrincipalProfile.objects.select_related('application', 'related_person')\
+                                       .filter(application__pilot=pilot)\
                                        .filter(deleted_at__isnull=True)
 
     header = [
