@@ -108,6 +108,9 @@ class ApplicationStatus(models.Model):
 class PrincipalProfile(models.Model):
     application = models.ForeignKey('Application')
     related_person = models.ForeignKey('RelatedPerson', null=True, blank=True)
+    # Store home address of primary applicant on behalf of organization.
+    # Null if applicant is applying as an individual.
+    org_applicant_address = models.ForeignKey(Address, null=True)
     date_of_birth = models.DateField(null=True)
     social_security_number = models.CharField(max_length=11, null=True)
     drivers_license_state = models.CharField(max_length=2, null=True)
@@ -131,10 +134,20 @@ class PrincipalProfile(models.Model):
 
     @property
     def address(self):
-        try:
-            return self.entity.owned_address.street
+        '''
+        If the PPF pertains to an individual, return the contact address from
+        their original application. If the PPF pertains to the primary appli-
+        cant for an organization, return the org_applicant_address. Otherwise,
+        return the related person's address.
+        '''
+        if isinstance(self.entity, Application):
+            if self.entity.organization_confirmed:
+                return self.org_applicant_address.street
 
-        except AttributeError:
+            else:
+                return self.entity.contact_address.street
+
+        else:
             return self.entity.address.street
 
 class RelatedPerson(models.Model):

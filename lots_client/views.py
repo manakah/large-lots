@@ -465,6 +465,18 @@ def advance_if_ppf_and_eds_submitted(application):
             application_status.current_step = step
             application_status.save()
 
+def address_from_ppf(ppf_data):
+    home_address = {
+        'street': ppf_data['home_address_street'],
+        'city': ppf_data['home_address_city'],
+        'state': ppf_data['home_address_state'],
+        'zip_code': ppf_data['home_address_zip_code'],
+    }
+
+    address, _ = Address.objects.get_or_create(**home_address)
+
+    return address
+
 def principal_profile_form(request, tracking_id=None):
 
     try:
@@ -476,18 +488,26 @@ def principal_profile_form(request, tracking_id=None):
         })
 
     existing_profiles = application.principalprofile_set.all()
+    organization_confirmed = application.organization_confirmed
 
     PrincipalProfileFormSet = formset_factory(PrincipalProfileForm, extra=0)
 
     if existing_profiles:
         initial_data = {}
     else:
-        # Prepopulate applicant's name and address.
+        # Prepopulate applicant's name and, if they aren't an org, address.
         initial_data = {
             'first_name': application.first_name,
             'last_name': application.last_name,
-            'home_address': application.contact_address.street,
         }
+
+        if not organization_confirmed:
+            initial_data.update({
+                'home_address_street': application.contact_address.street,
+                'home_address_city': application.contact_address.city,
+                'home_address_state': application.contact_address.state,
+                'home_address_zip_code': application.contact_address.zip_code,
+            })
 
     formset = PrincipalProfileFormSet(initial=[initial_data])
 
@@ -500,22 +520,31 @@ def principal_profile_form(request, tracking_id=None):
             for idx, form in enumerate(formset.forms):
                 submitted_data = form.cleaned_data
 
-                profile = PrincipalProfile(
-                    application=application,
-                    date_of_birth=submitted_data['date_of_birth'],
-                    social_security_number=submitted_data['social_security_number'],
-                    drivers_license_state=submitted_data['drivers_license_state'],
-                    drivers_license_number=submitted_data['drivers_license_number'],
-                    license_plate_state=submitted_data['license_plate_state'],
-                    license_plate_number=submitted_data['license_plate_number'],
-                )
+                ppf_data = {
+                    'application': application,
+                    'date_of_birth': submitted_data['date_of_birth'],
+                    'social_security_number': submitted_data['social_security_number'],
+                    'drivers_license_state': submitted_data['drivers_license_state'],
+                    'drivers_license_number': submitted_data['drivers_license_number'],
+                    'license_plate_state': submitted_data['license_plate_state'],
+                    'license_plate_number': submitted_data['license_plate_number'],
+                }
+
+                # If it's the primary applicant for an organization, collect
+                # their home address, because we don't already have it.
+
+                if organization_confirmed and idx == 0 and not existing_profiles:
+                    address = address_from_ppf(submitted_data)
+                    ppf_data['org_applicant_address'] = address
+
+                profile = PrincipalProfile(**ppf_data)
 
                 # If it's the second form, or if the applicant has already
                 # successfully submitted their information, it's a related
                 # person, and needs to be created and saved as such.
 
                 if idx or existing_profiles:
-                    address = get_lot_address(submitted_data['home_address'], None)
+                    address = address_from_ppf(submitted_data)
 
                     related_person = RelatedPerson(
                         application=application,

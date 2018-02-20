@@ -17,7 +17,7 @@ from lots_client.views import advance_if_ppf_and_eds_submitted
 def test_advance_to_step_8(django_db_setup,
                            eds_received,
                            ppf_received):
-    
+
     application = Application.objects.get(applicationstatus__current_step__step=7)
     application.eds_sent = True
     application.save()
@@ -49,32 +49,22 @@ def test_view_requires_tracking_id(django_db_setup,
     assert 'Instructions' in str(rv.content)
 
 @pytest.mark.django_db
-def test_ppf_submission(django_db_setup,
-                        client,
-                        application):
-    app = application.build()
+@pytest.mark.parametrize('ppf_type', ['individual', 'organization'])
+def test_individual_ppf_submission(django_db_setup,
+                                   client,
+                                   application,
+                                   ppf_blob,
+                                   ppf_type):
 
-    data = {
-        'form-TOTAL_FORMS': 2,
-        'form-INITIAL_FORMS': 0,
-        'form-0-first_name': app.first_name,
-        'form-0-last_name': app.last_name,
-        'form-0-home_address': app.owned_address.street,
-        'form-0-date_of_birth': '1992-02-16',
-        'form-0-social_security_number': '123-45-6789',
-        'form-0-drivers_license_state': 'IL',
-        'form-0-drivers_license_number': 'foo',
-        'form-0-license_plate_state': 'NA',
-        'form-1-first_name': 'Petmore',
-        'form-1-last_name': 'Dogs',
-        'form-1-home_address': '4539 N Paulina St',
-        'form-1-date_of_birth': '1985-05-05',
-        'form-1-social_security_number': '453-21-6789',
-        'form-1-drivers_license_state': 'IL',
-        'form-1-drivers_license_number': 'bar',
-        'form-1-license_plate_state': 'TN',
-        'form-1-license_plate_number': 'baz',
-    }
+    if ppf_type == 'individual':
+        app = application.build()
+        data = ppf_blob.build(app)
+
+    elif ppf_type == 'organization':
+        app = application.build(organization_confirmed=True,
+                                organization='The Peacock Company')
+
+        data = ppf_blob.build(app, home_address_street='456 Feather Lane')
 
     rv = client.post(
         '/principal-profile-form/{}/'.format(app.tracking_id),
@@ -85,10 +75,21 @@ def test_ppf_submission(django_db_setup,
     assert 'Success!' in str(rv.content)
 
     app.refresh_from_db()
-
-    related_people = app.relatedperson_set.all()
-
     assert app.ppf_received == True
-    assert len(app.principalprofile_set.all()) == 2
-    assert len(related_people) == 1
-    assert 'Petmore Dogs' in str(related_people.first())
+
+    principal_profiles = app.principalprofile_set.all()
+    assert len(principal_profiles) == 2
+
+    primary_ppf = principal_profiles.first()
+
+    if ppf_type == 'organization':
+        assert primary_ppf.address == '456 Feather Lane'
+
+    elif ppf_type == 'individual':
+        assert primary_ppf.address == app.contact_address.street
+
+    related_person = app.relatedperson_set.get()
+    related_ppf = principal_profiles.last()
+
+    assert 'Petmore Dogs' in str(related_person)
+    assert related_ppf.address == related_person.address.street

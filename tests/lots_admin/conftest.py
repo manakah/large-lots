@@ -30,20 +30,27 @@ def email_db_setup(django_db_setup, transactional_db):
 
 @pytest.fixture
 @pytest.mark.django_db
-def principal_profile(application, db):
-    data = {
-        'application': application.build(),
-        'date_of_birth': '1992-02-16',
-        'social_security_number': '123-45-6789',
-        'drivers_license_state': 'IN',
-        'drivers_license_number': 'foo',
-        'license_plate_state': 'MO',
-        'license_plate_number': 'bar',
-    }
+def principal_profile(db):
+    class PrincipalProfileFactory():
 
-    ppf = PrincipalProfile.objects.create(**data)
+        def build(self, app, **kwargs):
+            data = {
+                'application': app,
+                'date_of_birth': '1992-02-16',
+                'social_security_number': '123-45-6789',
+                'drivers_license_state': 'IN',
+                'drivers_license_number': 'foo',
+                'license_plate_state': 'MO',
+                'license_plate_number': 'bar',
+            }
 
-    return ppf
+            data.update(kwargs)
+
+            ppf = PrincipalProfile.objects.create(**data)
+
+            return ppf
+
+    return PrincipalProfileFactory()
 
 @pytest.fixture
 @pytest.mark.django_db
@@ -58,21 +65,3 @@ def related_person(application, address, db):
     related_person = RelatedPerson.objects.create(**data)
 
     return related_person
-
-@pytest.fixture
-@pytest.mark.django_db
-def principal_profile_with_related_person(application, related_person, db):
-    data = {
-        'application': application.build(),
-        'related_person': related_person,
-        'date_of_birth': '1992-02-16',
-        'social_security_number': '123-45-6789',
-        'drivers_license_state': 'IL',
-        'drivers_license_number': 'foo',
-        'license_plate_state': 'IL',
-        'license_plate_number': 'bar',
-    }
-
-    ppf = PrincipalProfile.objects.create(**data)
-
-    return ppf

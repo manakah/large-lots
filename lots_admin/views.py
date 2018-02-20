@@ -360,7 +360,14 @@ def dump_principal_profiles(request, pilot):
     now = datetime.now().isoformat()
     response['Content-Disposition'] = 'attachment; filename=Large_Lots_Principal_Profiles_%s_%s.csv' % (pilot, now)
 
-    profiles = PrincipalProfile.objects.filter(application__pilot=pilot)\
+    def org_address(ppf):
+        application = ppf.application
+        if application.organization_confirmed:
+            return (application.organization, application.contact_address.street)
+        return (None, None)
+
+    profiles = PrincipalProfile.objects.select_related('application', 'related_person')\
+                                       .filter(application__pilot=pilot)\
                                        .filter(deleted_at__isnull=True)
 
     header = [
@@ -369,6 +376,8 @@ def dump_principal_profiles(request, pilot):
         'Primary applicant',
         'First name',
         'Last name',
+        'Organization',
+        'Organization address',
         'Home address',
         'Date of birth',
         'Social Security number',
@@ -381,12 +390,15 @@ def dump_principal_profiles(request, pilot):
     rows = []
 
     for profile in profiles:
+        organization, organization_address = org_address(profile)
         rows.append([
             profile.application.id,
             profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
             not profile.related_person,
             profile.entity.first_name,
             profile.entity.last_name,
+            organization,
+            organization_address,
             profile.address,
             profile.date_of_birth,
             profile.social_security_number,

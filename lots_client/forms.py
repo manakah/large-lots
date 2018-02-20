@@ -201,7 +201,12 @@ class DeedUploadForm(forms.Form):
 class PrincipalProfileForm(forms.Form):
     first_name = forms.CharField()
     last_name = forms.CharField()
-    home_address = forms.CharField()
+    home_address_street = forms.CharField()
+    home_address_city = forms.CharField()
+    home_address_state = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    home_address_zip_code = forms.CharField()
     date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
         years=[year for year in range(2017, 1900, -1)],
         attrs={'class': 'form-control'})
@@ -227,13 +232,19 @@ class PrincipalProfileForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['drivers_license_state'].choices = self._state_choices
-        self.fields['license_plate_state'].choices = self._state_choices
+        for field in ('drivers_license_state', 'license_plate_state'):
+            self.fields[field].choices = self._state_choices()
 
-    @property
-    def _state_choices(self):
-        choices = [(None, 'State'), ['NA', 'NA']]
+        self.fields['home_address_state'].choices = self._state_choices(not_applicable=False)
+
+    def _state_choices(self, not_applicable=True):
+        choices = [(None, 'State')]
+
+        if not_applicable:
+            choices += [('NA', 'NA')]
+
         choices += [(state.abbr, state.name) for state in STATES]
+
         return choices
 
     def _clean_number(self, field):

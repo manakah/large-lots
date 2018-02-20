@@ -48,3 +48,47 @@ def application_blob(address, mock_file, mocker):
         'deed_image': mock_file,
         'terms': True,
     }
+
+@pytest.fixture
+def ppf_blob():
+    class PPFBlobFactory():
+
+        def build(self, app, **kwargs):
+            data = {
+                'form-TOTAL_FORMS': 2,
+                'form-INITIAL_FORMS': 0,
+                'form-0-first_name': app.first_name,
+                'form-0-last_name': app.last_name,
+                'form-0-home_address_street': app.owned_address.street,
+                'form-0-home_address_city': app.owned_address.city,
+                'form-0-home_address_state': app.owned_address.state,
+                'form-0-home_address_zip_code': app.owned_address.zip_code,
+                'form-0-date_of_birth': '1992-02-16',
+                'form-0-social_security_number': '123-45-6789',
+                'form-0-drivers_license_state': 'IL',
+                'form-0-drivers_license_number': 'foo',
+                'form-0-license_plate_state': 'NA',
+                'form-1-first_name': 'Petmore',
+                'form-1-last_name': 'Dogs',
+                'form-1-home_address_street': '4539 N Paulina',
+                'form-1-home_address_city': 'Chicago',
+                'form-1-home_address_state': 'IL',
+                'form-1-home_address_zip_code': '60624',
+                'form-1-date_of_birth': '1985-05-05',
+                'form-1-social_security_number': '453-21-6789',
+                'form-1-drivers_license_state': 'IL',
+                'form-1-drivers_license_number': 'bar',
+                'form-1-license_plate_state': 'TN',
+                'form-1-license_plate_number': 'baz',
+            }
+
+            safe_kwargs = {}
+
+            for k, v in kwargs.items():
+                safe_kwargs['form-0-{}'.format(k)] = v
+
+            data.update(safe_kwargs)
+
+            return data
+
+    return PPFBlobFactory()
