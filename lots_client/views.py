@@ -26,7 +26,7 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import formset_factory
@@ -171,6 +171,24 @@ def get_or_create_lot(address, pin):
 
     finally:
         return lot
+
+def get_applications_from_email(request):
+    email = request.GET.get('email')
+    applications = Application.objects.filter(email=email)\
+                                      .prefetch_related('contact_address')
+
+    response = []
+
+    for a in applications:
+        response.append({
+            'label': str(a),
+            'id': a.id,
+            'first_name': a.first_name,
+            'last_name': a.last_name,
+            'zip_code': a.contact_address.zip_code,
+        })
+
+    return JsonResponse(json.dumps(response), safe=False)
 
 def apply(request):
     applications = Application.objects.all()

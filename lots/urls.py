@@ -4,7 +4,7 @@ from django.views.generic.base import RedirectView
 from lots_client.views import home, apply_confirm, faq, about, lot_uses_page, lot_uses, apply, \
     get_pin_from_address, deed_upload, upload_confirm, \
     wintrust_invitation, wintrust_announcement, \
-    principal_profile_form, eds_submission
+    principal_profile_form, eds_submission, get_applications_from_email
 
 from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
     lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
@@ -46,6 +46,7 @@ urlpatterns = [
 
     # api endpoints
     url(r'^api/get-pin$', get_pin_from_address, name='get_pin_from_address'),
+    url(r'^api/get-applications$', get_applications_from_email, name='get_applications_from_email'),
 
     url(r'^django-admin/', include(admin.site.urls)),
 
