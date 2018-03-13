@@ -45,7 +45,7 @@ $('#id_email').autocomplete({
                 $('#application_found_modal').modal('show');
             } else {
                 flush_found_applications();
-            };
+            }
         });
     },
 });
