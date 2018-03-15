@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from lots_admin.models import Application, LotUse
@@ -81,3 +83,17 @@ def test_application(application_blob,
         planned_use = app_data['lot_{}_use'.format(idx)]
 
         assert lot.planned_use == planned_use
+
+
+@pytest.mark.django_db
+def test_get_application_endpoint(django_db_setup, client):
+
+    application = Application.objects.first()
+    email = application.email
+
+    rv = client.get('/api/get-applications?email={}'.format(email))
+
+    found_applications = json.loads(rv.json())
+
+    assert len(found_applications) == 1
+    assert found_applications[0]['id'] == application.id

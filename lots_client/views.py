@@ -173,7 +173,7 @@ def get_or_create_lot(address, pin):
         return lot
 
 def get_applications_from_email(request):
-    email = request.GET.get('email')
+    email = request.GET.get('email').replace(' ', '+')
     applications = Application.objects.filter(email=email)\
                                       .prefetch_related('contact_address')
 
