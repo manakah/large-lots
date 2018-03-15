@@ -33,7 +33,7 @@ function flush_found_applications() {
 }
 
 $('#id_email').autocomplete({
-    source: function call_application_api(request, response) {
+    source: function call_application_api(request) {
         $.get("/api/get-applications", {
             email: request.term,
         }, function fill_or_flush(data) {
@@ -54,7 +54,7 @@ function fill_existing_applicant_details(selected) {
     var applicant_details;
 
     $.each(found_applications, function get_application_details() {
-        if ( this.id == selected) {
+        if ( this.id === selected) {
             applicant_details = this;
             return;
         }
