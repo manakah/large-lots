@@ -1,7 +1,7 @@
 var found_applications;
 
-var fill_found_applications_modal = function(data, email) {
-    $.each(data, function() {
+function fill_found_applications_modal(data, email) {
+    $.each(data, function add_application() {
         var el = '<li><button class="option btn btn-link" data-application_id="' + this.id + '">' + this.label + '</button></li>';
         $('#found_applications').append(el);
     });
@@ -17,7 +17,7 @@ var fill_found_applications_modal = function(data, email) {
     $('#found_applications_email').text(email);
 }
 
-var flush_found_applications = function() {
+function flush_found_applications() {
     $('#found_applications').empty();
     $('#found_application_confirm').hide();
 
@@ -27,16 +27,16 @@ var flush_found_applications = function() {
         $('#id_contact_zip_code'),
     ];
 
-    $.each(auto_filled_fields, function() {
+    $.each(auto_filled_fields, function clear_fields() {
         this.val('');
     });
 }
 
 $('#id_email').autocomplete({
-    source: function(request, response) {
+    source: function call_application_api(request, response) {
         $.get("/api/get-applications", {
             email: request.term,
-        }, function(data) {
+        }, function fill_or_flush(data) {
             var parsed_data = JSON.parse(data);
 
             if ( parsed_data.length > 0 ) {
@@ -50,10 +50,10 @@ $('#id_email').autocomplete({
     },
 });
 
-var fill_existing_applicant_details = function (selected) {
+function fill_existing_applicant_details(selected) {
     var applicant_details;
 
-    $.each(found_applications, function() {
+    $.each(found_applications, function get_application_details() {
         if ( this.id == selected) {
             applicant_details = this;
             return;
