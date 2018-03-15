@@ -144,6 +144,29 @@
           <p>The City of Chicago will contact you during the application process. Only provide your most up-to-date information.</p>
           <p><span class="red">*</span>Required</p>
           <div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <label for="id_email"><i class="fa fa-envelope"></i> Email</label><span class="red">*</span>
+                  <p class="help-block"><strong>Email is the primary way the City will communicate with you during the application process!</strong> Please provide a functioning email address that you check regularly. Use the <em>same email address</em> on all applications, if you apply more than once.</p>
+                </div>
+              </div>
+
+              {% if form.email.errors %}
+              <div class="form-group has-error">
+              {% else %}
+              <div class="form-group">
+              {% endif %}
+                <p class="help-block"></p>
+                <input type="email" value="{{email}}" class="form-control" id="id_email" name="email" placeholder="name@email.com">
+                {% for error in form.email.errors %}
+                    <span class="help-block">{{ error }}</span>
+                {% endfor %}
+              </div>
+
+              <div class="alert alert-success collapse" id="found_application_confirm">
+                <p><i class="fa fa-fw fa-exclamation-circle"></i> <strong>Your name and ZIP code have been filled in for you.</strong> Please check the auto-filled information for accuracy, then complete the remainder of the form.</p>
+              </div>
+
               {% if form.first_name.errors or form.last_name.errors %}
               <div class="form-group has-error">
               {% else %}
@@ -205,24 +228,6 @@
               {% endfor %}
             </div>
 
-            <div class="row">
-              <div class="col-sm-12">
-                <label for="id_email"><i class="fa fa-envelope"></i> Email</label><span class="red">*</span>
-                <p class="help-block"><strong>Email is the primary way the City will communicate with you during the application process!</strong> Please provide a functioning email address that you check regularly. Use the <em>same email address</em> on all applications, if you apply more than once.</p>
-              </div>
-            </div>
-            {% if form.email.errors %}
-            <div class="form-group has-error">
-            {% else %}
-            <div class="form-group">
-            {% endif %}
-              <p class="help-block"></p>
-              <input type="email" value="{{email}}" class="form-control" id="id_email" name="email" placeholder="name@email.com">
-              {% for error in form.email.errors %}
-                  <span class="help-block">{{ error }}</span>
-              {% endfor %}
-            </div>
-
             {% if form.contact_street.errors or form.contact_city.errors or form.contact_state.errors or form.contact_zip_code.errors %}
             <div class="form-group has-error">
             {% else %}
@@ -252,7 +257,7 @@
                 {% endfor %}
               </div>
             </div>
-              {% if form.email.errors %}
+              {% if form.how_heard.errors %}
               <div class="form-group has-error">
               {% else %}
               <div class="form-group">
@@ -329,3 +334,26 @@
   <br />
   <p><strong>Questions? Visit our <a target='_blank' href='/faq/#additional'>frequently asked questions (FAQ) page</a> for more information and direct contacts.</strong></p>
 </form>
+
+<div class="modal fade" id="application_found_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">
+          <i class="fa fa-info-circle fa-fw text-success"></i>
+          Welcome back!
+        </h3>
+      </div>
+      <div class="modal-body">
+        <p><strong id="found_applications_count" class="text-bf"></strong> <span id="found_applications_clause"></span> applied to Large Lots using the email address <strong id="found_applications_email" class="text-bf"></strong>.</p>
+
+        <p>If you have already submitted an application, click your name in the list below. Otherwise, click "I'm not on this list," then enter your name in the form.</p>
+
+        <ul id="found_applications"></ul>
+
+        <button type="button" class="btn btn-link" data-dismiss="modal">I'm not on this list.</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

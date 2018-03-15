@@ -22,9 +22,9 @@ before_script:
 script:
 - pytest
 - jshint --extract=always templates/*
-- jshint lots/static/js/*
+- jshint lots/static/js/largelots_emailcheck.js
 notifications:
-  webhooks: 
+  webhooks:
     - https://semabot.datamade.us/travis/
 
 deploy:
