@@ -240,21 +240,28 @@
               <div class="row">
                 <div class="col-sm-6">
                   <input type="text" value="{{contact_street}}" class="form-control" id="id_contact_street" name="contact_street" placeholder="Street">
+                  {% for error in form.contact_street.errors %}
+                      <span class="help-block">{{ error }}</span>
+                  {% endfor %}
                 </div>
                 <div class="col-sm-2">
                   <input type="text" class="form-control" value="{{contact_city}}" id="id_contact_city" name="contact_city" placeholder="City">
+                  {% for error in form.contact_city.errors %}
+                      <span class="help-block">{{ error }}</span>
+                  {% endfor %}
                 </div>
                 <div class="col-sm-2">
                   <input type="text" class="form-control" value="{{contact_state}}" id="id_contact_state" name="contact_state" placeholder="State">
+                  {% for error in form.contact_state.errors %}
+                      <span class="help-block">{{ error }}</span>
+                  {% endfor %}
                 </div>
                 <div class="col-sm-2">
                   <input type="text" class="form-control" value="{{contact_zip_code}}" id="id_contact_zip_code" name="contact_zip_code" placeholder="Zip">
-                </div>
-                {% for error in form.contact_street.errors %}
-                    <div class="col-sm-12">
+                  {% for error in form.contact_zip_code.errors %}
                       <span class="help-block">{{ error }}</span>
-                    </div>
-                {% endfor %}
+                  {% endfor %}
+                </div>
               </div>
             </div>
               {% if form.how_heard.errors %}

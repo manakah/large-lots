@@ -57,9 +57,15 @@ class ApplicationForm(forms.Form):
     contact_street = forms.CharField(
         error_messages={'required': 'Provide a complete address'},
         label="Your contact address")
-    contact_city = forms.CharField()
-    contact_state = forms.CharField()
-    contact_zip_code = forms.CharField()
+    contact_city = forms.CharField(
+        error_messages={'required': 'Provide a city'},
+        label="Your contact city")
+    contact_state = forms.CharField(
+        error_messages={'required': 'Provide a state'},
+        label="Your contact state")
+    contact_zip_code = forms.CharField(
+        error_messages={'required': 'Provide a zipcode'},
+        label="Your contact zipcode")
     how_heard = forms.CharField(required=False)
     terms = forms.BooleanField(
         error_messages={'required': 'Verify that you have read and agree to the terms'},
