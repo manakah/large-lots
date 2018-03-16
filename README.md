@@ -27,13 +27,15 @@ Set the environmental variables in [local_settings.py.example](https://github.co
 
   * ``AWS_SECRET_ACCESS_KEY`` - The secret that goes with the key above.
 
+  * ``CARTODB_API_KEY`` - [Carto](https://carto.com/) API key
+
   * ``EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD`` - These are used to configure the email settings for Django. See [Django docs](https://docs.djangoproject.com/en/1.6/topics/email/) for more info.
 
   * ``SENTRY_DSN`` - This is a connection string for [Sentry](http://getsentry.com).
 
 Note that the example local settings sets `START_DATE` and `END_DATE` to now and two weeks from now, respectively, so you'll default to an "active" application period for local development. In production, these should correspond to the start and end dates of the current round's application period.
 
-Make a database and run migrations:
+Make a database, `largelots`, and run migrations:
 
 ```bash
 createdb largelots
