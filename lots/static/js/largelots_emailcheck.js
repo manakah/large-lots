@@ -54,7 +54,7 @@ function fill_existing_applicant_details(selected) {
     var applicant_details;
 
     $.each(found_applications, function get_application_details() {
-        if ( this.id === selected) {
+        if ( this.id === parseInt(selected) ) {
             applicant_details = this;
             return;
         }
