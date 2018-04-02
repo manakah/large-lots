@@ -170,6 +170,15 @@ a.dropdown-toggle:hover {
     color: #fff;
 }
 
+.alert-info {
+    background-color: #B3B3B3;
+    border-color: #B3B3B3;
+}
+
+.alert-info a:hover {
+    color: #fff;
+}
+
 div#organization-group .input-group-addon {
     background-color: #f6f6f6;
 }

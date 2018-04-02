@@ -40,6 +40,7 @@ from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileF
 def home(request):
     applications = Application.objects.all()
     current_count = get_lot_count(settings.CURRENT_CARTODB)
+    sold_count = get_lot_count('all_sold_lots')
 
     # Find all pins with active applications
     pins_under_review = set('0')
@@ -51,7 +52,10 @@ def home(request):
     for status in ApplicationStatus.objects.filter(denied=False).filter(current_step__step=11):
         pins_sold.add(status.lot_id)
 
-    sold_count = get_lot_count('all_sold_lots') + len(pins_sold) - 1
+    # `get_lot_count` could potentially return 0.
+    # It returns None when Carto does not return a 200 status code: in this case, show an alert on the Index.
+    if sold_count is not None:
+        sold_count += len(pins_sold) - 1
     
     return render(request, 'index.html', {
         'application_active': application_active(request),
@@ -68,13 +72,12 @@ def get_lot_count(cartoTable):
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT count(*) FROM %s" % (cartoTable),
     }
+
     r = requests.get(carto, params=params)
     if r.status_code is 200:
         resp = json.loads(r.text)
         count = resp['rows']
-        total = count[0]['count']
-            
-    return total
+        return count[0]['count']
 
 def application_active(request):
     apps = Application.objects.all()
