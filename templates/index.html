@@ -43,14 +43,16 @@
     <hr>
 
     <div class='row'>
+      {% if sold_count %}
       <div class='col-md-3 text-center'>
         <div class="panel panel-default panel-counter">
           <div class="panel-heading lead">Total lots sold</div>
           <div class="panel-body">
-            <strong><span class="counter">{% if sold_count %}{{sold_count}}{% endif %}</span></span></strong>
+            <strong><span class="counter">{{sold_count}}</span></span></strong>
           </div>
         </div>
       </div>
+      {% endif %}
       <div class='col-md-9'>
         {% if current_count is None or sold_count is None %}
           <div class='alert alert-info'><p class='lead'>We currently cannot load the correct lot counts! Please try again momentarily.</p></div>
