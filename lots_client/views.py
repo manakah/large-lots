@@ -7,18 +7,16 @@ from uuid import uuid4
 from collections import OrderedDict
 from datetime import datetime
 from io import BytesIO
+import requests
+import usaddress
+from dateutil import parser
+import magic
+from pdfid.pdfid import FindPDFHeaderRelaxed, C2BIP3, cBinaryFile
 from retrying import retry
 from retrying import RetryError
-
-import requests
-
-import usaddress
-
-from dateutil import parser
-
-import magic
-
-from pdfid.pdfid import FindPDFHeaderRelaxed, C2BIP3, cBinaryFile
+from raven.handlers.logging import SentryHandler
+import logging
+from raven.conf import setup_logging
 
 from django.shortcuts import render
 from django.conf import settings
@@ -38,6 +36,11 @@ from lots_admin.models import Lot, Application, Address, ApplicationStep,\
     ApplicationStatus, PrincipalProfile, RelatedPerson, LotUse
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
+# Establish logger for precise logging to Sentry.
+logger = logging.getLogger(__name__)
+handler = SentryHandler(settings.SENTRY_DSN)
+handler.setLevel(logging.ERROR)
+setup_logging(handler)
 
 def home(request):
     applications = Application.objects.all()
@@ -46,7 +49,10 @@ def home(request):
         current_count = get_lot_count(settings.CURRENT_CARTODB)
         sold_count = get_lot_count('all_sold_lots')
     except RetryError as e:
-        # TODO: Log to Sentry to alert us that Carto is not behaving as expected.
+        logger.error('Carto did not return 200 - twice. Check on this!', extra={
+            'stack': True,
+        })
+
         current_count = None
         sold_count = None
         pass
