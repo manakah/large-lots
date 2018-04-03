@@ -8,12 +8,12 @@ from collections import OrderedDict
 from datetime import datetime
 from io import BytesIO
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 import usaddress
 from dateutil import parser
 import magic
 from pdfid.pdfid import FindPDFHeaderRelaxed, C2BIP3, cBinaryFile
-from retrying import retry
-from retrying import RetryError
 from raven.handlers.logging import SentryHandler
 import logging
 from raven.conf import setup_logging
@@ -44,18 +44,13 @@ setup_logging(handler)
 
 def home(request):
     applications = Application.objects.all()
+    current_count = get_lot_count(settings.CURRENT_CARTODB)
+    sold_count = get_lot_count('all_sold_lots')
 
-    try:
-        current_count = get_lot_count(settings.CURRENT_CARTODB)
-        sold_count = get_lot_count('all_sold_lots')
-    except RetryError as e:
-        logger.error('Carto did not return 200 - twice. Check on this!', extra={
+    if not current_count or not sold_count:
+        logger.error('Carto did not return 200. Check on this!', extra={
             'stack': True,
         })
-
-        current_count = None
-        sold_count = None
-        pass
 
     # Find all pins with active applications
     pins_under_review = set('0')
@@ -81,10 +76,6 @@ def home(request):
         'pins_sold': pins_sold,
         })
 
-def retry_if_none(result):
-    return result == None
-
-@retry(stop_max_attempt_number=2, retry_on_result=retry_if_none)
 def get_lot_count(cartoTable):
     carto = 'https://datamade.cartodb.com/api/v2/sql'
     params = {
@@ -92,7 +83,12 @@ def get_lot_count(cartoTable):
         'q':  "SELECT count(*) FROM %s" % (cartoTable),
     }
 
-    r = requests.get(carto, params=params)
+    session = requests.Session()
+    retries = Retry(total=2,
+                    status_forcelist=[400, 404, 500, 502, 503, 504])
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+
+    r = session.get(carto, params=params)
 
     if r.status_code is 200:
         resp = json.loads(r.text)
