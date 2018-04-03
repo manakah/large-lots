@@ -7,6 +7,8 @@ from uuid import uuid4
 from collections import OrderedDict
 from datetime import datetime
 from io import BytesIO
+from retrying import retry
+from retrying import RetryError
 
 import requests
 
@@ -39,8 +41,15 @@ from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileF
 
 def home(request):
     applications = Application.objects.all()
-    current_count = get_lot_count(settings.CURRENT_CARTODB)
-    sold_count = get_lot_count('all_sold_lots')
+
+    try:
+        current_count = get_lot_count(settings.CURRENT_CARTODB)
+        sold_count = get_lot_count('all_sold_lots')
+    except RetryError as e:
+        # TODO: Log to Sentry to alert us that Carto is not behaving as expected.
+        current_count = None
+        sold_count = None
+        pass
 
     # Find all pins with active applications
     pins_under_review = set('0')
@@ -66,6 +75,10 @@ def home(request):
         'pins_sold': pins_sold,
         })
 
+def retry_if_none(result):
+    return result == None
+
+@retry(stop_max_attempt_number=2, retry_on_result=retry_if_none)
 def get_lot_count(cartoTable):
     carto = 'https://datamade.cartodb.com/api/v2/sql'
     params = {
@@ -74,6 +87,7 @@ def get_lot_count(cartoTable):
     }
 
     r = requests.get(carto, params=params)
+
     if r.status_code is 200:
         resp = json.loads(r.text)
         count = resp['rows']
