@@ -43,6 +43,7 @@
     <hr>
 
     <div class='row'>
+      {% if sold_count %}
       <div class='col-md-3 text-center'>
         <div class="panel panel-default panel-counter">
           <div class="panel-heading lead">Total lots sold</div>
@@ -51,9 +52,13 @@
           </div>
         </div>
       </div>
+      {% endif %}
       <div class='col-md-9'>
+        {% if current_count is None or sold_count is None %}
+          <div class='alert alert-info'><p class='lead'>We currently cannot load the correct lot counts! Please try again momentarily.</p></div>
+        {% endif %}
         {% if application_active %}
-          <p class='lead'>The current program has <span class="badge badge-green">{{current_count}}</span> lots available to buy.</p>
+          <p class='lead'>The current program has <span class="badge badge-green">{% if current_count is not None %}{{current_count}}{% endif %}</span> lots available to buy.</p>
           <p class='lead'>Visit our <a href="{% url 'apply' %}">application page</a> to learn about buying a lot, or explore properties on the map below to learn about sold and available lots.</p>
         {% else %}
           <p class='lead'>Currently the City is in the process of selling nearly <span class="badge badge-orange">1,000</span> more lots.</p><p class='lead'><strong>The City is not accepting Large Lot applications at this time.</strong> More information on a future round coming soon! Check back later this fall. In the meantime, explore the map below.</p>

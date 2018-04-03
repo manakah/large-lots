@@ -7,16 +7,16 @@ from uuid import uuid4
 from collections import OrderedDict
 from datetime import datetime
 from io import BytesIO
-
 import requests
-
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 import usaddress
-
 from dateutil import parser
-
 import magic
-
 from pdfid.pdfid import FindPDFHeaderRelaxed, C2BIP3, cBinaryFile
+from raven.handlers.logging import SentryHandler
+import logging
+from raven.conf import setup_logging
 
 from django.shortcuts import render
 from django.conf import settings
@@ -36,10 +36,21 @@ from lots_admin.models import Lot, Application, Address, ApplicationStep,\
     ApplicationStatus, PrincipalProfile, RelatedPerson, LotUse
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
 
+# Establish logger for precise logging to Sentry.
+logger = logging.getLogger(__name__)
+handler = SentryHandler(settings.SENTRY_DSN)
+handler.setLevel(logging.ERROR)
+setup_logging(handler)
 
 def home(request):
     applications = Application.objects.all()
     current_count = get_lot_count(settings.CURRENT_CARTODB)
+    sold_count = get_lot_count('all_sold_lots')
+
+    if not current_count or not sold_count:
+        logger.error('Carto did not return 200. Check on this!', extra={
+            'stack': True,
+        })
 
     # Find all pins with active applications
     pins_under_review = set('0')
@@ -51,7 +62,10 @@ def home(request):
     for status in ApplicationStatus.objects.filter(denied=False).filter(current_step__step=11):
         pins_sold.add(status.lot_id)
 
-    sold_count = get_lot_count('all_sold_lots') + len(pins_sold) - 1
+    # `get_lot_count` could potentially return 0.
+    # It returns None when Carto does not return a 200 status code: in this case, show an alert on the Index.
+    if sold_count is not None:
+        sold_count += len(pins_sold) - 1
     
     return render(request, 'index.html', {
         'application_active': application_active(request),
@@ -68,13 +82,18 @@ def get_lot_count(cartoTable):
         'api_key': settings.CARTODB_API_KEY,
         'q':  "SELECT count(*) FROM %s" % (cartoTable),
     }
-    r = requests.get(carto, params=params)
+
+    session = requests.Session()
+    retries = Retry(total=2,
+                    status_forcelist=[400, 404, 500, 502, 503, 504])
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+
+    r = session.get(carto, params=params)
+
     if r.status_code is 200:
         resp = json.loads(r.text)
         count = resp['rows']
-        total = count[0]['count']
-            
-    return total
+        return count[0]['count']
 
 def application_active(request):
     apps = Application.objects.all()
