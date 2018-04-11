@@ -173,18 +173,18 @@
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
-            cartodb_table: 'large_lots_2016_fall_expansion',
+            cartodb_table: 'large_lots_2018_spring',
             mainWhere: " where pin_nbr not in (" + pins_sold + ") and pin_nbr not in (" + pins_under_review + ")",
-            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
+            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS 2018 SPRING'",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             extra_sublayers: [
             {
-                sql: "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select  cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))",
+                sql: "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select  cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2018_spring where pin_nbr in (" + pins_sold + "))",
                 cartocss: $('#map-styles-sold').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community',
             },
             {
-                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_under_review + ")",
+                sql: "select * from large_lots_2018_spring where pin_nbr in (" + pins_under_review + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]

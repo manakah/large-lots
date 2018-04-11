@@ -9,7 +9,7 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_2016_fall_expansion',
+  cartodb_table: 'large_lots_2018_spring',
 
   initialize: function() {
 
@@ -151,7 +151,7 @@ var LargeLots = {
                   interactivity: fields
               },
               {
-                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
+                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS 2018 SPRING'",
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc; polygon-opacity: 0.25; line-color: #606060; line-width: 0.8; line-opacity: 1;}"
               }
           ]

@@ -172,7 +172,7 @@ var LargeLots = {
       var sql = 'select * from ' + LargeLots.cartodb_table + ' where ';
       var clauses = []
       if(checks.indexOf('sold') >= 0){
-          soldSQL = "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))";
+          soldSQL = "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2018_spring where pin_nbr in (" + pins_sold + "))";
       }
       else {
           soldSQL = 'select * from all_sold_lots where false';
@@ -312,7 +312,7 @@ var LargeLots = {
 
           // check if the point is in neighborhood area
           var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-          sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          sql.execute("select cartodb_id, the_geom FROM chicago_community_areas WHERE community = 'LARGE LOTS 2018 SPRING' AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
           .done(function(data){
             if (data.features.length == 0) {
               $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));

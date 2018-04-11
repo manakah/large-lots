@@ -60,6 +60,6 @@ DATABASES = {
 }
 
 CURRENT_PILOT = "pilot_6_dev"
-CURRENT_CARTODB = "large_lots_2016_fall_expansion"
+CURRENT_CARTODB = "large_lots_2018_spring"
 START_DATE = datetime.datetime.now(pytz.timezone('America/Chicago'))
 END_DATE = START_DATE + datetime.timedelta(weeks=2)

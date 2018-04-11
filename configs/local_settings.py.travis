@@ -57,4 +57,4 @@ DATABASES = {
 }
 
 CURRENT_PILOT = "pilot_6_dev"
-CURRENT_CARTODB = "large_lots_2016_fall_expansion"
+CURRENT_CARTODB = "large_lots_2018_spring"

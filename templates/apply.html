@@ -26,17 +26,17 @@
 {% block content %}
       <div class='col-md-12'>
 
-        <h1>Fall 2016 Expansion
+        <h1>Spring 2018 Sale
             {% if form %}
             <small class='open'>Open</small>
             {% else %}
-            <small class='closed'>Opens on November 29, 2016</small>
+            <small class='closed'>Opens on April 16, 2018</small>
             {% endif %}
         </h1>
 
         <p>If you own land on the South or West sides of Chicago, you can <strong>buy up to two vacant lots</strong> from the City of Chicago for $1 a lot. The lots must be <a href='/faq/#faq-block'>on the same block</a> as land you already own. Individuals and organizations can apply but churches are not eligible. Only <strong>one application</strong> will be accepted per property deed.</p>
 
-        <p>Applications will be accepted beginning <strong>November 29, 2016</strong>. The application period will end on <strong>January 31, 2017 at midnight</strong>.</p>
+        <p>Applications will be accepted beginning <strong>April 16, 2018</strong>. The application period will end on <strong>XXX at midnight</strong>.</p>
 
         <p>For more information, read the <a target='_blank' href='/faq/'>frequently asked questions (FAQ) page</a>.</p>
 
@@ -133,9 +133,9 @@
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
-            cartodb_table: 'large_lots_2016_fall_expansion',
+            cartodb_table: 'large_lots_2018_spring',
             mainWhere: "",
-            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
+            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS 2018 SPRING'",
             fields: "pin, pin_nbr, street_name, street_direction, street_type, square_feet, zone_class, ward, community"
         }
 
