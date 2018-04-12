@@ -74,7 +74,9 @@ def home(request):
         'current_count': current_count,
         'pins_under_review': pins_under_review,
         'pins_sold': pins_sold,
-        })
+        'cartodb_table': settings.CURRENT_CARTODB,
+        'boundaries': settings.CURRENT_BOUNDARIES,
+    })
 
 def get_lot_count(cartoTable):
     carto = 'https://datamade.cartodb.com/api/v2/sql'
@@ -352,6 +354,7 @@ def apply(request):
             context['cartodb_api'] = settings.CARTODB_API_KEY
             context['start_date'] = settings.START_DATE.strftime('%B %d, %Y')
             context['end_date'] = settings.END_DATE.strftime('%B %d, %Y')
+            context['boundaries'] = settings.CURRENT_BOUNDARIES
 
             return render(request, 'apply.html', context, {
                 'applied_pins': pins_str
@@ -371,6 +374,7 @@ def apply(request):
         'cartodb_api': settings.CARTODB_API_KEY,
         'start_date': settings.START_DATE.strftime('%B %d, %Y'),
         'end_date': settings.END_DATE.strftime('%B %d, %Y'),
+        'boundaries': settings.CURRENT_BOUNDARIES,
     })
 
 def apply_confirm(request, tracking_id):

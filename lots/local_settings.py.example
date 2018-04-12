@@ -27,7 +27,7 @@ EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER='<SMTP Username>'
 EMAIL_HOST_PASSWORD='<SMTP password>'
-SENTRY_DSN='<Sentry DSN>'
+SENTRY_DSN=''
 RAVEN_CONFIG = {'dsn': SENTRY_DSN}
 
 PILOT_INFO = {
@@ -59,7 +59,9 @@ DATABASES = {
    }
 }
 
-CURRENT_PILOT = "pilot_6_dev"
+CURRENT_PILOT = "pilot_7_dev"
 CURRENT_CARTODB = "large_lots_2018_spring"
+CURRENT_BOUNDARIES = "LARGE LOTS 2018 SPRING"
+
 START_DATE = datetime.datetime.now(pytz.timezone('America/Chicago'))
 END_DATE = START_DATE + datetime.timedelta(weeks=2)

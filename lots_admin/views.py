@@ -652,7 +652,8 @@ def location_check(request, application_id):
         'lot_pin': lot_pin,
         'warning': warning,
         'before_step4': before_step4,
-        })
+        'boundaries': settings.CURRENT_BOUNDARIES,
+    })
 
 def get_parcel_geometry(request):
     pin = request.GET.get('pin')
@@ -754,7 +755,8 @@ def multiple_applicant_check(request, application_id):
         'applicants_list': applicants_list,
         'other_owned_pins': json.dumps(other_owned_pins),
         'warning': warning,
-        })
+        'boundaries': settings.CURRENT_BOUNDARIES,
+    })
 
 @login_required(login_url='/lots-login/')
 def multiple_location_check_submit(request, application_id):

@@ -11,7 +11,9 @@ var LargeLots = {
   locationScope: 'chicago',
   cartodb_table: 'large_lots_2018_spring',
 
-  initialize: function() {
+  initialize: function(init_params) {
+
+      LargeLots.overlayName = init_params.overlayName;
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('locationcheck-map', {
@@ -151,7 +153,7 @@ var LargeLots = {
                   interactivity: fields
               },
               {
-                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS 2018 SPRING'",
+                  sql: "select * from " + LargeLots.overlayName,
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc; polygon-opacity: 0.25; line-color: #606060; line-width: 0.8; line-opacity: 1;}"
               }
           ]

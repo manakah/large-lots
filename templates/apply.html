@@ -133,9 +133,9 @@
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
-            cartodb_table: 'large_lots_2018_spring',
+            cartodb_table: '{{ cartodb_table }}',
             mainWhere: "",
-            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS 2018 SPRING'",
+            overlayName: "chicago_community_areas WHERE community = '{{ boundaries }}'",
             fields: "pin, pin_nbr, street_name, street_direction, street_type, square_feet, zone_class, ward, community"
         }
 

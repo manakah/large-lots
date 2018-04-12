@@ -108,7 +108,11 @@
     var lotPin = '{{ lot_pin }}';
 
     $(function() {
-      LargeLots.initialize();
+      init_params = {
+        overlayName: "chicago_community_areas WHERE community = '{{ boundaries }}'",
+      };
+
+      LargeLots.initialize(init_params);
     });
   </script>
 {% endblock %}
