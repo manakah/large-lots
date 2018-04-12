@@ -65,8 +65,10 @@ def lots_admin_map(request):
 
     return render(request, 'admin-map.html', {
         'applied_count': applied_count,
-        'applied_pins': pins_str
-        })
+        'applied_pins': pins_str,
+        'cartodb_table': settings.CURRENT_CARTODB,
+        'boundaries': settings.CURRENT_BOUNDARIES,
+    })
 
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):

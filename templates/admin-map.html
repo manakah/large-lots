@@ -51,14 +51,14 @@
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
-            cartodb_table: 'large_lots_2018_spring',
+            cartodb_table: '{{ cartodb_table }}',
             mainWhere: "",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             // Create the boundary layer (one of the Carto sublayers)
-            overlayName: " chicago_community_areas where community = 'LARGE LOTS 2018 SPRING'",
+            overlayName: " chicago_community_areas where community = '{{ boundaries }}'",
             // Add an extra sublayer
             extra_sublayers: [{
-                sql: "select * from large_lots_2018_spring where pin_nbr in (" + applied_pins + ")",
+                sql: "select * from {{ cartodb_table }} where pin_nbr in (" + applied_pins + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]
