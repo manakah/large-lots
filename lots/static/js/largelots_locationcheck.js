@@ -9,11 +9,11 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_2018_spring',
 
   initialize: function(init_params) {
 
       LargeLots.overlayName = init_params.overlayName;
+      LargeLots.cartodb_table = init_params.cartodb_table;
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('locationcheck-map', {

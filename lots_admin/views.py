@@ -653,6 +653,7 @@ def location_check(request, application_id):
         'warning': warning,
         'before_step4': before_step4,
         'boundaries': settings.CURRENT_BOUNDARIES,
+        'cartodb_table': settings.CURRENT_CARTODB,
     })
 
 def get_parcel_geometry(request):
@@ -756,6 +757,7 @@ def multiple_applicant_check(request, application_id):
         'other_owned_pins': json.dumps(other_owned_pins),
         'warning': warning,
         'boundaries': settings.CURRENT_BOUNDARIES,
+        'cartodb_table': settings.CURRENT_CARTODB,
     })
 
 @login_required(login_url='/lots-login/')
