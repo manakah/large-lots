@@ -7,6 +7,7 @@ SECRET_KEY = 'running man was a good movie'
 CARTODB_API_KEY = ''
 
 CURRENT_CARTODB = ''
+CURRENT_BOUNDARIES = ''
 
 INSTALLED_APPS = (
     'django.contrib.admin',
