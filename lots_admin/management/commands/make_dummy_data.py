@@ -1,3 +1,4 @@
+import csv
 import datetime
 import random
 import uuid
@@ -18,23 +19,39 @@ class Command(BaseCommand):
     # i.e., `fake.seed(2012)`
     fake = Faker()
 
+    def _pins(self):
+        '''
+        Grab real PINs from our generated list of sold lots.
+        '''
+        pins = []
+
+        with open('data/pilots_all/processed/all_sold_lots.csv', 'r') as f:
+            reader = csv.reader(f)
+
+            next(reader)
+
+            for row in reader:
+                pin, *_ = row
+                yield pin
+
     def add_arguments(self, parser):
         parser.add_argument('--n_applications',
                             help='Number of applications to create',
-                            default=150,
+                            default=25,
                             type=int)
 
         parser.add_argument('--n_addresses',
                             help='Number of addresses to create',
-                            default=100,
+                            default=50,
                             type=int)
 
         parser.add_argument('--n_lots',
                             help='Number of lots to create',
-                            default=75,
+                            default=50,
                             type=int)
 
     def handle(self, *args, **options):
+        self.pins = self._pins()
         self.make_steps()
         self.make_addresses(options['n_addresses'])
         self.make_lots(options['n_lots'])
@@ -69,7 +86,7 @@ class Command(BaseCommand):
             while not lot_saved:
                 try:
                     lot_info = {
-                        'pin': random.randint(1000,9999),
+                        'pin': next(self.pins),
                         'address': addresses[random.randint(0, len(addresses) - 1)]
                     }
                     lot = Lot(**lot_info)
@@ -93,7 +110,7 @@ class Command(BaseCommand):
                 'first_name': self.fake.first_name(),
                 'last_name': self.fake.last_name(),
                 'organization': '',
-                'owned_pin': '',
+                'owned_pin': next(self.pins),
                 'owned_address': address,
                 'deed_image': 'a-deed-image.png',
                 'deed_timestamp': datetime.datetime.now(),
