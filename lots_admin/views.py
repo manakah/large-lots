@@ -55,22 +55,6 @@ def lots_logout(request):
     return HttpResponseRedirect('/')
 
 @login_required(login_url='/lots-login/')
-def lots_admin_map(request):
-    applied_pins = set()
-    for lot in Lot.objects.all():
-        applied_pins.add(lot.pin)
-
-    applied_count = len(applied_pins)
-    pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
-
-    return render(request, 'admin-map.html', {
-        'applied_count': applied_count,
-        'applied_pins': pins_str,
-        'cartodb_table': settings.CURRENT_CARTODB,
-        'boundaries': settings.CURRENT_BOUNDARIES,
-    })
-
-@login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
     applications = Application.objects.filter(principalprofile__isnull=False).distinct()
 
