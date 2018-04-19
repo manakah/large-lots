@@ -7,7 +7,7 @@ gunicorn==19.6.0
 raven==5.26.0
 python-dateutil==2.5.3
 usaddress==0.5.7
-psycopg2==2.6.2
+psycopg2==2.7.4
 -e git+https://github.com/datamade/pyesridump.git#egg=pyesridump
 pytz==2016.7
 python-magic==0.4.12
