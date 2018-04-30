@@ -113,7 +113,12 @@
     var otherOwnedPins = ['0'];
 
     $(function() {
-      LargeLots.initialize();
+      init_params = {
+        overlayName: "chicago_community_areas WHERE community = '{{ boundaries }}'",
+        cartodb_table: '{{ cartodb_table }}',
+      };
+
+      LargeLots.initialize(init_params);
     });
   </script>
 {% endblock %}

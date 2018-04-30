@@ -6,14 +6,13 @@ from lots_client.views import home, apply_confirm, faq, about, lot_uses_page, lo
     wintrust_invitation, wintrust_announcement, \
     principal_profile_form, eds_submission, get_applications_from_email
 
-from lots_admin.views import lots_admin, lots_admin_map, csv_dump, lots_login, \
-    lots_logout,pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, applicant_duplicate_submit, \
-    location_check, location_check_submit, \
-    multiple_applicant_check, multiple_location_check_submit, \
-    lotteries, lottery, lottery_submit, \
-    review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
-    bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, \
-    deed, double_submit, lots_admin_principal_profiles, delete_principal_profiles, \
+from lots_admin.views import lots_admin, csv_dump, lots_login, \
+    lots_logout, pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, \
+    applicant_duplicate_submit, location_check, location_check_submit, \
+    multiple_applicant_check, multiple_location_check_submit, lotteries, lottery, \
+    lottery_submit, review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
+    bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, deed, \
+    double_submit, lots_admin_principal_profiles, delete_principal_profiles, \
     email_error
 
 from django.contrib import admin
@@ -36,7 +35,6 @@ urlpatterns = [
     url(r'^principal-profile-form/(?P<tracking_id>\S+)/$', principal_profile_form, name='principal_profile_form'),
     url(r'^principal-profile-form/$', principal_profile_form, name='principal_profile_form'),
     url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
-    url(r'^lots-admin-map/$', lots_admin_map, name='lots_admin_map'),
     url(r'^principal-profiles/$', lots_admin_principal_profiles, name='lots_admin_principal_profiles'),
     url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
     url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)$', csv_dump, name='csv_dump'),

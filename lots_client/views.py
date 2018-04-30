@@ -71,10 +71,14 @@ def home(request):
         'application_active': application_active(request),
         'applications': applications,
         'sold_count': sold_count,
-        'current_count': current_count,
+        'current_count': "{:,}".format(current_count),
         'pins_under_review': pins_under_review,
         'pins_sold': pins_sold,
-        })
+        'cartodb_table': settings.CURRENT_CARTODB,
+        'boundaries': settings.CURRENT_BOUNDARIES,
+        'start_date': settings.START_DATE.strftime('%B %d, %Y'),
+        'end_date': settings.END_DATE.strftime('%B %d, %Y'),
+    })
 
 def get_lot_count(cartoTable):
     carto = 'https://datamade.cartodb.com/api/v2/sql'
@@ -214,7 +218,7 @@ def apply(request):
 
     allLots = Lot.objects.all()
 
-    applied_pins = [lot.pin for lot in allLots ]
+    applied_pins = [lot.pin for lot in allLots]
 
     pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
 
@@ -310,6 +314,8 @@ def apply(request):
 
             return HttpResponseRedirect('/apply-confirm/%s/' % app.tracking_id)
         else:
+            context['form'] = form
+
             context['lot_1_address'] = form['lot_1_address'].value()
             context['lot_1_pin'] = form['lot_1_pin'].value()
             context['lot_1_use'] = form['lot_1_use'].value()
@@ -331,31 +337,46 @@ def apply(request):
             context['contact_zip_code'] = form['contact_zip_code'].value()
             context['how_heard'] = form['how_heard'].value()
             context['terms'] = form['terms'].value()
-            context['form'] = form
+
+            error_messages = OrderedDict()
+
             fields = [f for f in form.fields]
-            context['error_messages'] = OrderedDict()
-            context['applications'] = applications
-            context['cartodb_table'] = settings.CURRENT_CARTODB
-            context['cartodb_api'] = settings.CARTODB_API_KEY
+
             for field in fields:
                 label = form.fields[field].label
                 error = form.errors.get(field)
+
                 if label and error:
-                    context['error_messages'][label] = form.errors[field][0]
+                    error_messages[label] = form.errors[field][0]
+
+            context['error_messages'] = error_messages
+            context['applications'] = applications
+
+            context['cartodb_table'] = settings.CURRENT_CARTODB
+            context['cartodb_api'] = settings.CARTODB_API_KEY
+            context['start_date'] = settings.START_DATE.strftime('%B %d, %Y')
+            context['end_date'] = settings.END_DATE.strftime('%B %d, %Y')
+            context['boundaries'] = settings.CURRENT_BOUNDARIES
+
             return render(request, 'apply.html', context, {
                 'applied_pins': pins_str
-                })
+            })
+
     else:
         if application_active(request):
             form = ApplicationForm()
         else:
             form = None
+
     return render(request, 'apply.html', {
         'form': form,
         'applications': applications,
         'applied_pins': pins_str,
         'cartodb_table': settings.CURRENT_CARTODB,
-        'cartodb_api': settings.CARTODB_API_KEY
+        'cartodb_api': settings.CARTODB_API_KEY,
+        'start_date': settings.START_DATE.strftime('%B %d, %Y'),
+        'end_date': settings.END_DATE.strftime('%B %d, %Y'),
+        'boundaries': settings.CURRENT_BOUNDARIES,
     })
 
 def apply_confirm(request, tracking_id):

@@ -55,20 +55,6 @@ def lots_logout(request):
     return HttpResponseRedirect('/')
 
 @login_required(login_url='/lots-login/')
-def lots_admin_map(request):
-    applied_pins = set()
-    for lot in Lot.objects.all():
-        applied_pins.add(lot.pin)
-
-    applied_count = len(applied_pins)
-    pins_str = ",".join(["'%s'" % a.replace('-','').replace(' ','') for a in applied_pins])
-
-    return render(request, 'admin-map.html', {
-        'applied_count': applied_count,
-        'applied_pins': pins_str
-        })
-
-@login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
     applications = Application.objects.filter(principalprofile__isnull=False).distinct()
 
@@ -652,7 +638,9 @@ def location_check(request, application_id):
         'lot_pin': lot_pin,
         'warning': warning,
         'before_step4': before_step4,
-        })
+        'boundaries': settings.CURRENT_BOUNDARIES,
+        'cartodb_table': settings.CURRENT_CARTODB,
+    })
 
 def get_parcel_geometry(request):
     pin = request.GET.get('pin')
@@ -754,7 +742,9 @@ def multiple_applicant_check(request, application_id):
         'applicants_list': applicants_list,
         'other_owned_pins': json.dumps(other_owned_pins),
         'warning': warning,
-        })
+        'boundaries': settings.CURRENT_BOUNDARIES,
+        'cartodb_table': settings.CURRENT_CARTODB,
+    })
 
 @login_required(login_url='/lots-login/')
 def multiple_location_check_submit(request, application_id):

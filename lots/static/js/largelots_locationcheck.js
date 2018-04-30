@@ -9,9 +9,11 @@ var LargeLots = {
   geojson: null,
   marker: null,
   locationScope: 'chicago',
-  cartodb_table: 'large_lots_2016_fall_expansion',
 
-  initialize: function() {
+  initialize: function(init_params) {
+
+      LargeLots.overlayName = init_params.overlayName;
+      LargeLots.cartodb_table = init_params.cartodb_table;
 
       if (!LargeLots.map) {
         LargeLots.map = L.map('locationcheck-map', {
@@ -151,7 +153,7 @@ var LargeLots = {
                   interactivity: fields
               },
               {
-                  sql: "select * from chicago_community_areas where community = 'LARGE LOTS EXPANSION'",
+                  sql: "select * from " + LargeLots.overlayName,
                   cartocss: "#" + LargeLots.cartodb_table + "{polygon-fill: #ffffcc; polygon-opacity: 0.25; line-color: #606060; line-width: 0.8; line-opacity: 1;}"
               }
           ]

@@ -33,7 +33,7 @@
 {% block content %}
   <div class='col-md-12'>
     <br />
-    
+
     <div class='row'>
       <div class='col-md-12'>
         <h3>The City of Chicago sells vacant residential lots for <strong>$1</strong> through the Large Lot Program.</h3>
@@ -58,8 +58,9 @@
           <div class='alert alert-info'><p class='lead'>We currently cannot load the correct lot counts! Please try again momentarily.</p></div>
         {% endif %}
         {% if application_active %}
-          <p class='lead'>The current program has <span class="badge badge-green">{% if current_count is not None %}{{current_count}}{% endif %}</span> lots available to buy.</p>
-          <p class='lead'>Visit our <a href="{% url 'apply' %}">application page</a> to learn about buying a lot, or explore properties on the map below to learn about sold and available lots.</p>
+          <p class='lead'>There are currently <strong>{% if current_count is not None %}{{current_count}}{% endif %}</strong> lots available to buy. Applications will be accepted through <strong>{{ end_date }}</strong>. <a href="{% url 'apply' %}" >Apply for up to two lots &raquo;</a></p>
+          <p class='lead'>You can also explore the map below to learn about sold and available lots.</p>
+          <p><a href="{% url 'apply' %}" class='btn btn-success'>Apply now &raquo;</a></p>
         {% else %}
           <p class='lead'><strong>The Spring 2018 Large Lot Application Round is coming soon!</strong></p><p class='lead'>In the meantime, explore the map below of lots sold and available.</p>
         {% endif %}
@@ -68,8 +69,8 @@
 
     <br>
 
-    <div class="row">  
-      <div class="col-md-12"> 
+    <div class="row">
+      <div class="col-md-12">
         <p>
           <form class='form-inline hidden-print' id='lot-form'>
             <div class="form-group">
@@ -173,18 +174,18 @@
         var init_params = {
             map_centroid: [41.7872, -87.6345],
             defaultZoom: 11,
-            cartodb_table: 'large_lots_2016_fall_expansion',
+            cartodb_table: '{{ cartodb_table }}',
             mainWhere: " where pin_nbr not in (" + pins_sold + ") and pin_nbr not in (" + pins_under_review + ")",
-            overlayName: "chicago_community_areas WHERE community = 'LARGE LOTS EXPANSION'",
+            overlayName: "chicago_community_areas WHERE community = '{{ boundaries }}'",
             fields: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             extra_sublayers: [
             {
-                sql: "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select  cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from large_lots_2016_fall_expansion where pin_nbr in (" + pins_sold + "))",
+                sql: "(select cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from all_sold_lots) UNION ALL (select  cartodb_id, the_geom, the_geom_webmercator, pin, pin_nbr, street_name, street_direction, street_type, ward::int, community from {{ cartodb_table }} where pin_nbr in (" + pins_sold + "))",
                 cartocss: $('#map-styles-sold').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, community',
             },
             {
-                sql: "select * from large_lots_2016_fall_expansion where pin_nbr in (" + pins_under_review + ")",
+                sql: "select * from {{ cartodb_table }} where pin_nbr in (" + pins_under_review + ")",
                 cartocss: $('#map-styles-applied').html().trim(),
                 interactivity: 'pin, pin_nbr, street_name, street_direction, street_type, ward, square_feet, zone_class, community',
             }]
@@ -215,6 +216,7 @@
         };
 
         LargeLots.createParcelInfo = function(props) {
+            // TO-DO: Update with information from Fall 2016 expansion
             var pilot_lookups = {
               'EAST GARFIELD PARK': 'East Garfield Park pilot, which ended on August 4, 2014.',
               'AUSTIN': 'Austin pilot, which ended on January 31, 2015.',
@@ -224,16 +226,16 @@
             }
             var greater_englewood = ['NEW CITY', 'WASHINGTON PARK', 'ENGLEWOOD', 'GREATER GRAND CROSSING', 'GRAND BOULEVARD', 'WEST ENGLEWOOD', 'FULLER PARK', 'WOODLAWN', 'SOUTH SHORE']
             // Four pins in NEAR WEST SIDE and SOUTH SHORE areas do not match any pilots:
-            // 20234230230000, 20234230240000, 16132020060000, 16132020290000  
+            // 20234230230000, 20234230240000, 16132020060000, 16132020290000
             var address = LargeLots.formatAddress(props);
             var pin_formatted = LargeLots.formatPin(props.pin_nbr);
             var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
               <table class='table table-bordered table-condensed'><tbody>\
                 <tr><td>Address</td><td>" + address + "</td></tr>\
                 <tr><td>PIN</td><td>" + pin_formatted + " (<a target='_blank' href='http://www.cookcountypropertyinfo.com/cookviewerpinresults.aspx?pin=" + props.pin_nbr + "'>info</a>)</td></tr>";
-  
+
             info += "<tr><td>Community</td><td>" + props.community + "</td></tr>";
-            info += "<tr><td>Ward</td><td>" + props.ward + "</td></tr>";                
+            info += "<tr><td>Ward</td><td>" + props.ward + "</td></tr>";
 
             if (props.zone_class){
                 info += "<tr><td>Zoned</td><td> Residential (<a href='http://secondcityzoning.org/zone/" + props.zone_class + "' target='_blank'>" + props.zone_class + "</a>)</td></tr>";
@@ -244,19 +246,32 @@
 
             // Add colorful status labels
             if ((props.status == 'sold') || (pins_sold.indexOf(props.pin_nbr) >= 0)) {
-              info += "<tr><td>Status</td><td><span class='badge badge-purple'>Sold</span></td></tr>"; 
+              info += "<tr><td>Status</td><td><span class='badge badge-purple'>Sold</span></td></tr>";
+
               // Identify pilot name and end date
               var sold_statement = '';
+
+              // Lots from current pilot
               if (pins_sold.indexOf(props.pin_nbr) >= 0) {
-                sold_statement = 'Fall 2016 Expansion, which ended on January 31, 2017'
+                sold_statement = 'Spring 2018 Expansion, which ended on July 2, 2018'
               }
+
               else if (greater_englewood.indexOf(props.community) >= 0) {
                 sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
               }
-              else {
+
+              else if ( pilot_lookups[props.community] ) {
                 sold_statement = pilot_lookups[props.community]
               }
-              info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
+
+              // TO-DO: Once we update pilot_lookups, remove this block.
+              else {
+                sold_statement = 'Fall 2016 Expansion, which ended on January 31, 2017'
+              }
+
+              if (sold_statement) {
+                info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
+              }
             }
             else {
               if (pins_under_review.indexOf(props.pin_nbr) >= 0) {
@@ -272,7 +287,7 @@
                 info += "<tr><td>Status</td><td><span class='badge badge-green'>Available</span></td></tr>";
               }
             }
-            
+
             info += "</tbody></table></div><div class='col-xs-6 col-md-12'>\
             <img class='img-responsive img-thumbnail' src='https://pic.datamade.us/" + props.pin_nbr + ".jpg' /></div></div>";
 
