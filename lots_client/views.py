@@ -71,11 +71,13 @@ def home(request):
         'application_active': application_active(request),
         'applications': applications,
         'sold_count': sold_count,
-        'current_count': current_count,
+        'current_count': "{:,}".format(current_count),
         'pins_under_review': pins_under_review,
         'pins_sold': pins_sold,
         'cartodb_table': settings.CURRENT_CARTODB,
         'boundaries': settings.CURRENT_BOUNDARIES,
+        'start_date': settings.START_DATE.strftime('%B %d, %Y'),
+        'end_date': settings.END_DATE.strftime('%B %d, %Y'),
     })
 
 def get_lot_count(cartoTable):
