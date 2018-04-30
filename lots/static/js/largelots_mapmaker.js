@@ -311,7 +311,7 @@ var LargeLots = {
 
           // check if the point is in neighborhood area
           var sql = new cartodb.SQL({user: 'datamade', format: 'geojson'});
-          sql.execute("select cartodb_id, the_geom FROM {{boundaries}} AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {LargeLots:overlayName, lng:currentPinpoint[1], lat:currentPinpoint[0]})
+          sql.execute("select cartodb_id, the_geom FROM " + LargeLots.overlayName + " AND ST_Intersects( the_geom, ST_SetSRID(ST_POINT({{lng}}, {{lat}}) , 4326))", {lng:currentPinpoint[1], lat:currentPinpoint[0]})
           .done(function(data){
             if (data.features.length == 0) {
               $('#addr_search_modal').html(LargeLots.convertToPlainString($.address.parameter('address')));
