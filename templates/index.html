@@ -58,7 +58,7 @@
           <div class='alert alert-info'><p class='lead'>We currently cannot load the correct lot counts! Please try again momentarily.</p></div>
         {% endif %}
         {% if application_active %}
-          <p class='lead'>There are currently <strong>{% if current_count is not None %}{{current_count}}{% endif %}</strong> lots available to buy. Applications will be accepted through <strong>{{ end_date }}</strong>. <a href="{% url 'apply' %}" >Apply for up to two lots &raquo;</a></p>
+          <p class='lead'>There are currently <strong>{% if current_count is not None %}{{current_count}}{% endif %}</strong> lots available to buy. Applications will be accepted through <strong>{{ end_date }}</strong>. We have received <strong>{{ application_count }} applications</strong> so far this round. <a href="{% url 'apply' %}" >Apply for up to two lots &raquo;</a></p>
           <p class='lead'>You can also explore the map below to learn about sold and available lots.</p>
           <p><a href="{% url 'apply' %}" class='btn btn-success'>Apply now &raquo;</a></p>
         {% else %}

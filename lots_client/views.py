@@ -43,7 +43,7 @@ handler.setLevel(logging.ERROR)
 setup_logging(handler)
 
 def home(request):
-    applications = Application.objects.all()
+    application_count = Application.objects.count()
     current_count = get_lot_count(settings.CURRENT_CARTODB)
     sold_count = get_lot_count('all_sold_lots')
 
@@ -69,7 +69,7 @@ def home(request):
     
     return render(request, 'index.html', {
         'application_active': application_active(request),
-        'applications': applications,
+        'application_count': "{:,}".format(application_count),
         'sold_count': sold_count,
         'current_count': "{:,}".format(current_count),
         'pins_under_review': pins_under_review,
