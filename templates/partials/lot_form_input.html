@@ -51,6 +51,7 @@
       <div class="form-group">
       {% endif %}
       <label for="lot_{{lot_number}}_use">How do you plan on using this lot?</label>
+      <small class="help-block">Please use 255 or fewer characters.</small>
       <input type="text" value="{{lot_use}}" class="form-control" id="id_lot_{{lot_number}}_use" name="lot_{{lot_number}}_use" placeholder="Community garden, side lot or yard, etc.">
       {% for error in field.errors %}
           <span class="help-block">{{ error }}</span>

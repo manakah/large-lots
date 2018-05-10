@@ -24,10 +24,22 @@ class ApplicationForm(forms.Form):
         error_messages={
             'required': 'Provide the lot’s Parcel Identification Number'
         },label="Lot 1 PIN")
-    lot_1_use = forms.CharField(required=False)
+    lot_1_use = forms.CharField(
+        max_length=255,
+        error_messages={
+            'max_length': 'Please provide a lot use fewer than 255 characters in length'
+        },
+        required=False
+    )
     lot_2_address = forms.CharField(required=False)
     lot_2_pin = forms.CharField(required=False)
-    lot_2_use = forms.CharField(required=False)
+    lot_2_use = forms.CharField(
+        max_length=255,
+        error_messages={
+            'max_length': 'Please provide a lot use fewer than 255 characters in length'
+        },
+        required=False
+    )
     owned_address = forms.CharField(
         error_messages={
             'required': 'Provide the address of the building you own'
@@ -35,7 +47,7 @@ class ApplicationForm(forms.Form):
     owned_pin = forms.CharField(
         error_messages={
             'required': 'Provide the Parcel Identification Number for the property you own'
-        },label="Owned PIN")
+        }, label="Owned PIN")
     deed_image = forms.FileField(
         error_messages={'required': 'Provide an image of the deed of the building you own'
         }, label="Electronic version of your deed")
@@ -135,12 +147,14 @@ class ApplicationForm(forms.Form):
 
     def clean_owned_pin(self):
         pin = self.cleaned_data['owned_pin']
-        pin = pin.replace("-", "").replace(" ", "")
-        pattern = re.compile('[^0-9]')
-        if len(pattern.sub('', pin)) != 14:
-            raise forms.ValidationError('Please provide a valid PIN')
+
+        # Strip everything but digits from the provided PIN
+        clean_pin = re.sub('[^0-9]', '', pin)
+
+        if len(clean_pin) != 14:
+            raise forms.ValidationError('Please provide a valid 14-digit PIN')
         else:
-            return pin
+            return clean_pin
 
     def clean_contact_street(self):
         return self.cleaned_data['contact_street'].upper()
