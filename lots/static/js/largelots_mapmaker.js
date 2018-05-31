@@ -35,6 +35,13 @@ var LargeLots = {
             { saturation: -100 },
             { lightness: 40 }
           ]
+        },  
+        {
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+                  { visibility: "off" }
+            ]
         }
       ];
 
