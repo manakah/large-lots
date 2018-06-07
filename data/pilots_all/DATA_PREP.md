@@ -6,7 +6,7 @@ The index page displays all the properties sold and currently under review. Gett
 
 First, you need a Postgress database with all city parcels, communities, and wards. Please see `DATA_PREP.md` at the root of the large-lots repo for information on creating a database with the necessary tables. Alternatively, you may create an `lis` database, given the instructions provided in [this repo](https://github.com/datamade/lis). Whatever the case, be sure that you assign the name of your database to the `PG_DB` variable in the `pilots_all/Makefile`.
 
-Then, request a list of all properties sold in previous pilots from the Department of Planning and Development (contact: Jeanne Chandler). Add that file to `pilots_all/raw/`. 
+Then, request a list of all properties sold in previous pilots from the Department of Planning and Development. Add that file to `pilots_all/raw/`. 
 
 Finally, run the Makefile:
 
