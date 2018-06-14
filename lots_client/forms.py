@@ -1,22 +1,74 @@
 # -*- coding: utf-8 -*
 import re
 from io import BytesIO
+import time
 
 import requests
-
 import magic
-
 from pdfid.pdfid import PDFiD
 
 from django.conf import settings
 from django import forms
+from django.core.files.storage import default_storage
 
 from us.states import STATES
 
 from lots_admin.models import PrincipalProfile
 from .utils import call_carto
 
-class ApplicationForm(forms.Form):
+
+class DeedImageMixin(object):
+    def _guess_filetype(self, image):
+        filetype = magic.from_buffer(image.file.read(), mime=True)
+
+        image.file.seek(0)
+
+        return filetype
+
+    def _save_raw_pdf(self, image):
+        file_kwargs = {
+            'pilot': settings.CURRENT_PILOT,
+            'now': int(time.time()),
+            'filename': image.name,
+        }
+
+        # Format cribbed from lots_admin.models.upload_name
+        filename = '{pilot}/deeds/raw/{now}_{filename}'.format(**file_kwargs)
+
+        with default_storage.open(filename, 'wb') as f:
+            f.write(image.file.read())
+
+        image.file.seek(0)
+
+    def _sanitize_pdf(self, image):
+        outfile = BytesIO()
+        return PDFiD(image.file, disarm=True, outfile=outfile)
+
+    def clean_deed_image(self):
+        image = self.cleaned_data['deed_image']
+
+        filetype = self._guess_filetype(image)
+
+        ok_types = [
+            'image/gif',
+            'image/jpeg',
+            'image/png',
+            'application/pdf'
+        ]
+
+        if filetype == 'application/pdf':
+            self._save_raw_pdf(image)
+
+            _, sanitized_pdf = self._sanitize_pdf(image)
+            self.cleaned_data['deed_image'].file = sanitized_pdf
+
+        elif filetype not in ok_types:
+            raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
+
+        return self.cleaned_data['deed_image']
+
+
+class ApplicationForm(forms.Form, DeedImageMixin):
     lot_1_address = forms.CharField(
         error_messages={'required': 'Please provide an address: use the map above, manually enter a PIN and click on the correct one that appears in the dropdown, or paste the lot PIN, if you know it.'},
         label="Lot 1 Street address")
@@ -166,56 +218,10 @@ class ApplicationForm(forms.Form):
         return self.cleaned_data['contact_state'].upper()
 
 
-    def clean_deed_image(self):
-
-        image = self.cleaned_data['deed_image']
-        filetype = magic.from_buffer(image.file.read(), mime=True)
-
-        image.file.seek(0)
-
-        ok_types = [
-            'image/gif',
-            'image/jpeg',
-            'image/png',
-            'application/pdf'
-        ]
-
-        if filetype == 'application/pdf':
-
-            outfile = BytesIO()
-
-            _, self.cleaned_data['deed_image'].file = PDFiD(image.file,
-                                                            disarm=True,
-                                                            outfile=outfile)
-
-        elif filetype not in ok_types:
-            raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
-
-        return self.cleaned_data['deed_image']
-
-class DeedUploadForm(forms.Form):
+class DeedUploadForm(forms.Form, DeedImageMixin):
     deed_image = forms.FileField(
         error_messages={'required': 'Provide an image of the deed of the building you own'
         }, label="Electronic version of your deed")
-
-    def clean_deed_image(self):
-
-        image = self.cleaned_data['deed_image']
-        filetype = magic.from_buffer(image.file.read(), mime=True)
-
-        image.file.seek(0)
-
-        ok_types = [
-            'image/gif',
-            'image/jpeg',
-            'image/png',
-            'application/pdf'
-        ]
-
-        if filetype not in ok_types:
-            raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
-
-        return self.cleaned_data['deed_image']
 
 
 class PrincipalProfileForm(forms.Form):
