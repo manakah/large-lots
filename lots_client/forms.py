@@ -25,21 +25,6 @@ class DeedImageMixin(object):
 
         return filetype
 
-    def _save_raw_pdf(self, image):
-        file_kwargs = {
-            'pilot': settings.CURRENT_PILOT,
-            'now': int(time.time()),
-            'filename': image.name,
-        }
-
-        # Format cribbed from lots_admin.models.upload_name
-        filename = '{pilot}/deeds/raw/{now}_{filename}'.format(**file_kwargs)
-
-        with default_storage.open(filename, 'wb') as f:
-            f.write(image.file.read())
-
-        image.file.seek(0)
-
     def _sanitize_pdf(self, image):
         outfile = BytesIO()
         return PDFiD(image.file, disarm=True, outfile=outfile)
@@ -57,8 +42,6 @@ class DeedImageMixin(object):
         ]
 
         if filetype == 'application/pdf':
-            self._save_raw_pdf(image)
-
             _, sanitized_pdf = self._sanitize_pdf(image)
             self.cleaned_data['deed_image'].file = sanitized_pdf
 
@@ -66,6 +49,22 @@ class DeedImageMixin(object):
             raise forms.ValidationError('File type not supported. Please choose an image or PDF.')
 
         return self.cleaned_data['deed_image']
+
+    @classmethod
+    def save_raw_pdf(cls, image, **applicant_info):
+        file_kwargs = {
+            'pilot': settings.CURRENT_PILOT,
+            'first_name': applicant_info['first_name'],
+            'last_name': applicant_info['last_name'],
+            'now': int(time.time()),
+            'filename': image.name,
+        }
+
+        filename = '{pilot}/deeds/raw/{first_name}-{last_name}-{now}_{filename}'.format(**file_kwargs)
+
+        with default_storage.open(filename, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
 
 
 class ApplicationForm(forms.Form, DeedImageMixin):
