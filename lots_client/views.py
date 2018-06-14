@@ -267,6 +267,11 @@ def apply(request):
 
             app = Application.objects.create(**app_info)
 
+            raw_deed_image = request.FILES['deed_image']
+
+            if raw_deed_image.content_type == 'application/pdf':
+                form.save_raw_pdf(raw_deed_image, **app_info)
+
             app_step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['deed'],
                                                                 public_status='approved',
                                                                 step=2)
@@ -459,6 +464,13 @@ def deed_upload(request, tracking_id):
             # Add deed.
             new_deed_image = form.cleaned_data['deed_image']
             application.deed_image = new_deed_image
+
+            raw_deed_image = request.FILES['deed_image']
+
+            if raw_deed_image.content_type == 'application/pdf':
+                form.save_raw_pdf(raw_deed_image,
+                                  first_name=application.first_name,
+                                  last_name=application.last_name)
 
             # Add timestamp.
             timezone = pytz.timezone('America/Chicago')
