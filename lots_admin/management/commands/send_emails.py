@@ -1,14 +1,15 @@
+from datetime import datetime
+from itertools import chain
+from smtplib import SMTPException
+import time
+
 from django.core.management.base import BaseCommand
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 from django.db import connection
 
-from smtplib import SMTPException
-import time
-from datetime import datetime
-
-from lots_admin.models import Application, ApplicationStatus, ApplicationStep, Review, DenialReason, User, Lot
+from lots_admin.models import Application, ApplicationStatus, ApplicationStep, Review, DenialReason, User
 from lots_admin.look_ups import DENIAL_REASONS
 
 
@@ -61,444 +62,208 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['wintrust_email']:
-            application_statuses = ApplicationStatus.objects.all()
+            for app, statuses in chain(self._select_applicants_on_step(4),
+                                       self._select_applicants_on_step(6)):
 
-            print("Emails sent to:")
-            for app in application_statuses:
-                if app.current_step:
-                    if app.current_step.step in [4, 6] and app.denied is False:
+                context = {'app': app}
 
-                        print(app.application.first_name, app.application.last_name, " - Application ID", app.application.id)
-                        print(datetime.now())
+                self._send_email('wintrust_email',
+                                 'Special event for Large Lots applicants',
+                                 app.email,
+                                 context)
 
-                        context = {
-                            'app': app.application,
-                            'lot': app.lot
-                        }
-
-                        self.send_email('wintrust_email', 'Special event for Large Lots applicants', app.application.email, context)
+                self._log(app, statuses)
 
         if options['eds_email']:
-            limit = options['eds_email']
+            for app, statuses in self._select_applicants_on_step(7, every_status=True, filter='app.eds_sent = FALSE'):
+                '''
+                TO-DO: Only send one invitation per email?
+                '''
+                context = {'app': app}
 
-            # Select only applicants whose non-denied applications
-            # are all on step 7 in order to avoid a situation where
-            # an applicant has active applications at other steps,
-            # as these will get stuck if the applicant submits an
-            # EDS prior to their reaching step 7. (The applicant
-            # will not submit another EDS, thus the endpoint to
-            # advance the remaining applications will never be
-            # pinged.)
+                self._send_email('eds_email',
+                                 'LargeLots application - Economic Disclosure Statement (EDS)',
+                                 app.email,
+                                 context)
 
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT
-                      MIN(id) as id,
-                      email
-                    FROM (
-                      SELECT
-                        app.id,
-                        email,
-                        step,
-                        denied
-                      FROM lots_admin_application AS app
-                      JOIN lots_admin_applicationstatus AS status
-                      ON app.id = status.application_id
-                      JOIN lots_admin_applicationstep AS step
-                      ON status.current_step_id = step.id
-                      WHERE eds_sent = False
-                        AND denied = False
-                    ) AS applicants
-                    GROUP BY email
-                    HAVING (EVERY(step = 7))
-                    LIMIT {limit}
-                '''.format(limit=limit)
+                app.eds_sent = True
+                app.save()
 
-                cursor.execute(query)
-
-                applicants = [(app_id, email_address) for app_id, email_address in cursor]
-
-            for app_id, email_address in applicants:
-
-                application = Application.objects.filter(id=app_id).first()
-                context = {'app': application}
-                self.send_email(
-                    'eds_email',
-                    'LargeLots application - Economic Disclosure Statement (EDS)',
-                    email_address,
-                    context
-                )
-
-                applicant = self.applicant_detail_str(application)
-                print('Notified {}'.format(applicant))
-
-                # Set `eds_sent` = True on all applications for given applicant
-                # (since we only need one EDS per applicant)
-                active_applications = ApplicationStatus.objects\
-                                                       .filter(application__email=email_address)\
-                                                       .filter(denied=False)
-
-                print('Updated applications for {}:'.format(applicant))
-                for app in active_applications:
-                    print(self.applicant_detail_str(app.application))
-                    app.application.eds_sent = True
-                    app.application.save()
+                self._log(app, statuses)
 
         if options['lotto_email']:
-            time = options['lotto_email']
-            offset = int(options['lotto_offset']) - 1
+            for app, statuses in self._select_applicants_on_step(6, filter='status.lottery_email_sent = FALSE'):
+                '''
+                TO-DO: Set pool size, and divide by 2.
+                '''
+                for status in statuses:
+                    context = {
+                        'lot': status.lot,
+                        'app': app,
+                        'date': None,
+                        'time': None,
+                    }
 
-            if time == 'morning':
-                comparator = '<='
-            if time == 'afternoon':
-                comparator = '>'
+                    self._send_email('lottery_notification',
+                                     'LargeLots application - Lottery',
+                                     app.email,
+                                     context)
 
-            # This query grabs the lot pin, which lies at a specified mid-way point, e.g.,
-            # if we want to notify the applicants who applied to the first 85 lots (in ascending order),
-            # then the offset will be 84.
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT DISTINCT lot_id
-                    FROM lots_admin_applicationstatus as status
-                    JOIN lots_admin_applicationstep as step
-                    ON status.current_step_id=step.id
-                    WHERE step=6
-                    ORDER BY lot_id
-                    LIMIT 1 OFFSET {offset}
-                '''.format(offset=offset)
+                    status.lottery_email_sent = True
+                    status.save()
 
-                cursor.execute(query)
-                lot_id = cursor.fetchone()[0]
-
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT status.id, status.lot_id, email
-                    FROM lots_admin_applicationstatus as status
-                    JOIN lots_admin_applicationstep as step
-                    ON status.current_step_id=step.id
-                    JOIN lots_admin_application as app
-                    ON app.id=status.application_id
-                    WHERE step=6
-                    AND status.lottery_email_sent = False
-                    AND status.lot_id {comparator} '{lot_id}'
-                    ORDER BY status.lot_id
-                '''.format(comparator=comparator, lot_id=lot_id)
-
-                cursor.execute(query)
-                applicants = [(status_id, lot_id, email_address) for status_id, lot_id, email_address in cursor]
-
-            for status_id, lot_id, email_address in applicants:
-                status = ApplicationStatus.objects.get(id=status_id)
-                application = Application.objects.get(id=status.application_id)
-                lot = Lot.objects.get(pin=lot_id)
-                context = {'app': application,
-                           'lot': lot}
-                self.send_email(
-                    'lottery_notification_{}'.format(time),
-                    'LargeLots application - Lottery',
-                    email_address,
-                    context
-                )
-
-                status.lottery_email_sent = True
-                status.save()
-
-                applicant = self.applicant_detail_str(application)
-                print('Notified {}'.format(applicant))
+                self._log(app, statuses)
 
         if options['eds_final_email']:
-            # Send final notice email to all applicants on Step 7.
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT
-                      MIN(id) as id,
-                      email
-                    FROM (
-                      SELECT
-                        app.id,
-                        email,
-                        step,
-                        denied
-                      FROM lots_admin_application AS app
-                      JOIN lots_admin_applicationstatus AS status
-                      ON app.id = status.application_id
-                      JOIN lots_admin_applicationstep AS step
-                      ON status.current_step_id = step.id
-                      WHERE denied = False
-                      AND step = 7
-                    ) AS applicants
-                    GROUP BY email
-                '''
+            for app, statuses in self._select_applicants_on_step(7):
+                context = {'app': app}
 
-                cursor.execute(query)
+                self.send_email('eds_email',
+                                'LargeLots application - Economic Disclosure Statement (EDS)',
+                                app.email,
+                                context)
 
-                applicants = [(app_id, email_address) for app_id, email_address in cursor]
-
-            for app_id, email_address in applicants:
-
-                application = Application.objects.filter(id=app_id).first()
-                context = {'app': application}
-                self.send_email(
-                    'eds_email',
-                    'LargeLots application - Economic Disclosure Statement (EDS)',
-                    email_address,
-                    context
-                )
-
-                applicant = self.applicant_detail_str(application)
-                print('Notified {}'.format(applicant))
+                self._log(app, statuses)
 
         if options['closing_time']:
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT email, array_agg(status.lot_id) AS pins, array_agg(status.id) AS status_ids
-                    FROM lots_admin_application AS app
-                    JOIN lots_admin_applicationstatus AS status
-                    ON status.application_id = app.id
-                    JOIN lots_admin_applicationstep AS step
-                    ON status.current_step_id = step.id
-                    WHERE denied = False and step = 8
-                    GROUP BY email
-                '''
+            for app, statuses in self._select_applicants_on_step(8):
+                context = {
+                    'app': app,
+                    'lots': [s.lot for s in statuses],
+                }
 
-                cursor.execute(query)
+                self.send_email('closing_time_email',
+                                'Closing Time for Large Lots',
+                                app.email,
+                                context)
 
-                applicant_list = [(email, pins, status_ids) for email, pins, status_ids in cursor]
+                next_step = ApplicationStep.objects.get(step=9)
 
-                print("Emails sent to:")
-                for email, pins, status_ids in applicant_list:
-                    # Isolate one applicant - to pass into "context"
-                    application = Application.objects.filter(email=email).filter(applicationstatus__id__in=status_ids).first()
+                for status in statuses:
+                    status.current_step = next_step
+                    status.save()
 
-                    lots = [Lot.objects.get(pin=pin) for pin in pins]
-
-                    context = {
-                        'app': application,
-                        'lots': lots
-                    }
-
-                    self.send_email(
-                        'closing_time_email',
-                        'Closing Time for Large Lots',
-                        email,
-                        context
-                    )
-
-                    # Move applicants to Step 9
-                    application_statuses = ApplicationStatus.objects.filter(id__in=status_ids)
-                    step9 = ApplicationStep.objects.get(step=9)
-                    for a in application_statuses:
-                        a.current_step = step9
-                        a.save()
-
-                    print('{0} - Lots: {1}'.format(email, pins))
+                self._log(app, statuses)
 
         if options['closing_invitations']:
-            n = int(options['closing_invitations'])
             date = datetime.strptime(options['date'], '%Y-%m-%d')
+            applicants = self._select_applicants_on_step(10, filter='app.closing_invite_sent = FALSE')
+            sorted_applicants = sorted(list(applicants), key=lambda x: (x[0].last_name, x[0].first_name))
 
-            with connection.cursor() as cursor:
-                query = '''
-                    SELECT
-                      email,
-                      ARRAY_AGG(lot_id) AS pins,
-                      ARRAY_AGG(id) AS status_ids
-                    FROM (
-                      SELECT
-                        email,
-                        status.lot_id,
-                        status.id
-                      FROM lots_admin_application AS app
-                      JOIN lots_admin_applicationstatus AS status
-                      ON app.id = status.application_id
-                      JOIN lots_admin_applicationstep AS step
-                      ON status.current_step_id = step.id
-                      WHERE step = 10
-                        AND closing_invite_sent = False
-                      ORDER BY last_name, first_name
-                    ) AS applicants
-                    GROUP BY email
-                    LIMIT {n}
-                '''.format(n=n)
+            log_fmt = '{date} {applicant} ({email}, {phone}) invited to ' + \
+                      'Closing {event} for lots #{pins}'
 
-                cursor.execute(query)
+            for idx, app_stuff in enumerate(sorted_applicants, start=1):
+                app, statuses = app_stuff
+                lots = [s.lot for s in statuses]
 
-                applicant_list = [(email, pins, status_ids) for email, pins, status_ids in cursor]
+                date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
 
-                date_fmt = '%Y-%m-%d %H:%M'
+                # Invite half the applicants to the morning event, and
+                # half to the afternoon event, using len of applicant list
+                # rather than initial n to handle case where we get fewer
+                # than n applicants.
+                if idx <= len(sorted_applicants) / 2:
+                    date_parts += [9, 0]
+                    event = datetime(*date_parts)
+                else:
+                    date_parts += [13, 0]
+                    event = datetime(*date_parts)
 
-                log_fmt = '{date} {applicant} ({email}, {phone}) invited to ' + \
-                    'Closing {event} for lots #{pins}'
+                context = {
+                    'app': app,
+                    'lots': lots,
+                    'event': event,
+                }
 
-                for idx, applicant in enumerate(applicant_list, start=1):
-                    email, pins, status_ids = applicant
+                self._send_email('closing_invitation_email',
+                                 'Large Lot Closing Date and Time',
+                                 app.email,
+                                 context)
 
-                    # Status ID filter prevents us from grabbing an Application
-                    # with a shared email address that does _not_ belong to the
-                    # applicant we mean to notify
+                app.closing_invite_sent = True
+                app.save()
 
-                    applications = Application.objects\
-                                              .filter(email=email)\
-                                              .filter(applicationstatus__id__in=status_ids)
-
-                    application = applications.first()
-
-                    lots = [Lot.objects.get(pin=pin) for pin in pins]
-
-                    date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
-
-                    # Invite half the applicants to the morning event, and
-                    # half to the afternoon event, using len of applicant list
-                    # rather than initial n to handle case where we get fewer
-                    # than n applicants
-
-                    if idx <= len(applicant_list) / 2:
-                        date_parts += [9, 0]
-                        event = datetime(*date_parts)
-                    else:
-                        date_parts += [13, 0]
-                        event = datetime(*date_parts)
-
-                    context = {
-                        'app': application,
-                        'lots': lots,
-                        'event': event,
-                    }
-
-                    self.send_email(
-                        'closing_invitation_email',
-                        'Large Lot Closing Date and Time',
-                        email,
-                        context,
-                    )
-
-                    # Update all because we only want to send one invitation
-                    # per applicant (who may have multiple applications)
-
-                    for app in applications:
-                        app.closing_invite_sent = True
-                        app.save()
-
-                    print(log_fmt.format(
-                        date=datetime.now().strftime(date_fmt),
-                        applicant=' '.join([application.first_name, application.last_name]),
-                        email=application.email,
-                        phone=application.phone,
-                        event=event.strftime(date_fmt),
-                        pins=', #'.join(str(pin) for pin in pins),
-                    ))
+                self._log(app, statuses, log_fmt, event=event)
 
         if options['eds_denial']:
-
-            if options['separate_emails']:
-                separate_emails = options['separate_emails'].split(',')
-            else:
-                separate_emails = []
-
-            # Get email and application IDs where there are active applications
-            # on step 7.
-            query = '''
-                SELECT
-                  email,
-                  ARRAY_AGG(DISTINCT app.id)
-                FROM lots_admin_application AS app
-                JOIN lots_admin_applicationstatus AS status
-                ON app.id = status.application_id
-                JOIN lots_admin_applicationstep AS step
-                ON status.current_step_id = step.id
-                WHERE denied = False
-                AND step = 7
-                GROUP BY email
-            '''
-
-            with connection.cursor() as cursor:
-                cursor.execute(query)
-                applicants = [(email, app_ids) for email, app_ids in cursor]
-
-            log_fmt = '{date} {applicant} ({email}) denied due to ' + \
-                      'lack of EDS for lots #{pins}'
-
             # Set up denial globals
             no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
             admin_user = User.objects.get(id=5)
 
-            # Define some reusable functionality.
+            log_fmt = '{date} {applicant} ({email}) denied due to ' + \
+                      'lack of EDS for lots #{pins}'
 
-            def step_7_lots_list(application_obj):
-                '''Return list of lots for given applicant for which there
-                is an active application on step 7.
-                '''
-                return list(application_obj.lot_set
-                                           .filter(application__applicationstatus__current_step_id__step=7)
-                                           .filter(application__applicationstatus__denied=False)
-                                           .distinct())
-
-            def assemble_and_send_email(application, lots):
-                '''Assemble email context and send email.'''
+            for app, statuses in self._select_applicants_on_step(7):
                 context = {
-                    'app': application,
-                    'lots': lots
+                    'app': app,
+                    'lots': [s.lot for s in statuses]
                 }
 
-                self.send_email(
-                    'eds_denial_email',
-                    'LargeLots application - Denial',
-                    application.email,
-                    context
-                )
+                self._send_email('eds_denial_email',
+                                 'LargeLots application - Denial',
+                                 app.email,
+                                 context)
 
-            def log(application, lots):
-                print(log_fmt.format(
-                    date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-                    applicant=' '.join([application.first_name, application.last_name]),
-                    email=application.email,
-                    phone=application.phone,
-                    pins=', #'.join(str(lot.pin) for lot in lots)
-                ))
+                self._log(app, statuses, log_fmt)
 
-            for email, app_ids in applicants:
-                # Get application objects where the applicant is on step 7.
-                # (Some applicants have more than one application.)
-                applications = Application.objects.filter(id__in=list(app_ids))
+                for status in statuses:
+                    self._deny(status, no_eds, admin_user)
 
-                if email in separate_emails:
-                    # In the case of a shared email address, send denial
-                    # emails for each individual application.
-                    for application in applications:
-                        lots = step_7_lots_list(application)
+    def _log(self, app, statuses, log_fmt=None, **kwargs):
+        if not log_fmt:
+            log_fmt = '{date} {applicant} {email} {phone} {pins}'
 
-                        for app_status in application.applicationstatus_set\
-                                                     .filter(current_step_id__step=7):
+        log_kwargs = dict(
+            date=datetime.now().strftime('%Y-%m-%d %H:%M'),
+            applicant=' '.join([app.first_name, app.last_name]),
+            email=app.email,
+            phone=app.phone,
+            pins=', #'.join(str(s.lot.pin) for s in statuses),
+        )
 
-                            self.deny(app_status, no_eds, admin_user)
+        log_kwargs.update(kwargs)
 
-                        assemble_and_send_email(application, lots)
+        print(log_fmt.format(**log_kwargs))
 
-                        log(application, lots)
-
-                else:
-                    # Aggregate information from applications and send one email.
-                    lots = []
-
-                    for app in applications:
-                        lots += step_7_lots_list(app)
-
-                        for app_status in app.applicationstatus_set\
-                                             .filter(current_step_id__step=7):
-
-                            self.deny(app_status, no_eds, admin_user)
-
-                    application = applications.first()
-
-                    assemble_and_send_email(application, lots)
-
-                    log(application, lots)
-
-    def _some_logging_convenience_method(self):
-        pass
+    def _filter_string(self, filter_parts):
+        return ' AND '.join(filter(None, filter_parts))
 
     def _select_applicants_on_step(self, step, **kwargs):
-        pass
+        denied_filter = 'status.denied = FALSE'
+        step_filter = 'step.step = {step}'.format(step=step)
+
+        status_filter = self._filter_string([
+            denied_filter,
+            step_filter,
+            kwargs.get('filter'),
+        ])
+
+        applicant_select = '''
+            SELECT
+              app.id,
+              ARRAY_AGG(status.id) AS app_statuses
+            FROM lots_admin_application AS app
+            JOIN lots_admin_applicationstatus as status
+            ON app.id = status.application_id
+            JOIN lots_admin_applicationstep as step
+            ON status.current_step_id = step.id
+            WHERE {filter}
+            GROUP BY app.id
+        '''.format(filter=status_filter)
+
+        if kwargs.get('every_status'):
+            applicant_select += 'HAVING EVERY({step})'.format(step=step_filter)
+
+        # print(applicant_select)
+
+        with connection.cursor() as cursor:
+            cursor.execute(applicant_select)
+
+            for app, statuses in cursor:
+                application = Application.objects.get(id=app)
+                statuses = [ApplicationStatus.objects.get(id=s) for s in statuses]
+                yield application, statuses
 
     def _select_applicants_not_on_step(self, step, **kwargs):
         pass
@@ -530,8 +295,8 @@ class Command(BaseCommand):
         review.save()
 
     def _send_email(self, template, subject, email_address, context):
-        html_template = get_template('{}.html'.format(template))
-        txt_template = get_template('{}.txt'.format(template))
+        html_template = get_template('emails/{}.html'.format(template))
+        txt_template = get_template('emails/{}.txt'.format(template))
 
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)

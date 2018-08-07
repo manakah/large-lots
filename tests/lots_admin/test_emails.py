@@ -15,7 +15,7 @@ def test_eds_email(email_db_setup):
     and Karen Oh, and update their active applications in the
     database.
     '''
-    with patch.object(Command, 'send_email') as mock_send:
+    with patch.object(Command, '_send_email') as mock_send:
         call_command('send_emails', eds_email=5, stdout=sys.stdout)
 
     eds_sent_applications = Application.objects.filter(eds_sent=True)
@@ -32,7 +32,7 @@ def test_lotto_email_morning(email_db_setup):
     '''
     This test checks that the correct number of lotto emails go to the appropriate recipients.
     '''
-    with patch.object(Command, 'send_email') as mock_send:
+    with patch.object(Command, '_send_email') as mock_send:
         call_command('send_emails', lotto_email='morning', lotto_offset='1', stdout=sys.stdout)
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
@@ -48,7 +48,7 @@ def test_lotto_email_afternoon(email_db_setup):
     '''
     This test checks that the correct number of lotto emails go to the appropriate recipients.
     '''
-    with patch.object(Command, 'send_email') as mock_send:
+    with patch.object(Command, '_send_email') as mock_send:
         call_command('send_emails', lotto_email='afternoon', lotto_offset='1', stdout=sys.stdout)
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
@@ -60,7 +60,7 @@ def test_lotto_email_afternoon(email_db_setup):
 
 @pytest.mark.django_db
 def test_closing_invitations(email_db_setup, capsys):
-    with patch.object(Command, 'send_email') as mock_send:
+    with patch.object(Command, '_send_email') as mock_send:
         call_command('send_emails', closing_invitations=3, date='2017-11-13')
 
     # Test applications are updated
@@ -90,7 +90,7 @@ def test_eds_denials(email_db_setup, capsys):
     # Assert there are, in fact, applications we need to deny
     assert len(applications_to_deny)
 
-    with patch.object(Command, 'send_email') as mock_send:
+    with patch.object(Command, '_send_email') as mock_send:
         call_command('send_emails', eds_denial=True, separate_emails='weezerules@yahoo.com')
 
     log, _ = capsys.readouterr()
