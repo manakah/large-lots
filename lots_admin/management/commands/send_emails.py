@@ -74,6 +74,140 @@ class Command(BaseCommand):
         for email in (k for k, v in options.items() if k.endswith('email') and v is True):
             getattr(self, 'send_{}'.format(email))()
 
+    def _select_applicants(self, operator, step, **keywords):
+        '''
+        Build and execute a query to select applicants, grouped by email and
+        ordered by applicant name.
+
+        Return a tuple, (email, Application queryset, ApplicationStatus queryset),
+        such that the returned Application and ApplicationStatus objects meet
+        the criteria of the query.
+        '''
+        applicant_select = '''
+            WITH applicants AS (
+              SELECT
+                app.email,
+                app.id AS app_id,
+                status.id AS status_id,
+                step.step
+              FROM lots_admin_application AS app
+              JOIN lots_admin_applicationstatus as status
+              ON app.id = status.application_id
+              JOIN lots_admin_applicationstep as step
+              ON status.current_step_id = step.id
+              WHERE status.denied = FALSE
+              {filter}
+              ORDER BY app.last_name, app.first_name
+            )
+            SELECT
+              email,
+              ARRAY_AGG(app_id) AS apps,
+              ARRAY_AGG(status_id) AS app_statuses
+            FROM applicants
+            {where}
+            GROUP BY email
+            {having}
+        '''
+
+        select_kwargs = {}
+
+        if keywords.get('filter'):
+            select_kwargs['filter'] = 'AND {}'.format(keywords['filter'])
+        else:
+            select_kwargs['filter'] = ''
+
+        step_kwargs = {'operator': operator, 'step': step}
+
+        if keywords.get('every_status'):
+            where = ''
+            having = 'HAVING EVERY(step {operator} {step})'.format(**step_kwargs)
+        else:
+            where = 'WHERE step {operator} {step}'.format(**step_kwargs)
+            having = ''
+
+        select_kwargs.update({'where': where, 'having': having})
+
+        with connection.cursor() as cursor:
+            cursor.execute(applicant_select.format(**select_kwargs))
+
+            for email, apps, statuses in cursor:
+                apps = Application.objects.filter(id__in=apps)
+                statuses = ApplicationStatus.objects.filter(id__in=statuses)
+                yield email, apps, statuses
+
+    _select_applicants_on_step = partialmethod(_select_applicants, '=')
+    _select_applicants_not_on_step = partialmethod(_select_applicants, '!=')
+    _select_applicants_on_steps_before = partialmethod(_select_applicants, '<')
+    _select_applicants_on_steps_after = partialmethod(_select_applicants, '>')
+
+    def _send_email(self, template, subject, email_address, context):
+        html_template = get_template('emails/{}.html'.format(template))
+        txt_template = get_template('emails/{}.txt'.format(template))
+
+        html_content = html_template.render(context)
+        txt_content = txt_template.render(context)
+
+        msg = EmailMultiAlternatives(subject,
+                                     txt_content,
+                                     settings.EMAIL_HOST_USER,
+                                     [email_address])
+
+        msg.attach_alternative(html_content, 'text/html')
+
+        try:
+            msg.send()
+        except SMTPException as stmp_e:
+            print(stmp_e)
+            print("Not able to send email due to smtp exception.")
+        except Exception as e:
+            print(e)
+            print("Not able to send email.")
+
+        time.sleep(5)
+
+    def _log(self, app, statuses, log_fmt=None, **kwargs):
+        if not log_fmt:
+            log_fmt = '{date} {applicant} {email} {phone} {pins}'
+
+        log_kwargs = dict(
+            date=datetime.now().strftime('%Y-%m-%d %H:%M'),
+            applicant=' '.join([app.first_name, app.last_name]),
+            email=app.email,
+            phone=app.phone,
+            pins=', #'.join(str(s.lot.pin) for s in statuses),
+        )
+
+        log_kwargs.update(kwargs)
+
+        print(log_fmt.format(**log_kwargs))
+
+    def _deny(self, app_status, denial_reason, admin_user):
+        '''
+        Deny the given application and create a corresponding review object.
+
+        :app_status - ApplicationStatus object
+        :denial_reason - DenialReason object
+        :admin_user - User object (usually, an admin)
+        '''
+        app_status.denied = True
+        app_status.current_step = None
+        app_status.save()
+
+        review = Review(reviewer=admin_user,
+                        denial_reason=denial_reason,
+                        application=app_status,
+                        email_sent=True)
+
+        review.save()
+
+    def _date_to_datetime(self, hour, minute):
+        date = datetime.strptime(self.date, '%Y-%m-%d')
+
+        date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
+        date_parts += [hour, minute]
+
+        return datetime(*date_parts)
+
     def send_wintrust_email(self):
         '''
         Send event invitations on a per-application basis.
@@ -256,137 +390,3 @@ class Command(BaseCommand):
 
             for status in statuses:
                 self._deny(status, no_eds, admin_user)
-
-    def _log(self, app, statuses, log_fmt=None, **kwargs):
-        if not log_fmt:
-            log_fmt = '{date} {applicant} {email} {phone} {pins}'
-
-        log_kwargs = dict(
-            date=datetime.now().strftime('%Y-%m-%d %H:%M'),
-            applicant=' '.join([app.first_name, app.last_name]),
-            email=app.email,
-            phone=app.phone,
-            pins=', #'.join(str(s.lot.pin) for s in statuses),
-        )
-
-        log_kwargs.update(kwargs)
-
-        print(log_fmt.format(**log_kwargs))
-
-    def _select_applicants(self, operator, step, **keywords):
-        '''
-        Build and execute a query to select applicants, grouped by email and
-        ordered by applicant name.
-
-        Return a tuple, (email, Application queryset, ApplicationStatus queryset),
-        such that the returned Application and ApplicationStatus objects meet
-        the criteria of the query.
-        '''
-        applicant_select = '''
-            WITH applicants AS (
-              SELECT
-                app.email,
-                app.id AS app_id,
-                status.id AS status_id,
-                step.step
-              FROM lots_admin_application AS app
-              JOIN lots_admin_applicationstatus as status
-              ON app.id = status.application_id
-              JOIN lots_admin_applicationstep as step
-              ON status.current_step_id = step.id
-              WHERE status.denied = FALSE
-              {filter}
-              ORDER BY app.last_name, app.first_name
-            )
-            SELECT
-              email,
-              ARRAY_AGG(app_id) AS apps,
-              ARRAY_AGG(status_id) AS app_statuses
-            FROM applicants
-            {where}
-            GROUP BY email
-            {having}
-        '''
-
-        select_kwargs = {}
-
-        if keywords.get('filter'):
-            select_kwargs['filter'] = 'AND {}'.format(keywords['filter'])
-        else:
-            select_kwargs['filter'] = ''
-
-        step_kwargs = {'operator': operator, 'step': step}
-
-        if keywords.get('every_status'):
-            where = ''
-            having = 'HAVING EVERY(step {operator} {step})'.format(**step_kwargs)
-        else:
-            where = 'WHERE step {operator} {step}'.format(**step_kwargs)
-            having = ''
-
-        select_kwargs.update({'where': where, 'having': having})
-
-        with connection.cursor() as cursor:
-            cursor.execute(applicant_select.format(**select_kwargs))
-
-            for email, apps, statuses in cursor:
-                apps = Application.objects.filter(id__in=apps)
-                statuses = ApplicationStatus.objects.filter(id__in=statuses)
-                yield email, apps, statuses
-
-    _select_applicants_on_step = partialmethod(_select_applicants, '=')
-    _select_applicants_not_on_step = partialmethod(_select_applicants, '!=')
-    _select_applicants_on_steps_before = partialmethod(_select_applicants, '<')
-    _select_applicants_on_steps_after = partialmethod(_select_applicants, '>')
-
-    def _deny(self, app_status, denial_reason, admin_user):
-        '''
-        Deny the given application and create a corresponding review object.
-
-        :app_status - ApplicationStatus object
-        :denial_reason - DenialReason object
-        :admin_user - User object (usually, an admin)
-        '''
-        app_status.denied = True
-        app_status.current_step = None
-        app_status.save()
-
-        review = Review(reviewer=admin_user,
-                        denial_reason=denial_reason,
-                        application=app_status,
-                        email_sent=True)
-
-        review.save()
-
-    def _send_email(self, template, subject, email_address, context):
-        html_template = get_template('emails/{}.html'.format(template))
-        txt_template = get_template('emails/{}.txt'.format(template))
-
-        html_content = html_template.render(context)
-        txt_content = txt_template.render(context)
-
-        msg = EmailMultiAlternatives(subject,
-                                     txt_content,
-                                     settings.EMAIL_HOST_USER,
-                                     [email_address])
-
-        msg.attach_alternative(html_content, 'text/html')
-
-        try:
-            msg.send()
-        except SMTPException as stmp_e:
-            print(stmp_e)
-            print("Not able to send email due to smtp exception.")
-        except Exception as e:
-            print(e)
-            print("Not able to send email.")
-
-        time.sleep(5)
-
-    def _date_to_datetime(self, hour, minute):
-        date = datetime.strptime(self.date, '%Y-%m-%d')
-
-        date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
-        date_parts += [hour, minute]
-
-        return datetime(*date_parts)
