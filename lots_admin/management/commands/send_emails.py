@@ -185,6 +185,7 @@ class Command(BaseCommand):
                     'subject': subject,
                 }
             )
+            raise
 
         except Exception as e:
             logging.error(
@@ -195,8 +196,10 @@ class Command(BaseCommand):
                     'subject': subject,
                 }
             )
+            raise
 
-        time.sleep(5)
+        else:
+            time.sleep(5)
 
     def _log(self, app, statuses, log_fmt=None, **kwargs):
         if not log_fmt:
@@ -265,22 +268,38 @@ class Command(BaseCommand):
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
 
         for email, apps, statuses in self._select_applicants_on_step(7, every_status=True, filter='app.eds_sent = FALSE'):
-            send_one = True
-
             if email in self.separate_emails:
-                send_one = False
+                for app in apps:
+                    context = {'app': app}
 
-            for app in apps:
-                context = {'app': app}
-                self._send_email('eds_email', subject, email, context)
-                self._log(app, statuses)
+                    try:
+                        self._send_email('eds_email', subject, email, context)
 
-                if send_one:
-                    break
+                    except:
+                        pass
 
-            for app in apps:
-                app.eds_sent = True
-                app.save()
+                    else:
+                        self._log(app, statuses.filter(application=app))
+
+                        app.eds_sent = True
+                        app.save()
+
+            else:
+                context = {'app': apps.first()}
+
+                try:
+                    self._send_email('eds_email', subject, email, context)
+
+                except:
+                    pass
+
+                else:
+                    self._log(apps.first(), statuses)
+
+                    for app in apps:
+                        app.eds_sent = True
+                        app.save()
+
 
     def send_lotto_email(self):
         '''
@@ -315,12 +334,17 @@ class Command(BaseCommand):
                 'time': None,
             }
 
-            self._send_email('lottery_notification', subject, email, context)
+            try:
+                self._send_email('lottery_notification', subject, email, context)
 
-            status.lottery_email_sent = True
-            status.save()
+            except:
+                pass
 
-            self._log(app, [status], log_fmt, event=event)
+            else:
+                self._log(app, [status], log_fmt, event=event)
+
+                status.lottery_email_sent = True
+                status.save()
 
     def send_eds_final_email(self):
         '''
@@ -330,18 +354,30 @@ class Command(BaseCommand):
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
 
         for email, apps, statuses in self._select_applicants_on_step(7):
-            send_one = True
-
             if email in self.separate_emails:
-                send_one = False
+                for app in apps:
+                    context = {'app': app}
 
-            for app in apps:
-                context = {'app': app}
-                self._send_email('eds_email', subject, app.email, context)
-                self._log(app, statuses.filter(application=app))
+                    try:
+                        self._send_email('eds_email', subject, email, context)
 
-                if send_one:
-                    break
+                    except:
+                        pass
+
+                    else:
+                        self._log(app, statuses.filter(application=app))
+
+            else:
+                context = {'app': apps.first()}
+
+                try:
+                    self._send_email('eds_email', subject, email, context)
+
+                except:
+                    pass
+
+                else:
+                    self._log(app, statuses.filter(application=app))
 
     def send_closing_time_email(self):
         '''
@@ -355,12 +391,19 @@ class Command(BaseCommand):
             lots = [s.lot for s in statuses]
 
             context = {'app': apps.first(), 'lots': lots}
-            self._send_email('closing_time_email', subject, email, context)
-            self._log(apps.first(), statuses)
 
-            for status in statuses:
-                status.current_step = next_step
-                status.save()
+            try:
+                self._send_email('closing_time_email', subject, email, context)
+
+            except:
+                pass
+
+            else:
+                self._log(apps.first(), statuses)
+
+                for status in statuses:
+                    status.current_step = next_step
+                    status.save()
 
     def send_closing_invitations_email(self):
         '''
@@ -382,13 +425,19 @@ class Command(BaseCommand):
                 event = self._date_to_datetime(hour=13, minute=0)
 
             context = {'app': apps.first(), 'lots': lots, 'event': event}
-            self._send_email('closing_invitation_email', subject, email, context)
 
-            for app in apps:
-                app.closing_invite_sent = True
-                app.save()
+            try:
+                self._send_email('closing_invitation_email', subject, email, context)
 
-            self._log(app, statuses, log_fmt, event=event)
+            except:
+                pass
+
+            else:
+                self._log(apps.first(), statuses, log_fmt, event=event)
+
+                for app in apps:
+                    app.closing_invite_sent = True
+                    app.save()
 
     def send_eds_denial_email(self):
         '''
@@ -401,23 +450,36 @@ class Command(BaseCommand):
         no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
 
         for email, apps, statuses in self._select_applicants_on_step(7):
-            send_one = True
-
             if email in self.separate_emails:
-                send_one = False
+                for app in apps:
+                    app_statuses = statuses.filter(application=app)
+                    lots = [s.lot for s in app_statuses]
+                    context = {'app': app, 'lots': lots}
 
-            for app in apps:
-                if send_one:
-                    lots = [s.lot for s in statuses]
+                    try:
+                        self._send_email('eds_denial_email', subject, email, context)
+
+                    except:
+                        pass
+
+                    else:
+                        self._log(app, statuses, log_fmt)
+
+                        for status in app_statuses:
+                            self._deny(status, no_eds)
+
+            else:
+                lots = [s.lot for s in statuses]
+                context = {'app': apps.first(), 'lots': lots}
+
+                try:
+                    self._send_email('eds_denial_email', subject, email, context)
+
+                except:
+                    pass
+
                 else:
-                    lots = [s.lot for s in statuses.filter(application=app)]
+                    self._log(apps.first(), statuses, log_fmt)
 
-                context = {'app': app, 'lots': lots}
-                self._send_email('eds_denial_email', subject, email, context)
-                self._log(app, statuses, log_fmt)
-
-                if send_one:
-                    break
-
-            for status in statuses:
-                self._deny(status, no_eds)
+                    for status in statuses:
+                        self._deny(status, no_eds)
