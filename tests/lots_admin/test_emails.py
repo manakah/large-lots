@@ -1,3 +1,4 @@
+import logging
 import pytest
 from unittest.mock import patch
 import sys
@@ -28,12 +29,13 @@ def test_eds_email(email_db_setup):
     assert len(eds_sent_applications.filter(first_name='Karen')) == 1
 
 @pytest.mark.django_db
-def test_lotto_email(email_db_setup, capsys):
+def test_lotto_email(email_db_setup, caplog):
     '''
     This test checks that the correct number of lotto emails go to the appropriate recipients.
     '''
-    with patch.object(Command, '_send_email') as mock_send:
-        call_command('send_emails', '--lotto_email', n=3, date='2017-11-13')
+    with caplog.at_level(logging.INFO):
+        with patch.object(Command, '_send_email') as mock_send:
+            call_command('send_emails', '--lotto_email', n=3, date='2017-11-13')
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
 
@@ -41,17 +43,17 @@ def test_lotto_email(email_db_setup, capsys):
     # The 'morning' mail, with an offset of 1, should go to two of those three.
     assert len(lotto_sent_applications) == 3
 
-    out, err = capsys.readouterr()
-    lines = out.splitlines()
+    lines = caplog.text.splitlines()
 
     assert all(['2017-11-13' in line for line in lines])
     assert len([line for line in lines if '09:00' in line]) == 1
     assert len([line for line in lines if '13:00' in line]) == 2
 
 @pytest.mark.django_db
-def test_closing_invitations(email_db_setup, capsys):
-    with patch.object(Command, '_send_email') as mock_send:
-        call_command('send_emails', '--closing_invitations_email', n=3, date='2017-11-13')
+def test_closing_invitations(email_db_setup, caplog):
+    with caplog.at_level(logging.INFO):
+        with patch.object(Command, '_send_email') as mock_send:
+            call_command('send_emails', '--closing_invitations_email', n=3, date='2017-11-13')
 
     # Test applications are updated
     invited = Application.objects.filter(closing_invite_sent=True)
@@ -61,15 +63,14 @@ def test_closing_invitations(email_db_setup, capsys):
     # first group DOWN if n / 2 is not an integer. Given an n of 3, test 1
     # is invited to the morning event and 2 are invited to the afternoon event.
 
-    out, err = capsys.readouterr()
-    lines = out.splitlines()
+    lines = caplog.text.splitlines()
 
     assert all(['2017-11-13' in line for line in lines])
     assert len([line for line in lines if '09:00' in line]) == 1
     assert len([line for line in lines if '13:00' in line]) == 2
 
 @pytest.mark.django_db
-def test_eds_denials(email_db_setup, capsys):
+def test_eds_denials(email_db_setup, caplog):
     applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
                                       .filter(applicationstatus__denied=False)\
                                       .distinct()
@@ -80,20 +81,23 @@ def test_eds_denials(email_db_setup, capsys):
     # Assert there are, in fact, applications we need to deny
     assert len(applications_to_deny)
 
-    with patch.object(Command, '_send_email') as mock_send:
-        call_command('send_emails', '--eds_denial_email', separate_emails='weezerules@yahoo.com')
+    with caplog.at_level(logging.INFO):
+        with patch.object(Command, '_send_email') as mock_send:
+            call_command('send_emails', '--eds_denial_email', separate_emails='weezerules@yahoo.com')
 
-    log, _ = capsys.readouterr()
+    lines = caplog.text.splitlines()
 
     for app_id in applications_to_deny:
         app = Application.objects.get(id=app_id)
 
+        log_count = len([line for line in lines if app.email in line])
+
         if app.email == 'weezerules@yahoo.com':
             # Assert two emails sent
-            assert log.count(app.email) == 2
+            assert log_count == 2
         else:
             # Assert one email sent
-            assert log.count(app.email) == 1
+            assert log_count == 1
 
         # Assert no applications remain on step 7
         assert all([status.current_step != 7 for status in app.applicationstatus_set.all()])

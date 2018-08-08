@@ -10,8 +10,18 @@ from django.template.loader import get_template
 from django.conf import settings
 from django.db import connection
 
+import logging
+from raven.handlers.logging import SentryHandler
+from raven.conf import setup_logging
+
 from lots_admin.models import Application, ApplicationStatus, ApplicationStep, Review, DenialReason, User
 from lots_admin.look_ups import DENIAL_REASONS
+
+
+logger = logging.getLogger(__name__)
+handler = SentryHandler(settings.SENTRY_DSN)
+handler.setLevel(logging.ERROR)
+setup_logging(handler)
 
 
 class Command(BaseCommand):
@@ -20,6 +30,10 @@ class Command(BaseCommand):
         'be sent. See --separate_emails for handling shared email addresses.'
 
     def add_arguments(self, parser):
+        '''
+        To send a new email, add a Boolean argument called 'x_email' here, then
+        write a method on the Command class called 'send_x_email'.
+        '''
         # Meta options
         parser.add_argument('--date',
                             help='Date in format YYYY-MM-DD for emails, etc.')
@@ -156,12 +170,26 @@ class Command(BaseCommand):
 
         try:
             msg.send()
+
         except SMTPException as stmp_e:
-            print(stmp_e)
-            print("Not able to send email due to smtp exception.")
+            logging.error(
+                "Not able to send email due to SMTP exception.",
+                extra={
+                    'exception': stmp_e,
+                    'email_address': email_address,
+                    'subject': subject,
+                }
+            )
+
         except Exception as e:
-            print(e)
-            print("Not able to send email.")
+            logging.error(
+                "Not able to send email due to unknown exception.",
+                extra={
+                    'exception': e,
+                    'email_address': email_address,
+                    'subject': subject,
+                }
+            )
 
         time.sleep(5)
 
@@ -179,7 +207,7 @@ class Command(BaseCommand):
 
         log_kwargs.update(kwargs)
 
-        print(log_fmt.format(**log_kwargs))
+        logging.info(log_fmt.format(**log_kwargs))
 
     def _deny(self, app_status, denial_reason, admin_user):
         '''
