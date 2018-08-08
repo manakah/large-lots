@@ -51,6 +51,10 @@ class Command(BaseCommand):
                             help='Set number of emails to send.',
                             default=-1)
 
+        parser.add_argument('--admin',
+                            help='The ID admin sending the emails. Defaults to Jeanne Chandler.',
+                            default=5)
+
         # Select options
         parser.add_argument('--wintrust_email',
                             action='store_true',
@@ -84,6 +88,7 @@ class Command(BaseCommand):
         self.date = options['date']
         self.separate_emails = options['separate_emails'].split(',')
         self.n = int(options['n'])
+        self.admin = User.objects.get(id=int(options['admin']))
 
         for email in (k for k, v in options.items() if k.endswith('email') and v is True):
             getattr(self, 'send_{}'.format(email))()
@@ -209,19 +214,18 @@ class Command(BaseCommand):
 
         logging.info(log_fmt.format(**log_kwargs))
 
-    def _deny(self, app_status, denial_reason, admin_user):
+    def _deny(self, app_status, denial_reason):
         '''
         Deny the given application and create a corresponding review object.
 
         :app_status - ApplicationStatus object
         :denial_reason - DenialReason object
-        :admin_user - User object (usually, an admin)
         '''
         app_status.denied = True
         app_status.current_step = None
         app_status.save()
 
-        review = Review(reviewer=admin_user,
+        review = Review(reviewer=self.admin,
                         denial_reason=denial_reason,
                         application=app_status,
                         email_sent=True)
@@ -395,7 +399,6 @@ class Command(BaseCommand):
         log_fmt = '{date} {applicant} ({email}) denied due to lack of EDS for lots #{pins}'
 
         no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
-        admin_user = User.objects.get(id=5)
 
         for email, apps, statuses in self._select_applicants_on_step(7):
             send_one = True
@@ -417,4 +420,4 @@ class Command(BaseCommand):
                     break
 
             for status in statuses:
-                self._deny(status, no_eds, admin_user)
+                self._deny(status, no_eds)
