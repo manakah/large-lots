@@ -83,7 +83,7 @@ class Command(BaseCommand):
         parser.add_argument('--custom_email',
                             help='Send a custom email to applicants on or' +
                             'not on a given step. Accepted values: on_step,' +
-                            'not_on_step, on_steps_before, one_steps_after')
+                            'not_on_step, on_steps_before, on_steps_after')
 
         parser.add_argument('--steps',
                             help='Required when sending a custom email.' +
