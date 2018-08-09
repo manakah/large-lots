@@ -107,10 +107,8 @@ class Command(BaseCommand):
 
             self.operator = options['custom_email']
             self.steps = options['steps'].split(',')
-        '''
-        TO-DO: Find a better way to log this...
-        '''
-        print(getattr(self, 'send_{}'.format(email))())
+
+        getattr(self, 'send_{}'.format(email))()
 
     def _select_applicants(self, operator, step, **keywords):
         '''
@@ -269,8 +267,6 @@ class Command(BaseCommand):
         '''
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
 
-        errors = []
-
         for email, apps, statuses in self._select_applicants_on_step(7, every_status=True, filter='app.eds_sent = FALSE'):
             context = {'app': apps.first()}
 
@@ -278,8 +274,7 @@ class Command(BaseCommand):
                 self._send_email('eds_email', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, [app.id for app in apps])
-                errors.append(applicant_info)
+                self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
             else:
                 self._log(apps.first(), statuses)
@@ -287,8 +282,6 @@ class Command(BaseCommand):
                 for app in apps:
                     app.eds_sent = True
                     app.save()
-
-        return errors
 
     def send_lotto_email(self):
         '''
@@ -308,8 +301,6 @@ class Command(BaseCommand):
 
         sorted_applicants = sorted(list(applicants), key=lambda x: x[2].lot.pin)
 
-        errors = []
-
         for idx, app_data in enumerate(sorted_applicants[:self.n], start=1):
             email, app, status = app_data
 
@@ -320,8 +311,7 @@ class Command(BaseCommand):
                 self._send_email('lottery_notification', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, [app.id])
-                errors.append(applicant_info)
+                self.stdout.write('{0} {1}'.format(email, str(app.id)))
 
             else:
                 event = ' on '.join([context['time'], context['date']])
@@ -330,12 +320,8 @@ class Command(BaseCommand):
                 status.lottery_email_sent = True
                 status.save()
 
-        return errors
-
     def send_eds_final_email(self):
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
-
-        errors = []
 
         for email, apps, statuses in self._select_applicants_on_step(7):
             context = {'app': apps.first()}
@@ -344,20 +330,15 @@ class Command(BaseCommand):
                 self._send_email('eds_email', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, [app.id for app in apps])
-                errors.append(applicant_info)
+                self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
             else:
                 self._log(app, statuses.filter(application=app))
-
-        return errors
 
     def send_closing_time_email(self):
         subject = 'Closing Time for Large Lots'
 
         next_step = ApplicationStep.objects.get(step=9)
-
-        errors = []
 
         for email, apps, statuses in self._select_applicants_on_step(8):
             lots = [s.lot for s in statuses]
@@ -367,9 +348,8 @@ class Command(BaseCommand):
             try:
                 self._send_email('closing_time_email', subject, email, context)
 
-            except:
-                applicant_info = (email, [app.id for app in apps])
-                errors.append(applicant_info)
+            except CannotSendEmailException:
+                self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
             else:
                 self._log(apps.first(), statuses)
@@ -378,15 +358,11 @@ class Command(BaseCommand):
                     status.current_step = next_step
                     status.save()
 
-        return errors
-
     def send_closing_invitations_email(self):
         subject = 'Large Lot Closing Date and Time'
         log_fmt = '{date} {applicant} ({email}, {phone}) invited to Closing {event} for lots #{pins}'
 
         applicants = list(self._select_applicants_on_step(10, filter='app.closing_invite_sent = FALSE'))
-
-        errors = []
 
         for idx, app_data in enumerate(applicants[:self.n], start=1):
             email, apps, statuses = app_data
@@ -398,9 +374,8 @@ class Command(BaseCommand):
             try:
                 self._send_email('closing_invitation_email', subject, email, context)
 
-            except:
-                applicant_info = (email, [app.id for app in apps])
-                errors.append(applicant_info)
+            except CannotSendEmailException:
+                self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
             else:
                 event = ' on '.join([context['time'], context['date']])
@@ -410,15 +385,11 @@ class Command(BaseCommand):
                     app.closing_invite_sent = True
                     app.save()
 
-        return errors
-
     def send_eds_denial_email(self):
         subject = 'LargeLots application - Denial'
         log_fmt = '{date} {applicant} ({email}) denied due to lack of EDS for lots #{pins}'
 
         no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
-
-        errors = []
 
         for email, apps, statuses in self._select_applicants_on_step(7):
             lots = [s.lot for s in statuses]
@@ -427,9 +398,8 @@ class Command(BaseCommand):
             try:
                 self._send_email('eds_denial_email', subject, email, context)
 
-            except:
-                applicant_info = (email, [app.id for app in apps])
-                errors.append(applicant_info)
+            except CannotSendEmailException:
+                self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
             else:
                 self._log(apps.first(), statuses, log_fmt)
@@ -437,15 +407,11 @@ class Command(BaseCommand):
                 for status in statuses:
                     self._deny(status, no_eds)
 
-        return errors
-
     def send_custom_email(self):
         '''
         e.g., python manage.py send_emails --custom_email on_step --steps 3,6
         '''
         select_method = getattr(self, '_select_applicants_{}'.format(self.operator))
-
-        errors = []
 
         for step in self.steps:
             for email, apps, statuses in select_method(step):
@@ -459,11 +425,8 @@ class Command(BaseCommand):
                     '''
                     self._send_email('some template', context['subject'], email, context)
 
-                except:
-                    applicant_info = (email, [app.id for app in apps])
-                    errors.append(applicant_info)
+                except CannotSendEmailException:
+                    self.stdout.write('{0} {1}'.format(email, ' '.join(str(app.id) for app in apps)))
 
                 else:
                     self._log(apps.first(), statuses, log_fmt)
-
-        return errors
