@@ -41,8 +41,7 @@ class Command(BaseCommand):
         parser.add_argument('-n', '--number-to-send',
                             help='Set number of emails to send.',
                             type=int,
-                            default=0,
-                            dest='number_to_send')
+                            default=0)
 
         parser.add_argument('-a', '--admin',
                             help='The ID of the admin sending the emails.' +
@@ -50,7 +49,7 @@ class Command(BaseCommand):
                             type=int,
                             default=5)
 
-        parser.add_argument('-c', '--base_context',
+        parser.add_argument('--base_context',
                             help='A string-encoded JSON object of values for' +
                             'email template context.',
                             default=r'{}')
@@ -81,6 +80,16 @@ class Command(BaseCommand):
                             help='Send denial emails to applicants who did' +
                             'not submit EDS')
 
+        parser.add_argument('--custom_email',
+                            help='Send a custom email to applicants on or' +
+                            'not on a given step. Accepted values: on_step,' +
+                            'not_on_step, on_steps_before, one_steps_after')
+
+        parser.add_argument('--steps',
+                            help='Required when sending a custom email.' +
+                            'Comma-separated list of steps used to select' +
+                            'applicants to email.')
+
     def handle(self, *args, **options):
         if options['number_to_send']:
             self.n = options['number_to_send']
@@ -89,11 +98,19 @@ class Command(BaseCommand):
         self.admin = User.objects.get(id=options['admin'])
 
         try:
-            email, = (k for k, v in options.items() if k.endswith('email') and v is True)
+            email, = (k for k, v in options.items() if k.endswith('email') and v)
         except ValueError:
             raise CommandError('Only specify one email to send at a time.')
 
-        return getattr(self, 'send_{}'.format(email))()
+        if email == 'custom_email':
+            assert options['steps']
+
+            self.operator = options['custom_email']
+            self.steps = options['steps'].split(',')
+        '''
+        TO-DO: Find a better way to log this...
+        '''
+        print(getattr(self, 'send_{}'.format(email))())
 
     def _select_applicants(self, operator, step, **keywords):
         '''
@@ -261,7 +278,7 @@ class Command(BaseCommand):
                 self._send_email('eds_email', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, (app.id for app in apps))
+                applicant_info = (email, [app.id for app in apps])
                 errors.append(applicant_info)
 
             else:
@@ -303,7 +320,7 @@ class Command(BaseCommand):
                 self._send_email('lottery_notification', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, (app.id))
+                applicant_info = (email, [app.id])
                 errors.append(applicant_info)
 
             else:
@@ -327,7 +344,7 @@ class Command(BaseCommand):
                 self._send_email('eds_email', subject, email, context)
 
             except CannotSendEmailException:
-                applicant_info = (email, (app.id for app in apps))
+                applicant_info = (email, [app.id for app in apps])
                 errors.append(applicant_info)
 
             else:
@@ -351,7 +368,7 @@ class Command(BaseCommand):
                 self._send_email('closing_time_email', subject, email, context)
 
             except:
-                applicant_info = (email, (app.id for app in apps))
+                applicant_info = (email, [app.id for app in apps])
                 errors.append(applicant_info)
 
             else:
@@ -382,7 +399,7 @@ class Command(BaseCommand):
                 self._send_email('closing_invitation_email', subject, email, context)
 
             except:
-                applicant_info = (email, (app.id for app in apps))
+                applicant_info = (email, [app.id for app in apps])
                 errors.append(applicant_info)
 
             else:
@@ -411,7 +428,7 @@ class Command(BaseCommand):
                 self._send_email('eds_denial_email', subject, email, context)
 
             except:
-                applicant_info = (email, (app.id for app in apps))
+                applicant_info = (email, [app.id for app in apps])
                 errors.append(applicant_info)
 
             else:
@@ -419,5 +436,34 @@ class Command(BaseCommand):
 
                 for status in statuses:
                     self._deny(status, no_eds)
+
+        return errors
+
+    def send_custom_email(self):
+        '''
+        e.g., python manage.py send_emails --custom_email on_step --steps 3,6
+        '''
+        select_method = getattr(self, '_select_applicants_{}'.format(self.operator))
+
+        errors = []
+
+        for step in self.steps:
+            for email, apps, statuses in select_method(step):
+                lots = [s.lot for s in statuses]
+                context = {'app': apps.first(), 'lots': lots}
+                context.update(self.base_context)
+
+                try:
+                    '''
+                    TO-DO: Make a base template.
+                    '''
+                    self._send_email('some template', context['subject'], email, context)
+
+                except:
+                    applicant_info = (email, [app.id for app in apps])
+                    errors.append(applicant_info)
+
+                else:
+                    self._log(apps.first(), statuses, log_fmt)
 
         return errors
