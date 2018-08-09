@@ -1,10 +1,11 @@
 from datetime import datetime
 from functools import partialmethod
 from itertools import chain
+import json
 from smtplib import SMTPException
 import time
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
@@ -24,10 +25,12 @@ handler.setLevel(logging.ERROR)
 setup_logging(handler)
 
 
+class CannotSendEmailException(Exception):
+    pass
+
+
 class Command(BaseCommand):
-    help = 'Send bulk emails to Large Lots applicants. By default, all applications ' + \
-        'associated with an email address will be aggregated, and one email will ' + \
-        'be sent. See --separate_emails for handling shared email addresses.'
+    help = 'Send bulk emails to Large Lots applicants.'
 
     def add_arguments(self, parser):
         '''
@@ -35,25 +38,22 @@ class Command(BaseCommand):
         write a method on the Command class called 'send_x_email'.
         '''
         # Meta options
-        parser.add_argument('--date',
-                            help='Date in format YYYY-MM-DD for emails, etc.')
-
-        parser.add_argument('--separate_emails',
-                            help='Comma-separated list of email addresses. ' +
-                                 'In contrast to the default behavior of one aggregate ' +
-                                 'email, separate emails will be sent for each ' +
-                                 'application associated with the provided email ' +
-                                 'addresses. This is useful when one email address ' +
-                                 'is in use by more than one applicant.',
-                            default='')
-
-        parser.add_argument('--n',
+        parser.add_argument('-n', '--number-to-send',
                             help='Set number of emails to send.',
-                            default=-1)
+                            type=int,
+                            default=0,
+                            dest='number_to_send')
 
-        parser.add_argument('--admin',
-                            help='The ID admin sending the emails. Defaults to Jeanne Chandler.',
+        parser.add_argument('-a', '--admin',
+                            help='The ID of the admin sending the emails.' +
+                            'Defaults to Jeanne Chandler.',
+                            type=int,
                             default=5)
+
+        parser.add_argument('-c', '--base_context',
+                            help='A string-encoded JSON object of values for' +
+                            'email template context.',
+                            default=r'{}')
 
         # Select options
         parser.add_argument('--eds_email',
@@ -78,21 +78,28 @@ class Command(BaseCommand):
 
         parser.add_argument('--eds_denial_email',
                             action='store_true',
-                            help='Send denial emails to applicants who did not submit EDS')
+                            help='Send denial emails to applicants who did' +
+                            'not submit EDS')
 
     def handle(self, *args, **options):
-        self.date = options['date']
-        self.separate_emails = options['separate_emails'].split(',')
-        self.n = int(options['n'])
-        self.admin = User.objects.get(id=int(options['admin']))
+        if options['number_to_send']:
+            self.n = options['number_to_send']
 
-        for email in (k for k, v in options.items() if k.endswith('email') and v is True):
-            getattr(self, 'send_{}'.format(email))()
+        self.base_context = json.loads(options['base_context'])
+        self.admin = User.objects.get(id=options['admin'])
+
+        try:
+            email, = (k for k, v in options.items() if k.endswith('email') and v is True)
+        except ValueError:
+            raise CommandError('Only specify one email to send at a time.')
+
+        return getattr(self, 'send_{}'.format(email))()
 
     def _select_applicants(self, operator, step, **keywords):
         '''
-        Build and execute a query to select applicants, grouped by email and
-        ordered by applicant name.
+        Build and execute a query to select applicants, grouped by email, name,
+        and ZIP code (a rough unique identifier of individuals) and ordered by
+        applicant name.
 
         Return a tuple, (email, Application queryset, ApplicationStatus queryset),
         such that the returned Application and ApplicationStatus objects meet
@@ -102,14 +109,19 @@ class Command(BaseCommand):
             WITH applicants AS (
               SELECT
                 app.email,
+                app.first_name,
+                app.last_name,
+                address.zip_code,
                 app.id AS app_id,
                 status.id AS status_id,
                 step.step
               FROM lots_admin_application AS app
-              JOIN lots_admin_applicationstatus as status
+              JOIN lots_admin_applicationstatus AS status
               ON app.id = status.application_id
-              JOIN lots_admin_applicationstep as step
+              JOIN lots_admin_applicationstep AS step
               ON status.current_step_id = step.id
+              JOIN lots_admin_address AS address
+              ON app.contact_address_id = address.id
               WHERE status.denied = FALSE
               {filter}
               ORDER BY app.last_name, app.first_name
@@ -120,7 +132,7 @@ class Command(BaseCommand):
               ARRAY_AGG(status_id) AS app_statuses
             FROM applicants
             {where}
-            GROUP BY email
+            GROUP BY email, first_name, last_name, zip_code
             {having}
         '''
 
@@ -172,16 +184,16 @@ class Command(BaseCommand):
         try:
             msg.send()
 
-        except SMTPException as stmp_e:
+        except SMTPException as smtp_e:
             logging.error(
                 "Not able to send email due to SMTP exception.",
                 extra={
-                    'exception': stmp_e,
+                    'exception': smtp_e,
                     'email_address': email_address,
                     'subject': subject,
                 }
             )
-            raise
+            raise CannotSendEmailException(str(smtp_e))
 
         except Exception as e:
             logging.error(
@@ -192,7 +204,7 @@ class Command(BaseCommand):
                     'subject': subject,
                 }
             )
-            raise
+            raise CannotSendEmailException(str(e))
 
         else:
             time.sleep(5)
@@ -231,18 +243,8 @@ class Command(BaseCommand):
 
         review.save()
 
-    def _date_to_datetime(self, hour, minute):
-        date = datetime.strptime(self.date, '%Y-%m-%d')
-
-        date_parts = [getattr(date, k) for k in ('year', 'month', 'day')]
-        date_parts += [hour, minute]
-
-        return datetime(*date_parts)
-
     def send_eds_email(self):
         '''
-        Send EDS invitations on a per-email basis, unless specified by the admin.
-
         Email only applicants whose non-denied applications are all on step 7,
         in order to avoid a situation where an applicant has active application
         statuses on other steps, as these will get stuck if the applicant
@@ -250,39 +252,26 @@ class Command(BaseCommand):
         '''
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
 
+        errors = []
+
         for email, apps, statuses in self._select_applicants_on_step(7, every_status=True, filter='app.eds_sent = FALSE'):
-            if email in self.separate_emails:
-                for app in apps:
-                    context = {'app': app}
+            context = {'app': apps.first()}
 
-                    try:
-                        self._send_email('eds_email', subject, email, context)
+            try:
+                self._send_email('eds_email', subject, email, context)
 
-                    except:
-                        pass
-
-                    else:
-                        self._log(app, statuses.filter(application=app))
-
-                        app.eds_sent = True
-                        app.save()
+            except CannotSendEmailException:
+                applicant_info = (email, (app.id for app in apps))
+                errors.append(applicant_info)
 
             else:
-                context = {'app': apps.first()}
+                self._log(apps.first(), statuses)
 
-                try:
-                    self._send_email('eds_email', subject, email, context)
+                for app in apps:
+                    app.eds_sent = True
+                    app.save()
 
-                except:
-                    pass
-
-                else:
-                    self._log(apps.first(), statuses)
-
-                    for app in apps:
-                        app.eds_sent = True
-                        app.save()
-
+        return errors
 
     def send_lotto_email(self):
         '''
@@ -290,7 +279,7 @@ class Command(BaseCommand):
         will have their own lottery event.
         '''
         subject = 'LargeLots application - Lottery'
-        log_fmt = '{date} {applicant} ({email}, {phone}) invited to Lottery {event} for lots #{pins}'
+        log_fmt = '{date} {applicant} ({email}, {phone}) invited to Lottery at {event} for lots #{pins}'
 
         # Sort applicants by lot PIN
         applicants = []
@@ -302,73 +291,56 @@ class Command(BaseCommand):
 
         sorted_applicants = sorted(list(applicants), key=lambda x: x[2].lot.pin)
 
+        errors = []
+
         for idx, app_data in enumerate(sorted_applicants[:self.n], start=1):
             email, app, status = app_data
 
-            if idx <= len(sorted_applicants) / 2:
-                event = self._date_to_datetime(hour=9, minute=0)
-            else:
-                event = self._date_to_datetime(hour=13, minute=0)
-
-            context = {
-                'lot': status.lot,
-                'app': app,
-                'date': event,
-                'time': None,
-            }
+            context = {'lot': status.lot, 'app': app}
+            context.update(self.base_context)
 
             try:
                 self._send_email('lottery_notification', subject, email, context)
 
-            except:
-                pass
+            except CannotSendEmailException:
+                applicant_info = (email, (app.id))
+                errors.append(applicant_info)
 
             else:
+                event = ' on '.join([context['time'], context['date']])
                 self._log(app, [status], log_fmt, event=event)
 
                 status.lottery_email_sent = True
                 status.save()
 
+        return errors
+
     def send_eds_final_email(self):
-        '''
-        Send EDS final notice on a per-email basis, unless specified by the
-        admin.
-        '''
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)'
 
+        errors = []
+
         for email, apps, statuses in self._select_applicants_on_step(7):
-            if email in self.separate_emails:
-                for app in apps:
-                    context = {'app': app}
+            context = {'app': apps.first()}
 
-                    try:
-                        self._send_email('eds_email', subject, email, context)
+            try:
+                self._send_email('eds_email', subject, email, context)
 
-                    except:
-                        pass
-
-                    else:
-                        self._log(app, statuses.filter(application=app))
+            except CannotSendEmailException:
+                applicant_info = (email, (app.id for app in apps))
+                errors.append(applicant_info)
 
             else:
-                context = {'app': apps.first()}
+                self._log(app, statuses.filter(application=app))
 
-                try:
-                    self._send_email('eds_email', subject, email, context)
-
-                except:
-                    pass
-
-                else:
-                    self._log(app, statuses.filter(application=app))
+        return errors
 
     def send_closing_time_email(self):
-        '''
-        Send closing time notifications on a per-email basis.
-        '''
         subject = 'Closing Time for Large Lots'
 
         next_step = ApplicationStep.objects.get(step=9)
+
+        errors = []
 
         for email, apps, statuses in self._select_applicants_on_step(8):
             lots = [s.lot for s in statuses]
@@ -379,7 +351,8 @@ class Command(BaseCommand):
                 self._send_email('closing_time_email', subject, email, context)
 
             except:
-                pass
+                applicant_info = (email, (app.id for app in apps))
+                errors.append(applicant_info)
 
             else:
                 self._log(apps.first(), statuses)
@@ -388,81 +361,63 @@ class Command(BaseCommand):
                     status.current_step = next_step
                     status.save()
 
+        return errors
+
     def send_closing_invitations_email(self):
-        '''
-        Send invitations to closings on a per-email basis.
-        '''
         subject = 'Large Lot Closing Date and Time'
         log_fmt = '{date} {applicant} ({email}, {phone}) invited to Closing {event} for lots #{pins}'
 
         applicants = list(self._select_applicants_on_step(10, filter='app.closing_invite_sent = FALSE'))
 
+        errors = []
+
         for idx, app_data in enumerate(applicants[:self.n], start=1):
             email, apps, statuses = app_data
 
             lots = [s.lot for s in statuses]
-
-            if idx <= len(applicants) / 2:
-                event = self._date_to_datetime(hour=9, minute=0)
-            else:
-                event = self._date_to_datetime(hour=13, minute=0)
-
-            context = {'app': apps.first(), 'lots': lots, 'event': event}
+            context = {'app': apps.first(), 'lots': lots}
+            context.update(self.base_context)
 
             try:
                 self._send_email('closing_invitation_email', subject, email, context)
 
             except:
-                pass
+                applicant_info = (email, (app.id for app in apps))
+                errors.append(applicant_info)
 
             else:
+                event = ' on '.join([context['time'], context['date']])
                 self._log(apps.first(), statuses, log_fmt, event=event)
 
                 for app in apps:
                     app.closing_invite_sent = True
                     app.save()
 
+        return errors
+
     def send_eds_denial_email(self):
-        '''
-        Send denials on a per-email address basis, unless specified by the
-        admin.
-        '''
         subject = 'LargeLots application - Denial'
         log_fmt = '{date} {applicant} ({email}) denied due to lack of EDS for lots #{pins}'
 
         no_eds, _ = DenialReason.objects.get_or_create(value=DENIAL_REASONS['EDS'])
 
+        errors = []
+
         for email, apps, statuses in self._select_applicants_on_step(7):
-            if email in self.separate_emails:
-                for app in apps:
-                    app_statuses = statuses.filter(application=app)
-                    lots = [s.lot for s in app_statuses]
-                    context = {'app': app, 'lots': lots}
+            lots = [s.lot for s in statuses]
+            context = {'app': apps.first(), 'lots': lots}
 
-                    try:
-                        self._send_email('eds_denial_email', subject, email, context)
+            try:
+                self._send_email('eds_denial_email', subject, email, context)
 
-                    except:
-                        pass
-
-                    else:
-                        self._log(app, statuses, log_fmt)
-
-                        for status in app_statuses:
-                            self._deny(status, no_eds)
+            except:
+                applicant_info = (email, (app.id for app in apps))
+                errors.append(applicant_info)
 
             else:
-                lots = [s.lot for s in statuses]
-                context = {'app': apps.first(), 'lots': lots}
+                self._log(apps.first(), statuses, log_fmt)
 
-                try:
-                    self._send_email('eds_denial_email', subject, email, context)
+                for status in statuses:
+                    self._deny(status, no_eds)
 
-                except:
-                    pass
-
-                else:
-                    self._log(apps.first(), statuses, log_fmt)
-
-                    for status in statuses:
-                        self._deny(status, no_eds)
+        return errors

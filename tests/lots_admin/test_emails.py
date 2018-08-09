@@ -17,7 +17,7 @@ def test_eds_email(email_db_setup):
     database.
     '''
     with patch.object(Command, '_send_email') as mock_send:
-        call_command('send_emails', '--eds_email', n='5', stdout=sys.stdout)
+        call_command('send_emails', '--eds_email')
 
     eds_sent_applications = Application.objects.filter(eds_sent=True)
 
@@ -35,7 +35,7 @@ def test_lotto_email(email_db_setup, caplog):
     '''
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--lotto_email', n=3, date='2017-11-13')
+            call_command('send_emails', '--lotto_email', '-n 3', base_context='{"date": "2017-11-13", "time": "9:00"}')
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
 
@@ -46,14 +46,13 @@ def test_lotto_email(email_db_setup, caplog):
     lines = caplog.text.splitlines()
 
     assert all(['2017-11-13' in line for line in lines])
-    assert len([line for line in lines if '09:00' in line]) == 1
-    assert len([line for line in lines if '13:00' in line]) == 2
+    assert len([line for line in lines if '9:00' in line]) == 3
 
 @pytest.mark.django_db
 def test_closing_invitations(email_db_setup, caplog):
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--closing_invitations_email', n=3, date='2017-11-13')
+            call_command('send_emails', '--closing_invitations_email', '-n 3', base_context='{"date": "2017-11-13", "time": "9:00"}')
 
     # Test applications are updated
     invited = Application.objects.filter(closing_invite_sent=True)
@@ -66,8 +65,7 @@ def test_closing_invitations(email_db_setup, caplog):
     lines = caplog.text.splitlines()
 
     assert all(['2017-11-13' in line for line in lines])
-    assert len([line for line in lines if '09:00' in line]) == 1
-    assert len([line for line in lines if '13:00' in line]) == 2
+    assert len([line for line in lines if '9:00' in line]) == 3
 
 @pytest.mark.django_db
 def test_eds_denials(email_db_setup, caplog):
@@ -83,7 +81,7 @@ def test_eds_denials(email_db_setup, caplog):
 
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--eds_denial_email', separate_emails='weezerules@yahoo.com')
+            call_command('send_emails', '--eds_denial_email')
 
     lines = caplog.text.splitlines()
 
@@ -92,16 +90,10 @@ def test_eds_denials(email_db_setup, caplog):
 
         log_count = len([line for line in lines if app.email in line])
 
-        if app.email == 'weezerules@yahoo.com':
-            # Assert two emails sent
-            assert log_count == 2
-        else:
-            # Assert one email sent
-            assert log_count == 1
+        assert log_count == 1
 
         # Assert no applications remain on step 7
         assert all([status.current_step != 7 for status in app.applicationstatus_set.all()])
 
         # If there current step is None, assert application was denied
         assert all([status.denied for status in app.applicationstatus_set.all() if not status.current_step])
-
