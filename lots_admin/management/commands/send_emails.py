@@ -56,10 +56,6 @@ class Command(BaseCommand):
                             default=5)
 
         # Select options
-        parser.add_argument('--wintrust_email',
-                            action='store_true',
-                            help='Send emails about a special event')
-
         parser.add_argument('--eds_email',
                             action='store_true',
                             help='Send email with link to complete EDS')
@@ -242,19 +238,6 @@ class Command(BaseCommand):
         date_parts += [hour, minute]
 
         return datetime(*date_parts)
-
-    def send_wintrust_email(self):
-        '''
-        Send event invitations on a per-application basis.
-        '''
-        subject = 'Special event for Large Lots applicants'
-
-        for email, apps, statuses in chain(self._select_applicants_on_step(4),
-                                           self._select_applicants_on_step(6)):
-            for app in apps:
-                context = {'app': app}
-                self._send_email('wintrust_email', subject, email, context)
-                self._log(app, statuses.filter(application=app))
 
     def send_eds_email(self):
         '''
