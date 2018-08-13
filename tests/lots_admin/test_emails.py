@@ -1,23 +1,26 @@
+import json
 import logging
 import pytest
 from unittest.mock import patch
 import sys
 
 from django.core.management import call_command
+from django.db.models import Q
 
 from lots_admin.models import Application, ApplicationStatus
 from lots_admin.management.commands.send_emails import Command
 
 
 @pytest.mark.django_db
-def test_eds_email(email_db_setup):
+def test_eds_email(email_db_setup, caplog):
     '''
     Test that we appropriately select and notify Rivers Cuomo
     and Karen Oh, and update their active applications in the
     database.
     '''
-    with patch.object(Command, '_send_email') as mock_send:
-        call_command('send_emails', '--eds_email')
+    with caplog.at_level(logging.INFO):
+        with patch.object(Command, '_send_email') as mock_send:
+            call_command('send_emails', '--eds_email')
 
     eds_sent_applications = Application.objects.filter(eds_sent=True)
 
@@ -28,19 +31,25 @@ def test_eds_email(email_db_setup):
     assert len(eds_sent_applications.filter(first_name='Rivers')) == 2
     assert len(eds_sent_applications.filter(first_name='Karen')) == 1
 
+    lines = caplog.text.splitlines()
+
+    # Assert Rivers and Karen received one email apiece.
+    assert len(lines) == 2
+
 @pytest.mark.django_db
 def test_lotto_email(email_db_setup, caplog):
     '''
-    This test checks that the correct number of lotto emails go to the appropriate recipients.
+    This test checks that the correct number of lotto emails go to the
+    appropriate recipients.
     '''
+    base_context = {'date': '2017-11-13', 'time': '9:00'}
+
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--lotto_email', '-n 3', base_context='{"date": "2017-11-13", "time": "9:00"}')
+            call_command('send_emails', '--lotto_email', '-n 3', base_context=json.dumps(base_context))
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
 
-    # Three applicant-statuses are set for lottery.
-    # The 'morning' mail, with an offset of 1, should go to two of those three.
     assert len(lotto_sent_applications) == 3
 
     lines = caplog.text.splitlines()
@@ -50,17 +59,15 @@ def test_lotto_email(email_db_setup, caplog):
 
 @pytest.mark.django_db
 def test_closing_invitations(email_db_setup, caplog):
+    base_context = {'date': '2017-11-13', 'time': '9:00'}
+
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--closing_invitations_email', '-n 3', base_context='{"date": "2017-11-13", "time": "9:00"}')
+            call_command('send_emails', '--closing_invitations_email', '-n 3', base_context=json.dumps(base_context))
 
     # Test applications are updated
     invited = Application.objects.filter(closing_invite_sent=True)
     assert len(invited) == 3
-
-    # Command will invite half the given number of applicants, n, rounding the
-    # first group DOWN if n / 2 is not an integer. Given an n of 3, test 1
-    # is invited to the morning event and 2 are invited to the afternoon event.
 
     lines = caplog.text.splitlines()
 
@@ -97,3 +104,42 @@ def test_eds_denials(email_db_setup, caplog):
 
         # If there current step is None, assert application was denied
         assert all([status.denied for status in app.applicationstatus_set.all() if not status.current_step])
+
+
+@pytest.mark.parametrize('custom,step,q_filter', [
+    ('on_step', '6', Q(current_step__step=6)),
+    ('not_on_step', '8', Q(current_step__step__in=[i for i in range(12) if i != 8])),
+    ('on_steps_before', '8', Q(current_step__step__lt=8)),
+    ('on_steps_after', '6', Q(current_step__step__gt=6)),
+])
+@pytest.mark.django_db
+def test_custom_select(email_db_setup, caplog, custom, step, q_filter):
+    base_context = {'subject': 'test email'}
+
+    with caplog.at_level(logging.INFO):
+        with patch.object(Command, '_send_email') as mock_send:
+            call_command('send_emails', custom_email=custom, steps=step, base_context=json.dumps(base_context))
+
+    lines = caplog.text.splitlines()
+
+    statuses = ApplicationStatus.objects.none()
+
+    for line in lines:
+        # Parse the log entry.
+        email = line.split('|')[2].strip()
+        email = email
+
+        csv_pins = line.split('|')[-1]
+        pins = [int(s) for s in csv_pins.split(',')]
+
+        statuses |= ApplicationStatus.objects.filter(application__email=email,
+                                                     lot__pin__in=pins)
+
+    # Assert all statuses meet the given step criteria.
+    assert statuses.count() == statuses.filter(q_filter).count()
+
+    # Assert an email was logged for every distinct email address with a
+    # qualifying status.
+    assert len(lines) == Application.objects.filter(applicationstatus__in=statuses)\
+                                            .distinct('email')\
+                                            .count()
