@@ -224,10 +224,11 @@ class Command(BaseCommand):
 
     def _log(self, app, statuses, log_fmt=None, **kwargs):
         if not log_fmt:
-            log_fmt = '{date} | {applicant} | {email} | {phone} | {pins}'
+            log_fmt = '{date} | {application} | {applicant} | {email} | {phone} | {pins}'
 
         log_kwargs = dict(
             date=datetime.now().strftime('%Y-%m-%d %H:%M'),
+            application = app.id,
             applicant=' '.join([app.first_name, app.last_name]),
             email=app.email,
             phone=app.phone,

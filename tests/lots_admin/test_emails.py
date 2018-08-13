@@ -8,7 +8,8 @@ from django.core.management import call_command
 from django.db.models import Q
 
 from lots_admin.models import Application, ApplicationStatus
-from lots_admin.management.commands.send_emails import Command
+from lots_admin.management.commands.send_emails import Command, CannotSendEmailException
+from lots_admin.utils import EmailLogParser
 
 
 @pytest.mark.django_db
@@ -126,7 +127,7 @@ def test_custom_select(email_db_setup, caplog, custom, step, q_filter):
 
     for line in lines:
         # Parse the log entry.
-        email = line.split('|')[2].strip()
+        email = line.split('|')[3].strip()
         email = email
 
         csv_pins = line.split('|')[-1]
@@ -143,3 +144,15 @@ def test_custom_select(email_db_setup, caplog, custom, step, q_filter):
     assert len(lines) == Application.objects.filter(applicationstatus__in=statuses)\
                                             .distinct('email')\
                                             .count()
+
+@pytest.mark.django_db
+def test_parse_log(email_db_setup):
+    log = EmailLogParser()
+
+    base_context = {'subject': 'test email'}
+
+    with patch.object(Command, '_send_email', side_effect=CannotSendEmailException) as mock_send:
+        call_command('send_emails', custom_email='on_step', steps='6', base_context=json.dumps(base_context), stdout=log)
+
+    # Test parser returns Application object for each line in the log.
+    assert len(log.getvalue()) == log.applications.count()
