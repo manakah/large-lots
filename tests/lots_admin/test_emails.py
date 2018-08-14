@@ -21,7 +21,7 @@ def test_eds_email(email_db_setup, caplog):
     '''
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--eds_email')
+            call_command('send_emails', '--eds_email', '-a 5')
 
     eds_sent_applications = Application.objects.filter(eds_sent=True)
 
@@ -47,7 +47,7 @@ def test_lotto_email(email_db_setup, caplog):
 
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--lotto_email', '-n 3', base_context=json.dumps(base_context))
+            call_command('send_emails', '-a 5', '--lotto_email', '-n 3', base_context=json.dumps(base_context))
 
     lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
 
@@ -64,7 +64,7 @@ def test_closing_invitations(email_db_setup, caplog):
 
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--closing_invitations_email', '-n 3', base_context=json.dumps(base_context))
+            call_command('send_emails', '-a 5', '--closing_invitations_email', '-n 3', base_context=json.dumps(base_context))
 
     # Test applications are updated
     invited = Application.objects.filter(closing_invite_sent=True)
@@ -89,7 +89,7 @@ def test_eds_denials(email_db_setup, caplog):
 
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', '--eds_denial_email')
+            call_command('send_emails', '-a 5', '--eds_denial_email')
 
     lines = caplog.text.splitlines()
 
@@ -119,7 +119,7 @@ def test_custom_select(email_db_setup, caplog, custom, step, q_filter):
 
     with caplog.at_level(logging.INFO):
         with patch.object(Command, '_send_email') as mock_send:
-            call_command('send_emails', custom_email=custom, steps=step, base_context=json.dumps(base_context))
+            call_command('send_emails', '-a 5', custom_email=custom, steps=step, base_context=json.dumps(base_context))
 
     lines = caplog.text.splitlines()
 
@@ -152,7 +152,7 @@ def test_parse_log(email_db_setup):
     base_context = {'subject': 'test email'}
 
     with patch.object(Command, '_send_email', side_effect=CannotSendEmailException) as mock_send:
-        call_command('send_emails', custom_email='on_step', steps='6', base_context=json.dumps(base_context), stdout=log)
+        call_command('send_emails', '-a 5', custom_email='on_step', steps='6', base_context=json.dumps(base_context), stdout=log)
 
     # Test parser returns Application object for each line in the log.
     assert len(log.getvalue()) == log.applications.count()
