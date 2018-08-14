@@ -44,10 +44,8 @@ class Command(BaseCommand):
                             default=0)
 
         parser.add_argument('-a', '--admin',
-                            help='The ID of the admin sending the emails.' +
-                            'Defaults to Jeanne Chandler.',
-                            type=int,
-                            default=5)
+                            help='The ID of the admin sending the emails.',
+                            type=int)
 
         parser.add_argument('--base_context',
                             help='A string-encoded JSON object of values for' +
