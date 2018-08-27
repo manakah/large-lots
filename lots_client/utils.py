@@ -1,4 +1,5 @@
 import requests
+import usaddress
 
 from django.conf import settings
 
@@ -16,3 +17,13 @@ def call_carto(query_args, pin):
     response = requests.get(carto, params=params)
 
     return response
+
+def parse_address(address):
+    parsed = usaddress.parse(address)
+    street_number = ' '.join([p[0] for p in parsed if p[1] == 'AddressNumber'])
+    street_dir = ' '.join([p[0] for p in parsed if p[1] == 'StreetNamePreDirectional'])
+    street_name = ' '.join([p[0] for p in parsed if p[1] == 'StreetName'])
+    street_type = ' '.join([p[0] for p in parsed if p[1] == 'StreetNamePostType'])
+    unit_number = ' '.join([p[0] for p in parsed if p[1] == 'OccupancyIdentifier'])
+
+    return (street_number, street_dir, street_name, street_type, unit_number)

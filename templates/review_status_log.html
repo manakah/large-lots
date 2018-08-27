@@ -55,11 +55,16 @@
 
 <form action='/review-status-log/{{ application_status.id }}' method='post'>
   {% csrf_token %}
-  <div class="form-group row">
-    {{ application_formset  }}
+  <div class="form-group">
+    {{application_formset}}
   </div>
   
-  {{ address_form.as_p }}
+  {% for field in address_form %}
+    <div class='form-group'>
+      {{ field }}
+    </div>
+  {% endfor %}
+
   <button type="submit" class="btn btn-success btn-lg pull-right">
       <i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Submit
   </button>

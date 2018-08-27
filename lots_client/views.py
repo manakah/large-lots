@@ -10,7 +10,6 @@ from io import BytesIO
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-import usaddress
 from dateutil import parser
 import magic
 from pdfid.pdfid import FindPDFHeaderRelaxed, C2BIP3, cBinaryFile
@@ -35,6 +34,7 @@ from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from lots_admin.models import Lot, Application, Address, ApplicationStep,\
     ApplicationStatus, PrincipalProfile, RelatedPerson, LotUse
 from lots_client.forms import ApplicationForm, DeedUploadForm, PrincipalProfileForm
+from lots_client.utils import parse_address
 
 # Establish logger for precise logging to Sentry.
 logger = logging.getLogger(__name__)
@@ -146,16 +146,6 @@ def get_community(pin):
             community_name = community[0]['community']
 
     return community_name
-
-def parse_address(address):
-    parsed = usaddress.parse(address)
-    street_number = ' '.join([p[0] for p in parsed if p[1] == 'AddressNumber'])
-    street_dir = ' '.join([p[0] for p in parsed if p[1] == 'StreetNamePreDirectional'])
-    street_name = ' '.join([p[0] for p in parsed if p[1] == 'StreetName'])
-    street_type = ' '.join([p[0] for p in parsed if p[1] == 'StreetNamePostType'])
-    unit_number = ' '.join([p[0] for p in parsed if p[1] == 'OccupancyIdentifier'])
-
-    return (street_number, street_dir, street_name, street_type, unit_number)
 
 def get_lot_address(address, pin):
     (street_number, street_dir, street_name, street_type, unit_number) = parse_address(address)

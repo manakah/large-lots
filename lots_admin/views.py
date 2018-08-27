@@ -921,7 +921,7 @@ def review_status_log(request, application_id):
     future_list = [2, 3, 4, 5, 6, 7]
     
     address_form = AddressUpdateForm(instance=application.owned_address)
-    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',))
+    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',), extra=0, can_delete=False)
     application_formset = ApplicantFormSet(instance=application.owned_address)
 
     if request.method == 'POST':
@@ -930,7 +930,7 @@ def review_status_log(request, application_id):
             application_formset.save()
 
         address_form = AddressUpdateForm(request.POST, instance=application.owned_address)
-        if  address_form.is_valid():
+        if address_form.is_valid():
             address_form.save()
 
     return render(request, 'review_status_log.html', {
