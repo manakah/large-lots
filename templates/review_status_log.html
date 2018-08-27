@@ -49,11 +49,22 @@
   <p>This application has not been reviewed.</p>
 {% endif %}
 
-<div>
+
+<h3>Update applicant information</h3>
+<p>Use this form to change the applicant's owned pin or owned address information.</p>
+
+<form action='/review-status-log/{{ application_status.id }}' method='post'>
   {% csrf_token %}
-  {{ form.as_p }}
-  {{ form.address_form.as_p }}
-</div>
+  <div class="form-group row">
+    {{ application_formset.as_p }}
+  </div>
+  
+  {{ address_form.as_p }}
+  <button type="submit" class="btn btn-success btn-lg pull-right">
+      <i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Submit
+  </button>
+</form>
+
 
 <div><a href="{% url 'lots_admin' 'all' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a></div>
 

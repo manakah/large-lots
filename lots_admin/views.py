@@ -32,12 +32,14 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
+from django.forms import inlineformset_factory
+
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse
-from lots_admin.forms import ApplicationUpdateForm
+from lots_admin.forms import AddressUpdateForm
 
 def lots_login(request):
     if request.method == 'POST':
@@ -914,20 +916,26 @@ def review_EDS(request, application_id):
 def review_status_log(request, application_id):
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
+    application = Application.objects.get(applicationstatus__id=application_id)
 
     future_list = [2, 3, 4, 5, 6, 7]
-
-    # Form stuff
-    application = Application.objects.get(applicationstatus__id=application_id)
-    form = ApplicationUpdateForm(instance=application)
     
-    # from django.forms import inlineformset_factory
-    # AddressFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',))
-    # formset = AddressFormSet(instance=application.owned_address)
+    address_form = AddressUpdateForm(instance=application.owned_address)
+    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',))
+    application_formset = ApplicantFormSet(instance=application.owned_address)
+
+    if request.method == 'POST':
+        application_formset = ApplicantFormSet(request.POST, instance=application.owned_address)
+        if application_formset.is_valid():
+            application_formset.save()
+
+        address_form = AddressUpdateForm(request.POST, instance=application.owned_address)
+        if  address_form.is_valid():
+            address_form.save()
 
     return render(request, 'review_status_log.html', {
-        'form': form,
-        # 'formset': formset,
+        'address_form': address_form,
+        'application_formset': application_formset,
         'application_status': application_status,
         'reviews': reviews,
         'future_list': future_list,

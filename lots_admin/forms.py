@@ -9,12 +9,6 @@ class AddressUpdateForm(forms.ModelForm):
         model = Address
         exclude = ('ward', 'community')
 
-class ApplicationUpdateForm(forms.ModelForm):
-    class Meta:
-        model = Application
-        fields = ('owned_pin', )
-
     def __init__(self, *args, **kwargs):
-        super(ApplicationUpdateForm, self).__init__(*args, **kwargs)
-
-        self.address_form = AddressUpdateForm(instance=self.instance and self.instance.owned_address)
+        super(AddressUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['zip_code'].required = False
