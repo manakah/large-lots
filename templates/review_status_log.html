@@ -56,7 +56,7 @@
 <form action='/review-status-log/{{ application_status.id }}' method='post'>
   {% csrf_token %}
   <div class="form-group row">
-    {{ application_formset.as_p }}
+    {{ application_formset  }}
   </div>
   
   {{ address_form.as_p }}
