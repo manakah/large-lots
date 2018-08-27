@@ -52,6 +52,7 @@
 <div>
   {% csrf_token %}
   {{ form.as_p }}
+  {{ form.address_form.as_p }}
 </div>
 
 <div><a href="{% url 'lots_admin' 'all' %}" class="btn btn-danger"><i class="fa fa-angle-double-left" aria-hidden="true"></i> Go back</a></div>

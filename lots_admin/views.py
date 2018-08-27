@@ -35,8 +35,8 @@ from django.core.exceptions import MultipleObjectsReturned
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
-from lots_admin.models import Application, Lot, ApplicationStep, Review, \
-    ApplicationStatus, DenialReason, PrincipalProfile, LotUse
+from lots_admin.models import Application, Lot, ApplicationStep, Address, \
+    Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse
 from lots_admin.forms import ApplicationUpdateForm
 
 def lots_login(request):
@@ -917,11 +917,17 @@ def review_status_log(request, application_id):
 
     future_list = [2, 3, 4, 5, 6, 7]
 
+    # Form stuff
     application = Application.objects.get(applicationstatus__id=application_id)
-    form = ApplicationUpdateForm()
+    form = ApplicationUpdateForm(instance=application)
+    
+    # from django.forms import inlineformset_factory
+    # AddressFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',))
+    # formset = AddressFormSet(instance=application.owned_address)
 
     return render(request, 'review_status_log.html', {
         'form': form,
+        # 'formset': formset,
         'application_status': application_status,
         'reviews': reviews,
         'future_list': future_list,
