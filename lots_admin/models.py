@@ -161,3 +161,11 @@ class RelatedPerson(models.Model):
                                                                self.last_name,
                                                                str(self.application))
 
+class UpdatedEntity(models.Model):
+    updated_at = models.DateTimeField(auto_now_add=True)
+    admin = models.ForeignKey(User)
+    address = models.ForeignKey('Address', null=True)
+    application = models.ForeignKey('Application', null=True)
+
+    def __str__(self):
+        return '{0} updated {1}\'s application'.format(self.admin, self.application)

@@ -12,7 +12,6 @@ class AddressUpdateForm(forms.ModelForm):
             'street': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-
     def __init__(self, *args, **kwargs):
         super(AddressUpdateForm, self).__init__(*args, **kwargs)
         self.can_delete = False
@@ -36,5 +35,3 @@ class AddressUpdateForm(forms.ModelForm):
         address.save()
 
         return address
-        
-

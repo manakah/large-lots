@@ -38,7 +38,7 @@ from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
-    Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse
+    Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
 from lots_admin.forms import AddressUpdateForm
 
 def lots_login(request):
@@ -927,13 +927,21 @@ def review_status_log(request, application_id):
     application_formset = ApplicantFormSet(instance=application.owned_address)
 
     if request.method == 'POST':
+        update_info = {'admin': request.user}
         application_formset = ApplicantFormSet(request.POST, instance=application.owned_address)
         if application_formset.is_valid():
             application_formset.save()
+            if ('owned_pin' in form.changed_data for form in application_formset):
+                update_info['application'] = application
 
         address_form = AddressUpdateForm(request.POST, instance=application.owned_address)
         if address_form.is_valid():
             address_form.save()
+            if 'street' in address_form.changed_data:
+                update_info['address'] = application.owned_address
+        
+        if 'address' in update_info or 'application' in update_info:
+            UpdatedEntity.objects.create(**update_info)
 
     return render(request, 'review_status_log.html', {
         'address_form': address_form,
