@@ -33,4 +33,55 @@ def test_fields_in_csv(application,
         assert 'EDS Received' in download
         assert 'PPF Received' in download
 
+@pytest.mark.django_db
+def test_owned_pin_edit(application,
+                        application_status,
+                        auth_client):
+    application = application.build()
+    application_status = application_status.build(application, step=2)
+    owned_pin = application.owned_pin
+    new_owned_pin = '2623330090000'
 
+    url = reverse('review_status_log', args=[application_status.id])
+
+    response = auth_client.post(url, {
+        'owned_address-0-owned_pin': [new_owned_pin], 
+        'owned_address-MAX_NUM_FORMS': ['1000'], 
+        'owned_address-TOTAL_FORMS': ['1'], 
+        'owned_address-MIN_NUM_FORMS': ['0'], 
+        'owned_address-INITIAL_FORMS': ['1'],
+        'owned_address-0-id': [application.owned_address.id]
+    })
+
+    application.refresh_from_db()
+
+    assert application.owned_pin == new_owned_pin
+    assert application.owned_pin != owned_pin
+
+@pytest.mark.django_db
+def test_owned_address_edit(application,
+                        application_status,
+                        auth_client):
+    application = application.build()
+    application_status = application_status.build(application, step=2)
+    street = application.owned_address.street
+    new_street = '25 Brook St'
+    
+    url = reverse('review_status_log', args=[application_status.id])
+
+    response = auth_client.post(url, {
+        'street': [new_street], 
+        'owned_address-0-owned_pin': [application.owned_pin], 
+        'owned_address-MAX_NUM_FORMS': ['1000'], 
+        'owned_address-TOTAL_FORMS': ['1'], 
+        'owned_address-MIN_NUM_FORMS': ['0'], 
+        'owned_address-INITIAL_FORMS': ['1'],
+        'owned_address-0-id': [application.owned_address.id],
+    })
+
+    application.refresh_from_db()
+    application.owned_address.refresh_from_db()
+
+    assert application.owned_address.street == new_street
+    assert application.owned_address.street != street
+    assert application.owned_address.street_number == '25'

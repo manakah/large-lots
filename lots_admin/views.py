@@ -914,6 +914,13 @@ def review_EDS(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
+    '''
+    This view contains a form that allows LargeLots admins to update the owned_pin and related address 
+    of an application. The admin can update the pin, address, or both. 
+    
+    If the admin submits a valid form with changes, then this view creates an UpdatedEntity, 
+    which keeps track of such updates made by admins. 
+    '''
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
     application = Application.objects.get(applicationstatus__id=application_id)
@@ -921,9 +928,15 @@ def review_status_log(request, application_id):
     future_list = [2, 3, 4, 5, 6, 7]
     
     address_form = AddressUpdateForm(instance=application.owned_address)
-    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',), extra=0, can_delete=False, widgets = {
-            'owned_pin': forms.TextInput(attrs={'class': 'form-control'}),
-        })
+    ApplicantFormSet = inlineformset_factory(Address, 
+                                             Application, 
+                                             fk_name='owned_address', 
+                                             fields=('owned_pin',), 
+                                             extra=0, 
+                                             can_delete=False, 
+                                             widgets = {
+                                                'owned_pin': forms.TextInput(attrs={'class': 'form-control'}),
+                                             })
     application_formset = ApplicantFormSet(instance=application.owned_address)
 
     if request.method == 'POST':
