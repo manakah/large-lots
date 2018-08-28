@@ -8,6 +8,10 @@ class AddressUpdateForm(forms.ModelForm):
     class Meta:
         model = Address
         fields = ('street', )
+        widgets = {
+            'street': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
 
     def __init__(self, *args, **kwargs):
         super(AddressUpdateForm, self).__init__(*args, **kwargs)
@@ -15,7 +19,7 @@ class AddressUpdateForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         street = self.cleaned_data['street']
-        
+
         (street_number, street_dir, street_name, street_type, unit_number) = parse_address(street)
 
         add_info = {

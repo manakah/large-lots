@@ -921,7 +921,9 @@ def review_status_log(request, application_id):
     future_list = [2, 3, 4, 5, 6, 7]
     
     address_form = AddressUpdateForm(instance=application.owned_address)
-    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',), extra=0, can_delete=False)
+    ApplicantFormSet = inlineformset_factory(Address, Application, fk_name='owned_address', fields=('owned_pin',), extra=0, can_delete=False, widgets = {
+            'owned_pin': forms.TextInput(attrs={'class': 'form-control'}),
+        })
     application_formset = ApplicantFormSet(instance=application.owned_address)
 
     if request.method == 'POST':
