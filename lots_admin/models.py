@@ -167,5 +167,8 @@ class UpdatedEntity(models.Model):
     address = models.ForeignKey('Address', null=True)
     application = models.ForeignKey('Application', null=True)
 
+    class Meta:
+        verbose_name_plural = 'UpdatedEntities'
+
     def __str__(self):
         return '{0} updated {1}\'s application'.format(self.admin, self.application)
