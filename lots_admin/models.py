@@ -164,8 +164,9 @@ class RelatedPerson(models.Model):
 class UpdatedEntity(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
     admin = models.ForeignKey(User)
-    address = models.ForeignKey('Address', null=True)
     application = models.ForeignKey('Application', null=True)
+    owned_pin = models.CharField(max_length=14, null=True)
+    street = models.CharField(max_length=255, null=True)
 
     class Meta:
         verbose_name_plural = 'UpdatedEntities'

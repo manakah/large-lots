@@ -35,3 +35,15 @@ class AddressUpdateForm(forms.ModelForm):
         address.save()
 
         return address
+
+class ApplicationUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Application
+        fields = ('owned_pin', )
+        widgets = {
+            'owned_pin': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ApplicationUpdateForm, self).__init__(*args, **kwargs)
+        self.can_delete = False

@@ -39,7 +39,7 @@ from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
-from lots_admin.forms import AddressUpdateForm
+from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm
 
 def lots_login(request):
     if request.method == 'POST':
@@ -927,38 +927,33 @@ def review_status_log(request, application_id):
 
     future_list = [2, 3, 4, 5, 6, 7]
     
+    application_form = ApplicationUpdateForm(instance=application)
     address_form = AddressUpdateForm(instance=application.owned_address)
-    ApplicantFormSet = inlineformset_factory(Address, 
-                                             Application, 
-                                             fk_name='owned_address', 
-                                             fields=('owned_pin',), 
-                                             extra=0, 
-                                             can_delete=False, 
-                                             widgets = {
-                                                'owned_pin': forms.TextInput(attrs={'class': 'form-control'}),
-                                             })
-    application_formset = ApplicantFormSet(instance=application.owned_address)
 
     if request.method == 'POST':
-        update_info = {'admin': request.user}
-        application_formset = ApplicantFormSet(request.POST, instance=application.owned_address)
-        if application_formset.is_valid():
-            application_formset.save()
-            if ('owned_pin' in form.changed_data for form in application_formset):
-                update_info['application'] = application
-
+        update_info = {'admin': request.user, 'application': application}
+        application_form = ApplicationUpdateForm(request.POST, instance=application)
         address_form = AddressUpdateForm(request.POST, instance=application.owned_address)
-        if address_form.is_valid():
-            address_form.save()
-            if 'street' in address_form.changed_data:
-                update_info['address'] = application.owned_address
         
-        if 'address' in update_info or 'application' in update_info:
+        if application_form.is_valid() and address_form.is_valid():
+            application_form.save()
+            address_form.save()
+
+            if 'owned_pin' in application_form.changed_data:
+                update_info['owned_pin'] = application.owned_pin
+            else:
+                update_info['owned_pin'] = 'No changes'
+
+            if 'street' in address_form.changed_data:
+                update_info['street'] = application.owned_address
+            else:
+                update_info['street'] = 'No changes'
+        
             UpdatedEntity.objects.create(**update_info)
 
     return render(request, 'review_status_log.html', {
         'address_form': address_form,
-        'application_formset': application_formset,
+        'application_form': application_form,
         'application_status': application_status,
         'reviews': reviews,
         'future_list': future_list,

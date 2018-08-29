@@ -60,7 +60,12 @@
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            {{application_formset}}
+            {% for field in application_form %}
+              <div class='form-group'>
+                <label>Owned pin:</label>
+                {{ field }}
+              </div>
+            {% endfor %}
           </div>
         </div>
         <div class="col-md-8">

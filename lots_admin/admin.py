@@ -9,7 +9,7 @@ class AdminApplicationStatus(admin.ModelAdmin):
     search_fields = ['application__first_name', 'application__last_name', 'application__id']
 
 class AdminUpdatedEntity(admin.ModelAdmin):
-    readonly_fields = ['updated_at']
+    readonly_fields = ['updated_at', 'owned_pin', 'street']
     search_fields = ['application__first_name', 'application__last_name', 'address__street']
 
 admin.site.register(Address)
