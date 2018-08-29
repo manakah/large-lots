@@ -45,12 +45,8 @@ def test_owned_pin_edit(application,
     url = reverse('review_status_log', args=[application_status.id])
 
     response = auth_client.post(url, {
-        'owned_address-0-owned_pin': [new_owned_pin], 
-        'owned_address-MAX_NUM_FORMS': ['1000'], 
-        'owned_address-TOTAL_FORMS': ['1'], 
-        'owned_address-MIN_NUM_FORMS': ['0'], 
-        'owned_address-INITIAL_FORMS': ['1'],
-        'owned_address-0-id': [application.owned_address.id]
+        'owned_pin': [new_owned_pin],
+        'street': [application.owned_address.street] 
     })
 
     application.refresh_from_db()
@@ -70,13 +66,8 @@ def test_owned_address_edit(application,
     url = reverse('review_status_log', args=[application_status.id])
 
     response = auth_client.post(url, {
-        'street': [new_street], 
-        'owned_address-0-owned_pin': [application.owned_pin], 
-        'owned_address-MAX_NUM_FORMS': ['1000'], 
-        'owned_address-TOTAL_FORMS': ['1'], 
-        'owned_address-MIN_NUM_FORMS': ['0'], 
-        'owned_address-INITIAL_FORMS': ['1'],
-        'owned_address-0-id': [application.owned_address.id],
+        'owned_pin': [application.owned_pin],
+        'street': [new_street]
     })
 
     application.refresh_from_db()
