@@ -49,9 +49,16 @@
   <p>This application has not been reviewed.</p>
 {% endif %}
 
-
 <h3>Update applicant information</h3>
 <p>Use this form to change the applicant's owned pin or owned address.</p>
+
+<div class='row'>
+  <div class='col-md-6'>
+    {% if success %}
+      <p class='alert alert-success'><strong>Success!</strong> Updates made to {{application_status.application}}'s info.</p>
+    {% endif %}
+  </div>
+</div>
 
 <div class='row'>
   <div class='col-md-10'>
