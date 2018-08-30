@@ -33,4 +33,46 @@ def test_fields_in_csv(application,
         assert 'EDS Received' in download
         assert 'PPF Received' in download
 
+@pytest.mark.django_db
+def test_owned_pin_edit(application,
+                        application_status,
+                        auth_client):
+    application = application.build()
+    application_status = application_status.build(application, step=2)
+    owned_pin = application.owned_pin
+    new_owned_pin = '2623330090000'
 
+    url = reverse('review_status_log', args=[application_status.id])
+
+    response = auth_client.post(url, {
+        'owned_pin': [new_owned_pin],
+        'street': [application.owned_address.street] 
+    })
+
+    application.refresh_from_db()
+
+    assert application.owned_pin == new_owned_pin
+    assert application.owned_pin != owned_pin
+
+@pytest.mark.django_db
+def test_owned_address_edit(application,
+                        application_status,
+                        auth_client):
+    application = application.build()
+    application_status = application_status.build(application, step=2)
+    street = application.owned_address.street
+    new_street = '25 Brook St'
+    
+    url = reverse('review_status_log', args=[application_status.id])
+
+    response = auth_client.post(url, {
+        'owned_pin': [application.owned_pin],
+        'street': [new_street]
+    })
+
+    application.refresh_from_db()
+    application.owned_address.refresh_from_db()
+
+    assert application.owned_address.street == new_street
+    assert application.owned_address.street != street
+    assert application.owned_address.street_number == '25'

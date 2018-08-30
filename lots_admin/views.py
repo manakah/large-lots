@@ -32,11 +32,13 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
+
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
-from lots_admin.models import Application, Lot, ApplicationStep, Review, \
-    ApplicationStatus, DenialReason, PrincipalProfile, LotUse
+from lots_admin.models import Application, Lot, ApplicationStep, Address, \
+    Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
+from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm
 
 def lots_login(request):
     if request.method == 'POST':
@@ -911,12 +913,46 @@ def review_EDS(request, application_id):
 
 @login_required(login_url='/lots-login/')
 def review_status_log(request, application_id):
+    '''
+    This view contains a form that allows LargeLots admins to update the owned_pin and related address 
+    of an application. The admin can update the pin, address, or both. 
+    
+    If the admin submits a valid form with changes, then this view creates an UpdatedEntity, 
+    which keeps track of such updates made by admins. 
+    '''
     application_status = ApplicationStatus.objects.get(id=application_id)
     reviews = Review.objects.filter(application=application_status)
+    application = Application.objects.get(applicationstatus__id=application_id)
 
     future_list = [2, 3, 4, 5, 6, 7]
+    
+    application_form = ApplicationUpdateForm(instance=application)
+    address_form = AddressUpdateForm(instance=application.owned_address)
+
+    if request.method == 'POST':
+        update_info = {'admin': request.user, 'application': application}
+        application_form = ApplicationUpdateForm(request.POST, instance=application)
+        address_form = AddressUpdateForm(request.POST, instance=application.owned_address)
+        
+        if application_form.is_valid() and address_form.is_valid():
+            application_form.save()
+            address_form.save()
+
+            if 'owned_pin' in application_form.changed_data:
+                update_info['owned_pin'] = application.owned_pin
+            else:
+                update_info['owned_pin'] = 'No changes'
+
+            if 'street' in address_form.changed_data:
+                update_info['street'] = application.owned_address
+            else:
+                update_info['street'] = 'No changes'
+        
+            UpdatedEntity.objects.create(**update_info)
 
     return render(request, 'review_status_log.html', {
+        'address_form': address_form,
+        'application_form': application_form,
         'application_status': application_status,
         'reviews': reviews,
         'future_list': future_list,

@@ -161,3 +161,15 @@ class RelatedPerson(models.Model):
                                                                self.last_name,
                                                                str(self.application))
 
+class UpdatedEntity(models.Model):
+    updated_at = models.DateTimeField(auto_now_add=True)
+    admin = models.ForeignKey(User)
+    application = models.ForeignKey('Application', null=True)
+    owned_pin = models.CharField(max_length=14, null=True)
+    street = models.CharField(max_length=255, null=True)
+
+    class Meta:
+        verbose_name_plural = 'UpdatedEntities'
+
+    def __str__(self):
+        return '{0} updated {1}\'s application'.format(self.admin, self.application)
