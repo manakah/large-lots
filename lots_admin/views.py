@@ -929,6 +929,8 @@ def review_status_log(request, application_id):
     application_form = ApplicationUpdateForm(instance=application)
     address_form = AddressUpdateForm(instance=application.owned_address)
 
+    success = False 
+
     if request.method == 'POST':
         update_info = {'admin': request.user, 'application': application}
         application_form = ApplicationUpdateForm(request.POST, instance=application)
@@ -949,6 +951,7 @@ def review_status_log(request, application_id):
                 update_info['street'] = 'No changes'
         
             UpdatedEntity.objects.create(**update_info)
+            success = True
 
     return render(request, 'review_status_log.html', {
         'address_form': address_form,
@@ -956,6 +959,7 @@ def review_status_log(request, application_id):
         'application_status': application_status,
         'reviews': reviews,
         'future_list': future_list,
+        'success': success,
         })
 
 @login_required(login_url='/lots-login/')
