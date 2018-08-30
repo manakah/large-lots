@@ -32,7 +32,6 @@ from django.template.loader import get_template
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
-from django.forms import inlineformset_factory
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
