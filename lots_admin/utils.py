@@ -1,12 +1,13 @@
 from datetime import datetime
 import urllib.parse
+from io import StringIO
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 
 from lots_admin.look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from lots_admin.models import Review
+from lots_admin.models import Review, Application
 
 def create_email_msg(template_name, email_subject, email_to_address, context):
     html_template = get_template('emails/{}.html'.format(template_name))
@@ -66,3 +67,16 @@ def step_from_status(description_key):
 
     else:
         return given_index + 2  # Our numbered steps begin at 2.
+
+class EmailLogParser(StringIO):
+    '''
+    Convenience object for returning implicated Application objects from bulk
+    email error logs.
+    '''
+    def getvalue(self, *args, **kwargs):
+        return super().getvalue(*args, **kwargs).splitlines()
+
+    @property
+    def applications(self):
+        ids = [val.split('|')[1] for val in self.getvalue()]
+        return Application.objects.filter(id__in=ids)
