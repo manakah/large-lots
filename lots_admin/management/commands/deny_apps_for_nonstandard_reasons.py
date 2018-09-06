@@ -8,7 +8,7 @@ from lots_admin.models import ApplicationStatus, DenialReason, Review, User
 class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--pins_with_denials',
-                            help='JSON object, wherein the PIN is the key and text for denial reason is the value')
+                            help='JSON object, wherein the PIN is the key and the denial reason is the value')
 
         parser.add_argument('--user_email',
                             default='reginafcompton@datamade.us')
