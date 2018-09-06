@@ -7,11 +7,18 @@ from lots_admin.models import ApplicationStatus, DenialReason, Review, User
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('--pins_with_denials')
+        parser.add_argument('--pins_with_denials',
+                            help='JSON object, wherein the PIN is the key and text for denial reason is the value')
+
+        parser.add_argument('--user_email',
+                            default='reginafcompton@datamade.us')
 
     def handle(self, *args, **options):
         pins_with_denials = json.loads(options['pins_with_denials'])
-        user = User.objects.get(email='reginafcompton@datamade.us')
+        user_email = options['user_email']
+        user = User.objects.get(email=user_email)
+
+        self.stdout.write('Begin: Denying applications!')
 
         for pin, reason_text in pins_with_denials.items():
             applications = ApplicationStatus.objects.filter(lot=pin)
