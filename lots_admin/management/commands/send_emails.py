@@ -182,15 +182,10 @@ class Command(BaseCommand):
         html_content = html_template.render(context)
         txt_content = txt_template.render(context)
 
-        send_to = [email_address]
-
-        if hasattr(settings, 'INFO_EMAIL'):
-            send_to.append(settings.INFO_EMAIL)
-
         msg = EmailMultiAlternatives(subject,
                                      txt_content,
                                      settings.EMAIL_HOST_USER,
-                                     send_to)
+                                     [email_address])
 
         msg.attach_alternative(html_content, 'text/html')
 

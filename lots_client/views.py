@@ -302,9 +302,6 @@ def apply(request):
             if app.email:
                 to_email.append(app.email)
 
-            if hasattr(settings, 'INFO_EMAIL'):
-                to_email.append(settings.INFO_EMAIL)
-
             # send email confirmation to info@largelots.org
             msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
             msg.attach_alternative(html_content, 'text/html')
