@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 handler = SentryHandler(settings.SENTRY_DSN)
 handler.setLevel(logging.ERROR)
 setup_logging(handler)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 def home(request):
     application_count = Application.objects.count()
