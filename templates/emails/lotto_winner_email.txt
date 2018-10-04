@@ -11,7 +11,7 @@ Lot PIN: #{{ lot.pin }}
 
 The City will soon send you more information about next steps.
 
-Congratulations, and feel free to email me if you have any questions.
+Congratulations, and feel free to email us if you have any questions.
 
 Best,
 

@@ -87,7 +87,6 @@
                     <option>-----------------</option>
                     <option value="step5">Complete step 5: Alderman letter of support</option>
                     <option value="step7">Complete step 7: Wait for applicant to submit EDS and principal profile</option>
-                    <option value="step9">Move to step 9: Applicant approved by Plan Commission and City Council</option>
                     <option value="step10">Move to step 10: Applicant certified as free and clear of debts to the city</option>
                     <option value="step11">Move to step 11: Sold</option>
                     <option value="deny">Deny application</option>
@@ -257,16 +256,18 @@
                     <div class='col-sm-10' id="bulk-submit-checkbox">
                         Step {{ applicant.step }}: {{ applicant.step_description }}</br>
                         {% if on_steps23456|length == 0 %} <!-- Do not show checkbox until steps 2, 3, 4, and 5, and 6 are complete on all applications -->
-                            <br /><span class='emphasis'>Ready for bulk submit</span>
+                            <br /><span class='emphasis'>Ready for bulk submit{% if applicant.step == 8 %}: <a href="{% url 'send_emails' %}">Use the Send Emails interface ("City Council approval")</a>{% endif %}</span>
                         </div>
-                        <div class="form-group col-sm-2">
-                            {% csrf_token %}
-                            <div class="checkbox">
-                              <label>
-                                <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
-                              </label>
+                            {% if applicant.step != 8 %}
+                            <div class="form-group col-sm-2">
+                                {% csrf_token %}
+                                <div class="checkbox">
+                                  <label>
+                                    <input name="selected-for-bulk-submit" value="{{ applicant.status_id }}" type="checkbox"/>
+                                  </label>
+                                </div>
                             </div>
-                        </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 <!-- Step 12: Sold -->

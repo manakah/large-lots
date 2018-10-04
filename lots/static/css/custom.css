@@ -128,7 +128,7 @@ a.dropdown-toggle:hover {
     border-color: var(--purple-color);
 }
 
-.btn-danger:hover {
+.btn-danger:hover, .btn-danger.disabled, .btn-danger[disabled] {
     background-color: #ca3275;
     border-color: #ca3275;
 }
@@ -483,4 +483,12 @@ select.bulk-deny {
 /* Styles for PPF export */
 .btn.disabled {
     pointer-events: auto;
+}
+
+/* Styles for send-emails */
+/* Override user agent stylesheet */
+.custom-email ul#id_selection {
+    list-style: none;
+    margin-block-start: 0;
+    padding-inline-start: 0;
 }

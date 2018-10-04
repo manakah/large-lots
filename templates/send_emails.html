@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% load lots_filters %}
+{% load staticfiles %}
+{% block title %}Send emails{% endblock %}
+{% block extra_css %}
+    <link href="{% static 'css/jquery-ui.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/jquery.timepicker.min.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<h2>Send emails</h2>
+
+{% if form.errors %}
+    <p class='alert alert-info'><strong>Whoops!</strong> You did not provide complete form data.</p>
+{% endif %}
+
+<h3><strong><i class="fa fa-envelope"></i> Standard emails</strong></h3>
+<p>Use the options below to send standard, “one-click” emails to multiple applicants! Note that some emails require additional information, such as a deadline, the date and time of an event, or a limit on the number of emails to send.</p>
+
+<!-- send_lotto_email -->
+<div class='panel panel-default'>
+    <div class="panel-heading"><strong>Lottery notification</strong></div>
+    <div class="panel-body">
+        <p>Notify applicants about the lottery! Specify the number of lots in the scheduled lottery slot, and the date and time of the event. For example, the City may hold a lottery for 50 lots on July 22 at 9:00 am, and another lottery for 70 lots on July 22 at 1:00 pm. In this case, send two bulk emails - one for the 9:00 am event, and one for the 1:00 pm event.</p>
+        <p><strong>The City has a total of <span class="badge badge-orange">{{ lottery_count }} lots</span> in the lottery.</strong></p>
+        <form method='post' class='send_emails_form'>
+            {% csrf_token %}
+            {{lottery_form.action}}
+            <div class='form-group row'>
+                {% if lottery_form.date.errors %}
+                <div class='col-md-2 has-error'>
+                {% else %}
+                <div class='col-md-2'>
+                {% endif %}
+                    {{ lottery_form.date }}
+                    {% for error in lottery_form.date.errors %}
+                        <span class="help-block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                {% if lottery_form.time.errors %}
+                <div class='col-md-2 has-error'>
+                {% else %}
+                <div class='col-md-2'>
+                {% endif %}
+                    {{ lottery_form.time }}
+                    {% for error in lottery_form.time.errors %}
+                        <span class="help-block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                {% if lottery_form.number.errors %}
+                <div class='col-md-2 has-error'>
+                {% else %}
+                <div class='col-md-2'>
+                {% endif %}
+                    {{ lottery_form.number }}
+                    {% for error in lottery_form.number.errors %}
+                        <span class="help-block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                {% if lottery_form.location.errors %}
+                <div class='col-md-6 has-error'>
+                {% else %}
+                <div class='col-md-6'>
+                {% endif %}
+                    {{ lottery_form.location }}
+                    {% for error in lottery_form.location.errors %}
+                        <span class="help-block">{{ error }}</span>
+                    {% endfor %}
+                </div>  
+            </div>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#lotteryModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send Lottery Notifications</button>
+            {% include 'partials/send_emails_warning.html' with modal_message=lottery_form.modal_message target='lotteryModal' %}
+        </form>
+    </div>
+</div>
+<br>
+
+<!-- send_eds_email -->
+<div class='panel panel-default'>
+    <div class="panel-heading"><strong>Economic Disclosure Statement (EDS) and Principal Profile Form (PPF)</strong></div>
+    <div class="panel-body">
+        <p>Send an email with links to complete the EDS and PPF. Emails go to applicants whose non-denied applications are all on Step 7 ("Wait for applicant to submit EDS and principal profile"). Specify the deadline (date and time) for submission.</p>
+        <form method='post' class='send_emails_form'>
+            {% csrf_token %}
+
+            {% include 'partials/form_error.html' with email_form=eds_form %}
+
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#edsModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send EDS and PPF</button>
+            {% include 'partials/send_emails_warning.html' with modal_message=eds_form.modal_message target='edsModal' %}
+        </form>
+    </div>
+</div>
+<br>
+
+<!-- send_eds_final_email -->
+<div class='panel panel-default'>
+    <div class="panel-heading"><strong>EDS final notice</strong></p></div>
+    <div class="panel-body">
+        <p>Send a final notice to applicants on Step 7 who have not yet submitted an EDS and/or PPF forms.</p>
+        <form method='post' class='send_emails_form'>
+            {% csrf_token %}
+
+            {% include 'partials/form_error.html' with email_form=final_eds_form %}
+
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#finalEdsModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send EDS Final Notice</button>
+            {% include 'partials/send_emails_warning.html' with modal_message=final_eds_form.modal_message target='finalEdsModal' %}
+        </form>
+    </div>
+</div>
+<br>
+
+<!-- send_eds_denial_email -->
+<div class='panel panel-default'>
+    <div class="panel-heading"><strong>EDS denial</strong></div>
+    <div class="panel-body">
+        <p>Send denial emails to applicants on Step 7 who failed to submit an EDS and/or PPF forms.</p>
+        <form method='post' class='send_emails_form'>
+            {% csrf_token %}
+            {{eds_denial_form.as_p}}
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#edsDenialModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send EDS Denials</button>
+            {% include 'partials/send_emails_warning.html' with modal_message=eds_denial_form.modal_message target='edsDenialModal' %}
+        </form>
+    </div>
+</div>
+<br>
+
+<!-- send_closing_time_email -->
+<div class='panel panel-default'>
+    <div class="panel-heading"><strong>Notification of City Council approval and closing</strong></div>
+    <div class="panel-body">
+        <p>Notify applicants that the Chicago City Council granted approval for the sale of their lots! This email goes to <em>all</em> applicants on Step 8. These applicants should meet two criteria: (1) they submitted an EDS and PPF and (2) City Council approved the sale of their lot. <strong>Sending this email will move applicants from Step 8 to Step 9.</strong></p>
+        <form method='post' class='send_emails_form'>
+            {% csrf_token %}
+            {{closing_time_form.as_p}}
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#closingTimeModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send Closing Notifications</button>
+            {% include 'partials/send_emails_warning.html' with modal_message=closing_time_form.modal_message target='closingTimeModal' %}
+        </form>
+    </div>
+</div>
+<br>
+
+<hr>
+
+<h3><strong><i class="fa fa-pencil"></i> Custom emails</strong></h3>
+<p>Use this option to send a custom email to a group of applicants. This "group" can be all applicants on a step, <em>not</em> on a step, before a step, or after a step. For example, you may wish to inform all applicants on steps 5 and later that they have advanced past the initial review. To do so, select "4" and "after" and then enter your text.</p>
+<p>All custom emails will have the Large Lots header, applicant information (name, lots applied for), and closing regards (i.e., "Sincerely, The Large Lots Team").</p>
+
+<form role="form" method='post' class='well custom-email send_emails_form'>
+    {% csrf_token %}
+    {{custom_form.action}}
+    <p><strong>Step 1.</strong> Select a review step {{custom_form.step}}</p>
+    <p>
+        <strong>Step 2.</strong> Select the group of applicants who will receive your email 
+        {% if custom_form.selection.errors %}
+        <div class='has-error'>
+        {% else %}
+        <div>
+        {% endif %}
+            {{ custom_form.selection }}
+            {% for error in custom_form.selection.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+    </p>
+    <p>
+        <strong>Step 3.</strong> Give your email a subject line 
+        {% if custom_form.subject.errors %}
+        <div class='has-error'>
+        {% else %}
+        <div>
+        {% endif %}
+            {{ custom_form.subject }}
+            {% for error in custom_form.subject.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+    </p>
+    <p><strong>Step 4.</strong> Enter the body of your custom email. <strong>Note!</strong> The text above and below the input box show an example Large Lots header and closing statement: your email will contain actual applicant info.</p>
+    <hr>
+    <em><p>Dear Ms. Bordoni,</p>
+    <p>This email concerns your application for the following lots:</p>
+    <p><strong>Address</strong> 5302 S MAY ST</br><strong>PIN</strong> 20084150240000</p></em>
+
+    <p>
+        {% if custom_form.email_text.errors %}
+        <div class='has-error'>
+        {% else %}
+        <div>
+        {% endif %}
+            {{ custom_form.email_text }}
+            {% for error in custom_form.email_text.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+    </p>
+    <em><p>Best,</br>The Large Lots Team</p></em>
+    <hr>
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#customModal"><i class="fa fa-fw fa-paper-plane" aria-hidden="true"></i> Send Custom Email</button>
+    {% include 'partials/send_emails_warning.html' with modal_message=custom_form.modal_message target='customModal' %}
+</form>
+
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/lib/jquery-1.12.3.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/lib/jquery-ui.js' %}" type="text/javascript"></script>
+     <script src="{% static 'js/lib/jquery.timepicker.min.js' %}" type="text/javascript"></script>
+
+    <script>
+        $( function() {
+            $('input.email-datepicker').datepicker({ dateFormat: 'MM d, yy' });
+            $('input.email-timepicker').timepicker({});
+
+            $('.send_emails_form').submit(function () {
+                // Prevent double click.
+                $('div.modal-footer .btn').attr('disabled', true);
+
+                // Show loading message
+                $('.loading-msg').removeClass('hidden');
+
+                return true;
+            });
+        } );
+    </script>
+{% endblock %}

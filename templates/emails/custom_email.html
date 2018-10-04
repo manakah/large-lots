@@ -1,0 +1,51 @@
+{% load lots_filters %}
+
+<div style="font-family: Calibri, Arial, sans-serif; font-size: 14px;">
+    <div class="row">
+        <div class="col-md-12">
+            <a id='logo' href="http://largelots.org">
+            <img src='http://largelots.org/static/images/large_lots.png' alt='Large Lots' />
+            </a>
+            <p>{{ today|date:'F j, Y' }}</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {{ app.first_name}} {{ app.last_name }}<br />
+            {{ app.owned_address }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Dear {{ app.first_name }},</p>
+
+            <p>This email concerns your application for the following lots:</p>
+
+            {% for lot in lots %}
+                <table class="table table-bordered table-condensed">
+                    <tbody>
+                        <tr>
+                            <td><strong>Address</strong></td>
+                            <td>{{lot.address.street}}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PIN</strong></td>
+                            <td>
+                                {{lot.pin}} 
+                            </td>
+                        </tr>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            {% endfor %}
+
+            <p>{{ email_text }}</p>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+              <p>Best,</p>
+              <p>The Large Lots Team</p>
+          </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+<div class='form-group row'>
+    {% for field in email_form %}
+        {% if field.errors %}
+        <div class='col-md-6 has-error'>
+        {% else %}
+        <div class='col-md-6'>
+        {% endif %}
+            {{ field }}
+            {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

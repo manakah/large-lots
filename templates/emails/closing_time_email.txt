@@ -34,7 +34,8 @@ Here are some things you will be responsible for AFTER you purchase your Large L
 
     * Fencing: YOU are responsible for surrounding the lot with a noncombustible screen fence, with the required signage and maintained in accordance with the City’s laws, if the lot is not a sideyard.  If you violate this requirement, you are subject to a fine of not less than $300 nor more than $600 for each offense, for each day that a violation continues.
 
-    * Taxes: You are responsible for taxes that accrue starting AFTER you purchase your Large Lot Program parcel.  If you do not receive a tax bill in 2018 for the portion of calendar year 2017 that you owned the Large Lot Program parcel, the Cook County Assessor will assess back taxes at a later date.  If you do not receive a tax bill in 2019, please contact the Cook County Assessor. 
+    {% now "Y" as current_year %}
+    * Taxes: You are responsible for taxes that accrue starting AFTER you purchase your Large Lot Program parcel.  If you do not receive a tax bill in {{ current_year|add:1 }} for the portion of calendar year {{ current_year }} that you owned the Large Lot Program parcel, the Cook County Assessor will assess back taxes at a later date.  If you do not receive a tax bill in {{ current_year|add:2 }}, please contact the Cook County Assessor. 
 
     * Uses: You can use the lot for those uses that are permitted by the applicable zoning, subject to your obtaining any required permits and other governmental approvals.
 

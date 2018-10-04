@@ -1,0 +1,23 @@
+{% load lots_filters %}
+
+** $1 LARGE LOTS
+------------------------------------------------------------
+{{ today|date:'F j, Y' }}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+
+Dear {{ app.first_name}},
+
+This email concerns your application for the following lots:
+
+{% for lot in lots %}
+    Address: {{lot.address.street}}
+    PIN: {{lot.pin}}
+{% endfor %}
+
+{{ email_text }}
+
+Sincerely,
+
+The Large Lots Team

@@ -16,10 +16,15 @@ def create_email_msg(template_name, email_subject, email_to_address, context):
     html_content = html_template.render(context)
     txt_content = txt_template.render(context)
 
+    send_to = [email_to_address]
+
+    if hasattr(settings, 'INFO_EMAIL'):
+        send_to.append(settings.INFO_EMAIL)
+
     msg = EmailMultiAlternatives(email_subject,
                             txt_content,
                             settings.EMAIL_HOST_USER,
-                            [email_to_address])
+                            send_to)
 
     msg.attach_alternative(html_content, 'text/html')
 
@@ -67,16 +72,3 @@ def step_from_status(description_key):
 
     else:
         return given_index + 2  # Our numbered steps begin at 2.
-
-class EmailLogParser(StringIO):
-    '''
-    Convenience object for returning implicated Application objects from bulk
-    email error logs.
-    '''
-    def getvalue(self, *args, **kwargs):
-        return super().getvalue(*args, **kwargs).splitlines()
-
-    @property
-    def applications(self):
-        ids = [val.split('|')[1] for val in self.getvalue()]
-        return Application.objects.filter(id__in=ids)

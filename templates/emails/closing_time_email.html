@@ -18,7 +18,7 @@
     <div class="row">
         <div class="col-md-12">
             <p>Dear {{ app.first_name }},</p>
-            <p>On Wednesday, October 11th, 2017 the Chicago City Council granted approval for DPD to sell nearly 1000 lots through the Large Lot Program! This is the final stage of the application process- It’s Closing Time!</p>
+            <p>The Chicago City Council granted approval for DPD to sell hundreds of lots through the Large Lot Program. This is the final stage of the application process - It’s Closing Time!</p>
 
             <p>The City will be selling the following lot(s) to you:</p>
 
@@ -43,7 +43,7 @@
             <p>Here are the final steps:</p>
 
             <ul>
-                <li>Over the next few weeks you will receive a CLOSING EMAIL  containing the date and time of the Real Estate Closing for your Large Lot. Closings occur en masse so please anticipate it lasting a few hours. We anticipate completing all of the closings before the end of December.</li>
+                <li>Over the next few weeks you will receive a CLOSING EMAIL  containing the date and time of the Real Estate Closing for your Large Lot. Closings occur en masse so please anticipate it lasting a few hours.</li>
                 <li>There are closing costs associated with the purchase of the Large Lot, $56.00 to record and $1.00 to purchase per lot. Instructions on how to provide those costs and will be included in your CLOSING EMAIL.</li>
                 <li>We are still reviewing EDSs and Principal Profile Forms, you may receive an email from us separately if we find you owe money to the City or your EDS needs an edit. You will not be allowed to purchase the lot if you owe money to the City.</li>
             </ul>
@@ -54,7 +54,9 @@
                 <li><strong>Weeds:</strong> YOU are responsible for cutting or otherwise controlling all weeds on the property so that the average height of such weeds does not exceed ten inches.  If you violate this requirement, you are subject to a fine of not less than $600 nor more than $1,200 for each day that a violation continues.</li>
                 <li><strong>Lot maintenance:</strong> YOU are responsible for keeping the lot free of garbage, ashes, refuse, trash, rubbish, miscellaneous waste, manure or other substance that may contain disease germs or be scattered by the wind, or decompose, or become filthy, noxious or unhealthful.  If you violate this requirement, you are subject to a fine of not less than $300 nor more than $600 for each offense, for each day that a violation continues.</li>
                 <li><strong>Fencing:</strong> YOU are responsible for surrounding the lot with a noncombustible screen fence, with the required signage and maintained in accordance with the City’s laws, if the lot is not a sideyard.  If you violate this requirement, you are subject to a fine of not less than $300 nor more than $600 for each offense, for each day that a violation continues.</li>
-                <li><strong>Taxes:</strong> You are responsible for taxes that accrue starting AFTER you purchase your Large Lot Program parcel.  If you do not receive a tax bill in 2018 for the portion of calendar year 2017 that you owned the Large Lot Program parcel, the Cook County Assessor will assess back taxes at a later date.  If you do not receive a tax bill in 2019, please contact the Cook County Assessor. </li>
+
+                {% now "Y" as current_year %}
+                <li><strong>Taxes:</strong> You are responsible for taxes that accrue starting AFTER you purchase your Large Lot Program parcel.  If you do not receive a tax bill in {{ current_year|add:1 }} for the portion of calendar year {{ current_year }} that you owned the Large Lot Program parcel, the Cook County Assessor will assess back taxes at a later date.  If you do not receive a tax bill in {{ current_year|add:2 }}, please contact the Cook County Assessor. </li>
                 <li><strong>Uses:</strong> You can use the lot for those uses that are permitted by the applicable zoning, subject to your obtaining any required permits and other governmental approvals.</li>
             </ul>
 

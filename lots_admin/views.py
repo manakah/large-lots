@@ -4,6 +4,7 @@ import json
 import re
 from collections import namedtuple
 from smtplib import SMTPException
+from io import StringIO
 
 from operator import __or__ as OR
 from functools import reduce
@@ -25,20 +26,22 @@ from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
 from django import forms
 from django.template import Context
 from django.template.loader import get_template
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
+from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
     step_from_status
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
-from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm
+from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm, DateTimeForm, \
+    EdsEmailForm, FinalEdsEmailForm, EdsDenialEmailForm, LotteryEmailForm, ClosingTimeEmail, CustomEmail
 
 def lots_login(request):
     if request.method == 'POST':
@@ -803,20 +806,15 @@ def lotteries(request):
     applications = ApplicationStatus.objects.filter(current_step__step=6).filter(lottery=True).order_by('application__last_name')
     applications_list = list(applications)
     # Get all lots.
-    lots = []
+    lots = set()
     for a in applications_list:
-        lots.append(a.lot)
-    # Deduplicate applied_pins array.
-    lots_list = list(set(lots))
-    lots_list_sorted = sorted(lots_list, key=lambda lot: lot.pin)
+        lots.add(a.lot)
+    # # Deduplicate applied_pins array.
+    # lots_list = list(set(lots))
+    lots_list = sorted(lots, key=lambda lot: lot.pin)
 
-    # Break into morning and afternoon groups. 
-    pin_boundary = 20081180210000
-    lots_morning = [lot for lot in lots_list_sorted if int(lot.pin) <= pin_boundary]
-    lots_afternoon = [lot for lot in lots_list_sorted if int(lot.pin) > pin_boundary]
     return render(request, 'lotteries.html', {
-        'lots_morning': lots_morning,
-        'lots_afternoon': lots_afternoon,
+        'lots_list': lots_list,
         })
 
 @login_required(login_url='/lots-login/')
@@ -1007,12 +1005,9 @@ def bulk_submit(request):
                     review_blob['step_completed'] = 7
 
                 # In contrast to steps 2-7, the following steps confirm "past"
-                # actions, i.e., an applicant on Step 9 has been approved by Plan
-                # Commission and City Council, and has thus "completed" that step.
-                elif selected_step == 'step9':
-                    advance_to_step('city_council', app_status)
-                    review_blob['step_completed'] = 9
-
+                # actions, i.e., an applicant on Step 10 has been certified
+                # as free of debt and has thus "completed" that step.
+                # Admins should use the email sending interface to move applicants from Step 8 to Step 9.
                 elif selected_step == 'step10':
                     advance_to_step('debts', app_status)
                     review_blob['step_completed'] = 10
@@ -1130,3 +1125,90 @@ def email_error(request):
     return render(request, 'email_error.html', {
         'applicant_statuses': applicant_statuses,
     })
+
+@login_required(login_url='/lots-login/')
+def send_emails_notice(request):
+    failures = request.session['failures']
+
+    app_ids = [val.split('|')[0] for val in failures]
+    errors = [val.split('|')[1] for val in failures]
+    applications = Application.objects.filter(id__in=app_ids)
+
+    if applications:
+        failure_log = zip(applications, errors)
+    else: 
+        failure_log = None
+
+    return render(request, 'send_emails_notice.html', {
+        'failure_log': failure_log,
+    })
+
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+class EmailHandler(LoginRequiredMixin, TemplateView):
+    login_url = '/lots-login/'
+    template_name = 'send_emails.html'
+    form_map = {
+        'eds_form': EdsEmailForm, 
+        'final_eds_form': FinalEdsEmailForm,
+        'eds_denial_form': EdsDenialEmailForm,
+        'lottery_form': LotteryEmailForm,
+        'closing_time_form': ClosingTimeEmail,
+        'custom_form': CustomEmail,
+    }
+    success_url = '/send-emails-notice/'
+
+    def _get_form_class(self):
+        action = self.request.POST['action']
+        return self.form_map[action]
+
+    def get_context_data(self, **kwargs):
+        self.request.session['failures'] = None
+        
+        context = super().get_context_data(**kwargs)
+        
+        lottery_count = Lot.objects.filter(applicationstatus__current_step__step=6).distinct().count()
+        context['lottery_count'] = lottery_count
+        context.update(**self.form_map)
+
+        if self.request.POST.get('action'):
+            action = self.request.POST.get('action')
+            context[action] = kwargs['form']
+
+        return context 
+
+    def post(self, request, *args, **kwargs):
+        form_class = self._get_form_class()
+        form = form_class(request.POST)
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def form_valid(self, form):
+        out = StringIO()
+        base_context = {}
+        
+        if self.request.POST.get('action') == 'custom_form':
+            form.step = form.cleaned_data['step']
+            form.selection = form.cleaned_data['selection']
+            base_context['subject'] = form.cleaned_data['subject']
+            base_context['email_text'] = form.cleaned_data['email_text']
+
+        base_context['time'] = form.cleaned_data.get('time')
+        base_context['date'] = form.cleaned_data.get('date')
+        base_context['location'] = form.cleaned_data.get('location')
+        form.base_context = base_context
+        form.user = self.request.user
+        form.out = out
+
+        if 'number' in form.cleaned_data:
+            form.number = form.cleaned_data['number']
+
+        form._call_command()
+        
+        failures_list = form.out.getvalue().splitlines()
+        self.request.session['failures'] = failures_list
+
+        return HttpResponseRedirect('/send-emails-notice/')

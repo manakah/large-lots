@@ -90,6 +90,10 @@ We used the following open source tools:
 * [Leaflet](http://leafletjs.com/) - javascript library interactive maps
 * [jQuery Address](https://github.com/asual/jquery-address) - javascript library creating RESTful URLs
 
+## Logging 
+
+The `send_emails` management command employs the Python `logging` facility. The `file` handler directs output to log files in `/var/log/largelots` on the LargeLots server.
+
 ## Team
 
 * Demond Drummer - idea, content, outreach

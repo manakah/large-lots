@@ -1,0 +1,22 @@
+<!-- Modal -->
+<div class="modal fade" id="{{target}}" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalLabel">Are you sure?</h2>
+    </div>
+    <div class="modal-body">
+      <p>{{modal_message}}</p>
+      <div class='row hidden loading-msg'>
+        <hr>
+        <div class='col-md-3'><p><i class="fa fa-refresh fa-spin fa-3x fa-fw"></i></p></div>
+        <div class='col-md-9'>Your emails are being sent to applicants. This process may take a few minutes! Do not close your broswer.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" data-dismiss="modal">No, that doesn't sound right.</button>
+      <button type="submit" class="btn btn-success">Yes, send emails!</button>
+    </div>
+  </div>
+</div>
+</div>

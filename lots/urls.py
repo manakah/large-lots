@@ -13,7 +13,7 @@ from lots_admin.views import lots_admin, csv_dump, lots_login, \
     lottery_submit, review_EDS,deny_application, deny_submit, review_status_log, bulk_submit, \
     bulk_deny, bulk_deny_submit, status_tally, get_parcel_geometry, deed, \
     double_submit, lots_admin_principal_profiles, delete_principal_profiles, \
-    email_error
+    email_error, send_emails_notice, EmailHandler
 
 from django.contrib import admin
 admin.autodiscover()
@@ -72,7 +72,12 @@ urlpatterns = [
     url(r'^bulk-deny-submit/$', bulk_deny_submit, name='bulk_deny_submit'),
     url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
-    url(r'^email-error/$', email_error, name='email_error'),]
+    url(r'^email-error/$', email_error, name='email_error'),
+
+    # send emails
+    url(r'^send-emails/$', EmailHandler.as_view(), name='send_emails'),
+    url(r'^send-emails-notice/$', send_emails_notice, name='send_emails_notice'),
+    ]
 
 if settings.DEBUG:
     import debug_toolbar

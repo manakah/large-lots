@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load lots_filters %}
+{% load staticfiles %}
+{% block title %}Send emails notice{% endblock %}
+{% block extra_css %}
+    <link href="{% static 'css/jquery-ui.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/jquery.timepicker.min.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<h2>Send emails notice</h2>
+
+{% if failure_log %}
+  <p class='alert alert-info'><strong>Oh no! Some emails failed.</strong> The below applicants did not receive an email. Check the error, and when ready, manually send emails to these applicants using Gmail or other service.</p>
+  <table class='table table-striped'>
+  <thead>
+    <tr>
+      <th>Application ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Cause of email failure</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for app, error in failure_log %}
+      <tr>
+        <td>{{app.id}}</td>
+        <td>{{app.first_name}} {{app.last_name}}</td>
+        <td>{{app.email}}</td>
+        <td>{{error}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+{% else %}
+  <p class='alert alert-success'>Nicely done! All emails sent without error.</p>
+{% endif %}
+
+{% endblock %}

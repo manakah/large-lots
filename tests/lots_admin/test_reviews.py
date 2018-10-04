@@ -15,7 +15,6 @@ from lots_admin.models import Application, ApplicationStatus, Review
     (5, False),
     (5, True),
     (7, False),
-    (8, False),
     (9, False),
     (10, False),
 ])

@@ -7,22 +7,23 @@
 <h2>Large Lots Lottery</h2>
 <p>The City will hold a lottery for these lots. Click on the "Run lottery" button to see competing applicants and chose a winner.</p>
 
-{% if lots_morning or lots_afternoon %}
-
-  {% if lots_morning %}
-  <h3>Morning lotteries</h3>
-    {% with lots_list=lots_morning %}
-      {% include 'partials/lotto_table.html' %}
-    {% endwith %}
-  {% endif %}
-
-  {% if lots_afternoon %}
-  <h3>Afternoon lotteries</h3>
-    {% with lots_list=lots_afternoon %}
-      {% include 'partials/lotto_table.html' %}
-    {% endwith %}
-  {% endif %}
-  
+{% if lots_list %}
+  <table class="table table-striped">
+    <thead>
+      <th class="no-wrap">Address</th>
+      <th>Lot number</th>
+      <th></th>
+    </thead>
+    <tbody>
+        {% for lot in lots_list %}
+          <tr>
+            <td>{{ lot.address }}</td>
+            <td>{{ lot.pin | make_display_pin }}</td>
+            <td><a href="{% url 'lottery' lot.pin %}" class="btn btn-success">Run lottery</a></td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
 {% else %}
   <p>Lottery complete! Get some rest.</p>
 {% endif %}

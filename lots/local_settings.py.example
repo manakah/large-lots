@@ -30,6 +30,28 @@ EMAIL_HOST_PASSWORD='<SMTP password>'
 SENTRY_DSN=''
 RAVEN_CONFIG = {'dsn': SENTRY_DSN}
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO'
+    },
+}
+
 PILOT_INFO = {
     'pilot_2': {
         'human_name': 'Pilot 2: East Garfield Park'
