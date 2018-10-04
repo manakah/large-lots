@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 handler = SentryHandler(settings.SENTRY_DSN)
 handler.setLevel(logging.ERROR)
 setup_logging(handler)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 def home(request):
     application_count = Application.objects.count()
@@ -296,7 +297,7 @@ def apply(request):
             subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
 
             from_email = settings.EMAIL_HOST_USER
-            to_email = [from_email]
+            to_email = ['info@largelots.org']
 
             # if provided, send confirmation email to applicant
             if app.email:
