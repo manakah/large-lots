@@ -297,7 +297,7 @@ def apply(request):
             subject = 'Large Lots Application for %s %s' % (app.first_name, app.last_name)
 
             from_email = settings.EMAIL_HOST_USER
-            to_email = [from_email]
+            to_email = ['info@largelots.org']
 
             # if provided, send confirmation email to applicant
             if app.email:
