@@ -16,15 +16,10 @@ def create_email_msg(template_name, email_subject, email_to_address, context):
     html_content = html_template.render(context)
     txt_content = txt_template.render(context)
 
-    send_to = [email_to_address]
-
-    if hasattr(settings, 'INFO_EMAIL'):
-        send_to.append(settings.INFO_EMAIL)
-
     msg = EmailMultiAlternatives(email_subject,
                             txt_content,
                             settings.EMAIL_HOST_USER,
-                            send_to)
+                            [email_to_address])
 
     msg.attach_alternative(html_content, 'text/html')
 
