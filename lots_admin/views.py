@@ -178,7 +178,6 @@ def lots_admin(request, step):
     steps = {i: Q(current_step__step=i) for i in range(2, 7)}
 
     before_step4 = ApplicationStatus.objects.filter(steps[2] | steps[3])
-    on_steps234 = ApplicationStatus.objects.filter(steps[2] | steps[3] | steps[4])
     on_steps23456 = ApplicationStatus.objects.filter(steps[2] | steps[3] | steps[4] | steps[5] | steps[6])
 
     app_count = len(ApplicationStatus.objects.all())
@@ -210,7 +209,6 @@ def lots_admin(request, step):
         'selected_pilot': settings.CURRENT_PILOT,
         'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
-        'on_steps234': on_steps234,
         'on_steps23456': on_steps23456,
         'app_count': app_count,
         'ppf_count': ppf_count,
