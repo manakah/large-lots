@@ -11,6 +11,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.conf import settings
 from django.db import connection
+from django.template import Context, Template
 
 import logging
 from raven.handlers.logging import SentryHandler
@@ -85,6 +86,12 @@ class Command(BaseCommand):
                             'Step used to select applicants to email.',
                             type=int)
 
+        parser.add_argument('--every_status',
+                            help='Send emails to applicants who have all applications' + 
+                            'on the same step.',
+                            action='store_true',
+                            default=False)
+
     def handle(self, *args, **options):
         if options['number_to_send']:
             self.n = options['number_to_send']
@@ -100,6 +107,7 @@ class Command(BaseCommand):
         if self.email_command == 'custom_email':
             self.operator = options['custom_email']
             self.step = options['steps']
+            self.every_status = options['every_status']
 
         getattr(self, 'send_{}'.format(self.email_command))()
 
@@ -395,21 +403,26 @@ class Command(BaseCommand):
 
     def send_custom_email(self):
         '''
-        e.g., python manage.py send_emails --custom_email on_step --step 6
+        e.g., python manage.py send_emails --custom_email on_step --step 6 --every_status
         '''
         select_method = getattr(self, '_select_applicants_{}'.format(self.operator))
 
-        for email, apps, statuses in select_method(self.step):
+        for email, apps, statuses in select_method(self.step, every_status=self.every_status):
             lots = [s.lot for s in statuses]
             context = {'app': apps.first(), 'lots': lots}
+
+            # Render the email text here, if the user includes variables, e.g., app.tracking_id
+            partial_template = Template(self.base_context['email_text'])
+            partial_context = Context({'app': apps.first()})
+            rendered_text = partial_template.render(partial_context)
+            self.base_context['email_text'] = rendered_text
+
             context.update(self.base_context)
 
             try:
                 self._send_email('custom_email', context['subject'], email, context)
 
             except CannotSendEmailException as error:
-                print("here!!!!")
-                print(error)
                 for a in apps:
                     self._write_to_stdout(a.id, error)
 

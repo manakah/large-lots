@@ -119,7 +119,7 @@ class TestCustomEmail:
     @pytest.mark.parametrize('custom,step,q_filter', parameters)
     @pytest.mark.django_db
     def test_command(self, email_db_setup, caplog, custom, step, q_filter):
-        base_context = {'subject': 'test email'}
+        base_context = {'subject': 'test email', 'email_text': 'test text'}
 
         with caplog.at_level(logging.INFO):
             with patch.object(Command, '_send_email') as mock_send:
@@ -136,6 +136,7 @@ class TestCustomEmail:
             response = auth_client.post(url, {
                     'action': 'custom_form',
                     'step': step,
+                    'every_status': False,
                     'selection': custom,
                     'subject': 'an email subject line',
                     'text': 'a custom email for you' 
