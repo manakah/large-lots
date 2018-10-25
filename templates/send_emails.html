@@ -225,6 +225,19 @@
 
                 return true;
             });
+
+            $('#id_selection_0').on('click', function() {
+                $("#id_every_status").attr("disabled", false);
+            });
+            $('#id_selection_1').on('click', function() {
+                $("#id_every_status").attr("disabled", true);
+            });
+            $('#id_selection_2').on('click', function() {
+                $("#id_every_status").attr("disabled", true);
+            });
+            $('#id_selection_3').on('click', function() {
+                $("#id_every_status").attr("disabled", true);
+            });
         } );
     </script>
 {% endblock %}
