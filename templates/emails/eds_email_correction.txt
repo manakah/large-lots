@@ -1,0 +1,26 @@
+{% load lots_filters %}
+
+
+** $1 LARGE LOTS
+------------------------------------------------------------
+{{ today|date:'F j, Y' }}
+
+{{ app.first_name}} {{ app.last_name }}
+{{ app.owned_address }}
+
+
+Dear {{ app.first_name}},
+
+We are aware of the issues with the links for submitting your EDS and PPF. Please see the corrected links below. If you successfully submitted the EDS you only need to complete the PPF.
+
+For all applicants, please use <a href="https://largelots.org/principal-profile-form/{{app.tracking_id}}">this UPDATED link to complete the PPF</a>.
+
+For individuals, who encountered errors in submitting an EDS, please use <a href="https://eds.largelots.org/reauthenticate?tracking_id={{app.tracking_id}}">the following link to reenter the EDS form</a>.
+
+For organizations and corporations, you must use <a href="https://webapps1.cityofchicago.org/EDSWeb/appmanager/OnlineEDS/desktop?_nfpb=true&_pageLabel=OnlineEDS_portal_page_26" target="_blank">the standard EDS form</a>.
+
+<strong>Again, both of these documents must be submitted on November 9, 2018 by 04:00 PM or you will not be eligible to purchase property through the Large Lot Program.</strong> If you need assistance completing the EDS or PPF, please contact The Large Lots Team or Kim Harrison at 312-744-0605 or kim.harrison@cityofchicago.org.
+        
+Sincerely,
+
+The Large Lots Team
