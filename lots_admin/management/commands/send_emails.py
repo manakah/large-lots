@@ -179,7 +179,6 @@ class Command(BaseCommand):
                 yield email, apps, statuses
 
     _select_applicants_on_step = partialmethod(_select_applicants, '=')
-    _select_applicants_on_step_every_status = partialmethod(_select_applicants, '=', every_status=True)
     _select_applicants_not_on_step = partialmethod(_select_applicants, '!=')
     _select_applicants_on_steps_before = partialmethod(_select_applicants, '<')
     _select_applicants_on_steps_after = partialmethod(_select_applicants, '>')
@@ -406,12 +405,9 @@ class Command(BaseCommand):
         '''
         e.g., python manage.py send_emails --custom_email on_step --step 6 --every_status
         '''
-        if self.every_status and self.operator == 'on_step':
-            select_method = self._select_applicants_on_step_every_status
-        else:
-            select_method = getattr(self, '_select_applicants_{}'.format(self.operator))
+        select_method = getattr(self, '_select_applicants_{}'.format(self.operator))
 
-        for email, apps, statuses in select_method(self.step):
+        for email, apps, statuses in select_method(self.step, every_status=self.every_status):
             lots = [s.lot for s in statuses]
             context = {'app': apps.first(), 'lots': lots}
 

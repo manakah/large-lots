@@ -165,7 +165,7 @@
             {% endfor %}
         </div>
     </p>
-    <p><strong>Step 3. OPTIONAL.</strong><br>{{ custom_form.every_status }} If you selected "applicants on this step," check here if you ONLY want to send emails to applicants who have all applications on this step.</p>
+    <p><strong>Step 3. OPTIONAL.</strong><br>{{ custom_form.every_status }} If you selected "applicants on this step," check here if you ONLY want to send emails to applicants who have all non-denied applications on this step. For example, EDS and PPF emails are only sent to applicants who have all non-denied applications on Step 7. Select this option and "Step 7" (above) to send a second email to this pool.</p>
     <p>
         <strong>Step 4.</strong> Give your email a subject line 
         {% if custom_form.subject.errors %}
