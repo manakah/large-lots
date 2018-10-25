@@ -59,10 +59,6 @@ class Command(BaseCommand):
                             action='store_true',
                             help='Send email with link to complete EDS')
 
-        # parser.add_argument('--eds_correction_email',
-        #                     action='store_true',
-        #                     help='Send email with correct link to complete EDS. Used for a specific use case in late October.')
-
         parser.add_argument('--lotto_email',
                             action='store_true',
                             help='Send email with notification of lottery')
@@ -111,7 +107,7 @@ class Command(BaseCommand):
         if self.email_command == 'custom_email':
             self.operator = options['custom_email']
             self.step = options['steps']
-            self.every_status = options.get('every_status', '')
+            self.every_status = options['every_status']
 
         getattr(self, 'send_{}'.format(self.email_command))()
 
@@ -292,22 +288,6 @@ class Command(BaseCommand):
                 for app in apps:
                     app.eds_sent = True
                     app.save()
-
-    def send_eds_correction_email(self):
-        subject = 'Corrected links - PPF and EDS' 
-        for email, apps, statuses in self._select_applicants_on_step(7, every_status=True):
-            context = {'app': apps.first()}
-            context.update(self.base_context)
-
-            try:
-                self._send_email('eds_email_correction', subject, email, context)
-
-            except CannotSendEmailException as error:
-                for a in apps:
-                    self._write_to_stdout(a.id, error)
-
-            else:
-                self._log(apps.first(), statuses)
 
     def send_eds_final_email(self):
         subject = 'LargeLots application - Economic Disclosure Statement (EDS)' 
