@@ -1191,6 +1191,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         if self.request.POST.get('action') == 'custom_form':
             form.step = form.cleaned_data['step']
             form.selection = form.cleaned_data['selection']
+            form.every_status = form.cleaned_data['every_status']
             base_context['subject'] = form.cleaned_data['subject']
             base_context['email_text'] = form.cleaned_data['email_text']
 

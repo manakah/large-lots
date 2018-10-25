@@ -142,6 +142,9 @@ class CustomEmail(forms.Form):
                 widget=forms.HiddenInput(), 
                 initial='custom_form')
     step = forms.CharField(widget=forms.Select(choices=STEPS))
+    every_status = forms.BooleanField(
+                widget=forms.CheckboxInput(attrs={'style': 'margin-right: 8px'}),
+                required=False)
     selection = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES)
     subject = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     email_text = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control','placeholder': 'Enter custom text for your email...', 'style': 'font-size: 18px'}))
@@ -152,5 +155,6 @@ class CustomEmail(forms.Form):
                      '-a {}'.format(self.user.id), 
                      custom_email=self.selection, 
                      steps=int(self.step),
+                     every_status=self.every_status,
                      base_context=json.dumps(self.base_context),
                      stdout=self.out)

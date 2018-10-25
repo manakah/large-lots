@@ -165,8 +165,9 @@
             {% endfor %}
         </div>
     </p>
+    <p><strong>Step 3. OPTIONAL.</strong><br>{{ custom_form.every_status }} If you selected "applicants on this step," check here if you ONLY want to send emails to applicants who have all applications on this step.</p>
     <p>
-        <strong>Step 3.</strong> Give your email a subject line 
+        <strong>Step 4.</strong> Give your email a subject line 
         {% if custom_form.subject.errors %}
         <div class='has-error'>
         {% else %}
@@ -178,7 +179,7 @@
             {% endfor %}
         </div>
     </p>
-    <p><strong>Step 4.</strong> Enter the body of your custom email. <strong>Note!</strong> The text above and below the input box show an example Large Lots header and closing statement: your email will contain actual applicant info.</p>
+    <p><strong>Step 5.</strong> Enter the body of your custom email. <strong>Note!</strong> The text above and below the input box show an example Large Lots header and closing statement: your email will contain actual applicant info.</p>
     <hr>
     <em><p>Dear Ms. Bordoni,</p>
     <p>This email concerns your application for the following lots:</p>
