@@ -410,14 +410,13 @@ class Command(BaseCommand):
         for email, apps, statuses in select_method(self.step, every_status=self.every_status):
             lots = [s.lot for s in statuses]
             context = {'app': apps.first(), 'lots': lots}
+            context.update(self.base_context)
 
             # Render the email text here, if the user includes variables, e.g., app.tracking_id
             partial_template = Template(self.base_context['email_text'])
             partial_context = Context({'app': apps.first()})
             rendered_text = partial_template.render(partial_context)
-            self.base_context['email_text'] = rendered_text
-
-            context.update(self.base_context)
+            context.update({'email_text': rendered_text})
 
             try:
                 self._send_email('custom_email', context['subject'], email, context)
