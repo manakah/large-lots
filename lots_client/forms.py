@@ -230,6 +230,7 @@ class PrincipalProfileForm(forms.Form):
     home_address_city = forms.CharField()
     home_address_state = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False,
     )
     home_address_zip_code = forms.CharField()
     date_of_birth = forms.DateField(widget=forms.SelectDateWidget(
