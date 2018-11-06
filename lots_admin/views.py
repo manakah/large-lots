@@ -377,15 +377,15 @@ def dump_principal_profiles(request, pilot):
     for profile in profiles:
         organization, organization_address = org_address(profile)
         rows.append([
-            '',
+            'Department of Planning and Development (DPD)',
             ('{0} {1}').format(request.user.first_name, request.user.last_name),
             profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
             ('{0} {1}').format(profile.entity.first_name, profile.entity.last_name),
             profile.address,
             organization,
             organization_address,
-            profile.drivers_license_number,
-            profile.license_plate_number,
+            ('{0} {1}').format(profile.drivers_license_state, profile.drivers_license_number),
+            ('{0} {1}').format(profile.license_plate_state, profile.license_plate_number),
             profile.social_security_number[-4:],
         ])
         profile.exported_at = datetime.now().isoformat()

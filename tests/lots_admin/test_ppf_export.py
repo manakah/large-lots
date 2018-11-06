@@ -53,8 +53,8 @@ def test_export_ppf(application,
 
     for export, existing in zip(exported_profiles, existing_profiles):
         assert ('{0} {1}').format(existing.entity.first_name, existing.entity.last_name) == export['Principal\'s Name']
-        assert existing.drivers_license_number == export['Driver\'s License Number']
-        assert existing.license_plate_number == export['Plate Number']
+        assert ('{0} {1}').format(existing.drivers_license_state, existing.drivers_license_number) == export['Driver\'s License Number']
+        assert ('{0} {1}').format(existing.license_plate_state, existing.license_plate_number) == export['Plate Number']
         assert existing.social_security_number[-4:] == export['Last 4 of SSN']
 
         # Address is a property of the PPF model that returns the appropriate
