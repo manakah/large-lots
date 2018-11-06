@@ -370,7 +370,6 @@ def dump_principal_profiles(request, pilot):
         'Driver\'s License Number',
         'Plate Number',
         'Last 4 of SSN',
-
     ]
 
     rows = []
@@ -379,7 +378,7 @@ def dump_principal_profiles(request, pilot):
         organization, organization_address = org_address(profile)
         rows.append([
             '',
-            '',
+            ('{0} {1}').format(request.user.first_name, request.user.last_name),
             profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
             ('{0} {1}').format(profile.entity.first_name, profile.entity.last_name),
             profile.address,

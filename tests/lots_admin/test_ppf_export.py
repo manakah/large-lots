@@ -52,24 +52,19 @@ def test_export_ppf(application,
     assert len(exported_profiles) == len(existing_profiles)
 
     for export, existing in zip(exported_profiles, existing_profiles):
-        assert existing.entity.first_name == export['First name']
-        assert existing.entity.last_name == export['Last name']
-        assert str(existing.date_of_birth) == export['Date of birth']
-        assert existing.social_security_number == export['Social Security number']
-        assert existing.drivers_license_state == export['Driver\'s license state']
-        assert existing.drivers_license_number == export['Driver\'s license number']
-        assert existing.license_plate_state == export['License plate state']
-        assert existing.license_plate_number == export['License plate number']
+        assert ('{0} {1}').format(existing.entity.first_name, existing.entity.last_name) == export['Principal\'s Name']
+        assert existing.drivers_license_number == export['Driver\'s License Number']
+        assert existing.license_plate_number == export['Plate Number']
+        assert existing.social_security_number[-4:] == export['Last 4 of SSN']
 
         # Address is a property of the PPF model that returns the appropriate
         # address information for individual applicants, related persons,
         # and applicants applying on behalf of an organization.
-
-        assert existing.address == export['Home address']
+        assert existing.address == export['Principal\'s Address']
 
         if existing.application.organization_confirmed:
-            assert existing.application.organization == export['Organization']
-            assert existing.application.contact_address.street == export['Organization address']
+            assert existing.application.organization == export['Entity']
+            assert existing.application.contact_address.street == export['Address']
 
     assert all(profile.exported_at for profile in existing_profiles)
 

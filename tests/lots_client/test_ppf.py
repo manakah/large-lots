@@ -83,13 +83,13 @@ def test_individual_ppf_submission(django_db_setup,
     primary_ppf = principal_profiles.first()
 
     if ppf_type == 'organization':
-        assert primary_ppf.address == '456 Feather Lane'
+        assert primary_ppf.address == '456 Feather Lane, Chicago, IL 60609'
 
     elif ppf_type == 'individual':
-        assert primary_ppf.address == app.contact_address.street
+        assert primary_ppf.address == '5000 S ELIZABETH ST, Chicago, IL 60609'
 
     related_person = app.relatedperson_set.get()
     related_ppf = principal_profiles.last()
 
     assert 'Petmore Dogs' in str(related_person)
-    assert related_ppf.address == related_person.address.street
+    assert related_ppf.address == '4539 N Paulina, Chicago, IL 60624'
