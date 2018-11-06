@@ -142,13 +142,19 @@ class PrincipalProfile(models.Model):
         '''
         if isinstance(self.entity, Application):
             if self.entity.organization_confirmed:
-                return self.org_applicant_address.street
+                address_obj = self.org_applicant_address
 
             else:
-                return self.entity.contact_address.street
+                address_obj = self.entity.contact_address
 
         else:
-            return self.entity.address.street
+            address_obj = self.entity.address
+
+        return '{street}, {city}, {state} {zip_code}'.format(street=address_obj.street,
+                                                             city=address_obj.city,
+                                                             state=address_obj.state,
+                                                             zip_code=address_obj.zip_code)
+
 
 class RelatedPerson(models.Model):
     application = models.ForeignKey('Application')
