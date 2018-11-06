@@ -360,20 +360,17 @@ def dump_principal_profiles(request, pilot):
                                        .filter(deleted_at__isnull=True)
 
     header = [
-        'ID',
-        'Date received',
-        'Primary applicant',
-        'First name',
-        'Last name',
-        'Organization',
-        'Organization address',
-        'Home address',
-        'Date of birth',
-        'Social Security number',
-        'Driver\'s license state',
-        'Driver\'s license number',
-        'License plate state',
-        'License plate number',
+        'Department',
+        'Requester',
+        'Date Received',
+        'Principal\'s Name',
+        'Principal\'s Address',
+        'Entity',
+        'Address',
+        'Driver\'s License Number',
+        'Plate Number',
+        'Last 4 of SSN',
+
     ]
 
     rows = []
@@ -381,20 +378,16 @@ def dump_principal_profiles(request, pilot):
     for profile in profiles:
         organization, organization_address = org_address(profile)
         rows.append([
-            profile.application.id,
+            '',
+            '',
             profile.created_at.strftime('%Y-%m-%d %H:%m %p'),
-            not profile.related_person,
-            profile.entity.first_name,
-            profile.entity.last_name,
+            ('{0} {1}').format(profile.entity.first_name, profile.entity.last_name),
+            profile.address,
             organization,
             organization_address,
-            profile.address,
-            profile.date_of_birth,
-            profile.social_security_number,
-            profile.drivers_license_state,
             profile.drivers_license_number,
-            profile.license_plate_state,
             profile.license_plate_number,
+            profile.social_security_number[-4:],
         ])
         profile.exported_at = datetime.now().isoformat()
         profile.save()
