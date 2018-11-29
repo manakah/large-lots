@@ -370,6 +370,7 @@ def dump_principal_profiles(request, pilot):
         'Driver\'s License Number',
         'Plate Number',
         'Last 4 of SSN',
+        'Date of Birth',
     ]
 
     rows = []
@@ -387,6 +388,7 @@ def dump_principal_profiles(request, pilot):
             ('{0} {1}').format(profile.drivers_license_state, profile.drivers_license_number),
             ('{0} {1}').format(profile.license_plate_state, profile.license_plate_number),
             profile.social_security_number[-4:],
+            profile.date_of_birth,
         ])
         profile.exported_at = datetime.now().isoformat()
         profile.save()
