@@ -369,7 +369,7 @@ def dump_principal_profiles(request, pilot):
         'Address',
         'Driver\'s License Number',
         'Plate Number',
-        'Social Security number',
+        'Social Security Number',
         'Date of Birth',
     ]
 
