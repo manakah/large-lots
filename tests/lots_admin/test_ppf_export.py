@@ -55,7 +55,7 @@ def test_export_ppf(application,
         assert ('{0} {1}').format(existing.entity.first_name, existing.entity.last_name) == export['Principal\'s Name']
         assert ('{0} {1}').format(existing.drivers_license_state, existing.drivers_license_number) == export['Driver\'s License Number']
         assert ('{0} {1}').format(existing.license_plate_state, existing.license_plate_number) == export['Plate Number']
-        assert existing.social_security_number == export['Social Security number']
+        assert existing.social_security_number == export['Social Security Number']
 
         # Address is a property of the PPF model that returns the appropriate
         # address information for individual applicants, related persons,
