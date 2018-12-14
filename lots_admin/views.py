@@ -2,7 +2,7 @@ from datetime import datetime
 import csv
 import json
 import re
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from smtplib import SMTPException
 from io import StringIO
 
@@ -37,7 +37,7 @@ from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
-    step_from_status
+    step_from_status, application_steps
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
 from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm, DateTimeForm, \
@@ -1064,33 +1064,25 @@ def bulk_deny_submit(request):
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):
-    total = ApplicationStatus.objects.all()
+    pilot_info = OrderedDict(reversed(sorted(settings.PILOT_INFO.items())))
+    pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
 
-    step2 = ApplicationStatus.objects.filter(current_step__step=2)
-    step3 = ApplicationStatus.objects.filter(current_step__step=3)
-    step4 = ApplicationStatus.objects.filter(current_step__step=4)
-    step5 = ApplicationStatus.objects.filter(current_step__step=5)
-    step6 = ApplicationStatus.objects.filter(current_step__step=6)
-    step7 = ApplicationStatus.objects.filter(current_step__step=7)
-    step8 = ApplicationStatus.objects.filter(current_step__step=8)
-    step9 = ApplicationStatus.objects.filter(current_step__step=9)
-    step10 = ApplicationStatus.objects.filter(current_step__step=10)
-    sold = ApplicationStatus.objects.filter(current_step__step=11)
-    denied = ApplicationStatus.objects.filter(denied=True)
+    total = ApplicationStatus.objects.filter(application__pilot=pilot)
 
+    
+
+    steps = application_steps()
+
+    steps_with_count = [(step, short_name, total.filter(current_step__step=step).count())
+                for step, short_name in steps]
+    
+    denied = total.filter(denied=True).count()
+    
     return render(request, 'status-tally.html', {
+        'pilot_info': pilot_info,
+        'steps_with_count': steps_with_count,
+        'denied': denied,
         'total': total,
-        'step2': step2,
-        'step3': step3,
-        'step4': step4,
-        'step5': step5,
-        'step6': step6,
-        'step7': step7,
-        'step8': step8,
-        'step9': step9,
-        'step10': step10,
-        'sold': sold,
-        'denied': denied
         })
 
 def advance_to_step(description_key, app_status):

@@ -1,66 +1,46 @@
 {% extends "base.html" %}
+{% load lots_filters %}
 {% load staticfiles %}
 {% block title %}Application list{% endblock %}
 {% block content %}
 
 <div class="row">
     <div class="col-md-12">
-        <h3>Application status tally</h3>
+        <h2>
+            Application status tally
+        </h2>
+
+        Select a pilot: &nbsp;
+        {% for pilot, human_name in pilot_info.items %}
+            <a href="{% url 'status_tally' %}?{% query_transform request pilot=pilot %}" class="label {% ifequal request.GET.pilot pilot %}label-success{% else %}label-default{% endifequal %}">{{human_name}}</a>&nbsp;
+        {% endfor %}
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
         <table class="table table-striped">
             <thead>
                 <th>Review step</th>
                 <th>Tally</th>
             </thead>
             <tbody>
-                <!-- Step 2 -->
+
+            {% for step, short_name, count in steps_with_count %}
                 <tr>
-                    <td><a href="{% url 'applications' '2' %}">Step 2: Deed check</a></td>
-                    <td>{{ step2|length }}</td>
+                    <td><a href="{% url 'applications' step %}?{% query_transform request pilot=request.GET.pilot %}">Step {{step}}: {{short_name}}</a></td>
+                    <td>{{ count }}</td>
                 </tr>
+            {% endfor %}
                 <tr>
-                    <td><a href="{% url 'applications' '3' %}">Step 3: Location check</a></td>
-                    <td>{{ step3|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '4' %}">Step 4: Multiple location check</a></td>
-                    <td>{{ step4|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '5' %}">Step 5: Alderman letter of support</a></td>
-                    <td>{{ step5|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '6' %}">Step 6: Lottery</a></td>
-                    <td>{{ step6|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '7' %}">Step 7: Wait for applicant to submit EDS and principal profile</a></td>
-                    <td>{{ step7|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '8' %}">Step 8: Approval of EDS - Applicant submitted EDS and principal profile</a></td>
-                    <td>{{ step8|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '9' %}">Step 9: Approved by Plan Commission and City Council</a></td>
-                    <td>{{ step9|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '10' %}">Step 10: Certified as free and clear of debts to the city</a></td>
-                    <td>{{ step10|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' '11' %}">Sold</a></td>
-                    <td>{{ sold|length }}</td>
-                </tr>
-                <tr>
-                    <td><a href="{% url 'applications' 'denied' %}">Denied</a></td>
-                    <td>{{ denied|length }}</td>
+                    <td><a href="{% url 'applications' 'denied' %}?{% query_transform request pilot=request.GET.pilot %}">Denied</a></td>
+                    <td>{{ denied }}</td>
                 </tr>
                 <tr class="table-info">
-                    <td><a href="{% url 'applications' 'all' %}">Total</a></td>
+                    <td><a href="{% url 'applications' 'all' %}?{% query_transform request pilot=request.GET.pilot %}">Total</a></td>
                     <td>{{ total|length }}</td>
                 </tr>
+
             </tbody>
         </table>
     </div>
