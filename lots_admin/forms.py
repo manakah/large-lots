@@ -53,6 +53,7 @@ class ApplicationUpdateForm(forms.ModelForm):
 
 class DateTimeForm(forms.Form):
     use_required_attribute = False # Do not let the browser validate: https://docs.djangoproject.com/en/2.1/ref/forms/api/#django.forms.Form.use_required_attribute
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial='pilot')
     date = forms.CharField(widget=forms.TextInput(attrs={'class':'email-datepicker form-control', 
                                                          'placeholder':'Select a date'}))
     time = forms.CharField(widget=forms.TextInput(attrs={'class':'email-timepicker form-control',
@@ -89,6 +90,7 @@ class FinalEdsEmailForm(DateTimeForm):
                      stdout=self.out)
 
 class EdsDenialEmailForm(forms.Form):
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial='pilot')
     action = forms.CharField(widget=forms.HiddenInput(), initial='eds_denial_form')
     modal_message = 'You are about to do the following: (1) send denial emails to applicants on Step 7 who failed to submit an EDS and/or PPF form, and (2) deny those applicants.'
 
@@ -116,10 +118,12 @@ class LotteryEmailForm(DateTimeForm):
                      '--lotto_email',
                      '-n {}'.format(self.number),
                      '-a {}'.format(self.user.id),
+                     '--select_pilot={}'.format(self.select_pilot),
                      base_context=json.dumps(self.base_context),
                      stdout=self.out)
 
 class ClosingTimeEmail(forms.Form):
+    select_pilot = forms.CharField(widget=forms.HiddenInput())
     action = forms.CharField(widget=forms.HiddenInput(), initial='closing_time_form')
     modal_message = 'You are about to do the following: (1) notify applicants that the Chicago City Council granted approval for the sale of their lots, and (2) move applicants from Step 8 to Step 9.'
 
@@ -138,6 +142,7 @@ CHOICES = (('on_step', 'applicants on this step'),
 
 class CustomEmail(forms.Form):
     use_required_attribute = False
+    select_pilot = forms.CharField(widget=forms.HiddenInput())
     action = forms.CharField(
                 widget=forms.HiddenInput(), 
                 initial='custom_form')

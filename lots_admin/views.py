@@ -62,9 +62,9 @@ def lots_logout(request):
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
     select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
-    applications = Application.objects.filter(principalprofile__isnull=False) \
-                                      .filter(pilot=select_pilot) \
-                                      .distinct()
+    applications = Application.objects \
+                              .filter(principalprofile__isnull=False, pilot=select_pilot) \
+                              .distinct()
 
     sql = '''
         SELECT
@@ -395,9 +395,9 @@ def delete_principal_profiles(request, pilot):
     # filter out profiles without an exported_at date to avoid accidental
     # information loss (however improbable it may be).
     principal_profiles = PrincipalProfile.objects\
-                                         .filter(application__pilot=pilot)\
-                                         .filter(deleted_at__isnull=True)\
-                                         .filter(exported_at__isnull=False)
+                                         .filter(application__pilot=pilot, \
+                                                 deleted_at__isnull=True, \
+                                                 exported_at__isnull=False)
 
     n_deleted = len(principal_profiles)
 
@@ -1044,7 +1044,7 @@ def status_tally(request):
     total = ApplicationStatus.objects.filter(application__pilot=select_pilot)
     steps = application_steps()
     steps_with_count = [(step, short_name, total.filter(current_step__step=step).count())
-                for step, short_name in steps]
+                        for step, short_name in steps]
     denied = total.filter(denied=True).count()
     
     return render(request, 'status-tally.html', {
@@ -1125,9 +1125,18 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         self.request.session['failures'] = None
         
         context = super().get_context_data(**kwargs)
+
+        select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
+        context['select_pilot'] = select_pilot
         
-        lottery_count = Lot.objects.filter(applicationstatus__current_step__step=6).distinct().count()
+        lottery_count = Lot.objects \
+                           .filter(applicationstatus__application__pilot=select_pilot, \
+                                   applicationstatus__current_step__step=6) \
+                           .distinct() \
+                           .count()
+
         context['lottery_count'] = lottery_count
+
         context.update(**self.form_map)
 
         if self.request.POST.get('action'):
@@ -1139,7 +1148,11 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         form_class = self._get_form_class()
         form = form_class(request.POST)
+
         if form.is_valid():
+            select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
+            form.cleaned_data['select_pilot'] = select_pilot
+
             return self.form_valid(form)
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1147,7 +1160,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
     def form_valid(self, form):
         out = StringIO()
         base_context = {}
-        
+
         if self.request.POST.get('action') == 'custom_form':
             form.step = form.cleaned_data['step']
             form.selection = form.cleaned_data['selection']
@@ -1161,6 +1174,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         form.base_context = base_context
         form.user = self.request.user
         form.out = out
+        form.select_pilot = form.cleaned_data['select_pilot']
 
         if 'number' in form.cleaned_data:
             form.number = form.cleaned_data['number']
