@@ -50,7 +50,7 @@ def lots_login(request):
             user = form.get_user()
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                return HttpResponseRedirect(reverse('applications', args=['all']))
     else:
         form = AuthenticationForm()
     return render(request, 'lots_login.html', {'form': form})
@@ -87,9 +87,14 @@ def lots_admin_principal_profiles(request):
         })
 
 @login_required(login_url='/lots-login/')
-def lots_admin(request, step):
+def applications(request, step):
+# def lots_admin(request, pilot):
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
+    # step = request.GET.get('step', None)
+
+    # import pdb
+    # pdb.set_trace()
 
     # Add session variables for easy return to search results after step 3 and denials.
     request.session['page'] = page
@@ -504,7 +509,7 @@ def deny_submit(request, application_id):
 
     redirect_path = create_redirect_path(request)
 
-    return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+    return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 
 
 @login_required(login_url='/lots-login/')
@@ -695,14 +700,14 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+                return HttpResponseRedirect('/applications/all/%s' % redirect_path )
             else:
                 # Move to Step 5: Adlerman letter.
                 step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+                return HttpResponseRedirect('/applications/all/%s' % redirect_path )
         # Send admin to denial confirmation page.
         else:
             reason = 'block'
@@ -790,7 +795,7 @@ def multiple_location_check_submit(request, application_id):
 
         redirect_path = create_redirect_path(request)
 
-        return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+        return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 
 @login_required(login_url='/lots-login/')
 def lotteries(request):
@@ -1009,11 +1014,11 @@ def bulk_submit(request):
                     review_blob['step_completed'] = 11
 
                 else:  # Some invalid step was selected. Back to start!
-                    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                    return HttpResponseRedirect(reverse('applications', args=['all']))
 
                 Review.objects.create(**review_blob)
 
-            return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+            return HttpResponseRedirect(reverse('applications', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def bulk_deny(request):
@@ -1055,7 +1060,7 @@ def bulk_deny_submit(request):
         request.session['email_error_app_ids'] = email_error_app_ids
         return HttpResponseRedirect(reverse('email_error'))
 
-    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+    return HttpResponseRedirect(reverse('applications', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):

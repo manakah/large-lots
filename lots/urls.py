@@ -6,7 +6,7 @@ from lots_client.views import home, apply_confirm, faq, about, lot_uses_page, lo
     wintrust_invitation, wintrust_announcement, \
     principal_profile_form, eds_submission, get_applications_from_email
 
-from lots_admin.views import lots_admin, csv_dump, lots_login, \
+from lots_admin.views import applications, csv_dump, lots_login, \
     lots_logout, pdfviewer, deed_check, deed_check_submit, deed_duplicate_submit, \
     applicant_duplicate_submit, location_check, location_check_submit, \
     multiple_applicant_check, multiple_location_check_submit, lotteries, lottery, \
@@ -34,19 +34,26 @@ urlpatterns = [
     url(r'^eds-submission/$', eds_submission, name='eds_submission'),
     url(r'^principal-profile-form/(?P<tracking_id>\S+)/$', principal_profile_form, name='principal_profile_form'),
     url(r'^principal-profile-form/$', principal_profile_form, name='principal_profile_form'),
-    url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
-    url(r'^principal-profiles/$', lots_admin_principal_profiles, name='lots_admin_principal_profiles'),
-    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
-    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)$', csv_dump, name='csv_dump'),
-    url(r'^ppf-delete/(?P<pilot>\S+)/$', delete_principal_profiles, name='delete_principal_profiles'),
-    url(r'^lots-login/$', lots_login, name='lots_login'),
-    url(r'^logout/$', lots_logout, name='logout'),
 
     # api endpoints
     url(r'^api/get-pin$', get_pin_from_address, name='get_pin_from_address'),
     url(r'^api/get-applications$', get_applications_from_email, name='get_applications_from_email'),
 
+    # admin endpoints 
+    url(r'^lots-login/$', lots_login, name='lots_login'),
+    url(r'^logout/$', lots_logout, name='logout'),
     url(r'^django-admin/', include(admin.site.urls)),
+    # url(r'^lots-admin/(?P<step>\S+)/$', lots_admin, name='lots_admin'),
+    url(r'^applications/(?P<step>\S+)/$', applications, name='applications'),
+    url(r'^status-tally/$', status_tally, name='status_tally'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
+    url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)$', csv_dump, name='csv_dump'),
+    url(r'^principal-profiles/$', lots_admin_principal_profiles, name='lots_admin_principal_profiles'),
+    url(r'^ppf-delete/(?P<pilot>\S+)/$', delete_principal_profiles, name='delete_principal_profiles'),
+
+    # send emails
+    url(r'^send-emails/$', EmailHandler.as_view(), name='send_emails'),
+    url(r'^send-emails-notice/$', send_emails_notice, name='send_emails_notice'),
 
     # review steps
     url(r'^pdfviewer/$', pdfviewer, name='pdfviewer'),
@@ -70,13 +77,8 @@ urlpatterns = [
     url(r'^bulk_submit/$', bulk_submit, name='bulk_submit'),
     url(r'^bulk-deny/$', bulk_deny, name='bulk_deny'),
     url(r'^bulk-deny-submit/$', bulk_deny_submit, name='bulk_deny_submit'),
-    url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^get-parcel-geometry/$', get_parcel_geometry, name='get-parcel-geometry'),
     url(r'^email-error/$', email_error, name='email_error'),
-
-    # send emails
-    url(r'^send-emails/$', EmailHandler.as_view(), name='send_emails'),
-    url(r'^send-emails-notice/$', send_emails_notice, name='send_emails_notice'),
     ]
 
 if settings.DEBUG:

@@ -12,11 +12,11 @@
     <div class="col-md-12">
         <div class="right-nav">
             {% for i in step_range %}
-                <a href="{% url 'lots_admin' i %}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
+                <a href="{% url 'applications' i %}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
             {% endfor %}
-            <a href="{% url 'lots_admin' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
-            <a href="{% url 'lots_admin' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
-            <a href="{% url 'lots_admin' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
+            <a href="{% url 'applications' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
+            <a href="{% url 'applications' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
+            <a href="{% url 'applications' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
 </div>
@@ -39,7 +39,7 @@
         {% endif %}
 
         <!-- Form for searching applicants by name or ward -->
-        <form type="get" action="{% url 'lots_admin' step %}" style="margin: 0">
+        <form type="get" action="{% url 'applications' step %}" style="margin: 0">
             <input class="form-control update" id="query" type="text" name="query"  placeholder="Search for a name or ward..." >
             {% for name, value in request.GET.items %}
                 {% if name != 'query' %}
@@ -54,19 +54,19 @@
         {% if step == 7 %}
             <small>
                 Filter by: &nbsp;
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='true' %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='true' %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
                     PPF submitted
                 </a>&nbsp;
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request ppf='false' %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='false' %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
                     PPF not submitted
                 </a>&nbsp;
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='true' %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request eds='true' %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
                     EDS submitted
                 </a>&nbsp;
-                <a href="{% url 'lots_admin' '7' %}?{% query_transform request eds='false' %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request eds='false' %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
                     EDS not submitted
                 </a>&nbsp;
-                <a href="{% url 'lots_admin' '7' %}">
+                <a href="{% url 'applications' '7' %}">
                     <i class="fa fa-fw fa-times" aria-hidden="true"></i>
                     Clear filters
                 </a>
