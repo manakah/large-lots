@@ -9,13 +9,13 @@ from io import StringIO
 from operator import __or__ as OR
 from functools import reduce
 from datetime import datetime
-from django import forms
 
 from esridump.dumper import EsriDumper
 from esridump.errors import EsriDownloadError
 
 from raven.contrib.django.raven_compat.models import client
 
+from django import forms
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import connection, connections
 from django.shortcuts import render
@@ -61,7 +61,10 @@ def lots_logout(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
-    applications = Application.objects.filter(principalprofile__isnull=False).distinct()
+    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    applications = Application.objects.filter(principalprofile__isnull=False) \
+                                      .filter(pilot=select_pilot) \
+                                      .distinct()
 
     sql = '''
         SELECT
@@ -69,8 +72,11 @@ def lots_admin_principal_profiles(request):
           SUM(CASE WHEN (exported_at is null) THEN 1 ELSE 0 END) AS not_exported,
           MAX(exported_at) AS last_export,
           MAX(deleted_at) AS last_delete
-        FROM lots_admin_principalprofile
-    '''
+        FROM lots_admin_principalprofile as profile
+        JOIN lots_admin_application as app
+        ON profile.application_id=app.id
+        WHERE app.pilot='{pilot}'
+    '''.format(pilot=select_pilot)
 
     with connection.cursor() as cursor:
         cursor.execute(sql)
@@ -78,7 +84,7 @@ def lots_admin_principal_profiles(request):
         available, not_exported, last_export, last_delete = ppf_meta
 
     return render(request, 'admin-principal-profiles.html', {
-            'selected_pilot': settings.CURRENT_PILOT,
+            'select_pilot': select_pilot,
             'application_count': len(applications),
             'available_count': available,
             'not_exported_count': not_exported,
@@ -88,13 +94,12 @@ def lots_admin_principal_profiles(request):
 
 @login_required(login_url='/lots-login/')
 def applications(request, step):
-    pilot_info = OrderedDict(reversed(sorted(settings.PILOT_INFO.items())))
-    pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
 
     # Add session variables for easy return to search results after step 3 and denials.
-    request.session['pilot'] = pilot
+    request.session['pilot'] = select_pilot
     request.session['page'] = page
     request.session['query'] = query
 
@@ -140,7 +145,7 @@ def applications(request, step):
 
     conditions = make_conditions(request, step)
 
-    sql = sql_fmt.format(pilot=pilot,
+    sql = sql_fmt.format(pilot=select_pilot,
                          conditions=conditions,
                          order_by='ORDER BY {0} {1}'.format(order_by, sort_order))
 
@@ -182,8 +187,6 @@ def applications(request, step):
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
-        'selected_pilot': settings.CURRENT_PILOT,
-        'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
         'on_steps23456': on_steps23456,
         'app_count': app_count,
@@ -192,7 +195,7 @@ def applications(request, step):
         'step_range': step_range,
         'order_by': order_by,
         'toggle_order': toggle_order,
-        'pilot': pilot,
+        'select_pilot': select_pilot,
         })
 
 @login_required(login_url='/lots-login/')
@@ -1036,17 +1039,16 @@ def bulk_deny_submit(request):
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):
-    pilot_info = OrderedDict(reversed(sorted(settings.PILOT_INFO.items())))
-    pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
 
-    total = ApplicationStatus.objects.filter(application__pilot=pilot)
+    total = ApplicationStatus.objects.filter(application__pilot=select_pilot)
     steps = application_steps()
     steps_with_count = [(step, short_name, total.filter(current_step__step=step).count())
                 for step, short_name in steps]
     denied = total.filter(denied=True).count()
     
     return render(request, 'status-tally.html', {
-        'pilot_info': pilot_info,
+        'select_pilot': select_pilot,
         'steps_with_count': steps_with_count,
         'denied': denied,
         'total': total,
