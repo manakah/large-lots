@@ -4,19 +4,8 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
-<div class="row">
-    <div class="col-md-12">
-        <h2>
-            Application status tally
-        </h2>
+{% include 'partials/select_pilot.html' with header="Status tally" %}
 
-        Select a pilot: &nbsp;
-        {% for pilot, human_name in pilot_info.items %}
-            <a href="{% url 'status_tally' %}?{% query_transform request pilot=pilot %}" class="label {% ifequal request.GET.pilot pilot %}label-success{% else %}label-default{% endifequal %}">{{human_name}}</a>&nbsp;
-        {% endfor %}
-
-    </div>
-</div>
 <div class="row">
     <div class="col-md-12">
         <table class="table table-striped">

@@ -86,3 +86,39 @@ def application_steps():
              for k in APPLICATION_STATUS.keys()]
 
     return steps
+
+def make_conditions(request, step):
+    '''
+    Convenience method for the `applications` view in the admin backend.
+    '''
+    query = request.GET.get('query', None)
+
+    if step.isdigit():
+        step = int(step)
+
+        conditions = '''
+            AND coalesce(deed_image, '') <> ''
+            AND step = {0}
+        '''.format(step)
+
+        if request.GET.get('eds', None):
+            conditions += 'AND app.eds_received = {} '.format(request.GET['eds'])
+
+        elif request.GET.get('ppf', None):
+            conditions += 'AND app.ppf_received = {} '.format(request.GET['ppf'])
+
+    elif step == 'denied':
+        conditions = '''
+            AND coalesce(deed_image, '') <> ''
+            AND status.denied = TRUE
+        '''
+
+    elif step == 'all':
+        conditions = ''
+
+    if query:
+        query_sql = "plainto_tsquery('english', '{0}') @@ to_tsvector(app.first_name || ' ' || app.last_name || ' ' || address.ward)".format(query)
+
+        conditions += 'AND {0}'.format(query_sql)
+
+    return conditions

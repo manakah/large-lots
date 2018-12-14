@@ -1,0 +1,16 @@
+{% load lots_filters %}
+{% load staticfiles %}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>
+            {{header}}
+        </h2>
+        Select a pilot: &nbsp;
+        {% for pilot, human_name in pilot_info.items %}
+            <a href="{{request.path}}?{% query_transform request pilot=pilot %}" class="label {% ifequal request.GET.pilot pilot %}label-success{% else %}label-default{% endifequal %}">{{human_name}}</a>&nbsp;
+        {% endfor %}
+
+        <hr>
+    </div>
+</div>

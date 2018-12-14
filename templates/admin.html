@@ -8,25 +8,29 @@
 {% block title %}Application list{% endblock %}
 {% block content %}
 
+
+{% include 'partials/select_pilot.html' with header="Applications received" %}
+
 <div class="row">
     <div class="col-md-12">
         <div class="right-nav">
             {% for i in step_range %}
-                <a href="{% url 'applications' i %}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
+                <a href="{% url 'applications' i %}?pilot={{pilot}}">{% if step == i %}Step {% endif %}{{i}}</a>&nbsp;|
             {% endfor %}
-            <a href="{% url 'applications' '11' %}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
-            <a href="{% url 'applications' 'denied' %}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
-            <a href="{% url 'applications' 'all' %}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
+            <a href="{% url 'applications' '11' %}?pilot={{pilot}}"><i class="fa fa-usd" aria-hidden="true"></i> Sold</a>&nbsp;|
+            <a href="{% url 'applications' 'denied' %}?pilot={{pilot}}"><i class="fa fa-ban" aria-hidden="true"></i> Denied</a>&nbsp;|
+            <a href="{% url 'applications' 'all' %}?pilot={{pilot}}"><i class="fa fa-list" aria-hidden="true"></i> All applications</a>
         </div>
     </div>
 </div>
 
 <div class="row">
     <div class='col-md-8'>
-        <h3>
+        <h4><strong>
             Large Lots received {{ app_count }} applications
             <small><a href="{% url 'csv_dump' selected_pilot step %}"><i class='fa fa-fw fa-file-excel-o'></i> Export as CSV</a></small>
-        </h3>
+        </strong>
+        </h4>
         {% if step == 7 %}
             <h4>
                 Principal Profiles have been received for {{ ppf_count }} applications

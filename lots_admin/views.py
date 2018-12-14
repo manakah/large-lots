@@ -37,7 +37,7 @@ from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path, \
-    step_from_status, application_steps
+    step_from_status, application_steps, make_conditions
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
 from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm, DateTimeForm, \
@@ -88,15 +88,13 @@ def lots_admin_principal_profiles(request):
 
 @login_required(login_url='/lots-login/')
 def applications(request, step):
-# def lots_admin(request, pilot):
+    pilot_info = OrderedDict(reversed(sorted(settings.PILOT_INFO.items())))
+    pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
-    # step = request.GET.get('step', None)
-
-    # import pdb
-    # pdb.set_trace()
 
     # Add session variables for easy return to search results after step 3 and denials.
+    request.session['pilot'] = pilot
     request.session['page'] = page
     request.session['query'] = query
 
@@ -129,40 +127,10 @@ def applications(request, step):
         ON status.lot_id = lot.pin
         LEFT JOIN lots_admin_address AS address
         ON lot.address_id = address.id
+        WHERE pilot='{pilot}' 
         {conditions}
         {order_by}
     '''
-
-    if step.isdigit():
-        step = int(step)
-
-        conditions = '''
-            WHERE coalesce(deed_image, '') <> ''
-            AND step = {0}
-        '''.format(step)
-
-        if request.GET.get('eds', None):
-            conditions += 'AND app.eds_received = {} '.format(request.GET['eds'])
-
-        elif request.GET.get('ppf', None):
-            conditions += 'AND app.ppf_received = {} '.format(request.GET['ppf'])
-
-    elif step == 'denied':
-        conditions = '''
-            WHERE coalesce(deed_image, '') <> ''
-            AND status.denied = TRUE
-        '''
-
-    elif step == 'all':
-        conditions = ''
-
-    if query:
-        query_sql = "plainto_tsquery('english', '{0}') @@ to_tsvector(app.first_name || ' ' || app.last_name || ' ' || address.ward)".format(query)
-
-        if step == 'all':
-            conditions = 'WHERE {0}'.format(query_sql)
-        else:
-            conditions += 'AND {0}'.format(query_sql)
 
     order_by = request.GET.get('order_by', 'last_name')
     sort_order = request.GET.get('sort_order', 'asc')
@@ -170,7 +138,10 @@ def applications(request, step):
     if order_by == 'ward':
         order_by = 'ward::int'
 
-    sql = sql_fmt.format(conditions=conditions,
+    conditions = make_conditions(request, step)
+
+    sql = sql_fmt.format(pilot=pilot,
+                         conditions=conditions,
                          order_by='ORDER BY {0} {1}'.format(order_by, sort_order))
 
     with connection.cursor() as cursor:
@@ -220,7 +191,8 @@ def applications(request, step):
         'step': step,
         'step_range': step_range,
         'order_by': order_by,
-        'toggle_order': toggle_order
+        'toggle_order': toggle_order,
+        'pilot': pilot,
         })
 
 @login_required(login_url='/lots-login/')
@@ -1068,14 +1040,9 @@ def status_tally(request):
     pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
 
     total = ApplicationStatus.objects.filter(application__pilot=pilot)
-
-    
-
     steps = application_steps()
-
     steps_with_count = [(step, short_name, total.filter(current_step__step=step).count())
                 for step, short_name in steps]
-    
     denied = total.filter(denied=True).count()
     
     return render(request, 'status-tally.html', {
