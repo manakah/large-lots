@@ -53,11 +53,11 @@ class ApplicationUpdateForm(forms.ModelForm):
 
 class DateTimeForm(forms.Form):
     use_required_attribute = False # Do not let the browser validate: https://docs.djangoproject.com/en/2.1/ref/forms/api/#django.forms.Form.use_required_attribute
-    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
     date = forms.CharField(widget=forms.TextInput(attrs={'class':'email-datepicker form-control', 
                                                          'placeholder':'Select a date'}))
     time = forms.CharField(widget=forms.TextInput(attrs={'class':'email-timepicker form-control',
                                                          'placeholder':'Select a time'}))
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
 
 class EdsEmailForm(DateTimeForm):
     action = forms.CharField(widget=forms.HiddenInput(), initial='eds_form')
@@ -71,6 +71,7 @@ class EdsEmailForm(DateTimeForm):
         call_command('send_emails', 
                      '--eds_email', 
                      '-a {}'.format(self.user.id), # Make sure to hit the argument parser: https://docs.djangoproject.com/en/1.10/ref/django-admin/#django.core.management.call_command
+                     '--select_pilot={}'.format(self.select_pilot),
                      base_context=json.dumps(self.base_context),
                      stdout=self.out)
 
@@ -86,11 +87,12 @@ class FinalEdsEmailForm(DateTimeForm):
         call_command('send_emails', 
                      '--eds_final_email', 
                      '-a {}'.format(self.user.id), 
+                     '--select_pilot={}'.format(self.select_pilot),
                      base_context=json.dumps(self.base_context),
                      stdout=self.out)
 
 class EdsDenialEmailForm(forms.Form):
-    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial='pilot')
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
     action = forms.CharField(widget=forms.HiddenInput(), initial='eds_denial_form')
     modal_message = 'You are about to do the following: (1) send denial emails to applicants on Step 7 who failed to submit an EDS and/or PPF form, and (2) deny those applicants.'
 
@@ -98,6 +100,7 @@ class EdsDenialEmailForm(forms.Form):
         call_command('send_emails', 
                      '--eds_denial_email', 
                      '-a {}'.format(self.user.id), 
+                     '--select_pilot={}'.format(self.select_pilot),
                      base_context=json.dumps(self.base_context),
                      stdout=self.out)
 
@@ -123,7 +126,7 @@ class LotteryEmailForm(DateTimeForm):
                      stdout=self.out)
 
 class ClosingTimeEmail(forms.Form):
-    select_pilot = forms.CharField(widget=forms.HiddenInput())
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
     action = forms.CharField(widget=forms.HiddenInput(), initial='closing_time_form')
     modal_message = 'You are about to do the following: (1) notify applicants that the Chicago City Council granted approval for the sale of their lots, and (2) move applicants from Step 8 to Step 9.'
 
@@ -131,6 +134,7 @@ class ClosingTimeEmail(forms.Form):
         call_command('send_emails',
                      '--closing_time_email',
                      '-a {}'.format(self.user.id),
+                     '--select_pilot={}'.format(self.select_pilot),
                      stdout=self.out)
 
 
@@ -142,7 +146,7 @@ CHOICES = (('on_step', 'applicants on this step'),
 
 class CustomEmail(forms.Form):
     use_required_attribute = False
-    select_pilot = forms.CharField(widget=forms.HiddenInput())
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
     action = forms.CharField(
                 widget=forms.HiddenInput(), 
                 initial='custom_form')
@@ -157,7 +161,8 @@ class CustomEmail(forms.Form):
 
     def _call_command(self):
         call_command('send_emails', 
-                     '-a {}'.format(self.user.id), 
+                     '-a {}'.format(self.user.id),
+                     '--select_pilot={}'.format(self.select_pilot), 
                      custom_email=self.selection, 
                      steps=int(self.step),
                      every_status=self.every_status,

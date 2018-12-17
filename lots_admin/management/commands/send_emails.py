@@ -348,7 +348,6 @@ class Command(BaseCommand):
         lots_with_apps = defaultdict(list)
 
         for email, apps, statuses in self._select_applicants_on_step(6, filter='status.lottery_email_sent = FALSE'):
-            print(email, "!!!")
             for status in statuses:
                 app_data = (email, apps.get(applicationstatus=status), status)
                 lots_with_apps[status.lot.pin].append(app_data)

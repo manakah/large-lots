@@ -161,6 +161,7 @@
         <div>
         {% endif %}
             {{ custom_form.selection }}
+            {{ custom_form.select_pilot }}
             {% for error in custom_form.selection.errors %}
                 <span class="help-block">{{ error }}</span>
             {% endfor %}

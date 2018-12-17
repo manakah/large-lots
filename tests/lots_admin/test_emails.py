@@ -13,52 +13,55 @@ from lots_admin.models import Application, ApplicationStatus
 from lots_admin.management.commands.send_emails import Command, CannotSendEmailException
 
 
-# class TestEdsEmail:
-#     '''
-#     Test that we appropriately select and notify Rivers Cuomo
-#     and Karen Oh, and update their active applications in the
-#     database.
-#     '''
-#     @pytest.mark.django_db
-#     def test_command(self, email_db_setup, caplog):
-#         with caplog.at_level(logging.INFO):
-#             with patch.object(Command, '_send_email') as mock_send:
-#                 call_command('send_emails', '--eds_email', '-a 5')
+class TestEdsEmail:
+    '''
+    Test that we appropriately select and notify Rivers Cuomo
+    and Karen Oh, and update their active applications in the
+    database.
 
-#         self._assertion_helper(caplog)
+    Both are in pilot_6, i.e., the CURRENT_PILOT.
+    '''
+    @pytest.mark.django_db
+    def test_command(self, email_db_setup, caplog):
+        with caplog.at_level(logging.INFO):
+            with patch.object(Command, '_send_email') as mock_send:
+                call_command('send_emails', '--eds_email', '-a 5', '--select_pilot=pilot_6')
 
-#     @pytest.mark.django_db
-#     def test_form(self, email_db_setup, caplog, auth_client):
-#         with caplog.at_level(logging.INFO):
-#             url = reverse('send_emails')
+        self._assertion_helper(caplog)
 
-#             response = auth_client.post(url, {
-#                     'action': 'eds_form', 
-#                     'date': 'October 31, 2018',
-#                     'time': '9:00 AM',
-#                 })
+    @pytest.mark.django_db
+    def test_form(self, email_db_setup, caplog, auth_client):
+        with caplog.at_level(logging.INFO):
+            url = reverse('send_emails')
 
-#         self._assertion_helper(caplog)
+            response = auth_client.post(url, {
+                    'action': 'eds_form', 
+                    'date': 'October 31, 2018',
+                    'time': '9:00 AM',
+                    'select_pilot': CURRENT_PILOT 
+                })
 
-#     def _assertion_helper(self, caplog):
-#         eds_sent_applications = Application.objects.filter(eds_sent=True)
-#         # We started with one application where the EDS had been sent.
-#         # With the addition of two for Rivers and one for Karen, we
-#         # should see four applications where `eds_sent` = True.
-#         assert len(eds_sent_applications) == 4
-#         assert len(eds_sent_applications.filter(first_name='Rivers')) == 2
-#         assert len(eds_sent_applications.filter(first_name='Karen')) == 1
+        self._assertion_helper(caplog)
 
-#         lines = caplog.text.splitlines()
+    def _assertion_helper(self, caplog):
+        eds_sent_applications = Application.objects.filter(eds_sent=True)
+        # We started with one application where the EDS had been sent.
+        # With the addition of two for Rivers and one for Karen, we
+        # should see four applications where `eds_sent` = True.
+        assert len(eds_sent_applications) == 4
+        assert len(eds_sent_applications.filter(first_name='Rivers')) == 2
+        assert len(eds_sent_applications.filter(first_name='Karen')) == 1
 
-#         # Assert Rivers and Karen received one email apiece.
-#         assert len(lines) == 2
+        lines = caplog.text.splitlines()
+
+        # Assert Rivers and Karen received one email apiece.
+        assert len(lines) == 2
 
 
 # class TestEdsDenialEmail:
 #     '''
 #     Test that we (1) notify applicants with all non-denied applications on Step 7,
-#     and (2) deny those applicants.  
+#     and (2) deny those applicants. 
 #     '''
 #     applications_to_deny = []
     
@@ -90,6 +93,7 @@ from lots_admin.management.commands.send_emails import Command, CannotSendEmailE
 
 #             response = auth_client.post(url, {
 #                     'action': 'eds_denial_form', 
+#                     'select_pilot': CURRENT_PILOT 
 #                 })
 
 #         self._assertion_helper(caplog)
@@ -175,14 +179,24 @@ class TestLottoEmail:
     This test checks that the correct number of lotto emails go to the
     appropriate recipients.
     '''
-    @pytest.mark.parametrize('lot_count,applicant_count', [(1, 2), (2, 3)])
+    @pytest.mark.parametrize('lot_count,applicant_count,pilot', [
+                                (1, 1, CURRENT_PILOT),
+                                (2, 3, CURRENT_PILOT),
+                                (1, 1, 'pilot_7'),
+                                (2, 3, 'pilot_7'),
+                            ])
     @pytest.mark.django_db
-    def test_command(self, email_db_setup, lot_count, applicant_count, caplog):
+    def test_command(self, email_db_setup, lot_count, applicant_count, pilot, caplog):
         base_context = {'date': 'October 31, 2018', 'time': '9:00 AM'}
 
         with caplog.at_level(logging.INFO):
             with patch.object(Command, '_send_email') as mock_send:
-                call_command('send_emails', '-a 5', '--lotto_email', '-n {}'.format(lot_count), base_context=json.dumps(base_context))
+                call_command('send_emails', 
+                             '-a 5', 
+                             '--lotto_email', 
+                             '-n {}'.format(lot_count),
+                             '-p {}'. format(pilot), 
+                             base_context=json.dumps(base_context))
 
         self._assertion_helper(caplog, applicant_count)
 
