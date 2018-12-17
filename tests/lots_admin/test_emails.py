@@ -25,7 +25,10 @@ class TestEdsEmail:
     def test_command(self, email_db_setup, caplog):
         with caplog.at_level(logging.INFO):
             with patch.object(Command, '_send_email') as mock_send:
-                call_command('send_emails', '--eds_email', '-a 5', '--select_pilot=pilot_6')
+                call_command('send_emails', 
+                               '--eds_email', 
+                               '-a 5', 
+                               '--select_pilot=pilot_6')
 
         self._assertion_helper(caplog)
 
@@ -58,121 +61,137 @@ class TestEdsEmail:
         assert len(lines) == 2
 
 
-# class TestEdsDenialEmail:
-#     '''
-#     Test that we (1) notify applicants with all non-denied applications on Step 7,
-#     and (2) deny those applicants. 
-#     '''
-#     applications_to_deny = []
+class TestEdsDenialEmail:
+    '''
+    Test that we (1) notify applicants with all non-denied applications on Step 7,
+    and (2) deny those applicants.
+    '''
+    applications_to_deny = []
     
-#     @pytest.mark.django_db
-#     def test_command(self, email_db_setup, caplog):
-#         applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
-#                                           .filter(applicationstatus__denied=False)\
-#                                           .distinct()
+    @pytest.mark.django_db
+    def test_command(self, email_db_setup, caplog):
+        applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
+                                          .filter(applicationstatus__denied=False)\
+                                          .distinct()
 
-#         # Store active applications on step 7
-#         self.applications_to_deny = [app.id for app in applications]
+        # Store active applications on step 7
+        self.applications_to_deny = [app.id for app in applications]
 
-#         with caplog.at_level(logging.INFO):
-#             with patch.object(Command, '_send_email') as mock_send:
-#                 call_command('send_emails', '-a 5', '--eds_denial_email')
+        with caplog.at_level(logging.INFO):
+            with patch.object(Command, '_send_email') as mock_send:
+                call_command('send_emails', 
+                             '-a 5', 
+                             '--select_pilot={}'.format(CURRENT_PILOT),
+                             '--eds_denial_email')
 
-#         self._assertion_helper(caplog)
+        self._assertion_helper(caplog)
 
-#     def test_form(self, email_db_setup, caplog, auth_client):
-#         applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
-#                                           .filter(applicationstatus__denied=False)\
-#                                           .distinct()
+    def test_form(self, email_db_setup, caplog, auth_client):
+        applications = Application.objects.filter(applicationstatus__current_step_id__step=7)\
+                                          .filter(applicationstatus__denied=False)\
+                                          .distinct()
 
-#         # Store active applications on step 7
-#         self.applications_to_deny = [app.id for app in applications]
+        # Store active applications on step 7
+        self.applications_to_deny = [app.id for app in applications]
 
-#         with caplog.at_level(logging.INFO):
-#             url = reverse('send_emails')
+        with caplog.at_level(logging.INFO):
+            url = reverse('send_emails')
 
-#             response = auth_client.post(url, {
-#                     'action': 'eds_denial_form', 
-#                     'select_pilot': CURRENT_PILOT 
-#                 })
+            response = auth_client.post(url, {
+                    'action': 'eds_denial_form', 
+                    'select_pilot': CURRENT_PILOT 
+                })
 
-#         self._assertion_helper(caplog)
+        self._assertion_helper(caplog)
 
-#     def _assertion_helper(self, caplog):
-#         lines = caplog.text.splitlines()
+    def _assertion_helper(self, caplog):
+        lines = caplog.text.splitlines()
 
-#         for app_id in self.applications_to_deny:
-#             app = Application.objects.get(id=app_id)
+        for app_id in self.applications_to_deny:
+            app = Application.objects.get(id=app_id)
 
-#             log_count = len([line for line in lines if app.email in line])
+            log_count = len([line for line in lines if app.email in line])
 
-#             assert log_count == 1
+            assert log_count == 1
 
-#             # Assert no applications remain on step 7
-#             assert all([status.current_step != 7 for status in app.applicationstatus_set.all()])
+            # Assert no applications remain on step 7
+            assert all([status.current_step != 7 for status in app.applicationstatus_set.all()])
 
-#             # If current step is None, assert application was denied
-#             assert all([status.denied for status in app.applicationstatus_set.all() if not status.current_step])
+            # If current step is None, assert application was denied
+            assert all([status.denied for status in app.applicationstatus_set.all() if not status.current_step])
 
 
-# class TestCustomEmail:
-#     parameters = [('on_step', '6', Q(current_step__step=6)),
-#                   ('not_on_step', '8', Q(current_step__step__in=[i for i in range(12) if i != 8])),
-#                   ('on_steps_before', '8', Q(current_step__step__lt=8)),
-#                   ('on_steps_after', '6', Q(current_step__step__gt=6)),]
+class TestCustomEmail:
+    parameters = [
+                    ('on_step', '6', 'pilot_6', Q(current_step__step=6, application__pilot='pilot_6')),
+                    ('on_step', '6', 'pilot_7', Q(current_step__step=6, application__pilot='pilot_7')),
+                    ('not_on_step', '8', 'pilot_6', Q(current_step__step__in=[i for i in range(12) if i != 8],                              application__pilot='pilot_6')),
+                    ('not_on_step', '8', 'pilot_7', Q(current_step__step__in=[i for i in range(12) if i != 8],                              application__pilot='pilot_7')),
+                    ('on_steps_before', '8', 'pilot_6', Q(current_step__step__lt=8, application__pilot='pilot_6')),
+                    ('on_steps_before', '8', 'pilot_7', Q(current_step__step__lt=8, application__pilot='pilot_7')),
+                    ('on_steps_after', '6', 'pilot_6', Q(current_step__step__gt=6, application__pilot='pilot_6')),
+                  ]
 
-#     @pytest.mark.parametrize('custom,step,q_filter', parameters)
-#     @pytest.mark.django_db
-#     def test_command(self, email_db_setup, caplog, custom, step, q_filter):
-#         base_context = {'subject': 'test email', 'email_text': 'test text'}
+    @pytest.mark.parametrize('custom,step,pilot,q_filter', parameters)
+    @pytest.mark.django_db
+    def test_command(self, email_db_setup, caplog, custom, step, pilot, q_filter):
+        base_context = {'subject': 'test email', 'email_text': 'test text'}
 
-#         with caplog.at_level(logging.INFO):
-#             with patch.object(Command, '_send_email') as mock_send:
-#                 call_command('send_emails', '-a 5', custom_email=custom, steps=step, base_context=json.dumps(base_context))
+        with caplog.at_level(logging.INFO):
+            with patch.object(Command, '_send_email') as mock_send:
+                call_command('send_emails', 
+                             '-a 5', 
+                             '--select_pilot={}'.format(pilot),
+                             custom_email=custom, 
+                             steps=step, 
+                             base_context=json.dumps(base_context))
 
-#         self._assertion_helper(caplog, q_filter)
+        self._assertion_helper(caplog, pilot, q_filter)
 
-#     @pytest.mark.parametrize('custom,step,q_filter', parameters)
-#     @pytest.mark.django_db
-#     def test_form(self, email_db_setup, caplog, custom, step, q_filter, auth_client):
-#         with caplog.at_level(logging.INFO):
-#             url = reverse('send_emails')
+    @pytest.mark.parametrize('custom,step,pilot,q_filter', parameters)
+    @pytest.mark.django_db
+    def test_form(self, email_db_setup, caplog, custom, step, pilot, q_filter, auth_client):
+        with caplog.at_level(logging.INFO):
+            url = reverse('send_emails')
 
-#             response = auth_client.post(url, {
-#                     'action': 'custom_form',
-#                     'step': step,
-#                     'every_status': False,
-#                     'selection': custom,
-#                     'subject': 'an email subject line',
-#                     'text': 'a custom email for you' 
-#                 })
+            response = auth_client.post(url, {
+                    'action': 'custom_form',
+                    'step': step,
+                    'every_status': False,
+                    'selection': custom,
+                    'subject': 'an email subject line',
+                    'text': 'a custom email for you',
+                    'select_pilot': pilot, 
+                })
 
-#         self._assertion_helper(caplog, q_filter)
+        self._assertion_helper(caplog, pilot, q_filter)
 
-#     def _assertion_helper(self, caplog, q_filter):
-#         lines = caplog.text.splitlines()
+    def _assertion_helper(self, caplog, pilot, q_filter):
+        lines = caplog.text.splitlines()
 
-#         statuses = ApplicationStatus.objects.none()
 
-#         for line in lines:
-#             # Parse the log entry.
-#             email = line.split('|')[4].strip()
-#             email = email
+        statuses = ApplicationStatus.objects.none()
 
-#             csv_pins = line.split('|')[-1]
-#             pins = [int(s) for s in csv_pins.split(',')]
+        for line in lines:
+            # Parse the log entry.
+            email = line.split('|')[4].strip()
+            email = email
 
-#             statuses |= ApplicationStatus.objects.filter(application__email=email,
-#                                                          lot__pin__in=pins)
+            csv_pins = line.split('|')[-1]
+            pins = [int(s) for s in csv_pins.split(',')]
 
-#         # Assert all statuses meet the given step criteria.
-#         assert statuses.count() == statuses.filter(q_filter).count()
+            statuses |= ApplicationStatus.objects.filter(application__email=email,
+                                                         lot__pin__in=pins,
+                                                         application__pilot=pilot)
 
-#         # Assert an email was logged for every distinct email address with a
-#         # qualifying status.
-#         assert len(lines) == Application.objects.filter(applicationstatus__in=statuses)\
-#                                                 .distinct('email')\
-#                                                 .count()
+        # Assert all statuses meet the given step criteria.
+        assert statuses.count() == statuses.filter(q_filter).count()
+
+        # Assert an email was logged for every distinct email address with a
+        # qualifying status.
+        assert len(lines) == Application.objects.filter(applicationstatus__in=statuses, pilot=pilot)\
+                                                .distinct('email')\
+                                                .count()
 
 class TestLottoEmail:
     '''
@@ -201,9 +220,9 @@ class TestLottoEmail:
         self._assertion_helper(caplog, applicant_count)
 
     @pytest.mark.parametrize('lot_count,applicant_count,pilot', [
-                                (1, 1, CURRENT_PILOT),
+                                (1, 2, CURRENT_PILOT),
                                 (2, 3, CURRENT_PILOT),
-                                (1, 1, 'pilot_7'),
+                                (1, 2, 'pilot_7'),
                                 (2, 3, 'pilot_7'),
                             ])
     @pytest.mark.django_db
@@ -217,7 +236,7 @@ class TestLottoEmail:
                     'time': '9:00 AM', 
                     'number': lot_count,
                     'location': 'City Hall',
-                    'select_pilot': CURRENT_PILOT                  
+                    'select_pilot': pilot,                  
                 })
 
         self._assertion_helper(caplog, applicant_count)
