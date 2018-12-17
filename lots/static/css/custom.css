@@ -1,3 +1,8 @@
+:root {
+  --green-color: #389250;
+  --purple-color: #A1285D;
+}
+
 body {
   font-size: 18px;
 }
@@ -8,11 +13,9 @@ a, a:hover, .btn-link, .btn-link:hover {
 
 .lead { font-size: 21px; }
 
-:root {
-  --green-color: #389250;
-  --purple-color: #A1285D;
+.bg-white {
+    background-color: #fff;
 }
-
 
 /* Index */
 .panel-counter .panel-heading {
@@ -157,10 +160,6 @@ a.dropdown-toggle:hover {
 }
 
 /* Styles for application */
-#print-page:hover { background-color: #eee; }
-
-#print-page { color: #555; }
-
 .well-success {
     background-color: #DFF5E6;
     border-color: #DFF5E6;

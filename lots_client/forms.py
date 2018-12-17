@@ -91,6 +91,9 @@ class ApplicationForm(forms.Form, DeedImageMixin):
         },
         required=False
     )
+    is_resident = forms.BooleanField(
+        error_messages={'required': 'Verify that you are a resident of the block by checking the box'},
+        label="Are you a resident of the block?")
     owned_address = forms.CharField(
         error_messages={
             'required': 'Provide the address of the building you own'

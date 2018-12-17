@@ -282,6 +282,7 @@ def apply(request):
 
                     app_status = ApplicationStatus.objects.create(lot=lot,
                                                                   application=app,
+                                                                  is_resident=form.cleaned_data['is_resident'],
                                                                   current_step=app_step)
 
                     app_status.save()
