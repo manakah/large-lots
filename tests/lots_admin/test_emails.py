@@ -1,15 +1,16 @@
-# import json
-# import logging
-# import pytest
-# from unittest.mock import patch
-# import sys
+import json
+import logging
+import pytest
+from unittest.mock import patch
+import sys
 
-# from django.core.management import call_command
-# from django.db.models import Q
-# from django.core.urlresolvers import reverse
+from django.core.management import call_command
+from django.db.models import Q
+from django.core.urlresolvers import reverse
+from ..test_config import CURRENT_PILOT
 
-# from lots_admin.models import Application, ApplicationStatus
-# from lots_admin.management.commands.send_emails import Command, CannotSendEmailException
+from lots_admin.models import Application, ApplicationStatus
+from lots_admin.management.commands.send_emails import Command, CannotSendEmailException
 
 
 # class TestEdsEmail:
@@ -169,44 +170,50 @@
 #                                                 .distinct('email')\
 #                                                 .count()
 
-# class TestLottoEmail:
-#     '''
-#     This test checks that the correct number of lotto emails go to the
-#     appropriate recipients.
-#     '''
-#     @pytest.mark.parametrize('lot_count,applicant_count', [(1, 2), (2, 3)])
-#     @pytest.mark.django_db
-#     def test_command(self, email_db_setup, lot_count, applicant_count, caplog):
-#         base_context = {'date': 'October 31, 2018', 'time': '9:00 AM'}
+class TestLottoEmail:
+    '''
+    This test checks that the correct number of lotto emails go to the
+    appropriate recipients.
+    '''
+    @pytest.mark.parametrize('lot_count,applicant_count', [(1, 2), (2, 3)])
+    @pytest.mark.django_db
+    def test_command(self, email_db_setup, lot_count, applicant_count, caplog):
+        base_context = {'date': 'October 31, 2018', 'time': '9:00 AM'}
 
-#         with caplog.at_level(logging.INFO):
-#             with patch.object(Command, '_send_email') as mock_send:
-#                 call_command('send_emails', '-a 5', '--lotto_email', '-n {}'.format(lot_count), base_context=json.dumps(base_context))
+        with caplog.at_level(logging.INFO):
+            with patch.object(Command, '_send_email') as mock_send:
+                call_command('send_emails', '-a 5', '--lotto_email', '-n {}'.format(lot_count), base_context=json.dumps(base_context))
 
-#         self._assertion_helper(caplog, applicant_count)
+        self._assertion_helper(caplog, applicant_count)
 
-#     @pytest.mark.parametrize('lot_count,applicant_count', [(1, 2), (2, 3)])
-#     @pytest.mark.django_db
-#     def test_command(self, email_db_setup, auth_client, lot_count, applicant_count, caplog):
-#         with caplog.at_level(logging.INFO):
-#             url = reverse('send_emails')
+    @pytest.mark.parametrize('lot_count,applicant_count,pilot', [
+                                (1, 1, CURRENT_PILOT),
+                                (2, 3, CURRENT_PILOT),
+                                (1, 1, 'pilot_7'),
+                                (2, 3, 'pilot_7'),
+                            ])
+    @pytest.mark.django_db
+    def test_command(self, email_db_setup, auth_client, lot_count, applicant_count, pilot, caplog):
+        with caplog.at_level(logging.INFO):
+            url = reverse('send_emails')
 
-#             response = auth_client.post(url, {
-#                     'action': 'lottery_form',
-#                     'date': 'October 31, 2018',
-#                     'time': '9:00 AM', 
-#                     'number': lot_count,
-#                     'location': 'City Hall'                  
-#                 })
+            response = auth_client.post(url, {
+                    'action': 'lottery_form',
+                    'date': 'October 31, 2018',
+                    'time': '9:00 AM', 
+                    'number': lot_count,
+                    'location': 'City Hall',
+                    'select_pilot': CURRENT_PILOT                  
+                })
 
-#         self._assertion_helper(caplog, applicant_count)
+        self._assertion_helper(caplog, applicant_count)
 
-#     def _assertion_helper(self, caplog, applicant_count):
-#         lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
+    def _assertion_helper(self, caplog, applicant_count):
+        lotto_sent_applications = ApplicationStatus.objects.filter(lottery_email_sent=True)
 
-#         assert len(lotto_sent_applications) == applicant_count
+        assert len(lotto_sent_applications) == applicant_count
 
-#         lines = caplog.text.splitlines()
+        lines = caplog.text.splitlines()
 
-#         assert all(['October 31, 2018' in line for line in lines])
-#         assert len([line for line in lines if '9:00 AM' in line]) == applicant_count
+        assert all(['October 31, 2018' in line for line in lines])
+        assert len([line for line in lines if '9:00 AM' in line]) == applicant_count

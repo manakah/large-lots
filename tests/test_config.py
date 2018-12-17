@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-CURRENT_PILOT = "pilot_6_dev"
+CURRENT_PILOT = "pilot_6"
 
 timezone = pytz.timezone('America/Chicago')
 

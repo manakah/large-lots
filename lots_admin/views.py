@@ -1150,9 +1150,6 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         form = form_class(request.POST)
 
         if form.is_valid():
-            select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
-            form.cleaned_data['select_pilot'] = select_pilot
-
             return self.form_valid(form)
         else:
             return self.render_to_response(self.get_context_data(form=form))
@@ -1160,6 +1157,10 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
     def form_valid(self, form):
         out = StringIO()
         base_context = {}
+        # The form sets the initial value of `select_pilot` to the CURRENT_PILOT. 
+        # However, the user may specify a different pilot: set it here. 
+        select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
+        form.select_pilot = select_pilot
 
         if self.request.POST.get('action') == 'custom_form':
             form.step = form.cleaned_data['step']
@@ -1174,7 +1175,6 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         form.base_context = base_context
         form.user = self.request.user
         form.out = out
-        form.select_pilot = form.cleaned_data['select_pilot']
 
         if 'number' in form.cleaned_data:
             form.number = form.cleaned_data['number']

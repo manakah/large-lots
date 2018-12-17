@@ -53,7 +53,7 @@ class ApplicationUpdateForm(forms.ModelForm):
 
 class DateTimeForm(forms.Form):
     use_required_attribute = False # Do not let the browser validate: https://docs.djangoproject.com/en/2.1/ref/forms/api/#django.forms.Form.use_required_attribute
-    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial='pilot')
+    select_pilot = forms.CharField(widget=forms.HiddenInput(), initial=settings.CURRENT_PILOT)
     date = forms.CharField(widget=forms.TextInput(attrs={'class':'email-datepicker form-control', 
                                                          'placeholder':'Select a date'}))
     time = forms.CharField(widget=forms.TextInput(attrs={'class':'email-timepicker form-control',
