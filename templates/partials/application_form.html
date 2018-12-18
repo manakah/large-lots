@@ -57,14 +57,13 @@
             {% endif %}
                 <div>
                     {% if form.is_resident.errors %}
-                    {% for error in form.is_resident.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                    {% else %}
-                        <i class="fa fa-user"></i> Are you a resident of this block? <span class="red">*</span>
+                      {% for error in form.is_resident.errors %}
+                          <span class="help-block">{{ error }}</span>
+                      {% endfor %}
                     {% endif %}
-                    <input id="id_is_resident_1" name="is_resident" type="radio" value="True" required="" {% if is_resident == 'True' and request.POST %}checked="checked"{% endif %}> Yes
-                    <input id="id_is_resident_0" name="is_resident" type="radio" value="False" required="" {% if is_resident == 'False' and request.POST %}checked="checked"{% endif %}> No
+                        <i class="fa fa-user"></i> Are you a resident of this block? <span class="red">*</span>
+                    <input id="id_is_resident_1" name="is_resident" type="radio" value="True" {% if is_resident == 'True' and request.POST %}checked="checked"{% endif %}> Yes
+                    <input id="id_is_resident_0" name="is_resident" type="radio" value="False" {% if is_resident == 'False' and request.POST %}checked="checked"{% endif %}> No
                 </div>
             </div>
 

@@ -91,9 +91,14 @@ class ApplicationForm(forms.Form, DeedImageMixin):
         },
         required=False
     )
-    is_resident = forms.TypedChoiceField(coerce=lambda x: x =='True', 
-                                         choices=((False, 'No'), (True, 'Yes')), 
-                                         widget=forms.RadioSelect)
+    is_resident = forms.TypedChoiceField(
+        coerce=lambda x: x =='True', 
+        choices=((False, 'No'), (True, 'Yes')), 
+        widget=forms.RadioSelect,
+        error_messages={
+            'required': 'Please indicate if you are a resident of this block'},
+        label="Resident",
+    )
     owned_address = forms.CharField(
         error_messages={
             'required': 'Provide the address of the building you own'
