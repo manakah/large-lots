@@ -13,10 +13,6 @@ a, a:hover, .btn-link, .btn-link:hover {
 
 .lead { font-size: 21px; }
 
-.bg-white {
-    background-color: #fff;
-}
-
 /* Index */
 .panel-counter .panel-heading {
     background-color: var(--purple-color);
@@ -184,6 +180,10 @@ div#organization-group .input-group-addon {
 
 .lot_instructions {
     color: #959595 !important;
+}
+
+input#id_is_resident_0, input#id_is_resident_1 {
+    margin-left: 12px;
 }
 
 

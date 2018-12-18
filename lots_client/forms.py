@@ -91,9 +91,9 @@ class ApplicationForm(forms.Form, DeedImageMixin):
         },
         required=False
     )
-    is_resident = forms.BooleanField(
-        required=False,
-        label="Are you a resident of the block?")
+    is_resident = forms.TypedChoiceField(coerce=lambda x: x =='True', 
+                                         choices=((False, 'No'), (True, 'Yes')), 
+                                         widget=forms.RadioSelect)
     owned_address = forms.CharField(
         error_messages={
             'required': 'Provide the address of the building you own'
