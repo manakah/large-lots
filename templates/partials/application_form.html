@@ -48,22 +48,11 @@
             <h2>2. Proof of ownership on the block</h2>
             <p><span class="red">*</span>Required</p>
 
-
-            {% if form.is_resident.errors %}
-            <div class="well bg-white form-group has-error">
-            {% else %}
             <div class="well bg-white form-group">
-            {% endif %}
               <div class="checkbox">
                 <label>
-                  <input id="id_is_resident" name="is_resident" type="checkbox" {% if terms %}checked=true{% endif %}/>
-                    {% if form.is_resident.errors %}
-                    {% for error in form.is_resident.errors %}
-                        <span class="help-block">{{ error }}</span>
-                    {% endfor %}
-                    {% else %}
-                    Are you a resident of the block? If yes, check this box.<span class="red">*</span>
-                    {% endif %}
+                  <input id="id_is_resident" name="is_resident" type="checkbox" {% if is_resident %}checked=true{% endif %}/>
+                    Are you a resident of the block? If yes, check this box.
                 </label>
               </div>
             </div>

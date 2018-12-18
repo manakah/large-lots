@@ -319,6 +319,7 @@ def apply(request):
             context['lot_2_address'] = form['lot_2_address'].value()
             context['lot_2_pin'] = form['lot_2_pin'].value()
             context['lot_2_use'] = form['lot_2_use'].value()
+            context['is_resident'] = form['is_resident'].value()
             context['owned_address'] = form['owned_address'].value()
             context['owned_pin'] = form['owned_pin'].value()
             context['deed_image'] = form['deed_image'].value()
