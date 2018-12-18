@@ -42,7 +42,7 @@ urlpatterns = [
     # admin endpoints 
     url(r'^lots-login/$', lots_login, name='lots_login'),
     url(r'^logout/$', lots_logout, name='logout'),
-    url(r'^django-admin/', include(admin.site.urls)),,
+    url(r'^django-admin/', include(admin.site.urls)),
     url(r'^applications/(?P<step>\S+)/$', applications, name='applications'),
     url(r'^status-tally/$', status_tally, name='status_tally'),
     url(r'^csv-dump/(?P<pilot>\S+)/(?P<status>\S+)/(?P<content>\S+)$', csv_dump, name='csv_dump'),
