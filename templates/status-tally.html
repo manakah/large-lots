@@ -17,16 +17,16 @@
 
             {% for step, short_name, count in steps_with_count %}
                 <tr>
-                    <td><a href="{% url 'applications' step %}?{% query_transform request pilot=request.GET.pilot %}">Step {{step}}: {{short_name}}</a></td>
+                    <td><a href="{% url 'applications' step %}?{% query_transform request pilot=select_pilot %}">Step {{step}}: {{short_name}}</a></td>
                     <td>{{ count }}</td>
                 </tr>
             {% endfor %}
                 <tr>
-                    <td><a href="{% url 'applications' 'denied' %}?{% query_transform request pilot=request.GET.pilot %}">Denied</a></td>
+                    <td><a href="{% url 'applications' 'denied' %}?{% query_transform request pilot=select_pilot %}">Denied</a></td>
                     <td>{{ denied }}</td>
                 </tr>
                 <tr class="table-info">
-                    <td><a href="{% url 'applications' 'all' %}?{% query_transform request pilot=request.GET.pilot %}">Total</a></td>
+                    <td><a href="{% url 'applications' 'all' %}?{% query_transform request pilot=select_pilot %}">Total</a></td>
                     <td>{{ total|length }}</td>
                 </tr>
 

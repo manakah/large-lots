@@ -143,7 +143,7 @@ def applications(request, step):
     if order_by == 'ward':
         order_by = 'ward::int'
 
-    conditions = make_conditions(request, step)
+    conditions, step = make_conditions(request, step)
 
     sql = sql_fmt.format(pilot=select_pilot,
                          conditions=conditions,

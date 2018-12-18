@@ -43,7 +43,7 @@ def send_denial_email(request, application_status):
     msg.send()
 
 def create_redirect_path(request):
-    params = {k: request.session[k] for k in ('page', 'query') if request.session.get(k)}
+    params = {k: request.session[k] for k in ('page', 'query', 'pilot') if request.session.get(k)}
 
     return '?' + urllib.parse.urlencode(params)
 
@@ -104,7 +104,7 @@ def make_conditions(request, step):
         if request.GET.get('eds', None):
             conditions += 'AND app.eds_received = {} '.format(request.GET['eds'])
 
-        elif request.GET.get('ppf', None):
+        if request.GET.get('ppf', None):
             conditions += 'AND app.ppf_received = {} '.format(request.GET['ppf'])
 
     elif step == 'denied':
@@ -121,4 +121,4 @@ def make_conditions(request, step):
 
         conditions += 'AND {0}'.format(query_sql)
 
-    return conditions
+    return conditions, step

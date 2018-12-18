@@ -57,19 +57,19 @@
         {% if step == 7 %}
             <small>
                 Filter by: &nbsp;
-                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='true' %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='true' pilot=select_pilot %}" class="label {% ifequal request.GET.ppf 'true' %}label-success{% else %}label-default{% endifequal %}">
                     PPF submitted
                 </a>&nbsp;
-                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='false' %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request ppf='false' pilot=select_pilot %}" class="label {% ifequal request.GET.ppf 'false' %}label-success{% else %}label-default{% endifequal %}">
                     PPF not submitted
                 </a>&nbsp;
-                <a href="{% url 'applications' '7' %}?{% query_transform request eds='true' %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request eds='true' pilot=select_pilot %}" class="label {% ifequal request.GET.eds 'true' %}label-success{% else %}label-default{% endifequal %}">
                     EDS submitted
                 </a>&nbsp;
-                <a href="{% url 'applications' '7' %}?{% query_transform request eds='false' %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
+                <a href="{% url 'applications' '7' %}?{% query_transform request eds='false' pilot=select_pilot %}" class="label {% ifequal request.GET.eds 'false' %}label-success{% else %}label-default{% endifequal %}">
                     EDS not submitted
                 </a>&nbsp;
-                <a href="{% url 'applications' '7' %}">
+                <a href="{% url 'applications' '7' %}?pilot={{select_pilot}}">
                     <i class="fa fa-fw fa-times" aria-hidden="true"></i>
                     Clear filters
                 </a>
