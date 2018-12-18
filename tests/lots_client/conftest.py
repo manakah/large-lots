@@ -47,6 +47,7 @@ def application_blob(address, mock_file, mocker):
         'how_heard': '',
         'deed_image': mock_file,
         'terms': True,
+        'is_resident': True,
     }
 
 @pytest.fixture

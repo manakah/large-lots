@@ -45,8 +45,29 @@
     <div class='row'>
       <div class='col-md-12'>
         <div class="well" id="ownership">
-          <h2>2. Proof of ownership on the block</h2>
-          <p><span class="red">*</span>Required</p>
+            <h2>2. Proof of ownership on the block</h2>
+            <p><span class="red">*</span>Required</p>
+
+            <br>
+
+            {% if form.is_resident.errors %}
+            <div class="form-group has-error">
+            {% else %}
+            <div class="form-group">
+            {% endif %}
+                <div>
+                    {% if form.is_resident.errors %}
+                      {% for error in form.is_resident.errors %}
+                          <span class="help-block">{{ error }}</span>
+                      {% endfor %}
+                    {% endif %}
+                        <i class="fa fa-user"></i> Are you a resident of this block? <span class="red">*</span>
+                    <input id="id_is_resident_1" name="is_resident" type="radio" value="True" {% if is_resident == 'True' and request.POST %}checked="checked"{% endif %}> Yes
+                    <input id="id_is_resident_0" name="is_resident" type="radio" value="False" {% if is_resident == 'False' and request.POST %}checked="checked"{% endif %}> No
+                </div>
+            </div>
+
+            <hr>
 
             <p>You'll need to <strong>upload a copy of your recorded deed</strong> to prove that you own property on the same block as the lot(s) you are applying to buy. You do not need to be a resident of the deeded property, but you must be its owner.</p>
             <p>The name on your application and the address entered here must exactly match the name and address on your deed.</p>
@@ -131,7 +152,6 @@
               {% endfor %}
               <p class="help-block">Your deed must be in PDF or image (JPG, PNG) format. Max size 5mb.</p>
               </div>
-
           </div>
         </div>
       </div>

@@ -115,6 +115,7 @@ def application_status(db, lot, app_steps):
                 'lottery': False,
                 'application_id': application.id,
                 'current_step_id': app_step.id,
+                'is_resident': True,
             }
 
             application_status_info.update(kwargs)

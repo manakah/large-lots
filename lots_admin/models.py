@@ -98,6 +98,7 @@ class ApplicationStatus(models.Model):
     denied = models.BooleanField(default=False)
     application = models.ForeignKey('Application', blank=True, null=True)
     lot = models.ForeignKey('Lot', blank=True, null=True)
+    is_resident = models.NullBooleanField(null=True)
     current_step = models.ForeignKey('ApplicationStep', blank=True, null=True)
     lottery = models.BooleanField(default=False)
     lottery_email_sent = models.BooleanField(default=False)
