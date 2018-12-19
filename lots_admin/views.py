@@ -36,7 +36,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from .utils import create_email_msg, send_denial_email, create_redirect_path, \
+from .utils import create_email_msg, send_denial_email, create_redirect_path_from_session, \
     step_from_status, application_steps, make_conditions
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
@@ -98,7 +98,18 @@ def applications(request, step):
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
 
-    # Add session variables for easy return to search results after step 3 and denials.
+    '''
+    The review process has three moments, in which it redirects to the `applications` view 
+    and maintains the query params from when the user left the page. Those moments are in the following views:
+    (1) deny_submit
+    (2) location_check_submit
+    (3) multiple_location_check_submit
+
+    To accomplish this, we store the query params in the sessions variable.
+    Then, the views use a redirect link that includes the session variables.
+    Note: a utility function (`create_redirect_path_from_session`) creates the link, and it should be updated, 
+    whenever new query params need to be accounted for.
+    '''
     request.session['pilot'] = select_pilot
     request.session['page'] = page
     request.session['query'] = query
@@ -482,7 +493,7 @@ def deny_submit(request, application_id):
             advance_to_step('letter', last_application_status)
             Review.objects.create(reviewer=request.user, email_sent=False, application=last_application_status, step_completed=4)
 
-    redirect_path = create_redirect_path(request)
+    redirect_path = create_redirect_path_from_session(request)
 
     return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 
@@ -651,7 +662,7 @@ def location_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block')
-        redirect_path = create_redirect_path(request)
+        redirect_path = create_redirect_path_from_session(request)
 
        # Check if application has already been denied.
         if application_status.current_step == None:
@@ -768,7 +779,7 @@ def multiple_location_check_submit(request, application_id):
             request.session['email_error_app_ids'] = email_error_app_ids
             return HttpResponseRedirect(reverse('email_error'))
 
-        redirect_path = create_redirect_path(request)
+        redirect_path = create_redirect_path_from_session(request)
 
         return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 

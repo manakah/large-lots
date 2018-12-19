@@ -42,7 +42,7 @@ def send_denial_email(request, application_status):
 
     msg.send()
 
-def create_redirect_path(request):
+def create_redirect_path_from_session(request):
     params = {k: request.session[k] for k in ('page', 'query', 'pilot') if request.session.get(k)}
 
     return '?' + urllib.parse.urlencode(params)
