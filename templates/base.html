@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load lots_filters %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -67,10 +68,10 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-user" aria-hidden="true"></i> Admin <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="{% url 'applications' 'all' %}">Applications received</a></li>
-                  <li><a class="dropdown-item" href="{% url 'status_tally' %}">Status tally</a></li>
-                  <li><a class="dropdown-item" href="{% url 'lots_admin_principal_profiles' %}">Principal profiles</a></li>
-                  <li><a class="dropdown-item" href="{% url 'send_emails' %}">Send emails</a></li>
+                  <li><a class="dropdown-item" href="{% url 'applications' 'all' %}{% if select_pilot %}?{% query_transform request pilot=select_pilot %}{% endif %}">Applications received</a></li>
+                  <li><a class="dropdown-item" href="{% url 'status_tally' %}{% if select_pilot %}?{% query_transform request pilot=select_pilot %}{% endif %}">Status tally</a></li>
+                  <li><a class="dropdown-item" href="{% url 'lots_admin_principal_profiles' %}{% if select_pilot %}?{% query_transform request pilot=select_pilot %}{% endif %}">Principal profiles</a></li>
+                  <li><a class="dropdown-item" href="{% url 'send_emails' %}{% if select_pilot %}?{% query_transform request pilot=select_pilot %}{% endif %}">Send emails</a></li>
                   <li role="separator" class="divider"></li>
                   <li><a href="{% url 'logout' %}"><i class='fa fa-sign-out'></i> Logout</a></li>
               </ul>
