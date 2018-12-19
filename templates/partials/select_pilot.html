@@ -3,14 +3,32 @@
 
 <div class="row">
     <div class="col-md-12">
-        <h2>
-            {{header}}
-        </h2>
-        Select a pilot: &nbsp;
-        {% for pilot, human_name in pilot_info.items %}
-            <a href="{{request.path}}?{% query_transform request pilot=pilot %}" class="label {% ifequal select_pilot pilot %}label-success{% else %}label-default{% endifequal %}">{{human_name}}</a>&nbsp;
-        {% endfor %}
 
-        <hr>
+
+        <div>
+        <h2 class="inline">
+        
+            {{header}} for <strong>{{ pilot_info|get_value:select_pilot }}</strong>
+
+        </h2>
+        <div class="dropdown inline">
+          <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownPilotMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+            Select a pilot
+            <span class="caret"></span>
+          </button>
+
+          <ul class="dropdown-menu" aria-labelledby="dropdownPilotMenu">
+            {% for pilot, human_name in pilot_info.items %}
+                    <li><a href="{{request.path}}?{% query_transform request pilot=pilot %}">{% ifequal select_pilot pilot %}<i class="fa fa-check-circle"></i>&nbsp;{% endifequal %}{{human_name}}</a></li>
+            {% endfor %}
+          </ul>
+
+        </div>
+        
+    </div>
+
+
     </div>
 </div>
+
+<hr>

@@ -13,6 +13,10 @@ a, a:hover, .btn-link, .btn-link:hover {
   --purple-color: #A1285D;
 }
 
+.inline {
+    display: inline-block;
+}
+
 
 /* Index */
 .panel-counter .panel-heading {
@@ -154,6 +158,11 @@ a.dropdown-toggle:hover {
 
 .label-link {
     text-decoration: none !important;
+}
+
+button#dropdownPilotMenu {
+    margin-bottom: 10px; /* to vertically align with h2 */
+    margin-left: 15px;
 }
 
 /* Styles for application */
