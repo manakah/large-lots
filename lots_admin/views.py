@@ -94,7 +94,6 @@ def lots_admin_principal_profiles(request):
 
 @login_required(login_url='/lots-login/')
 def applications(request, step):
-    default_pilot_to_render()
     select_pilot = request.GET.get('pilot', default_pilot_to_render())
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
