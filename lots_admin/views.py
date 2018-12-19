@@ -2,20 +2,20 @@ from datetime import datetime
 import csv
 import json
 import re
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from smtplib import SMTPException
 from io import StringIO
 
 from operator import __or__ as OR
 from functools import reduce
 from datetime import datetime
-from django import forms
 
 from esridump.dumper import EsriDumper
 from esridump.errors import EsriDownloadError
 
 from raven.contrib.django.raven_compat.models import client
 
+from django import forms
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import connection, connections
 from django.shortcuts import render
@@ -36,8 +36,8 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
-from .utils import create_email_msg, send_denial_email, create_redirect_path, \
-    step_from_status
+from .utils import create_email_msg, send_denial_email, create_redirect_path_from_session, \
+    step_from_status, application_steps, make_conditions, default_pilot_to_render
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
 from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm, DateTimeForm, \
@@ -50,7 +50,7 @@ def lots_login(request):
             user = form.get_user()
             if user is not None:
                 login(request, user)
-                return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                return HttpResponseRedirect(reverse('applications', args=['all']))
     else:
         form = AuthenticationForm()
     return render(request, 'lots_login.html', {'form': form})
@@ -61,7 +61,10 @@ def lots_logout(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
-    applications = Application.objects.filter(principalprofile__isnull=False).distinct()
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
+    applications = Application.objects \
+                              .filter(principalprofile__isnull=False, pilot=select_pilot) \
+                              .distinct()
 
     sql = '''
         SELECT
@@ -69,8 +72,11 @@ def lots_admin_principal_profiles(request):
           SUM(CASE WHEN (exported_at is null) THEN 1 ELSE 0 END) AS not_exported,
           MAX(exported_at) AS last_export,
           MAX(deleted_at) AS last_delete
-        FROM lots_admin_principalprofile
-    '''
+        FROM lots_admin_principalprofile as profile
+        JOIN lots_admin_application as app
+        ON profile.application_id=app.id
+        WHERE app.pilot='{pilot}'
+    '''.format(pilot=select_pilot)
 
     with connection.cursor() as cursor:
         cursor.execute(sql)
@@ -78,7 +84,7 @@ def lots_admin_principal_profiles(request):
         available, not_exported, last_export, last_delete = ppf_meta
 
     return render(request, 'admin-principal-profiles.html', {
-            'selected_pilot': settings.CURRENT_PILOT,
+            'select_pilot': select_pilot,
             'application_count': len(applications),
             'available_count': available,
             'not_exported_count': not_exported,
@@ -87,11 +93,24 @@ def lots_admin_principal_profiles(request):
         })
 
 @login_required(login_url='/lots-login/')
-def lots_admin(request, step):
+def applications(request, step):
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
 
-    # Add session variables for easy return to search results after step 3 and denials.
+    '''
+    The review process has three moments, in which it redirects to the `applications` view 
+    and maintains the query params from when the user left the page. Those moments are in the following views:
+    (1) deny_submit
+    (2) location_check_submit
+    (3) multiple_location_check_submit
+
+    To accomplish this, we store the query params in the sessions variable.
+    Then, the views use a redirect link that includes the session variables.
+    Note: a utility function (`create_redirect_path_from_session`) creates the link, and it should be updated, 
+    whenever new query params need to be accounted for.
+    '''
+    request.session['pilot'] = select_pilot
     request.session['page'] = page
     request.session['query'] = query
 
@@ -124,40 +143,10 @@ def lots_admin(request, step):
         ON status.lot_id = lot.pin
         LEFT JOIN lots_admin_address AS address
         ON lot.address_id = address.id
+        WHERE pilot='{pilot}' 
         {conditions}
         {order_by}
     '''
-
-    if step.isdigit():
-        step = int(step)
-
-        conditions = '''
-            WHERE coalesce(deed_image, '') <> ''
-            AND step = {0}
-        '''.format(step)
-
-        if request.GET.get('eds', None):
-            conditions += 'AND app.eds_received = {} '.format(request.GET['eds'])
-
-        elif request.GET.get('ppf', None):
-            conditions += 'AND app.ppf_received = {} '.format(request.GET['ppf'])
-
-    elif step == 'denied':
-        conditions = '''
-            WHERE coalesce(deed_image, '') <> ''
-            AND status.denied = TRUE
-        '''
-
-    elif step == 'all':
-        conditions = ''
-
-    if query:
-        query_sql = "plainto_tsquery('english', '{0}') @@ to_tsvector(app.first_name || ' ' || app.last_name || ' ' || address.ward)".format(query)
-
-        if step == 'all':
-            conditions = 'WHERE {0}'.format(query_sql)
-        else:
-            conditions += 'AND {0}'.format(query_sql)
 
     order_by = request.GET.get('order_by', 'last_name')
     sort_order = request.GET.get('sort_order', 'asc')
@@ -165,7 +154,10 @@ def lots_admin(request, step):
     if order_by == 'ward':
         order_by = 'ward::int'
 
-    sql = sql_fmt.format(conditions=conditions,
+    conditions, step = make_conditions(request, step)
+
+    sql = sql_fmt.format(pilot=select_pilot,
+                         conditions=conditions,
                          order_by='ORDER BY {0} {1}'.format(order_by, sort_order))
 
     with connection.cursor() as cursor:
@@ -206,8 +198,6 @@ def lots_admin(request, step):
 
     return render(request, 'admin.html', {
         'application_status_list': application_status_list,
-        'selected_pilot': settings.CURRENT_PILOT,
-        'pilot_info': settings.PILOT_INFO,
         'before_step4': before_step4,
         'on_steps23456': on_steps23456,
         'app_count': app_count,
@@ -215,7 +205,8 @@ def lots_admin(request, step):
         'step': step,
         'step_range': step_range,
         'order_by': order_by,
-        'toggle_order': toggle_order
+        'toggle_order': toggle_order,
+        'select_pilot': select_pilot,
         })
 
 @login_required(login_url='/lots-login/')
@@ -415,9 +406,9 @@ def delete_principal_profiles(request, pilot):
     # filter out profiles without an exported_at date to avoid accidental
     # information loss (however improbable it may be).
     principal_profiles = PrincipalProfile.objects\
-                                         .filter(application__pilot=pilot)\
-                                         .filter(deleted_at__isnull=True)\
-                                         .filter(exported_at__isnull=False)
+                                         .filter(application__pilot=pilot, \
+                                                 deleted_at__isnull=True, \
+                                                 exported_at__isnull=False)
 
     n_deleted = len(principal_profiles)
 
@@ -502,9 +493,9 @@ def deny_submit(request, application_id):
             advance_to_step('letter', last_application_status)
             Review.objects.create(reviewer=request.user, email_sent=False, application=last_application_status, step_completed=4)
 
-    redirect_path = create_redirect_path(request)
+    redirect_path = create_redirect_path_from_session(request)
 
-    return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+    return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 
 
 @login_required(login_url='/lots-login/')
@@ -671,7 +662,7 @@ def location_check_submit(request, application_id):
         application_status = ApplicationStatus.objects.get(id=application_id)
         user = request.user
         block = request.POST.get('block')
-        redirect_path = create_redirect_path(request)
+        redirect_path = create_redirect_path_from_session(request)
 
        # Check if application has already been denied.
         if application_status.current_step == None:
@@ -695,14 +686,14 @@ def location_check_submit(request, application_id):
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+                return HttpResponseRedirect('/applications/all/%s' % redirect_path )
             else:
                 # Move to Step 5: Adlerman letter.
                 step, _ = ApplicationStep.objects.get_or_create(description=APPLICATION_STATUS['letter'], public_status='valid', step=5)
                 application_status.current_step = step
                 application_status.save()
 
-                return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+                return HttpResponseRedirect('/applications/all/%s' % redirect_path )
         # Send admin to denial confirmation page.
         else:
             reason = 'block'
@@ -788,9 +779,9 @@ def multiple_location_check_submit(request, application_id):
             request.session['email_error_app_ids'] = email_error_app_ids
             return HttpResponseRedirect(reverse('email_error'))
 
-        redirect_path = create_redirect_path(request)
+        redirect_path = create_redirect_path_from_session(request)
 
-        return HttpResponseRedirect('/lots-admin/all/%s' % redirect_path )
+        return HttpResponseRedirect('/applications/all/%s' % redirect_path )
 
 @login_required(login_url='/lots-login/')
 def lotteries(request):
@@ -1009,11 +1000,11 @@ def bulk_submit(request):
                     review_blob['step_completed'] = 11
 
                 else:  # Some invalid step was selected. Back to start!
-                    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+                    return HttpResponseRedirect(reverse('applications', args=['all']))
 
                 Review.objects.create(**review_blob)
 
-            return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+            return HttpResponseRedirect(reverse('applications', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def bulk_deny(request):
@@ -1055,37 +1046,23 @@ def bulk_deny_submit(request):
         request.session['email_error_app_ids'] = email_error_app_ids
         return HttpResponseRedirect(reverse('email_error'))
 
-    return HttpResponseRedirect(reverse('lots_admin', args=['all']))
+    return HttpResponseRedirect(reverse('applications', args=['all']))
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):
-    total = ApplicationStatus.objects.all()
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
 
-    step2 = ApplicationStatus.objects.filter(current_step__step=2)
-    step3 = ApplicationStatus.objects.filter(current_step__step=3)
-    step4 = ApplicationStatus.objects.filter(current_step__step=4)
-    step5 = ApplicationStatus.objects.filter(current_step__step=5)
-    step6 = ApplicationStatus.objects.filter(current_step__step=6)
-    step7 = ApplicationStatus.objects.filter(current_step__step=7)
-    step8 = ApplicationStatus.objects.filter(current_step__step=8)
-    step9 = ApplicationStatus.objects.filter(current_step__step=9)
-    step10 = ApplicationStatus.objects.filter(current_step__step=10)
-    sold = ApplicationStatus.objects.filter(current_step__step=11)
-    denied = ApplicationStatus.objects.filter(denied=True)
-
+    total = ApplicationStatus.objects.filter(application__pilot=select_pilot)
+    steps = application_steps()
+    steps_with_count = [(step, short_name, total.filter(current_step__step=step).count())
+                        for step, short_name in steps]
+    denied = total.filter(denied=True).count()
+    
     return render(request, 'status-tally.html', {
+        'select_pilot': select_pilot,
+        'steps_with_count': steps_with_count,
+        'denied': denied,
         'total': total,
-        'step2': step2,
-        'step3': step3,
-        'step4': step4,
-        'step5': step5,
-        'step6': step6,
-        'step7': step7,
-        'step8': step8,
-        'step9': step9,
-        'step10': step10,
-        'sold': sold,
-        'denied': denied
         })
 
 def advance_to_step(description_key, app_status):
@@ -1159,9 +1136,18 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         self.request.session['failures'] = None
         
         context = super().get_context_data(**kwargs)
+
+        select_pilot = self.request.GET.get('pilot', default_pilot_to_render())
+        context['select_pilot'] = select_pilot
         
-        lottery_count = Lot.objects.filter(applicationstatus__current_step__step=6).distinct().count()
+        lottery_count = Lot.objects \
+                           .filter(applicationstatus__application__pilot=select_pilot, \
+                                   applicationstatus__current_step__step=6) \
+                           .distinct() \
+                           .count()
+
         context['lottery_count'] = lottery_count
+
         context.update(**self.form_map)
 
         if self.request.POST.get('action'):
@@ -1173,6 +1159,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         form_class = self._get_form_class()
         form = form_class(request.POST)
+
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -1181,7 +1168,11 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
     def form_valid(self, form):
         out = StringIO()
         base_context = {}
-        
+        # The form sets the initial value of `select_pilot` to the CURRENT_PILOT. 
+        # However, the user may specify a different pilot: set it here. 
+        select_pilot = self.request.GET.get('pilot', default_pilot_to_render())
+        form.select_pilot = select_pilot
+
         if self.request.POST.get('action') == 'custom_form':
             form.step = form.cleaned_data['step']
             form.selection = form.cleaned_data['selection']

@@ -24,7 +24,7 @@
           {% if application_status.current_step.step == 3 %}
             Please move ahead to <a href="/application-review/step-{{ application_status.current_step.step }}/{{ application_status.id }}/">Step {{ application_status.current_step.step }}</a>.
           {% else %}
-            Please return to the <a href="{% url 'lots_admin' 'all' %}">main page</a>.
+            Please return to the <a href="{% url 'applications' 'all' %}">main page</a>.
           {% endif %}
           </p>
         </div>

@@ -64,7 +64,7 @@ def get_step_all_denied(request):
     elif 'denied' in request:
         return 'denied'
     else:
-        return re.search(r'(lots-admin\/)(\d+)(\/)', request).group(2)
+        return re.search(r'(applications\/)(\d+)(\/)', request).group(2)
 
 @register.filter
 def get_value(collection, attr):

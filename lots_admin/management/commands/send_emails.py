@@ -49,6 +49,9 @@ class Command(BaseCommand):
                             help='The ID of the admin sending the emails.',
                             type=int)
 
+        parser.add_argument('-p', '--select_pilot',
+                            help='The pilot selected by the admin on the send_emails view')
+
         parser.add_argument('--base_context',
                             help='A string-encoded JSON object of values for' +
                             'email template context.',
@@ -98,6 +101,7 @@ class Command(BaseCommand):
 
         self.base_context = json.loads(options['base_context'])
         self.admin = User.objects.get(id=options['admin'])
+        self.select_pilot = options['select_pilot']
 
         try:
             self.email_command, = (k for k, v in options.items() if k.endswith('email') and v)
@@ -139,6 +143,7 @@ class Command(BaseCommand):
               JOIN lots_admin_address AS address
               ON app.contact_address_id = address.id
               WHERE status.denied = FALSE
+              AND app.pilot = '{pilot}'
               {filter}
               ORDER BY app.last_name, app.first_name
             )
@@ -152,8 +157,9 @@ class Command(BaseCommand):
             {having}
         '''
 
-        select_kwargs = {}
+        select_kwargs = {'pilot': self.select_pilot}
 
+        
         if keywords.get('filter'):
             select_kwargs['filter'] = 'AND {}'.format(keywords['filter'])
         else:

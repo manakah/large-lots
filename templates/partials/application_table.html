@@ -5,7 +5,7 @@
     <thead>
         <th class="no-wrap">
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='app_id' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='app_id' sort_order=toggle_order %}">
                     ID
                     {% if order_by == 'app_id' %}
                         {{ toggle_order|get_sort_icon|safe }}
@@ -15,7 +15,7 @@
         </th>
         <th>
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='received_date' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='received_date' sort_order=toggle_order %}">
                     Date received
                     {% if order_by == 'received_date' %}
                         {{ toggle_order|get_sort_icon|safe }}
@@ -25,7 +25,7 @@
         </th>
         <th class="no-wrap">
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='last_name' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='last_name' sort_order=toggle_order %}">
                     Name/Organization
                     {% if order_by == 'last_name' %}
                         {{ toggle_order|get_sort_icon|safe }}
@@ -36,7 +36,7 @@
         <th>Details</th>
         <th>
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='pin' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='pin' sort_order=toggle_order %}">
                     Lot requested
                     {% if order_by == 'pin' %}
                         {{ toggle_order|get_sort_icon|safe }}
@@ -46,7 +46,7 @@
         </th>
         <th class="no-wrap">
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='ward' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='ward' sort_order=toggle_order %}">
                     Ward
                     {% if order_by == 'ward' %}
                         {{ toggle_order|get_sort_icon|safe }}
@@ -56,7 +56,7 @@
         </th>
         <th class="no-wrap">
             {% with path=request.path|get_step_all_denied %}
-                <a href="{% url 'lots_admin' path %}?{% query_transform request order_by='step' sort_order=toggle_order %}">
+                <a href="{% url 'applications' path %}?{% query_transform request order_by='step' sort_order=toggle_order %}">
                     Next review step
                     {% if order_by == 'step' %}
                         {{ toggle_order|get_sort_icon|safe }}

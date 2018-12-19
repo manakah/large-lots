@@ -93,7 +93,7 @@
             "how_heard": "really big headphones",
             "tracking_id": "db92f58c-64f8-4cbf-95fe-2420c36c13a3",
             "received_date": "2017-07-17T14:34:23.075",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -114,7 +114,7 @@
             "how_heard": "really big headphones",
             "tracking_id": "db92f88c-64f8-4cbf-95fe-2420c36c13a3",
             "received_date": "2017-07-17T14:34:23.075",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -135,7 +135,7 @@
             "how_heard": "pitchfork dot com",
             "tracking_id": "fc8be17e-9f58-4f4c-b403-caa3cfb2b995",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -156,7 +156,7 @@
             "how_heard": "bulletin board",
             "tracking_id": "7370eab5-4e16-4648-89e3-f2cfcf139ac5",
             "received_date": "2017-07-17T14:34:23.075",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": true
         }
     },
@@ -177,7 +177,7 @@
             "how_heard": "the year 2004",
             "tracking_id": "cffd359c-af8b-4286-8ac9-9a33748a9f9c",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -198,7 +198,7 @@
             "how_heard": "the year 2004",
             "tracking_id": "09328127-fa9a-4979-a0bc-09734c91737c",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -219,7 +219,7 @@
             "how_heard": "paper flyer",
             "tracking_id": "b0df4483-60b2-4920-820e-22e2f14ed3ca",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -240,7 +240,7 @@
             "how_heard": "best friend",
             "tracking_id": "7d6ad284-a338-4711-943c-8268fa005b6a",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_7",
             "eds_sent": false
         }
     },
@@ -261,7 +261,7 @@
             "how_heard": "the annals of history",
             "tracking_id": "41F84FF1-3197-418C-B3AB-D5408EFE0675",
             "received_date": "2017-06-17T15:14:31.705",
-            "pilot": "3",
+            "pilot": "pilot_6",
             "eds_sent": false
         }
     },
@@ -502,6 +502,17 @@
             "application": 4,
             "lot": "78787",
             "current_step": 6,
+            "lottery": true
+        }
+    },
+    {
+        "model": "lots_admin.applicationstatus",
+        "pk": 15,
+        "fields": {
+            "denied": false,
+            "application": 4,
+            "lot": "56565",
+            "current_step": 3,
             "lottery": true
         }
     }

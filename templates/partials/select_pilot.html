@@ -1,0 +1,25 @@
+{% load lots_filters %}
+{% load staticfiles %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div>
+            <h2 class="inline">
+                {{header}} for <span class="label label-no-fill"><strong>{{ pilot_info|get_value:select_pilot }}</strong></span>
+            </h2>
+            <div class="dropdown inline">
+              <button class="btn btn-danger btn-sm dropdown-toggle" type="button" id="dropdownPilotMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                Change the pilot
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownPilotMenu">
+                {% for pilot, human_name in pilot_info.items %}
+                        <li><a href="{{request.path}}?{% query_transform request pilot=pilot %}">{% ifequal select_pilot pilot %}<i class="fa fa-check-circle"></i>&nbsp;{% endifequal %}{{human_name}}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr>

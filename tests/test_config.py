@@ -68,12 +68,18 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'lots_admin.context.extra_context',
             ],
         },
     },
 ]
 
-CURRENT_PILOT = "pilot_6_dev"
+PILOT_INFO = {
+    "pilot_6": 'Fall 2016 Expansion',
+    "pilot_7": 'Spring 2018 Sale',
+}
+
+CURRENT_PILOT = "pilot_6"
 
 timezone = pytz.timezone('America/Chicago')
 

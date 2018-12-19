@@ -52,22 +52,10 @@ LOGGING = {
     },
 }
 
+# Dictionary that provides information about that pilots on the server database.
 PILOT_INFO = {
-    'pilot_2': {
-        'human_name': 'Pilot 2: East Garfield Park'
-    },
-    "pilot_3_dev": {
-        'human_name': 'Pilot 3: Austin'
-    },
-    "pilot_4_dev": {
-        'human_name': 'Pilot 4: Roseland/Pullman'
-    },
-    "pilot_5_dev": {
-        'human_name': 'Pilot 5: Auburn Gresham'
-    },
-    "pilot_6_dev": {
-        'human_name': 'Pilot 6: Fall 2016 Expansion'
-    }
+    'pilot_6_dev': 'Fall 2016 Expansion',
+    'pilot_7_dev': 'Spring 2018 Sale',
 }
 
 DATABASES = {

@@ -8,7 +8,7 @@
 {% endblock %}
 {% block content %}
 
-<h2>Send emails</h2>
+{% include 'partials/select_pilot.html' with header="Send Emails" %}
 
 {% if form.errors %}
     <p class='alert alert-info'><strong>Whoops!</strong> You did not provide complete form data.</p>
@@ -26,6 +26,7 @@
         <form method='post' class='send_emails_form'>
             {% csrf_token %}
             {{lottery_form.action}}
+            {{lottery_form.select_pilot}}
             <div class='form-group row'>
                 {% if lottery_form.date.errors %}
                 <div class='col-md-2 has-error'>
@@ -160,6 +161,7 @@
         <div>
         {% endif %}
             {{ custom_form.selection }}
+            {{ custom_form.select_pilot }}
             {% for error in custom_form.selection.errors %}
                 <span class="help-block">{{ error }}</span>
             {% endfor %}
