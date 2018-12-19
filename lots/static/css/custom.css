@@ -132,7 +132,13 @@ a.dropdown-toggle:hover {
     border-color: var(--purple-color);
 }
 
-.btn-danger:hover, .btn-danger.disabled, .btn-danger[disabled] {
+.btn-danger:hover, 
+.btn-danger.disabled, 
+.btn-danger[disabled], 
+.btn-danger:focus, 
+.btn-danger:active, 
+.btn-danger.active, 
+.open .dropdown-toggle.btn-danger {
     background-color: #ca3275;
     border-color: #ca3275;
 }
@@ -152,6 +158,12 @@ a.dropdown-toggle:hover {
 .label-applied, .badge-orange { background-color: #bf502c; }
 .label-danger { background-color: #BE4630; }
 
+.label-no-fill {
+    background-color: #fff;
+    color: var(--purple-color);
+    border: 2px solid var(--purple-color);
+}
+
 .label-link label {
     color: #fff;
 }
@@ -161,7 +173,7 @@ a.dropdown-toggle:hover {
 }
 
 button#dropdownPilotMenu {
-    margin-bottom: 10px; /* to vertically align with h2 */
+    margin-bottom: 5px; /* to vertically align with h2 */
     margin-left: 15px;
 }
 
