@@ -282,6 +282,7 @@ def apply(request):
 
                     app_status = ApplicationStatus.objects.create(lot=lot,
                                                                   application=app,
+                                                                  is_resident=form.cleaned_data['is_resident'],
                                                                   current_step=app_step)
 
                     app_status.save()
@@ -318,6 +319,7 @@ def apply(request):
             context['lot_2_address'] = form['lot_2_address'].value()
             context['lot_2_pin'] = form['lot_2_pin'].value()
             context['lot_2_use'] = form['lot_2_use'].value()
+            context['is_resident'] = form['is_resident'].value()
             context['owned_address'] = form['owned_address'].value()
             context['owned_pin'] = form['owned_pin'].value()
             context['deed_image'] = form['deed_image'].value()
