@@ -1,6 +1,8 @@
 from datetime import datetime
+import pytz
 import urllib.parse
 from io import StringIO
+from collections import OrderedDict
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
@@ -122,3 +124,23 @@ def make_conditions(request, step):
         conditions += 'AND {0}'.format(query_sql)
 
     return conditions, step
+
+def default_pilot_to_render():
+    '''
+    This method determines the default pilot to use in admin views. 
+
+    We assume that admins are reviewing applications from the previous pilot, 
+    while the site accepts applications for the current pilot. 
+
+    If the application process is open, then show the previous pilot 
+    in the admin view. Otherwise, show the most recent (or "current") pilot.
+    '''
+    timezone = pytz.timezone('America/Chicago')
+    chicago_time = datetime.now(timezone)
+    pilot_info = OrderedDict(reversed(sorted(settings.PILOT_INFO.items())))
+
+    if settings.END_DATE > chicago_time:
+        previous_pilot = list(pilot_info.keys())[1]
+        return previous_pilot
+    else:
+        return settings.CURRENT_PILOT

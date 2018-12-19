@@ -37,7 +37,7 @@ from django.views.generic.base import TemplateView
 
 from .look_ups import DENIAL_REASONS, APPLICATION_STATUS
 from .utils import create_email_msg, send_denial_email, create_redirect_path_from_session, \
-    step_from_status, application_steps, make_conditions
+    step_from_status, application_steps, make_conditions, default_pilot_to_render
 from lots_admin.models import Application, Lot, ApplicationStep, Address, \
     Review, ApplicationStatus, DenialReason, PrincipalProfile, LotUse, UpdatedEntity
 from lots_admin.forms import AddressUpdateForm, ApplicationUpdateForm, DateTimeForm, \
@@ -61,7 +61,7 @@ def lots_logout(request):
 
 @login_required(login_url='/lots-login/')
 def lots_admin_principal_profiles(request):
-    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
     applications = Application.objects \
                               .filter(principalprofile__isnull=False, pilot=select_pilot) \
                               .distinct()
@@ -94,7 +94,8 @@ def lots_admin_principal_profiles(request):
 
 @login_required(login_url='/lots-login/')
 def applications(request, step):
-    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    default_pilot_to_render()
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
     query = request.GET.get('query', None)
     page = request.GET.get('page', None)
 
@@ -1050,7 +1051,7 @@ def bulk_deny_submit(request):
 
 @login_required(login_url='/lots-login/')
 def status_tally(request):
-    select_pilot = request.GET.get('pilot', settings.CURRENT_PILOT)
+    select_pilot = request.GET.get('pilot', default_pilot_to_render())
 
     total = ApplicationStatus.objects.filter(application__pilot=select_pilot)
     steps = application_steps()
@@ -1137,7 +1138,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         
         context = super().get_context_data(**kwargs)
 
-        select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
+        select_pilot = self.request.GET.get('pilot', default_pilot_to_render())
         context['select_pilot'] = select_pilot
         
         lottery_count = Lot.objects \
@@ -1170,7 +1171,7 @@ class EmailHandler(LoginRequiredMixin, TemplateView):
         base_context = {}
         # The form sets the initial value of `select_pilot` to the CURRENT_PILOT. 
         # However, the user may specify a different pilot: set it here. 
-        select_pilot = self.request.GET.get('pilot', settings.CURRENT_PILOT)
+        select_pilot = self.request.GET.get('pilot', default_pilot_to_render())
         form.select_pilot = select_pilot
 
         if self.request.POST.get('action') == 'custom_form':
