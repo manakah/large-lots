@@ -48,27 +48,6 @@
             <h2>2. Proof of ownership on the block</h2>
             <p><span class="red">*</span>Required</p>
 
-            <br>
-
-            {% if form.is_resident.errors %}
-            <div class="form-group has-error">
-            {% else %}
-            <div class="form-group">
-            {% endif %}
-                <div>
-                    {% if form.is_resident.errors %}
-                      {% for error in form.is_resident.errors %}
-                          <span class="help-block">{{ error }}</span>
-                      {% endfor %}
-                    {% endif %}
-                        <i class="fa fa-user"></i> Are you a resident of this block? <span class="red">*</span>
-                    <input id="id_is_resident_1" name="is_resident" type="radio" value="True" {% if is_resident == 'True' and request.POST %}checked="checked"{% endif %}> Yes
-                    <input id="id_is_resident_0" name="is_resident" type="radio" value="False" {% if is_resident == 'False' and request.POST %}checked="checked"{% endif %}> No
-                </div>
-            </div>
-
-            <hr>
-
             <p>You'll need to <strong>upload a copy of your recorded deed</strong> to prove that you own property on the same block as the lot(s) you are applying to buy. You do not need to be a resident of the deeded property, but you must be its owner.</p>
             <p>The name on your application and the address entered here must exactly match the name and address on your deed.</p>
 
@@ -307,7 +286,7 @@
 
     <div class='row'>
       <div class='col-md-12'>
-        <div id="terms">
+        <div class="well" id="terms">
           <h2>4. Eligibility and Terms</h2>
 
           <h3>Program Eligibility</h3>
@@ -325,13 +304,59 @@
             <li>You can't use the lot for commercial purposes</li>
           </ul>
 
+
+          <h3>Residency</h3>
+          
+            <div class="row">
+              
+              <div class="col-md-5">
+                  {% if form.is_resident.errors %}
+                    <div class="form-group has-error well bg-white">
+                    {% else %}
+                    <div class="form-group well bg-white">
+                    {% endif %}
+                        <div>
+                            {% if form.is_resident.errors %}
+                              {% for error in form.is_resident.errors %}
+                                  <span class="help-block">{{ error }}</span>
+                              {% endfor %}
+                            {% endif %}
+                            Do you live on the block? <span class="red">*</span>
+                            <input id="id_is_resident_1" name="is_resident" type="radio" value="True" {% if is_resident == 'True' and request.POST %}checked="checked"{% endif %}> Yes
+                            <input id="id_is_resident_0" name="is_resident" type="radio" value="False" {% if is_resident == 'False' and request.POST %}checked="checked"{% endif %}> No
+                        </div>
+                    </div> <!-- end form-group -->
+                    <p>You live on the block of the lot, if you live:</p>
+
+                    <ul>
+                      <li>On the same side of the street of the lot</li>
+                      <li>Across the street from the lot</li>
+                      <li>Across the alley behind the lot</li>
+                    </ul>
+                </div>
+
+                <div class='col-md-5'>
+                  <p><img class='img-responsive img-thumbnail' src='/static/images/same-block.png' /></p>
+                </div>
+
+              </div> <!-- end row -->
+
           <h3>Terms</h3>
 
           <p>This application is a Statement of Interest only, and does not guarantee that the City of Chicago will transfer ownership of the lots indicated. If this application gets approved, the City will work with the buyer to close the transaction - the property will be transferred "AS IS" via a Quit Claim Deed. The City maintains the right to condition the transfer of the title on the buyer’s acceptance of certain deed restrictions. Restrictions may be included in the deed to ensure properties are maintained in an agreed upon way. If the buyer fails to maintain the property in an agreed upon way, the City may exercise its discretion and take title to the property back from the buyer.</p>
+          
+          <p>Applications will be awarded by the following priorities:
+            <ol>
+              <li>adjacent residents (lives adjacent to Lot);</li>
+              <li>adjacent property owners (own property adjacent to Lot, but does not live at the property);</li>
+              <li>lives on block (live on block, but not adjacent to Lot); and </li>
+              <li>owns property on block (owns property on block, but not adjacent to Lot). </li>
+            </ol>
+          </p>
 
           <p>By checking the box below, I certify that the information provided is correct and true to the best of my knowledge. Falsifying or deliberately omitting any information regarding this application will result in immediate termination from the program and/or the City of Chicago seeking remedies available under law.</p>
 
-          <div class='well'>
+          <div class='well bg-white'>
             {% if form.terms.errors %}
             <div class="form-group has-error">
             {% else %}
