@@ -48,7 +48,7 @@ def test_organization_field(django_db_setup,
     ('26233300420000', '123 Main St.'),
     ('26233300420000', ''),
 ])
-def test_organization_field(django_db_setup,
+def test_lot_2_address_field(django_db_setup,
                             client,
                             mock_file,
                             lot_2_pin,
