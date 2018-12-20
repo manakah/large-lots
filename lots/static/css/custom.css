@@ -13,9 +13,9 @@ a, a:hover, .btn-link, .btn-link:hover {
 
 .lead { font-size: 21px; }
 
-.inline {
-    display: inline-block;
-}
+.inline { display: inline-block; }
+
+.bg-white { background-color: #fff; }
 
 /* Index */
 .panel-counter .panel-heading {

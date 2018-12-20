@@ -96,7 +96,7 @@ class ApplicationForm(forms.Form, DeedImageMixin):
         choices=((False, 'No'), (True, 'Yes')), 
         widget=forms.RadioSelect,
         error_messages={
-            'required': 'Please indicate if you are a resident of this block'},
+            'required': 'Please indicate if you are a resident of the block'},
         label="Resident",
     )
     owned_address = forms.CharField(
