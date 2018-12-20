@@ -142,6 +142,12 @@ class ApplicationForm(forms.Form, DeedImageMixin):
         error_messages={'required': 'Verify that you have read and agree to the terms'},
         label="Application terms")
 
+    def __init__(self, data=None, *args, **kwargs):
+        super(ApplicationForm, self).__init__(data, *args, **kwargs)
+
+        if data and data.get('lot_2_pin'):
+            self.fields['lot_2_address'].required = True
+            self.fields['lot_2_address'].error_messages = {'required': 'Please provide an address: use the map above, manually enter a PIN and click on the correct one that appears in the dropdown, or paste the lot PIN, if you know it.'}
     '''
     Possible combinations of user input for organization (text) and organization_confirmed (checkbox):
     (1) The user does not check the confirm box and does not input an org name - VALID 
