@@ -44,6 +44,44 @@ def test_organization_field(django_db_setup,
         assert new_application
 
 @pytest.mark.django_db
+@pytest.mark.parametrize('lot_2_pin,lot_2_address', [
+    ('26233300420000', '123 Main St.'),
+    ('26233300420000', ''),
+])
+def test_organization_field(django_db_setup,
+                            client,
+                            mock_file,
+                            lot_2_pin,
+                            lot_2_address,
+                            application_blob):
+    '''
+    Tests that the application:
+    (1) validates with a lot_2_pin and address.
+    (2) does not validate with a lot_2_pin without an address.
+    '''
+    app_data = application_blob
+
+    lot_2_data = { 
+        'lot_2_pin': lot_2_pin,
+        'lot_2_address': lot_2_address,
+        'lot_2_use': 'Network of climbing tunnels',
+    }
+
+    app_data.update(lot_2_data)
+
+    rv = client.post('/apply/', data=app_data, files={"file": mock_file})
+
+    new_application = Application.objects.filter(first_name="Seymour", last_name="Gerbils")
+
+    if lot_2_pin and not lot_2_address:
+        assert rv.status_code == 200
+        assert "Please provide an address" in str(rv.content)
+        assert not new_application
+    else:
+        assert rv.status_code == 302
+        assert new_application
+
+@pytest.mark.django_db
 @pytest.mark.parametrize('lot_2', [False, True])
 def test_application(application_blob,
                      address,
