@@ -217,17 +217,6 @@
         };
 
         LargeLots.createParcelInfo = function(props) {
-            // TO-DO: Update with information from Fall 2016 expansion
-            var pilot_lookups = {
-              'EAST GARFIELD PARK': 'East Garfield Park pilot, which ended on August 4, 2014.',
-              'AUSTIN': 'Austin pilot, which ended on January 31, 2015.',
-              'ROSELAND': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
-              'WEST PULLMAN': 'Roseland and Pullman pilot, which ended on October 31, 2015.',
-              'AUBURN GRESHAM': 'Auburn Gresham pilot, which ended on May 15, 2016.'
-            }
-            var greater_englewood = ['NEW CITY', 'WASHINGTON PARK', 'ENGLEWOOD', 'GREATER GRAND CROSSING', 'GRAND BOULEVARD', 'WEST ENGLEWOOD', 'FULLER PARK', 'WOODLAWN', 'SOUTH SHORE']
-            // Four pins in NEAR WEST SIDE and SOUTH SHORE areas do not match any pilots:
-            // 20234230230000, 20234230240000, 16132020060000, 16132020290000
             var address = LargeLots.formatAddress(props);
             var pin_formatted = LargeLots.formatPin(props.pin_nbr);
             var info = "<div class='row'><div class='col-xs-6 col-md-12'>\
@@ -248,31 +237,6 @@
             // Add colorful status labels
             if ((props.status == 'sold') || (pins_sold.indexOf(props.pin_nbr) >= 0)) {
               info += "<tr><td>Status</td><td><span class='badge badge-purple'>Sold</span></td></tr>";
-
-              // Identify pilot name and end date
-              var sold_statement = '';
-
-              // Lots from current pilot
-              if (pins_sold.indexOf(props.pin_nbr) >= 0) {
-                sold_statement = 'Spring 2018 Expansion, which ended on July 28, 2018'
-              }
-
-              else if (greater_englewood.indexOf(props.community) >= 0) {
-                sold_statement = 'Greater Englewood pilot, which ended on April 21, 2014'
-              }
-
-              else if ( pilot_lookups[props.community] ) {
-                sold_statement = pilot_lookups[props.community]
-              }
-
-              // TO-DO: Once we update pilot_lookups, remove this block.
-              else {
-                sold_statement = 'Fall 2016 Expansion, which ended on January 31, 2017'
-              }
-
-              if (sold_statement) {
-                info += "<tr><td colspan='2'><em>The City sold this lot as part of the " + sold_statement + "</em></td></tr>";
-              }
             }
             else {
               if (pins_under_review.indexOf(props.pin_nbr) >= 0) {
